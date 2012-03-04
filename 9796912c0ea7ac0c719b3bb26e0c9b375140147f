@@ -1,0 +1,10 @@
+Change-Id: I9796912c0ea7ac0c719b3bb26e0c9b375140147f
+Code-Review+1: Mykola Nikishov <mn@mn.com.ua>
+Code-Review+2: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+IP-Clean+1: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Verified+1: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-by: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-at: Sun, 04 Mar 2012 00:39:32 -0500
+Reviewed-on: https://git.eclipse.org/r/5238
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
