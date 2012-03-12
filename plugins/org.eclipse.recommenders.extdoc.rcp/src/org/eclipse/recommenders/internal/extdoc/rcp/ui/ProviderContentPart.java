@@ -171,6 +171,7 @@ public class ProviderContentPart {
 
     public void createNewRenderingPanel() {
         renderingPanel = new Composite(stack, SWT.NONE);
+        renderingPanel.setRedraw(false);
         renderingPanel.setBackground(renderingPanel.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
         renderingPanel.setLayout(defaultGridLayoutFactory.create());
 
@@ -245,6 +246,7 @@ public class ProviderContentPart {
                 makeRenderingPanelVisible();
                 relayout();
                 scrollToTop();
+                renderingPanel.setRedraw(true);
             }
         });
     }
@@ -416,7 +418,7 @@ public class ProviderContentPart {
                         // Throwables.getStackTraceAsString(e.exception);
                         final String providerName = e.provider.getDescription().getName();
 
-                        final String dialogTitle = format("Extdoc Provider Failure", providerName);
+                        final String dialogTitle = format("Extdoc Provider '%s' Failure", providerName);
                         final String errorMessage = findFirstNonNullErrorMessage(e.throwable);
                         final String rootCauseMessage = Throwables.getRootCause(e.throwable).getMessage();
 

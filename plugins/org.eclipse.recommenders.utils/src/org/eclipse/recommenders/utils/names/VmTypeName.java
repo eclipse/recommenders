@@ -18,6 +18,8 @@ import static org.eclipse.recommenders.utils.Throws.throwUnreachable;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.MapMaker;
 
 public class VmTypeName implements ITypeName {
@@ -36,7 +38,7 @@ public class VmTypeName implements ITypeName {
 
     public static final VmTypeName STRING = VmTypeName.get("Ljava/lang/String");
 
-    public static final VmTypeName NULL = get("null");
+    public static final VmTypeName NULL = get("Lnull");
 
     public static final VmTypeName BYTE = get("B");
 
@@ -67,8 +69,7 @@ public class VmTypeName implements ITypeName {
     }
 
     private static String removeGenerics(final String typeName) {
-        final String replacement = typeName.replaceAll("<.*>", "");
-        return replacement;
+        return StringUtils.substringBefore(typeName, "<");
     }
 
     private String identifier;
@@ -98,7 +99,16 @@ public class VmTypeName implements ITypeName {
             default:
                 throwUnreachable("Invalid type name: " + vmTypeName);
             }
+        } else {
+            switch (vmTypeName.charAt(0)) {
+            case '[':
+            case 'L':
+                break;
+            default:
+                throwUnreachable("Invalid type name: " + vmTypeName);
+            }
         }
+
         int off = 0;
         while (off < vmTypeName.length()) {
             final char c = vmTypeName.charAt(off);

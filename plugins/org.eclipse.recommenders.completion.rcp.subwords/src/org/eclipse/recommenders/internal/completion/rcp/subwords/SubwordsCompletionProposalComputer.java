@@ -15,12 +15,16 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
+import org.eclipse.swt.graphics.Point;
 
 public class SubwordsCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
@@ -29,7 +33,7 @@ public class SubwordsCompletionProposalComputer implements IJavaCompletionPropos
     @Override
     public List computeCompletionProposals(final ContentAssistInvocationContext context, final IProgressMonitor monitor) {
         ctx = (JavaContentAssistInvocationContext) context;
-        return findSubwordMatchingProposals();
+        return findSubwordMatchingProposals(monitor);
     }
 
     private String getToken() {
@@ -40,20 +44,28 @@ public class SubwordsCompletionProposalComputer implements IJavaCompletionPropos
         return String.valueOf(token);
     }
 
-    private List<IJavaCompletionProposal> findSubwordMatchingProposals() {
+    private List<IJavaCompletionProposal> findSubwordMatchingProposals(IProgressMonitor monitor) {
 
         final String token = getToken();
         final SubwordsCompletionRequestor requestor = new SubwordsCompletionRequestor(token, ctx);
+
+        final ITextViewer viewer = ctx.getViewer();
+        final Point selection = viewer.getSelectedRange();
+        if (selection.y > 0) {
+            requestor.setReplacementLength(selection.y);
+        }
+
         final ICompilationUnit cu = ctx.getCompilationUnit();
         final int offsetBeforeTokenBegin = ctx.getInvocationOffset() - token.length();
         try {
-            cu.codeComplete(offsetBeforeTokenBegin, requestor);
+            // first on the original position
+            cu.codeComplete(ctx.getInvocationOffset(), requestor, monitor);
+            if (token.length() > 0) {
+                // then on the 'virtual' position
+                cu.codeComplete(offsetBeforeTokenBegin, requestor, monitor);
+            }
         } catch (final JavaModelException e) {
-            // TODO: won't do that in a later version... but for this early
-            // prototype...
-            // REVIEW: could improve my code and log this message to the error
-            // log?
-            e.printStackTrace();
+            RecommendersUtilsPlugin.log(e);
         }
         return requestor.getProposals();
     }

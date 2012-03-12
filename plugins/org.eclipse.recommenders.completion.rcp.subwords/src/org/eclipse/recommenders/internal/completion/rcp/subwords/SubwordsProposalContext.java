@@ -10,11 +10,7 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp.subwords;
 
-import static java.lang.Math.floor;
-import static java.lang.Math.log;
-import static java.lang.Math.max;
-import static org.apache.commons.lang3.StringUtils.getLevenshteinDistance;
-import static org.apache.commons.lang3.StringUtils.substring;
+import static org.apache.commons.lang3.StringUtils.getCommonPrefix;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 
 import java.util.Collection;
@@ -74,7 +70,7 @@ public class SubwordsProposalContext {
     private List<String> matchingRegionBigrams;
     private Pattern pattern;
 
-    private final int maxLevenshteinDistance;
+    // private final int maxLevenshteinDistance;
 
     public SubwordsProposalContext(final String prefix, final CompletionProposal proposal,
             final IJavaCompletionProposal jdtProposal, final JavaContentAssistInvocationContext ctx) {
@@ -84,7 +80,7 @@ public class SubwordsProposalContext {
         this.subwordsMatchingRegion = SubwordsUtils.getTokensBetweenLastWhitespaceAndFirstOpeningBracket(jdtProposal
                 .getDisplayString());
         this.jdtProposal = ensureIsNotNull(jdtProposal);
-        maxLevenshteinDistance = max(1, (int) floor(log(prefix.length())));
+        // maxLevenshteinDistance = max(1, (int) floor(log(prefix.length())));
         calculateMatchingRegionBigrams();
     }
 
@@ -119,23 +115,26 @@ public class SubwordsProposalContext {
     }
 
     public boolean isRegexMatch() {
-        return createMatcher().matches() || passesLevenshteinDistanceFilter();
+        return createMatcher().matches();// ||
+                                         // passesLevenshteinDistanceFilter();
     }
 
-    private boolean passesLevenshteinDistanceFilter() {
-        if (prefix.length() < 2) {
-            return false;
-        }
-
-        prefix = prefix.toLowerCase();
-        final String completionPrefix = substring(subwordsMatchingRegion, 0, prefix.length()).toLowerCase();
-        final int distance = getLevenshteinDistance(completionPrefix, prefix, maxLevenshteinDistance);
-        // no exact matches:
-        if (distance <= 0) {
-            return false;
-        }
-        return true;
-    }
+    // private boolean passesLevenshteinDistanceFilter() {
+    // if (prefix.length() < 2) {
+    // return false;
+    // }
+    //
+    // prefix = prefix.toLowerCase();
+    // final String completionPrefix = substring(subwordsMatchingRegion, 0,
+    // prefix.length()).toLowerCase();
+    // final int distance = getLevenshteinDistance(completionPrefix, prefix,
+    // maxLevenshteinDistance);
+    // // no exact matches:
+    // if (distance <= 0) {
+    // return false;
+    // }
+    // return true;
+    // }
 
     private Matcher createMatcher() {
         return pattern.matcher(subwordsMatchingRegion);
@@ -154,7 +153,7 @@ public class SubwordsProposalContext {
         return copy;
     }
 
-    protected Set<SourceRange> findIntersections(final List<SourceRange> ranges1, final List<SourceRange> ranges2) {
+    public Set<SourceRange> findIntersections(final List<SourceRange> ranges1, final List<SourceRange> ranges2) {
         final Set<SourceRange> intersections = Sets.newHashSet();
         for (final SourceRange range1 : ranges1) {
             for (final SourceRange range2 : ranges2) {
@@ -175,7 +174,7 @@ public class SubwordsProposalContext {
         }
     }
 
-    protected List<SourceRange> findBigramHighlightRanges() {
+    public List<SourceRange> findBigramHighlightRanges() {
         final List<SourceRange> res = Lists.newLinkedList();
         for (final String bigram : prefixBigrams) {
             final int indexOf = StringUtils.indexOfIgnoreCase(subwordsMatchingRegion, bigram);
@@ -187,7 +186,7 @@ public class SubwordsProposalContext {
         return res;
     }
 
-    protected List<SourceRange> findRegexHighlightRanges() {
+    public List<SourceRange> findRegexHighlightRanges() {
         final Matcher m = createMatcher();
         final List<SourceRange> res = Lists.newLinkedList();
         if (m.find()) {
@@ -214,22 +213,16 @@ public class SubwordsProposalContext {
     }
 
     public int calculateRelevance() {
-        if (subwordsMatchingRegion.startsWith(prefix)) {
-            return 5;
+        String commonPrefix = getCommonPrefix(subwordsMatchingRegion, prefix);
+
+        if (commonPrefix.length() == prefix.length()) {
+            return jdtProposal.getRelevance();
         }
 
-        return 1;
-        // TODO until https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991 is
-        // fixed this should not be used:
-        // final int matches =
-        // SubwordsUtils.calculateMatchingNGrams(prefixBigrams,
-        // matchingRegionBigrams);
+        final int matches = SubwordsUtils.calculateMatchingNGrams(prefixBigrams, matchingRegionBigrams);
         //
-        // int relevance = jdtProposal.getRelevance() + matches;
-        // if (isPrefixMatch()) {
-        // relevance += PREFIX_BONUS;
-        // }
-        // return relevance;
+        int relevance = commonPrefix.length() + matches;
+        return relevance;
     }
 
 }

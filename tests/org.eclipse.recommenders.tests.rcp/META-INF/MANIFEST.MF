@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Code Recommenders: Tests RCP (Incubation)
 Bundle-SymbolicName: org.eclipse.recommenders.tests.rcp
-Bundle-Version: 0.5.0.qualifier
+Bundle-Version: 0.5.1.qualifier
 Bundle-Vendor: Eclipse Code Recommenders
 Fragment-Host: org.eclipse.recommenders.rcp
 Require-Bundle: org.eclipse.ui,
@@ -23,6 +23,6 @@ Require-Bundle: org.eclipse.ui,
  org.junit4,
  org.mockito,
  org.hamcrest,
- org.objenesis
+ org.objenesis,
+ org.eclipse.recommenders.rcp.logging
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-

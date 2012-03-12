@@ -15,10 +15,11 @@ import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.NODE_I
 import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.NODE_ID_KIND;
 import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.NODE_ID_PATTERNS;
 import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.STATE_TRUE;
-import static org.eclipse.recommenders.commons.udc.ObjectUsage.UNKNOWN_METHOD;
+import static org.eclipse.recommenders.internal.analysis.codeelements.ObjectUsage.UNKNOWN_METHOD;
 import static org.eclipse.recommenders.utils.Checks.ensureEquals;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,9 +31,9 @@ import java.util.TreeSet;
 
 import org.eclipse.recommenders.commons.bayesnet.BayesianNetwork;
 import org.eclipse.recommenders.commons.bayesnet.Node;
-import org.eclipse.recommenders.commons.udc.ObjectUsage;
 import org.eclipse.recommenders.internal.analysis.codeelements.DefinitionSite;
 import org.eclipse.recommenders.internal.analysis.codeelements.DefinitionSite.Kind;
+import org.eclipse.recommenders.internal.analysis.codeelements.ObjectUsage;
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.inference.junctionTree.JunctionTreeAlgorithm;
@@ -147,6 +148,10 @@ public class BayesNetWrapper implements IObjectMethodCallsNet {
 
     @Override
     public void setKind(final DefinitionSite.Kind newKind) {
+        if (newKind == null) {
+            clearEvidence();
+            return;
+        }
         final String identifier = newKind.toString();
         if (kindNode.getOutcomes().contains(identifier)) {
             junctionTreeAlgorithm.addEvidence(kindNode, identifier);
@@ -317,4 +322,19 @@ public class BayesNetWrapper implements IObjectMethodCallsNet {
         return res;
     }
 
+    @Override
+    public Set<DefinitionSite> getDefinitions() {
+        double[] beliefs = junctionTreeAlgorithm.getBeliefs(definitionNode);
+        for (int i = definitionNode.getOutcomeCount(); i-- > 0;) {
+            if (beliefs[i] > 0.05) {
+                String outcomeName = definitionNode.getOutcomeName(i);
+                if (outcomeName.equals("LNone.none()V")) {
+                    continue;
+                }
+                System.err.println(outcomeName);
+                ;
+            }
+        }
+        return Collections.emptySet();
+    }
 }

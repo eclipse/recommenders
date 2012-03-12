@@ -15,17 +15,15 @@ import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Optional.of;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
-import org.eclipse.jdt.core.CompletionContext;
+import java.util.Map;
+
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnLocalName;
@@ -36,15 +34,18 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.Region;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
+import org.eclipse.recommenders.utils.names.IMethodName;
+import org.eclipse.recommenders.utils.rcp.CompilerBindings;
 import org.eclipse.recommenders.utils.rcp.JdtUtils;
 
 import com.google.common.base.Optional;
@@ -55,33 +56,28 @@ public abstract class BaseRecommendersCompletionContext implements IRecommenders
     private final JavaContentAssistInvocationContext javaContext;
     private InternalCompletionContext coreContext;
     private final IAstProvider astProvider;
+    private ProposalCollectingCompletionRequestor collector;
 
     public BaseRecommendersCompletionContext(final JavaContentAssistInvocationContext jdtContext,
             final IAstProvider astProvider) {
         this.javaContext = jdtContext;
         this.astProvider = astProvider;
         this.coreContext = cast(jdtContext.getCoreContext());
-        if (!coreContext.isExtended()) {
-            requestExtendedContext();
-        }
+        // if (!coreContext.isExtended()) {
+        requestExtendedContext();
+        // }
     }
 
     private void requestExtendedContext() {
         final ICompilationUnit cu = getCompilationUnit();
-        final CompletionProposalCollector collector = new CompletionProposalCollector(cu) {
-            @Override
-            public void acceptContext(final CompletionContext context) {
-                super.acceptContext(context);
-                coreContext = (InternalCompletionContext) context;
-            }
-        };
-        collector.setInvocationContext(javaContext);
-        collector.setRequireExtendedContext(true);
+
+        collector = new ProposalCollectingCompletionRequestor(javaContext);
         try {
             cu.codeComplete(getInvocationOffset(), collector);
         } catch (final JavaModelException e) {
             RecommendersPlugin.log(e);
         }
+        coreContext = collector.getCoreContext();
     }
 
     public InternalCompletionContext getCoreContext() {
@@ -177,34 +173,9 @@ public abstract class BaseRecommendersCompletionContext implements IRecommenders
         return astProvider.get(getCompilationUnit());
     }
 
-    private CompilationUnit internal_getAst(final ICompilationUnit cu) throws JavaModelException {
-        final CompilationUnit ast = cu.reconcile(AST.JLS4, true, true, new WorkingCopyOwner() {
-            @Override
-            public IProblemRequestor getProblemRequestor(final ICompilationUnit workingCopy) {
-                return new IProblemRequestor() {
-
-                    @Override
-                    public boolean isActive() {
-                        // TODO XXX this is important:
-                        // Otherwise no bindings are resolved.
-                        return true;
-                    }
-
-                    @Override
-                    public void endReporting() {
-                    }
-
-                    @Override
-                    public void beginReporting() {
-                    }
-
-                    @Override
-                    public void acceptProblem(final IProblem problem) {
-                    }
-                };
-            }
-        }, null);
-        return ast;
+    @Override
+    public Map<IJavaCompletionProposal, CompletionProposal> getProposals() {
+        return collector.getProposals();
     }
 
     @Override
@@ -341,6 +312,19 @@ public abstract class BaseRecommendersCompletionContext implements IRecommenders
             return absent();
         }
         return JdtUtils.createUnresolvedType(b);
+    }
 
+    @Override
+    public Optional<IMethodName> getMethodDef() {
+        final ASTNode node = getCompletionNode();
+        if (node instanceof CompletionOnMemberAccess) {
+            final CompletionOnMemberAccess n = cast(node);
+            if (n.receiver instanceof MessageSend) {
+                final MessageSend receiver = (MessageSend) n.receiver;
+                final MethodBinding binding = receiver.binding;
+                return CompilerBindings.toMethodName(binding);
+            }
+        }
+        return absent();
     }
 }

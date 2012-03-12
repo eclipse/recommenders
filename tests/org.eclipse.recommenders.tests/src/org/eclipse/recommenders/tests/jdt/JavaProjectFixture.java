@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.tests.jdt;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertTrue;
@@ -21,6 +22,7 @@ import static org.eclipse.recommenders.utils.Throws.throwUnhandledException;
 import static org.eclipse.recommenders.utils.Tuple.newTuple;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,8 +31,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -45,25 +50,59 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.recommenders.utils.Tuple;
-import org.eclipse.recommenders.utils.rcp.ast.BindingUtils;
 
 import com.google.common.collect.Sets;
 
 public class JavaProjectFixture {
 
     public static String findClassName(final CharSequence source) {
-        final Pattern p = Pattern.compile(".*class\\s+(\\w+).*", Pattern.DOTALL);
-        final Matcher matcher = p.matcher(source);
+        Pattern p = Pattern.compile(".*?class\\s+(\\w+).*", Pattern.DOTALL);
+        Matcher matcher = p.matcher(source);
+        if (!matcher.matches()) {
+            p = Pattern.compile(".*interface\\s+(\\w+).*", Pattern.DOTALL);
+            matcher = p.matcher(source);
+        }
         assertTrue(matcher.matches());
         final String group = matcher.group(1);
         return group;
+    }
+
+    public static List<String> findInnerClassNames(final CharSequence source) {
+        String declaringType = findClassName(source);
+        List<String> names = newArrayList();
+
+        Pattern p = Pattern.compile("(class|interface)\\s+(\\w+)", Pattern.DOTALL);
+        Matcher matcher = p.matcher(source);
+        while (matcher.find()) {
+            final String name = matcher.group(2);
+            if (!name.equals(declaringType)) {
+                names.add(declaringType + "$" + name);
+            }
+        }
+        return names;
+    }
+
+    public static List<String> findAnonymousClassNames(final CharSequence source) {
+        String declaringType = findClassName(source);
+        int num = 1;
+        List<String> names = newArrayList();
+
+        // new <name> ( ... ) {
+        Pattern p = Pattern.compile("new\\s*?(\\w+)\\s*?\\([^)]*?\\)\\s*?\\{", Pattern.DOTALL);
+        Matcher matcher = p.matcher(source);
+        while (matcher.find()) {
+            final String name = matcher.group(1);
+            if (!name.equals(declaringType)) {
+                names.add(declaringType + "$" + num++);
+            }
+        }
+        return names;
     }
 
     private IJavaProject javaProject;
     private ASTParser parser;
 
     public JavaProjectFixture(final IWorkspace workspace, final String projectName) {
-        BindingUtils.testingInitializeResolver();
         createJavaProject(workspace, projectName);
         createParser();
     }
@@ -154,7 +193,6 @@ public class JavaProjectFixture {
     }
 
     public CompilationUnit parse(final String content) {
-
         parser.setSource(content.toCharArray());
         parser.setUnitName(findClassName(content) + ".java");
         final CompilationUnit cu = cast(parser.createAST(null));
@@ -172,11 +210,29 @@ public class JavaProjectFixture {
         if (file.exists()) {
             file.delete(true, null);
         }
-
         final ByteArrayInputStream is = new ByteArrayInputStream(content.getFirst().getBytes());
         file.create(is, true, null);
         final ICompilationUnit cu = (ICompilationUnit) javaProject.findElement(path);
+        project.refreshLocal(IResource.DEPTH_INFINITE, null);
+        project.build(IncrementalProjectBuilder.FULL_BUILD, null);
         return Tuple.newTuple(cu, content.getSecond());
+    }
+
+    public void clear() throws CoreException {
+
+        final IProject project = javaProject.getProject();
+        project.accept(new IResourceVisitor() {
+            @Override
+            public boolean visit(final IResource resource) throws CoreException {
+                switch (resource.getType()) {
+                case IResource.FILE:
+                    if (resource.getName().endsWith(".class") || resource.getName().endsWith(".java")) {
+                        resource.delete(true, null);
+                    }
+                }
+                return true;
+            }
+        });
     }
 
     public String removeMarkers(final String content) {

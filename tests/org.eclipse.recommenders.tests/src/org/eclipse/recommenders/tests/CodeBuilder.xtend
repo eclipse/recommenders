@@ -1,8 +1,25 @@
 package org.eclipse.recommenders.tests
 
+import java.util.concurrent.atomic.AtomicInteger
+
 class CodeBuilder {
 	
 	public static CharSequence someClass = '''public class C {}'''
+	private static AtomicInteger classCounter = new AtomicInteger()
+	
+	def static classDeclaration(CharSequence declaration, CharSequence body) {
+		'''
+		import java.util.*;
+		import java.util.concurrent.*;
+		import java.text.*;
+		import java.util.concurrent.*;
+		import javax.annotation.*;
+		import javax.xml.ws.Action;
+		«declaration» {
+			«body»
+		}
+		''' 
+	}
 	
 	def static classbody(CharSequence classname, CharSequence classbody){
 		'''
@@ -11,6 +28,7 @@ class CodeBuilder {
 		import java.text.*;
 		import java.util.concurrent.*;
 		import javax.annotation.*;
+		import javax.xml.ws.Action;
 		public class «classname» {
 			«classbody»
 		}
@@ -24,7 +42,8 @@ class CodeBuilder {
 		import java.text.*;
 		import java.util.concurrent.*;
 		import javax.annotation.*;
-		public class MyClass {
+		import javax.xml.ws.Action;
+		public class Class«classCounter.addAndGet(1)» {
 			«classbody»
 		}
 		'''
@@ -94,14 +113,14 @@ class CodeBuilder {
 	}
 	
 	def static method(CharSequence methodbody){
-		classbody('MyClass', '''
+		classbody('''
 		public void __test() {
 			«methodbody»
 		}''')
 	}
 
 	def static classWithFieldsAndTestMethod(CharSequence fieldDeclarations, CharSequence methodbody){
-		classbody('MyClass', '''
+		classbody('''
 		
 		«fieldDeclarations»
 		

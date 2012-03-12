@@ -2,8 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Code Recommenders: Codecompletion Test Suite (Incubation)
 Bundle-SymbolicName: org.eclipse.recommenders.tests.completion.rcp;singleton:=true
-Bundle-Version: 0.5.0.qualifier
+Bundle-Version: 0.5.1.qualifier
 Bundle-Vendor: Eclipse Code Recommenders
+Export-Package: org.eclipse.recommenders.tests.completion.rcp
 Require-Bundle: org.mockito,
  org.junit4,
  org.eclipse.xtend2.lib,
@@ -24,7 +25,11 @@ Require-Bundle: org.mockito,
  org.eclipse.equinox.ds,
  org.hamcrest,
  org.eclipse.recommenders.rcp,
- org.apache.commons.lang3;bundle-version="3.1.0"
+ org.apache.commons.lang3;bundle-version="3.1.0",
+ org.eclipse.recommenders.completion.rcp.calls;bundle-version="0.5.1",
+ org.eclipse.recommenders.rcp.repo;bundle-version="0.5.1",
+ org.eclipse.recommenders.analysis;bundle-version="0.5.1",
+ org.eclipse.recommenders.completion.rcp.chain;bundle-version="0.5.1",
+ org.eclipse.recommenders.completion.rcp.overrides;bundle-version="0.5.1",
+ org.eclipse.recommenders.completion.rcp.subwords;bundle-version="0.5.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.eclipse.recommenders.tests.completion.rcp
-

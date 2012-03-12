@@ -2,16 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Code Recommenders: Commons Analysis (Incubation)
 Bundle-SymbolicName: org.eclipse.recommenders.analysis
-Bundle-Version: 0.5.0.qualifier
+Bundle-Version: 0.5.1.qualifier
 Bundle-Vendor: Eclipse Code Recommenders
 Export-Package: org.eclipse.recommenders.internal.analysis,
  org.eclipse.recommenders.internal.analysis.archive,
  org.eclipse.recommenders.internal.analysis.codeelements
-Require-Bundle: org.apache.commons.lang3,
- com.google.guava,
+Require-Bundle: org.eclipse.osgi,
  org.eclipse.recommenders.utils,
  org.eclipse.recommenders.utils.gson,
+ org.apache.commons.lang3,
  org.slf4j.api,
- org.eclipse.osgi;bundle-version="3.7.1"
+ com.google.guava
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

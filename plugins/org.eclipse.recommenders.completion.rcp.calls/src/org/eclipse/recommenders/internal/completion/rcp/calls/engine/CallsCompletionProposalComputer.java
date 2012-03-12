@@ -10,11 +10,14 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp.calls.engine;
 
+import static java.lang.Math.rint;
 import static java.util.Collections.emptyList;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -33,24 +36,24 @@ import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleNameRefere
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
-import org.eclipse.recommenders.commons.udc.ObjectUsage;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContextFactory;
+import org.eclipse.recommenders.internal.analysis.codeelements.ObjectUsage;
 import org.eclipse.recommenders.internal.analysis.codeelements.Variable;
 import org.eclipse.recommenders.internal.completion.rcp.calls.net.IObjectMethodCallsNet;
 import org.eclipse.recommenders.internal.completion.rcp.calls.store2.CallModelStore;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.utils.Tuple;
 import org.eclipse.recommenders.utils.names.IMethodName;
-import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.rcp.CompletionProposalDecorator;
 import org.eclipse.recommenders.utils.rcp.JavaElementResolver;
@@ -64,7 +67,8 @@ import com.google.inject.Inject;
 @SuppressWarnings("restriction")
 public class CallsCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
-    private static final int BASIS_RELEVANCE = 1600;
+    // 65 * 16 + 4 = 1038 is the proposal score for proposals that match the expected type of an assignment
+    private static final int BASIS_RELEVANCE = 935;
 
     // private static final int MAX_NUM_PROPOSALS = 5;
     private static final double MIN_PROBABILITY_THRESHOLD = 0.1d;
@@ -79,7 +83,6 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
         }
     };
 
-    private final CallModelStore modelStore;
     private final IRecommendersCompletionContextFactory ctxFactory;
     private final JavaElementResolver jdtResolver;
 
@@ -93,10 +96,12 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
 
     private JavaContentAssistInvocationContext javaContext;
 
+    private final CallModelStore modelStore3;
+
     @Inject
-    public CallsCompletionProposalComputer(final CallModelStore modelStore, final JavaElementResolver jdtResolver,
+    public CallsCompletionProposalComputer(final CallModelStore modelStore3, final JavaElementResolver jdtResolver,
             final IRecommendersCompletionContextFactory ctxFactory) {
-        this.modelStore = modelStore;
+        this.modelStore3 = modelStore3;
         this.jdtResolver = jdtResolver;
         this.ctxFactory = ctxFactory;
     }
@@ -118,7 +123,9 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
         if (!completeQuery()) {
             return emptyList();
         }
-        findRecommendations();
+        if (!findRecommendations()) {
+            return emptyList();
+        }
         createProspsals();
         releaseModel();
         return proposals;
@@ -174,7 +181,8 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
     }
 
     private boolean acquireModel() {
-        model = modelStore.aquireModel(receiverType).orNull();
+        model = modelStore3.aquireModel(receiverType).orNull();
+        // model = modelStore.aquireModel(receiverType).orNull();
         return model != null;
     }
 
@@ -213,13 +221,16 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
                     query.kind = usage.kind;
                 }
                 if (usage.definition != null) {
-                    query.definition = usage.definition;
+                    final Optional<IMethodName> def = ctx.getMethodDef();
+                    if (def.isPresent()) {
+                        query.definition = def.get();
+                    }
                 }
             }
         }
     }
 
-    private void findRecommendations() {
+    private boolean findRecommendations() {
         recommendations = Lists.newLinkedList();
 
         model.setQuery(query);
@@ -230,19 +241,18 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
         final Variable var = Variable.create(receiverName, jdtResolver.toRecType(receiverType), null);
 
         final boolean expectsReturnType = ctx.getExpectedTypeSignature().isPresent();
-        final boolean expectsNonPrimitiveReturnType = ctx.getExpectedType().isPresent();
-        final boolean expectsPrimitive = !expectsNonPrimitiveReturnType;
-
+        final String prefix = ctx.getPrefix();
         for (final Tuple<IMethodName, Double> recommended : recommendedMethodCalls) {
             final IMethodName method = recommended.getFirst();
             final Double probability = recommended.getSecond();
 
+            final String proposalPrefix = StringUtils.substring(method.getName(), 0, prefix.length());
+            if (!proposalPrefix.equalsIgnoreCase(prefix)) {
+                continue;
+            }
+
             if (expectsReturnType) {
-                final ITypeName returnType = method.getReturnType();
                 if (method.isVoid()) {
-                    continue;
-                }
-                if (expectsPrimitive && !samePrimitiveType(returnType, ctx.getExpectedTypeSignature().or(""))) {
                     continue;
                 }
             }
@@ -253,47 +263,45 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
         // XXX experimental. limit completion list to "magical number 7"
         // http://en.wikipedia.org/wiki/The_Magical_Number_Seven,_Plus_or_Minus_Two
         recommendations = recommendations.subList(0, Math.min(recommendations.size(), 7));
-    }
-
-    private boolean samePrimitiveType(final ITypeName returnType, final String lhs) {
-        final String rhs = returnType.getIdentifier();
-        return rhs.equals(lhs);
+        return !recommendations.isEmpty();
     }
 
     private void createProspsals() {
-        final String prefix = ctx.getPrefix();
-        for (final CallsRecommendation r : recommendations) {
-            final String proposalPrefix = StringUtils.substring(r.method.getName(), 0, prefix.length());
-            if (!proposalPrefix.equalsIgnoreCase(prefix)) {
-                continue;
+        final Map<IJavaCompletionProposal, CompletionProposal> proposals = ctx.getProposals();
+        for (final Entry<IJavaCompletionProposal, CompletionProposal> p : proposals.entrySet()) {
+            final CompletionProposal compilerProposal = p.getValue();
+            switch (compilerProposal.getKind()) {
+            case CompletionProposal.METHOD_REF:
+            case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
+            case CompletionProposal.METHOD_NAME_REFERENCE:
+                createCallProposalIfRecommended(compilerProposal, p.getKey());
             }
-
-            final Optional<IMethod> optMethod = jdtResolver.toJdtMethod(r.method);
-            if (!optMethod.isPresent()) {
-                continue;
-            }
-
-            final int start = ctx.getInvocationOffset() - ctx.getPrefix().length();
-            final int end = ctx.getInvocationOffset();
-            final CompletionProposal proposal = JdtUtils.createProposal(optMethod.get(), CompletionProposal.METHOD_REF,
-                    start, end, end);
-            final int proposalPercentage = (int) Math.rint(r.probability * 100);
-            final int rating = BASIS_RELEVANCE + proposalPercentage;
-            proposal.setRelevance(rating);
-
-            final ParameterGuessingProposal javaProposal = ParameterGuessingProposal.createProposal(proposal,
-                    ctx.getJavaContext(), true);
-            final CompletionProposalDecorator decorator = new CompletionProposalDecorator(javaProposal, r.probability);
-            proposals.add(decorator);
         }
-        // if (!proposals.isEmpty()) {
-        // proposals.add(new SeparatorProposal(ctx.getInvocationOffset()));
-        // }
+    }
+
+    private void createCallProposalIfRecommended(final CompletionProposal compilerProposal,
+            final IJavaCompletionProposal jdtuiProposal) {
+        final String signature = String.valueOf(compilerProposal.getSignature()).replace('.', '/');
+        final String name = String.valueOf(compilerProposal.getName());
+        final String propSignature = (name + signature).replaceAll("<\\.>", "");
+        for (final CallsRecommendation call : recommendations) {
+            final String recSignature = call.method.getSignature();
+            if (recSignature.equals(propSignature)) {
+                if (jdtuiProposal instanceof AbstractJavaCompletionProposal) {
+                    int baseRelevance = jdtuiProposal.getRelevance();
+                    baseRelevance += 100 + (int) rint(call.probability * 100);
+                    ((AbstractJavaCompletionProposal) jdtuiProposal).setRelevance(baseRelevance);
+                }
+                final CompletionProposalDecorator decoratedProposal = new CompletionProposalDecorator(jdtuiProposal,
+                        call.probability);
+                proposals.add(decoratedProposal);
+            }
+        }
     }
 
     private void releaseModel() {
         if (model != null) {
-            modelStore.releaseModel(model);
+            modelStore3.releaseModel(model);
             model = null;
         }
     }

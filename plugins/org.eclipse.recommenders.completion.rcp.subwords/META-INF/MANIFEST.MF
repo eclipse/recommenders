@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Code Recommenders: Example Code Completion Engine (Incubation)
 Bundle-SymbolicName: org.eclipse.recommenders.completion.rcp.subwords;singleton:=true
-Bundle-Version: 0.5.0.qualifier
+Bundle-Version: 0.5.1.qualifier
 Bundle-Vendor: Eclipse Code Recommenders
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
@@ -11,5 +11,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.apache.commons.lang3,
  com.google.guava,
- org.eclipse.recommenders.utils
+ org.eclipse.recommenders.utils,
+ org.eclipse.recommenders.utils.rcp,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.ui.editors
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.eclipse.recommenders.internal.completion.rcp.subwords,
+ org.eclipse.recommenders.internal.completion.rcp.subwords.proposals

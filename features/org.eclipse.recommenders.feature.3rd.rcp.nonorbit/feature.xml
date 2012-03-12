@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.recommenders.feature.3rd.rcp.nonorbit"
       label="Code Recommenders: 3rd Party Dependencies not hosted on Orbit (Incubation)"
-      version="0.5.0.qualifier"
+      version="0.5.1.qualifier"
       provider-name="Eclipse Code Recommenders">
 
    <description url="http://www.eclipse.org/recommenders/">
@@ -69,7 +69,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.guava"
+         id="org.apache.lucene"
          download-size="0"
          install-size="0"
          version="0.0.0"

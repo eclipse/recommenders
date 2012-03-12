@@ -1,5 +1,6 @@
 package org.eclipse.recommenders.tests;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.xbase.lib.Functions.Function0;
 
@@ -13,6 +14,38 @@ public class CodeBuilder {
     }
   }.apply();
   
+  private static AtomicInteger classCounter = new Function0<AtomicInteger>() {
+    public AtomicInteger apply() {
+      AtomicInteger _atomicInteger = new AtomicInteger();
+      return _atomicInteger;
+    }
+  }.apply();
+  
+  public static CharSequence classDeclaration(final CharSequence declaration, final CharSequence body) {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import java.util.*;");
+    _builder.newLine();
+    _builder.append("import java.util.concurrent.*;");
+    _builder.newLine();
+    _builder.append("import java.text.*;");
+    _builder.newLine();
+    _builder.append("import java.util.concurrent.*;");
+    _builder.newLine();
+    _builder.append("import javax.annotation.*;");
+    _builder.newLine();
+    _builder.append("import javax.xml.ws.Action;");
+    _builder.newLine();
+    _builder.append(declaration, "");
+    _builder.append(" {");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append(body, "	");
+    _builder.newLineIfNotEmpty();
+    _builder.append("}");
+    _builder.newLine();
+    return _builder;
+  }
+  
   public static CharSequence classbody(final CharSequence classname, final CharSequence classbody) {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.*;");
@@ -24,6 +57,8 @@ public class CodeBuilder {
     _builder.append("import java.util.concurrent.*;");
     _builder.newLine();
     _builder.append("import javax.annotation.*;");
+    _builder.newLine();
+    _builder.append("import javax.xml.ws.Action;");
     _builder.newLine();
     _builder.append("public class ");
     _builder.append(classname, "");
@@ -49,8 +84,13 @@ public class CodeBuilder {
     _builder.newLine();
     _builder.append("import javax.annotation.*;");
     _builder.newLine();
-    _builder.append("public class MyClass {");
+    _builder.append("import javax.xml.ws.Action;");
     _builder.newLine();
+    _builder.append("public class Class");
+    int _addAndGet = CodeBuilder.classCounter.addAndGet(1);
+    _builder.append(_addAndGet, "");
+    _builder.append(" {");
+    _builder.newLineIfNotEmpty();
     _builder.append("\t");
     _builder.append(classbody, "	");
     _builder.newLineIfNotEmpty();
@@ -226,7 +266,7 @@ public class CodeBuilder {
     _builder.append(methodbody, "	");
     _builder.newLineIfNotEmpty();
     _builder.append("}");
-    CharSequence _classbody = CodeBuilder.classbody("MyClass", _builder);
+    CharSequence _classbody = CodeBuilder.classbody(_builder);
     return _classbody;
   }
   
@@ -242,7 +282,7 @@ public class CodeBuilder {
     _builder.append(methodbody, "	");
     _builder.newLineIfNotEmpty();
     _builder.append("}");
-    CharSequence _classbody = CodeBuilder.classbody("MyClass", _builder);
+    CharSequence _classbody = CodeBuilder.classbody(_builder);
     return _classbody;
   }
 }
