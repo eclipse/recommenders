@@ -26,7 +26,8 @@
         <!-- Sonar properties -->
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>../target/jacoco.exec</sonar.jacoco.reportPath>
+        <!-- Points to the target folder of the global parent project -->
+        <sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
     </properties>
     <modules>
         <module>etc/licenses</module>
