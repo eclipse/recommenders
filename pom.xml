@@ -45,6 +45,11 @@
         </profile>
         <profile>
             <id>e3x</id>
+            <properties>
+                <!-- Enables sonar analysis of the same project but for different versions of it -->
+                <!-- http://docs.codehaus.org/display/SONAR/Advanced+parameters -->
+                <sonar.branch>e3x</sonar.branch>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -70,6 +75,11 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <properties>
+                <!-- Enables sonar analysis of the same project but for different versions of it -->
+                <!-- http://docs.codehaus.org/display/SONAR/Advanced+parameters -->
+                <sonar.branch>e42</sonar.branch>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
