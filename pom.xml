@@ -23,11 +23,6 @@
         <jacoco-version>0.5.6.201201232323</jacoco-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build-alias>b000</build-alias>
-        <!-- Sonar properties -->
-        <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <!-- Points to the target folder of the global parent project -->
-        <sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
     </properties>
     <modules>
         <module>etc/licenses</module>
@@ -73,14 +68,14 @@
         </profile>
         <profile>
             <id>e42</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <!-- Enables sonar analysis of the same project but for different versions of it -->
                 <!-- http://docs.codehaus.org/display/SONAR/Advanced+parameters -->
                 <sonar.branch>e42</sonar.branch>
             </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -97,6 +92,38 @@
                                 </artifact>
                             </target>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>sonar</id>
+            <properties>
+                <!-- Sonar properties -->
+                <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+                <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+                <!-- Points to the target folder of the global parent project -->
+                <sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
+                <!-- Skips test modules during sonar analysis -->
+                <sonar.skippedModules>org.eclipse.recommenders.tests,org.eclipse.recommenders.tests.analysis,org.eclipse.recommenders.tests.completion.rcp,org.eclipse.recommenders.tests.extdoc.rcp,org.eclipse.recommenders.tests.jayes,org.eclipse.recommenders.tests.mining,org.eclipse.recommenders.tests.rcp,org.eclipse.recommenders.tests.udc.server,org.eclipse.recommenders.tests.util,org.eclipse.recommenders.tests.webclient</sonar.skippedModules>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <append>true</append>
+                                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -169,10 +196,6 @@
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
-                            <configuration>
-                                <append>true</append>
-                                <destFile>${sonar.jacoco.reportPath}</destFile>
-                            </configuration>
                         </execution>
                         <execution>
                             <id>jacoco-site</id>
