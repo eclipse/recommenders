@@ -104,8 +104,6 @@
                 <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
                 <!-- Points to the target folder of the global parent project -->
                 <sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
-                <!-- Skips test modules during sonar analysis -->
-                <sonar.skippedModules>org.eclipse.recommenders.tests,org.eclipse.recommenders.tests.analysis,org.eclipse.recommenders.tests.completion.rcp,org.eclipse.recommenders.tests.extdoc.rcp,org.eclipse.recommenders.tests.jayes,org.eclipse.recommenders.tests.mining,org.eclipse.recommenders.tests.rcp,org.eclipse.recommenders.tests.udc.server,org.eclipse.recommenders.tests.util,org.eclipse.recommenders.tests.webclient</sonar.skippedModules>
             </properties>
             <build>
                 <plugins>
