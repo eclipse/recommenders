@@ -16,6 +16,7 @@ import java.io.File;
 
 import javax.inject.Inject;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -33,8 +34,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.recommenders.internal.completion.rcp.calls.models.CallModelStore;
+import org.eclipse.recommenders.internal.completion.rcp.calls.net.IObjectMethodCallsNet;
 import org.eclipse.recommenders.internal.completion.rcp.calls.wiring.CallsCompletionPlugin;
+import org.eclipse.recommenders.internal.rcp.models.IModelArchiveStore;
 import org.eclipse.recommenders.rcp.ClasspathEntryInfo;
 import org.eclipse.recommenders.rcp.IClasspathEntryInfoProvider;
 import org.eclipse.recommenders.utils.rcp.ScaleOneDimensionLayout;
@@ -46,7 +48,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -62,11 +63,10 @@ public class CallsPreferencePage extends PreferencePage implements IWorkbenchPre
     private final SectionsFactory factory;
     private ClasspathEntryInfoSection cpeInfoDetailsSection;
     private ModelDetailsSection callModelDetailsSection;
-    private Text webserviceBaseurl;
 
     @Inject
-    public CallsPreferencePage(SectionsFactory factory, final IClasspathEntryInfoProvider cpeInfoProvider,
-            final CallModelStore archiveStore) {
+    public CallsPreferencePage(SectionsFactory factory, IClasspathEntryInfoProvider cpeInfoProvider,
+            IModelArchiveStore<IType, IObjectMethodCallsNet> store) {
         this.factory = factory;
         this.cpeInfoProvider = cpeInfoProvider;
         noDefaultAndApplyButton();

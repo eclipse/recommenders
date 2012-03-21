@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, 2011 Darmstadt University of Technology.
+ * Copyright (c) 2010, 2012 Darmstadt University of Technology.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.recommenders.internal.rcp.repo;
 
 import static org.apache.commons.lang3.ArrayUtils.reverse;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.replace;
 import static org.apache.commons.lang3.StringUtils.split;
@@ -22,6 +23,14 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 import com.google.common.net.InternetDomainName;
 
 public class RepositoryUtils {
+
+    public static String EXTENSION_MODELS = "zip";
+
+    public static String CLASSIFIER_COMPLETION_CALLS = "call";
+    public static String CLASSIFIER_COMPLETION_OVERRIDES = "ovrd";
+    public static String CLASSIFIER_EXTDOC_OVERRIDE = "extdoc-ovrd";
+    public static String CLASSIFIER_EXTDOC_OVERRIDE_PATTERNS = "extodc-ovrdp";
+    public static String CLASSIFIER_EXTDOC_SELF_CALLS = "extdoc-self";
 
     public static Artifact newArtifact(String coordinate) {
         return new DefaultArtifact(coordinate);
@@ -72,5 +81,31 @@ public class RepositoryUtils {
         for (int i = segments.length; i-- > 0;) {
             segments[i] = replace(segments[i], "/", "");
         }
+    }
+
+    public static String toArtifactFileName(Artifact artifact) {
+        String artifactId = artifact.getArtifactId();
+        String version = artifact.getVersion();
+        String classifier = artifact.getClassifier();
+        String extension = artifact.getExtension();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(artifactId).append('-').append(version);
+        if (!isEmpty(classifier)) {
+            sb.append('-').append(classifier);
+        }
+        sb.append('.').append(extension);
+        return sb.toString();
+    }
+
+    public static Artifact pom(Artifact a) {
+        DefaultArtifact pom = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), null, "pom", a.getVersion());
+        return pom;
+    }
+
+    public static Artifact newClassifierAndExtension(Artifact a, String classifier, String extension) {
+        DefaultArtifact res = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), classifier, extension,
+                a.getVersion());
+        return res;
     }
 }

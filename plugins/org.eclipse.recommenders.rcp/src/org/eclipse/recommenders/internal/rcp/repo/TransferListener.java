@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, 2011 Darmstadt University of Technology.
+ * Copyright (c) 2010, 2012 Darmstadt University of Technology.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,20 +11,17 @@
 package org.eclipse.recommenders.internal.rcp.repo;
 
 import static java.lang.String.format;
+import static org.apache.commons.io.FileUtils.byteCountToDisplaySize;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonatype.aether.transfer.AbstractTransferListener;
 import org.sonatype.aether.transfer.TransferEvent;
 import org.sonatype.aether.transfer.TransferResource;
 
 public class TransferListener extends AbstractTransferListener {
-
-    private Logger log = LoggerFactory.getLogger(getClass());
 
     private final IProgressMonitor monitor;
     private Map<TransferResource, Long> downloads = new ConcurrentHashMap<TransferResource, Long>();
@@ -41,6 +38,10 @@ public class TransferListener extends AbstractTransferListener {
     }
 
     @Override
+    public void transferStarted(TransferEvent event) throws org.sonatype.aether.transfer.TransferCancelledException {
+    };
+
+    @Override
     public void transferProgressed(TransferEvent event) {
         TransferResource resource = event.getResource();
         downloads.put(resource, Long.valueOf(event.getTransferredBytes()));
@@ -55,34 +56,23 @@ public class TransferListener extends AbstractTransferListener {
     public void transferSucceeded(TransferEvent event) {
         TransferResource resource = event.getResource();
         downloads.remove(resource);
-        monitor.subTask("Finished transfer: " + resource);
+        monitor.subTask("Finished transfer: " + resource.getResourceName());
     }
 
     private String getStatus(long complete, long total) {
-        if (total >= 1024) {
-            return toKB(complete) + "/" + toKB(total) + " KB ";
-        } else if (total >= 0) {
-            return complete + "/" + total + " B ";
-        } else if (complete >= 1024) {
-            return toKB(complete) + " KB ";
-        } else {
-            return complete + " B ";
-        }
+        String status = byteCountToDisplaySize(complete);
+        if (total > 0)
+            status += "/" + byteCountToDisplaySize(total);
+        return status;
     }
 
     @Override
     public void transferFailed(TransferEvent event) {
-        log.error("Transfer failed.", event.getException());
-        monitor.subTask("Transfer failed: " + event);
+        monitor.subTask("Transfer failed: " + event.getException().getLocalizedMessage());
     }
 
     @Override
     public void transferCorrupted(TransferEvent event) {
-        log.error("Transfer corrupted.", event.getException());
         monitor.subTask("Transfer corrupted: " + event.getException().getLocalizedMessage());
-    }
-
-    private long toKB(long bytes) {
-        return (bytes + 1023) / 1024;
     }
 }

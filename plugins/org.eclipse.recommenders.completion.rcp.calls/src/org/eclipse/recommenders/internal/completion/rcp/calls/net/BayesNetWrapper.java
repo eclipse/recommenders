@@ -15,7 +15,7 @@ import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.NODE_I
 import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.NODE_ID_KIND;
 import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.NODE_ID_PATTERNS;
 import static org.eclipse.recommenders.commons.bayesnet.CallsNetConstants.STATE_TRUE;
-import static org.eclipse.recommenders.internal.analysis.codestructs.ObjectUsage.UNKNOWN_METHOD;
+import static org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage.UNKNOWN_METHOD;
 import static org.eclipse.recommenders.utils.Checks.ensureEquals;
 
 import java.util.Collection;
@@ -31,9 +31,9 @@ import java.util.TreeSet;
 
 import org.eclipse.recommenders.commons.bayesnet.BayesianNetwork;
 import org.eclipse.recommenders.commons.bayesnet.Node;
-import org.eclipse.recommenders.internal.analysis.codestructs.DefinitionSite;
-import org.eclipse.recommenders.internal.analysis.codestructs.ObjectUsage;
-import org.eclipse.recommenders.internal.analysis.codestructs.DefinitionSite.Kind;
+import org.eclipse.recommenders.internal.utils.codestructs.DefinitionSite;
+import org.eclipse.recommenders.internal.utils.codestructs.DefinitionSite.Kind;
+import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.inference.junctionTree.JunctionTreeAlgorithm;
@@ -202,11 +202,9 @@ public class BayesNetWrapper implements IObjectMethodCallsNet {
 
             final boolean isAlreadyUsedAsEvidence = junctionTreeAlgorithm.getEvidence().containsKey(bayesNode);
             if (!isAlreadyUsedAsEvidence) {
-
                 final int indexForTrue = bayesNode.getOutcomeIndex(STATE_TRUE);
                 final double[] probabilities = junctionTreeAlgorithm.getBeliefs(bayesNode);
                 final double probability = probabilities[indexForTrue];
-
                 if (probability >= minProbabilityThreshold) {
                     res.add(Tuple.newTuple(method, probability));
                 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010 Darmstadt University of Technology.
+ * Copyright (c) 2010, 2012 Darmstadt University of Technology.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,10 +47,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContextFactory;
-import org.eclipse.recommenders.internal.analysis.codestructs.ObjectUsage;
-import org.eclipse.recommenders.internal.analysis.codestructs.Variable;
-import org.eclipse.recommenders.internal.completion.rcp.calls.models.CallModelStore;
 import org.eclipse.recommenders.internal.completion.rcp.calls.net.IObjectMethodCallsNet;
+import org.eclipse.recommenders.internal.rcp.models.IModelArchiveStore;
+import org.eclipse.recommenders.internal.utils.codestructs.DefinitionSite.Kind;
+import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
+import org.eclipse.recommenders.internal.utils.codestructs.Variable;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.utils.Tuple;
 import org.eclipse.recommenders.utils.names.IMethodName;
@@ -71,7 +72,7 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
     private static final int BASIS_RELEVANCE = 935;
 
     // private static final int MAX_NUM_PROPOSALS = 5;
-    private static final double MIN_PROBABILITY_THRESHOLD = 0.1d;
+    private static final double MIN_PROBABILITY_THRESHOLD = 0.01d;
 
     @SuppressWarnings("serial")
     private final Set<Class<?>> supportedCompletionRequests = new HashSet<Class<?>>() {
@@ -96,12 +97,12 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
 
     private JavaContentAssistInvocationContext javaContext;
 
-    private final CallModelStore modelStore3;
+    private final IModelArchiveStore<IType, IObjectMethodCallsNet> modelStore;
 
     @Inject
-    public CallsCompletionProposalComputer(final CallModelStore modelStore3, final JavaElementResolver jdtResolver,
-            final IRecommendersCompletionContextFactory ctxFactory) {
-        this.modelStore3 = modelStore3;
+    public CallsCompletionProposalComputer(final IModelArchiveStore<IType, IObjectMethodCallsNet> modelStore,
+            final JavaElementResolver jdtResolver, final IRecommendersCompletionContextFactory ctxFactory) {
+        this.modelStore = modelStore;
         this.jdtResolver = jdtResolver;
         this.ctxFactory = ctxFactory;
     }
@@ -181,7 +182,7 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
     }
 
     private boolean acquireModel() {
-        model = modelStore3.aquireModel(receiverType).orNull();
+        model = modelStore.aquireModel(receiverType).orNull();
         // model = modelStore.aquireModel(receiverType).orNull();
         return model != null;
     }
@@ -190,7 +191,19 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
         setCalls();
         setReceiverType();
         setFirstMethodDeclaration();
+        setDefinition();
         return true;
+    }
+
+    private void setDefinition() {
+        if (query.definition.equals(ObjectUsage.UNKNOWN_METHOD)) {
+            Optional<IMethodName> methodDef = ctx.getMethodDef();
+            if (methodDef.isPresent()) {
+                query.definition = methodDef.get();
+            }
+        } else if (query.definition != null && query.kind == Kind.PARAMETER) {
+            query.definition = query.contextFirst;
+        }
     }
 
     private void setFirstMethodDeclaration() {
@@ -221,6 +234,7 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
                     query.kind = usage.kind;
                 }
                 if (usage.definition != null) {
+                    query.definition = usage.definition;
                     final Optional<IMethodName> def = ctx.getMethodDef();
                     if (def.isPresent()) {
                         query.definition = def.get();
@@ -301,7 +315,7 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
 
     private void releaseModel() {
         if (model != null) {
-            modelStore3.releaseModel(model);
+            modelStore.releaseModel(model);
             model = null;
         }
     }
