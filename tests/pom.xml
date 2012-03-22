@@ -11,12 +11,12 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>org.eclipse.recommenders.tests</module>
-		<module>org.eclipse.recommenders.tests.completion.rcp</module>
+		<!--module>org.eclipse.recommenders.tests.completion.rcp</module>
 		<module>org.eclipse.recommenders.tests.extdoc.rcp</module>
 		<module>org.eclipse.recommenders.tests.jayes</module>
-		<module>org.eclipse.recommenders.tests.rcp</module>
+		<module>org.eclipse.recommenders.tests.rcp</module-->
 		<module>org.eclipse.recommenders.tests.util</module>
-		<module>org.eclipse.recommenders.tests.webclient</module>
+		<!--module>org.eclipse.recommenders.tests.webclient</module-->
 	</modules>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
