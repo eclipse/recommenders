@@ -101,6 +101,9 @@
 		</profile>
 		<profile>
             <id>sonar</id>
+            <activation>
+		<activeByDefault>true</activeByDefault>
+	    </activation>
             <properties>
                 <!-- Sonar properties -->
                 <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
