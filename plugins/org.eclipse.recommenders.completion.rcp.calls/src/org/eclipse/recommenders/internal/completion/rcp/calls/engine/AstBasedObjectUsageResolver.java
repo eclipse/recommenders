@@ -46,8 +46,8 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
 import org.eclipse.recommenders.internal.utils.codestructs.DefinitionSite.Kind;
+import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
 import org.eclipse.recommenders.utils.annotations.Nullable;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.rcp.ast.BindingUtils;
@@ -132,6 +132,7 @@ public class AstBasedObjectUsageResolver extends ASTVisitor {
         ensureIsNotNull(varname);
         ensureIsNotNull(method);
         setVarname(varname);
+
         initializeResult();
         method.accept(this);
         return res;
@@ -196,6 +197,8 @@ public class AstBasedObjectUsageResolver extends ASTVisitor {
             // e.g. int j=anotherValue;
             final SimpleName sn = cast(expression);
             // some alias thing...
+            // it might be that we found an assignment before and this simpleName is just "$missing". Then ignore this
+            if (res.kind == null)
             res.kind = Kind.UNKNOWN;
             break;
         default:

@@ -44,12 +44,12 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContextFactory;
-import org.eclipse.recommenders.internal.analysis.codeelements.DefinitionSite;
-import org.eclipse.recommenders.internal.analysis.codeelements.ObjectUsage;
 import org.eclipse.recommenders.internal.completion.rcp.calls.net.IObjectMethodCallsNet;
-import org.eclipse.recommenders.internal.completion.rcp.calls.store2.CallModelStore;
 import org.eclipse.recommenders.internal.completion.rcp.templates.code.CodeBuilder;
 import org.eclipse.recommenders.internal.completion.rcp.templates.types.CompletionTargetVariable;
+import org.eclipse.recommenders.internal.rcp.models.IModelArchiveStore;
+import org.eclipse.recommenders.internal.utils.codestructs.DefinitionSite;
+import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
 import org.eclipse.recommenders.utils.Throws;
 import org.eclipse.recommenders.utils.Tuple;
 import org.eclipse.recommenders.utils.names.IMethodName;
@@ -79,7 +79,7 @@ public final class TemplatesCompletionProposalComputer implements IJavaCompletio
     private String receiverName;
     private String methodNamePrefix;
     private CompletionMode mode;
-    private final CallModelStore store;
+    private final IModelArchiveStore<IType, IObjectMethodCallsNet> store;
     private final JavaElementResolver jdtCache;
 
     /**
@@ -93,7 +93,7 @@ public final class TemplatesCompletionProposalComputer implements IJavaCompletio
      */
     @Inject
     public TemplatesCompletionProposalComputer(final IRecommendersCompletionContextFactory ctxFactory,
-            CallModelStore store, JavaElementResolver jdtCache) {
+            IModelArchiveStore<IType, IObjectMethodCallsNet> store, JavaElementResolver jdtCache) {
         this.ctxFactory = ctxFactory;
         this.store = store;
         this.jdtCache = jdtCache;
@@ -161,30 +161,37 @@ public final class TemplatesCompletionProposalComputer implements IJavaCompletio
 
             double sum = 0.0d;
 
-            DefinitionSite.Kind[] values = { DefinitionSite.Kind.NEW, DefinitionSite.Kind.METHOD_RETURN };
+            DefinitionSite.Kind[] values = { DefinitionSite.Kind.NEW };
 
             for (DefinitionSite.Kind k : values) {
                 query.kind = k;
                 net.setQuery(query);
-                for (Tuple<String, Double> p : getMostLikelyPatternsSortedByProbability(net)) {
-                    Set<DefinitionSite> definitions = net.getDefinitions();
+                List<Tuple<String, Double>> callgroups = getMostLikelyPatternsSortedByProbability(net);
+                for (Tuple<String, Double> p : callgroups) {
                     String patternId = p.getFirst();
-                    double prob = p.getSecond();
-                    if (prob < 0.05) {
-                        break;
-                    }
+                    net.setPattern(patternId);
+                    for (Tuple<String, Double> def : net.getDefinitions()) {
+                        double prob = p.getSecond();
+                        if (prob < 0.05) {
+                            break;
+                        }
 
-                    SortedSet<Tuple<IMethodName, Double>> rec = net.getRecommendedMethodCalls(0.2d);
-                    if (rec.isEmpty()) {
+                        SortedSet<Tuple<IMethodName, Double>> rec = net.getRecommendedMethodCalls(0.2d);
+                        if (rec.isEmpty()) {
+                            continue;
+                        }
+
+                        TreeSet<IMethodName> calls = Sets.newTreeSet();
+                        for (final Tuple<IMethodName, Double> pair : rec) {
+                            calls.add(pair.getFirst());
+                        }
+
+                        System.out.printf("%3.3f def:%s calls:\n", prob, def);
+                        for (IMethodName call : calls) {
+                            System.out.printf("\t%s\n", call);
+                        }
                         continue;
                     }
-
-                    TreeSet<IMethodName> calls = Sets.newTreeSet();
-                    for (final Tuple<IMethodName, Double> pair : rec) {
-                        calls.add(pair.getFirst());
-                    }
-                    System.out.printf("%3.3f %s\n", prob, calls);
-                    continue;
                 }
             }
             store.releaseModel(net);
