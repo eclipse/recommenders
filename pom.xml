@@ -18,14 +18,11 @@
 	<version>0.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
-		<tycho-version>0.14.0</tycho-version>
+		<tycho-version>0.14.1</tycho-version>
 		<recommenders-version>0.5.0-SNAPSHOT</recommenders-version>
-		<jacoco-version>0.5.4.201111111111</jacoco-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<build-alias>b000</build-alias>
 		<coverage.skip>false</coverage.skip>
-		<coverage.filter>org.eclipse.recommenders.*</coverage.filter>
-		<coverage.destFile>../target/jacoco.exec</coverage.destFile>
 	</properties>
 	<modules>
 		<module>etc/licenses</module>
@@ -44,6 +41,11 @@
 		</profile>
 		<profile>
 			<id>e3x</id>
+			<properties>
+                <!-- Enables sonar analysis of the same project but for different versions of it -->
+                <!-- http://docs.codehaus.org/display/SONAR/Advanced+parameters -->
+                <sonar.branch>e3x</sonar.branch>
+            </properties>
 			<build>
 				<plugins>
 					<plugin>
@@ -66,6 +68,11 @@
 		</profile>
 		<profile>
 			<id>e42</id>
+			<properties>
+                <!-- Enables sonar analysis of the same project but for different versions of it -->
+                <!-- http://docs.codehaus.org/display/SONAR/Advanced+parameters -->
+                <sonar.branch>e42</sonar.branch>
+            </properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -89,30 +96,44 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+            <id>quality</id>
+            <activation>
+            	<activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <!-- Sonar properties -->
+                <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+                <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+                <!-- Points to the target folder of the global parent project -->
+                <sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.5.6.201201232323</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <append>true</append>
+                                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                                    <includes>
+                                    	<include>org.eclipse.recommenders.*</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 	</profiles>
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.5.6.201201232323</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<configuration>
-							<skip>${coverage.skip}</skip>
-							<destFile>${coverage.destFile}</destFile>
-							<includes>
-								<include>${coverage.filter}</include>
-							</includes>
-							<append>true</append>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -159,7 +180,7 @@
 					<artifactId>tycho-surefire-plugin</artifactId>
 					<version>${tycho-version}</version>
 					<configuration>
-						<argLine>${tycho.test.jvmArgs}</argLine>
+						<appArgLine>${tycho.test.jvmArgs}</appArgLine>
 					</configuration>
 				</plugin>
 				<plugin>
