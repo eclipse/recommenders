@@ -38,14 +38,12 @@ import org.eclipse.swt.graphics.Image;
 /**
  * Creates the templates for a give call chain.
  */
-public class CompletionTemplateBuilder {
+final class CompletionTemplateBuilder {
 
     private HashBag<String> varNames;
     private StringBuilder sb;
-    private JavaContentAssistInvocationContext context;
 
-    public TemplateProposal create(final List<MemberEdge> chain, final JavaContentAssistInvocationContext context) {
-        this.context = context;
+    TemplateProposal create(final List<MemberEdge> chain, final JavaContentAssistInvocationContext context) {
         final String title = createCompletionTitle(chain);
         final String body = createCompletionBody(chain);
 
@@ -54,7 +52,7 @@ public class CompletionTemplateBuilder {
     }
 
     private static String createCompletionTitle(final List<MemberEdge> chain) {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(64);
         for (final MemberEdge edge : chain) {
             switch (edge.getEdgeType()) {
             case FIELD:
@@ -66,6 +64,7 @@ public class CompletionTemplateBuilder {
                 final IMethod method = edge.getEdgeElement();
                 final String label = getElementLabel(method, M_PARAMETER_NAMES | M_PARAMETER_TYPES);
                 sb.append(label);
+                break;
             default:
                 break;
             }
@@ -80,7 +79,7 @@ public class CompletionTemplateBuilder {
 
     private String createCompletionBody(final List<MemberEdge> chain) {
         varNames = HashBag.newHashBag();
-        sb = new StringBuilder();
+        sb = new StringBuilder(64);
         for (final MemberEdge edge : chain) {
             switch (edge.getEdgeType()) {
             case FIELD:
@@ -112,7 +111,7 @@ public class CompletionTemplateBuilder {
             final String[] paramNames = method.getParameterNames();
             final String[] paramTypes = method.getParameterTypes();
             final int numberOfParams = paramNames.length;
-            for (int i = 0; i < numberOfParams; i++) {
+            for (int i = 0; i < numberOfParams; ++i) {
                 appendTemplateVariable(paramNames[i], paramTypes[i]);
                 sb.append(", ");
             }
@@ -155,7 +154,7 @@ public class CompletionTemplateBuilder {
         sb.append("]");
     }
 
-    static TemplateProposal createTemplateProposal(final Template template,
+    private static TemplateProposal createTemplateProposal(final Template template,
             final JavaContentAssistInvocationContext contentAssistContext) {
         final DocumentTemplateContext javaTemplateContext = createJavaContext(contentAssistContext);
         final TemplateProposal proposal = new TemplateProposal(template, javaTemplateContext, new Region(
@@ -164,7 +163,7 @@ public class CompletionTemplateBuilder {
         return proposal;
     }
 
-    static JavaContext createJavaContext(final JavaContentAssistInvocationContext contentAssistContext) {
+    private static JavaContext createJavaContext(final JavaContentAssistInvocationContext contentAssistContext) {
         final ContextTypeRegistry templateContextRegistry = JavaPlugin.getDefault().getTemplateContextRegistry();
         final TemplateContextType templateContextType = templateContextRegistry.getContextType(JavaContextType.ID_ALL);
         final JavaContext javaTemplateContext = new JavaContext(templateContextType,
@@ -174,7 +173,7 @@ public class CompletionTemplateBuilder {
         return javaTemplateContext;
     }
 
-    static Image getChainCompletionIcon() {
+    private static Image getChainCompletionIcon() {
         return JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_MISC_PUBLIC);
     }
 }

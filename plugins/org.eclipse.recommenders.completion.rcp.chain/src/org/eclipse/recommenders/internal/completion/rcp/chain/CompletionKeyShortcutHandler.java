@@ -10,8 +10,6 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp.chain;
 
-import static org.eclipse.recommenders.utils.Throws.throwIllegalStateException;
-
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -21,6 +19,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.SpecificContentAssistExecutor;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
+import org.eclipse.recommenders.utils.Throws;
 import org.eclipse.recommenders.utils.rcp.JdtUtils;
 
 import com.google.common.base.Optional;
@@ -30,7 +29,7 @@ import com.google.common.base.Optional;
  * the active editor.
  */
 @SuppressWarnings("restriction")
-public class CompletionKeyShortcutHandler extends AbstractHandler {
+public final class CompletionKeyShortcutHandler extends AbstractHandler {
     private static final String CHAIN_COMPLETION_CATEGORY = "org.eclipse.recommenders.completion.rcp.chain.category";
     private final CompletionProposalComputerRegistry registry = CompletionProposalComputerRegistry.getDefault();
     private final SpecificContentAssistExecutor executor = new SpecificContentAssistExecutor(registry);
@@ -47,7 +46,7 @@ public class CompletionKeyShortcutHandler extends AbstractHandler {
                 return;
             }
         }
-        throwIllegalStateException("Chain proposal engine category '%s' no found. Report this as bug.",
+        Throws.throwIllegalStateException("Chain proposal engine category '%s' no found. Report this as bug.",
                 CHAIN_COMPLETION_CATEGORY);
 
     }

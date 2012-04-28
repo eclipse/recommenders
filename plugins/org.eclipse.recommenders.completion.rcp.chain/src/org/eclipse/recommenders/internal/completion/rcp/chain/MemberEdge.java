@@ -31,45 +31,34 @@ import com.google.common.base.Optional;
  * Represents a transition from Type A to Type B by some chain element ( {@link IField} access, {@link IMethod} call, or
  * {@link ILocalVariable} (as entrypoints only)).
  * 
- * @see TypeNode
  * @see GraphBuilder
  */
-public class MemberEdge {
+final class MemberEdge {
 
-    public enum EdgeType {
+    enum EdgeType {
         METHOD, FIELD, LOCAL_VARIABLE
     }
 
     private final IJavaElement element;
-    /**
-     * the iteration number (==depth) this edge was found in the graph construction phase
-     */
-    private final int iterationDepth;
     private final Optional<IType> optReceiverType;
     private Optional<IType> optReturnType;
     private int dimension;
     private EdgeType edgeType;
 
     // TODO I don't like var names sourceType javaelement... too generic
-    public MemberEdge(final IType receiverType, final IJavaElement member, final int iterationDepth) {
+    MemberEdge(final IType receiverType, final IJavaElement member) {
         ensureIsNotNull(member);
         ensureIsMemberTypeOrLocalVariable(member);
-        this.optReceiverType = fromNullable(receiverType);
-        this.element = member;
-        this.iterationDepth = iterationDepth;
-        try {
-            initializeReturnType();
-        } catch (final JavaModelException e) {
-            RecommendersUtilsPlugin.log(e);
-        }
+        optReceiverType = fromNullable(receiverType);
+        element = member;
+    }
+
+    MemberEdge(final IJavaElement member) {
+        this(null, member);
     }
 
     private void ensureIsMemberTypeOrLocalVariable(final IJavaElement element) {
 
-    }
-
-    public MemberEdge(final IJavaElement member) {
-        this(null, member, 1);
     }
 
     private void initializeReturnType() throws JavaModelException {
@@ -96,7 +85,7 @@ public class MemberEdge {
     }
 
     /**
-     * Instance of {@link IMethod}, {@link IField}, or {@link ILocalVariable}
+     * @return Instance of {@link IMethod}, {@link IField}, or {@link ILocalVariable}.
      */
     @SuppressWarnings("unchecked")
     public <T extends IJavaElement> T getEdgeElement() {
@@ -126,6 +115,13 @@ public class MemberEdge {
     }
 
     public Optional<IType> getReturnType() {
+        if (optReturnType == null) {
+            try {
+                initializeReturnType();
+            } catch (final JavaModelException e) {
+                RecommendersUtilsPlugin.log(e);
+            }
+        }
         return optReturnType;
     }
 
@@ -139,22 +135,14 @@ public class MemberEdge {
         return optReceiverType;
     }
 
-    public int getIterationDepth() {
-        return iterationDepth;
-    }
-
-    public boolean isArray() {
-        return dimension > 0;
-    }
-
     public int getDimension() {
         return dimension;
     }
 
-    public boolean isAssignableTo(final IType lhsType) {
+    boolean isAssignableTo(final IType lhsType) {
         ensureIsNotNull(lhsType);
-        if (optReturnType.isPresent()) {
-            return JdtUtils.isAssignable(lhsType, optReturnType.get());
+        if (getReturnType().isPresent()) {
+            return JdtUtils.isAssignable(lhsType, getReturnType().get());
         }
         return false;
     }
