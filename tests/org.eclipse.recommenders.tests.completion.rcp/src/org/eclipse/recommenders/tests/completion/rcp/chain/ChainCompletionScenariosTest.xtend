@@ -356,7 +356,8 @@ class ChainCompletionScenariosTest {
 				final Boolean c = $
 			''')
 		var expected = w(newArrayList(
-			"f _public"
+			"f _public", // local
+			"f _public" // static
 			))
 			
 		exercise(code, expected);
