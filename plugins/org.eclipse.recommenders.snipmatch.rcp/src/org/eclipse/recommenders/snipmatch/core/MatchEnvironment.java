@@ -171,7 +171,7 @@ public abstract class MatchEnvironment {
 	 * @param node The match node to evaluate.
 	 * @return The result of the evaluation.
 	 */
-	private Object evaluateMatchNode(MatchNode node) {
+	protected Object evaluateMatchNode(MatchNode node) {
 		
 		/* For argument nodes, simply return the argument. 
 		 * For effect nodes, use evaluateEffect and pass in the arguments.

@@ -24,8 +24,13 @@ public abstract class SnippetMatchEnvironment extends MatchEnvironment {
 		cachedSnippetNodes = new HashMap<String, ISnippetNode[]>();
 	}
 
-	/* (non-Javadoc)
-	 * @see snipmatch.core.MatchEnvironment#evaluateEffect(snipmatch.core.EffectMatchNode, java.lang.Object[])
+	/**
+	 * Method to build target code snip string by
+	 * EffectMatchNode effectNode
+	 * and Object[] args, as we remove parameters input dialog in search result display module, so args will always be empty array
+	 * we can only use dummy args here
+	 * 
+	 * TODO: In the future, user can set default dummy variables for each code snip, then we will re-use args in this method 
 	 */
 	@Override
 	protected Object evaluateEffect(EffectMatchNode effectNode, Object[] args) {
@@ -38,7 +43,8 @@ public abstract class SnippetMatchEnvironment extends MatchEnvironment {
 		
 		// First add a variable for each of the effect's arguments.
 		for (int i = 0; i < args.length; i++) {
-			variables.put(effect.getParameter(i).getName(), (String)args[i]);
+			//Use dummy parameter name for all the parameters in code snips
+			variables.put(effect.getParameter(i).getName(), effect.getParameter(i).getName());
 		}
 		
 		ISnippetNode[] snippetNodes;
