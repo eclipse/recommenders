@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*/
+ */
 
 package org.eclipse.recommenders.snipmatch.rcp;
 
@@ -16,47 +16,55 @@ import org.eclipse.recommenders.snipmatch.core.MatchNode;
  */
 public class CompleteMatchThread implements Runnable {
 
-	boolean canceled;
-	MatchEnvironment env;
-	MatchNode match;
-	ICompleteMatchListener listener;
-	
-	/**
-	 * @param env The match environment.
-	 * @param match The match to complete.
-	 */
-	public CompleteMatchThread(MatchEnvironment env, MatchNode match) {
+    boolean canceled;
+    MatchEnvironment env;
+    MatchNode match;
+    ICompleteMatchListener listener;
 
-		this.env = env;
-		this.match = match;
-		canceled = false;
-	}
-	
-	public void cancel() {
-		
-		canceled = true;
-	}
-	
-	public void setListener(ICompleteMatchListener listener) {
-		
-		this.listener = listener;
-	}
+    /**
+     * @param env
+     *            The match environment.
+     * @param match
+     *            The match to complete.
+     */
+    public CompleteMatchThread(final MatchEnvironment env, final MatchNode match) {
 
-	@Override
-	public void run() {
+        this.env = env;
+        this.match = match;
+        canceled = false;
+    }
 
-		// First, test to see if the match is valid.
-		if (env.testMatch(match)) {
+    public void cancel() {
 
-			// Generate completions for the match, and notify the caller via the listener.
-			for (MatchNode completeMatch : env.getMatchCompletions(match)) {
+        canceled = true;
+    }
 
-				if (canceled) break;
-				if (listener != null) listener.completionFound(completeMatch);
-			}
-		}
-		
-		// Tell the caller that we are done.
-		if (listener != null) listener.completionFinished();
-	}
+    public void setListener(final ICompleteMatchListener listener) {
+
+        this.listener = listener;
+    }
+
+    @Override
+    public void run() {
+
+        // First, test to see if the match is valid.
+        if (env.testMatch(match)) {
+
+            // Generate completions for the match, and notify the caller via the listener.
+            for (final MatchNode completeMatch : env.getMatchCompletions(match)) {
+
+                if (canceled) {
+                    break;
+                }
+                if (listener != null) {
+                    listener.completionFound(completeMatch);
+                }
+            }
+        }
+
+        // Tell the caller that we are done.
+        if (listener != null) {
+            listener.completionFinished();
+        }
+    }
 }

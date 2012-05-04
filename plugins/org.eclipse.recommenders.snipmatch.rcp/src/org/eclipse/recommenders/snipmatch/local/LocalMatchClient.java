@@ -40,7 +40,7 @@ public final class LocalMatchClient implements SearchClient {
     }
 
     @Override
-    public void startSearch(String query, MatchEnvironment env, ISearchListener listener) {
+    public void startSearch(final String query, final MatchEnvironment env, final ISearchListener listener) {
         workThread = new LocalSearchThread(this, env, query, listener);
         workThread.start();
     }
@@ -48,51 +48,57 @@ public final class LocalMatchClient implements SearchClient {
     @Override
     public void cancelWork() {
 
-        if (isWorking())
+        if (isWorking()) {
             workThread.cancel();
+        }
     }
 
     @Override
     public boolean isWorking() {
 
-        return workThread != null && !workThread.isDone();
+        return (workThread != null) && !workThread.isDone();
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
+    @Override
     public String getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(final String version) {
         this.version = version;
     }
 
+    @Override
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
     @Override
-    public void startSendFeedback(String query, MatchNode result, String comment, int rating, boolean flag,
-            boolean isLog, boolean isStartup, long clientId, boolean used, ISendFeedbackListener listener) {
+    public void startSendFeedback(final String query, final MatchNode result, final String comment, final int rating,
+            final boolean flag, final boolean isLog, final boolean isStartup, final long clientId, final boolean used,
+            final ISendFeedbackListener listener) {
         // TODO Auto-generated method stub
 
     }
@@ -122,7 +128,7 @@ public final class LocalMatchClient implements SearchClient {
     }
 
     @Override
-    public void setServerProcessingTime(float serverProcessingTime) {
+    public void setServerProcessingTime(final float serverProcessingTime) {
         // TODO Auto-generated method stub
 
     }
@@ -140,25 +146,25 @@ public final class LocalMatchClient implements SearchClient {
     }
 
     @Override
-    public void startLogin(String username, String password, ILoginListener listener) {
+    public void startLogin(final String username, final String password, final ILoginListener listener) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void startDeleteEffect(Effect effect, IDeleteEffectListener listener) {
+    public void startDeleteEffect(final Effect effect, final IDeleteEffectListener listener) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void startSubmitEffect(Effect effect, boolean isPublic, ISubmitEffectListener listener) {
+    public void startSubmitEffect(final Effect effect, final boolean isPublic, final ISubmitEffectListener listener) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void startLoadProfile(ILoadProfileListener listener) {
+    public void startLoadProfile(final ILoadProfileListener listener) {
         // TODO Auto-generated method stub
 
     }

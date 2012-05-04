@@ -40,8 +40,9 @@ public class GitRepositorySettingPreferencePage extends PreferencePage implement
         setPreferenceStore(SnipMatchPlugin.getDefault().getPreferenceStore());
     }
 
-    protected Control createContents(Composite parent) {
-        Composite storeSettingGroup = new Composite(parent, SWT.LEFT);
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Composite storeSettingGroup = new Composite(parent, SWT.LEFT);
         storeSettingGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         storeSettingGroup.setLayout(new GridLayout());
 
@@ -61,7 +62,8 @@ public class GitRepositorySettingPreferencePage extends PreferencePage implement
         updateIndexButton.setText(" Update index ");
 
         updateIndexButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent evt) {
+            @Override
+            public void widgetSelected(final SelectionEvent evt) {
                 performOk();
                 SnipMatchPlugin.getDefault().getSearchEngine().updateIndex();
             }
@@ -70,23 +72,27 @@ public class GitRepositorySettingPreferencePage extends PreferencePage implement
         return storeSettingGroup;
     }
 
+    @Override
     public void dispose() {
         super.dispose();
     }
 
+    @Override
     protected void performDefaults() {
         this.snippetsDir.loadDefault();
         this.snippetsIndexFile.loadDefault();
         super.performDefaults();
     }
 
+    @Override
     public boolean performOk() {
         this.snippetsDir.store();
         this.snippetsIndexFile.store();
         return true;
     }
 
-    public void init(IWorkbench workbench) {
+    @Override
+    public void init(final IWorkbench workbench) {
     }
 
 }

@@ -29,12 +29,13 @@ public class LocalSearchThread extends Thread {
     protected LocalMatchClient client;
     protected boolean done;
 
-    private int waitTime = 450;
-    private MatchEnvironment env;
-    private String query;
-    private ISearchListener listener;
+    private final int waitTime = 450;
+    private final MatchEnvironment env;
+    private final String query;
+    private final ISearchListener listener;
 
-    public LocalSearchThread(LocalMatchClient client, MatchEnvironment env, String query, ISearchListener listener) {
+    public LocalSearchThread(final LocalMatchClient client, final MatchEnvironment env, final String query,
+            final ISearchListener listener) {
 
         this.client = client;
         this.env = env;
@@ -45,16 +46,16 @@ public class LocalSearchThread extends Thread {
 
     @Override
     public void run() {
-        SnipMatchSearchEngine searchEngine = SnipMatchPlugin.getDefault().getSearchEngine();
+        final SnipMatchSearchEngine searchEngine = SnipMatchPlugin.getDefault().getSearchEngine();
 
-        String snippetsDir = SnipMatchPlugin.getDefault().getPreferenceStore()
+        final String snippetsDir = SnipMatchPlugin.getDefault().getPreferenceStore()
                 .getString(PreferenceConstants.SNIPPETS_STORE_DIR);
-        String indexDir = SnipMatchPlugin.getDefault().getPreferenceStore()
+        final String indexDir = SnipMatchPlugin.getDefault().getPreferenceStore()
                 .getString(PreferenceConstants.SNIPPETS_INDEX_FILE);
         // Everything is prepared, just wait for final query string
         try {
             sleep(waitTime);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             listener.searchFailed("Thread exception");
             done = true;
@@ -64,25 +65,28 @@ public class LocalSearchThread extends Thread {
             // Not initialed, initial it first
             try {
                 searchEngine.initialize(snippetsDir, indexDir);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 done = true;
                 return;
             }
         }
-        if (done)
+        if (done) {
             return;
+        }
 
-        List<MatchNode> resultList = searchEngine.search(query);
-        if (done)
+        final List<MatchNode> resultList = searchEngine.search(query);
+        if (done) {
             return;
+        }
 
-        if (resultList == null)
+        if (resultList == null) {
             listener.searchFailed("No snippets match for " + query);
-        else {
-            for (MatchNode match : resultList) {
-                if (match != null)
+        } else {
+            for (final MatchNode match : resultList) {
+                if (match != null) {
                     listener.matchFound(match);
+                }
             }
             listener.searchSucceeded();
             done = true;
@@ -95,8 +99,9 @@ public class LocalSearchThread extends Thread {
     }
 
     protected InputStream search() {
-        if (done)
+        if (done) {
             return null;
+        }
 
         return null;
     }

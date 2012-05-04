@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*/
+ */
 
 package org.eclipse.recommenders.snipmatch.core;
 
@@ -13,42 +13,46 @@ package org.eclipse.recommenders.snipmatch.core;
  */
 public class ArgumentMatchNode extends MatchNode {
 
-	private String arg;
-	private EffectParameter param;
-	
-	public ArgumentMatchNode(String arg, EffectParameter param) {
-		
-		this.arg = arg;
-		this.param = param;
-	}
-	
-	public MatchNode clone() {
+    private String arg;
+    private final EffectParameter param;
 
-		ArgumentMatchNode clone = new ArgumentMatchNode(arg, param);
-		clone.setMatchType(matchType);
-		return clone;
-	}
+    public ArgumentMatchNode(final String arg, final EffectParameter param) {
 
-	public String getArgument() {
+        this.arg = arg;
+        this.param = param;
+    }
 
-		return arg;
-	}
-	
-	public void setArgument(String arg) {
-		
-		this.arg = arg;
-	}
+    @Override
+    public MatchNode clone() {
 
-	public EffectParameter getParameter() {
+        final ArgumentMatchNode clone = new ArgumentMatchNode(arg, param);
+        clone.setMatchType(matchType);
+        return clone;
+    }
 
-		return param;
-	}
-	
-	public boolean equals(Object other) {
+    public String getArgument() {
 
-		if (!(other instanceof ArgumentMatchNode)) return false;
-		ArgumentMatchNode otherArgNode = (ArgumentMatchNode) other;
+        return arg;
+    }
 
-		return param.equals(otherArgNode.param) && arg.equals(otherArgNode.arg);
-	}
+    public void setArgument(final String arg) {
+
+        this.arg = arg;
+    }
+
+    public EffectParameter getParameter() {
+
+        return param;
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+
+        if (!(other instanceof ArgumentMatchNode)) {
+            return false;
+        }
+        final ArgumentMatchNode otherArgNode = (ArgumentMatchNode) other;
+
+        return param.equals(otherArgNode.param) && arg.equals(otherArgNode.arg);
+    }
 }

@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*/
+ */
 
 package org.eclipse.recommenders.snipmatch.core;
 
@@ -13,50 +13,54 @@ package org.eclipse.recommenders.snipmatch.core;
  */
 public class EffectParameter {
 
-	private String name = "";
-	private String majorType = "";
-	private String minorType = "";
-	
-	public String getName() {
+    private String name = "";
+    private String majorType = "";
+    private String minorType = "";
 
-		return name;
-	}
+    public String getName() {
 
-	public void setName(String name) {
+        return name;
+    }
 
-		this.name = name;
-	}
+    public void setName(final String name) {
 
-	public String getMajorType() {
-		
-		return majorType;
-	}
+        this.name = name;
+    }
 
-	public void setMajorType(String majorType) {
-		
-		this.majorType = majorType;
-	}
+    public String getMajorType() {
 
-	public String getMinorType() {
-		
-		return minorType;
-	}
+        return majorType;
+    }
 
-	public void setMinorType(String minorType) {
+    public void setMajorType(final String majorType) {
 
-		this.minorType = minorType;
-	}
+        this.majorType = majorType;
+    }
 
-	public String getFullType() {
-		
-		if (!minorType.isEmpty()) return majorType + ":" + minorType;
-		else return majorType;
-	}
-	
-	public boolean equals(Object other) {
-		
-		EffectParameter otherParam = (EffectParameter)other;
-		return name.equals(otherParam.name) && majorType.equals(otherParam.majorType) &&
-				minorType.equals(otherParam.minorType);
-	}
+    public String getMinorType() {
+
+        return minorType;
+    }
+
+    public void setMinorType(final String minorType) {
+
+        this.minorType = minorType;
+    }
+
+    public String getFullType() {
+
+        if (!minorType.isEmpty()) {
+            return majorType + ":" + minorType;
+        } else {
+            return majorType;
+        }
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+
+        final EffectParameter otherParam = (EffectParameter) other;
+        return name.equals(otherParam.name) && majorType.equals(otherParam.majorType)
+                && minorType.equals(otherParam.minorType);
+    }
 }

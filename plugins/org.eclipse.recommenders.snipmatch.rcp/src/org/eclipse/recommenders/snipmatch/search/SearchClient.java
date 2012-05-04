@@ -12,42 +12,42 @@ import org.eclipse.recommenders.snipmatch.web.ISubmitEffectListener;
 
 public interface SearchClient {
 
-	public void startSearch(String query, MatchEnvironment env, ISearchListener listener);
+    public void startSearch(String query, MatchEnvironment env, ISearchListener listener);
 
-	public void cancelWork();
+    public void cancelWork();
 
-	public boolean isWorking();
-	
-	public boolean isLoggedIn();
-	
-	public void logout();
-	
-	public String getUsername();
-	
-	public String getPassword();
-	
-	public String getName();
-	
-	public String getVersion();
-	
-	public void startProcessing();
-	
-	public void stopProcessing();
-	
-	public void setServerProcessingTime(float serverProcessingTime);
-	
-	public float getServerProcessingTime();
-	
-	public float getProcessingTime();
+    public boolean isWorking();
 
-	public void startSendFeedback(String query, MatchNode result, String comment, int rating, boolean flag,
-			boolean isLog, boolean isStartup, long clientId, boolean used, ISendFeedbackListener listener);
+    public boolean isLoggedIn();
 
-	public void startLogin(String username, String password, ILoginListener listener);
+    public void logout();
 
-	public void startDeleteEffect(Effect effect, IDeleteEffectListener listener);
+    public String getUsername();
 
-	public void startSubmitEffect(Effect effect, boolean isPublic, ISubmitEffectListener listener);
-	
-	public void startLoadProfile(ILoadProfileListener listener);
+    public String getPassword();
+
+    public String getName();
+
+    public String getVersion();
+
+    public void startProcessing();
+
+    public void stopProcessing();
+
+    public void setServerProcessingTime(float serverProcessingTime);
+
+    public float getServerProcessingTime();
+
+    public float getProcessingTime();
+
+    public void startSendFeedback(String query, MatchNode result, String comment, int rating, boolean flag,
+            boolean isLog, boolean isStartup, long clientId, boolean used, ISendFeedbackListener listener);
+
+    public void startLogin(String username, String password, ILoginListener listener);
+
+    public void startDeleteEffect(Effect effect, IDeleteEffectListener listener);
+
+    public void startSubmitEffect(Effect effect, boolean isPublic, ISubmitEffectListener listener);
+
+    public void startLoadProfile(ILoadProfileListener listener);
 }

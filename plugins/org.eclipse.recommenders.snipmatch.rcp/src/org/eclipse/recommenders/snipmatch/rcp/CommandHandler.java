@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*/
+ */
 
 package org.eclipse.recommenders.snipmatch.rcp;
 
@@ -17,32 +17,28 @@ import org.eclipse.core.commands.ExecutionException;
  */
 public class CommandHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
 
-		String id = event.getCommand().getId();
+        final String id = event.getCommand().getId();
 
-		if (id.equals("org.eclipse.snipmatch.commands.login")) {
-			
-			SnipMatchPlugin.getDefault().showLoginBox(null, null);
-		}
-		else if (id.equals("org.eclipse.snipmatch.commands.logout")) {
-			
-			SnipMatchPlugin.getDefault().logout();
-		}
-		else if (id.equals("org.eclipse.snipmatch.commands.search")) {
+        if (id.equals("org.eclipse.snipmatch.commands.login")) {
 
-			SnipMatchPlugin.getDefault().showSearchBox("javasnippet");
-		}
-		else if (id.equals("org.eclipse.snipmatch.commands.submit")) {
+            SnipMatchPlugin.getDefault().showLoginBox(null, null);
+        } else if (id.equals("org.eclipse.snipmatch.commands.logout")) {
 
-			SnipMatchPlugin.getDefault().showSubmitBox();
-		}
-		else if (id.equals("org.eclipse.snipmatch.commands.profile")) {
+            SnipMatchPlugin.getDefault().logout();
+        } else if (id.equals("org.eclipse.snipmatch.commands.search")) {
 
-			SnipMatchPlugin.getDefault().showProfileBox();
-		}
+            SnipMatchPlugin.getDefault().showSearchBox("javasnippet");
+        } else if (id.equals("org.eclipse.snipmatch.commands.submit")) {
 
-		return null;
-	}
+            SnipMatchPlugin.getDefault().showSubmitBox();
+        } else if (id.equals("org.eclipse.snipmatch.commands.profile")) {
+
+            SnipMatchPlugin.getDefault().showProfileBox();
+        }
+
+        return null;
+    }
 }

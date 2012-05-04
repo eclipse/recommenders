@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*/
+ */
 
 package org.eclipse.recommenders.snipmatch.web;
 
@@ -18,57 +18,61 @@ import org.apache.commons.httpclient.methods.PostMethod;
  */
 public abstract class PostThread extends Thread {
 
-	private PostMethod post;
+    private final PostMethod post;
 
-	protected MatchClient client;
-	protected boolean done;
-	
-	public PostThread(MatchClient client, String url) {
+    protected MatchClient client;
+    protected boolean done;
 
-		this.client = client;
-		post = new PostMethod(url);
-		done = false;
-	}
-	
-	public boolean isDone() {
-		
-		return done;
-	}
-	
-	public void addParameter(String name, String value) {
-		
-		post.addParameter(name, value);
-	}
+    public PostThread(final MatchClient client, final String url) {
 
-	protected InputStream post() {
-		
-		HttpClient http = new HttpClient();
-		http.getParams().setConnectionManagerTimeout(10000);
+        this.client = client;
+        post = new PostMethod(url);
+        done = false;
+    }
 
-		if (done) return null;
-		
-		try {
-			if (http.executeMethod(post) == -1) return null;
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+    public boolean isDone() {
 
-		if (done) return null;
+        return done;
+    }
 
-		try {
-			//System.out.println(post.getResponseBodyAsString());
-			return post.getResponseBodyAsStream();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public void cancel() {
-		
-		done = true;
-	}
+    public void addParameter(final String name, final String value) {
+
+        post.addParameter(name, value);
+    }
+
+    protected InputStream post() {
+
+        final HttpClient http = new HttpClient();
+        http.getParams().setConnectionManagerTimeout(10000);
+
+        if (done) {
+            return null;
+        }
+
+        try {
+            if (http.executeMethod(post) == -1) {
+                return null;
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        if (done) {
+            return null;
+        }
+
+        try {
+            // System.out.println(post.getResponseBodyAsString());
+            return post.getResponseBodyAsStream();
+        } catch (final Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void cancel() {
+
+        done = true;
+    }
 }

@@ -23,20 +23,21 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
     /*
      * (non-Javadoc)
-     * 
      * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
      */
+    @Override
     public void initializeDefaultPreferences() {
-        IPreferenceStore store = SnipMatchPlugin.getDefault().getPreferenceStore();
+        final IPreferenceStore store = SnipMatchPlugin.getDefault().getPreferenceStore();
         String defaultPath = System.getProperty("user.home");
-        File snipmatchDefaultPath = new File(defaultPath, "/.eclipse/recommenders/snippets/");
+        final File snipmatchDefaultPath = new File(defaultPath, "/.eclipse/recommenders/snippets/");
         if (!snipmatchDefaultPath.exists() || !snipmatchDefaultPath.isDirectory()) {
-            boolean success = snipmatchDefaultPath.mkdirs();
+            final boolean success = snipmatchDefaultPath.mkdirs();
             if (success) {
                 defaultPath = snipmatchDefaultPath.getAbsolutePath();
             }
-        } else
+        } else {
             defaultPath = snipmatchDefaultPath.getAbsolutePath();
+        }
 
         store.setDefault(PreferenceConstants.SEARCH_MODEL, PreferenceConstants.SEARCH_MODEL_LOCAL);
 

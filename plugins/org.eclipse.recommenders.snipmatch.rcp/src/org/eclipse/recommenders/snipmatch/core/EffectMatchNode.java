@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*/
+ */
 
 package org.eclipse.recommenders.snipmatch.core;
 
@@ -13,143 +13,163 @@ package org.eclipse.recommenders.snipmatch.core;
  */
 public class EffectMatchNode extends MatchNode {
 
-	private Effect effect;
-	private String pattern;
-	private MatchNode[] children;
-	private ArgumentMatchNode ghostChild;
-	
-	public EffectMatchNode(Effect effect, String pattern, MatchNode[] children) {
+    private final Effect effect;
+    private final String pattern;
+    private final MatchNode[] children;
+    private final ArgumentMatchNode ghostChild;
 
-		this.effect = effect;
-		this.pattern = pattern;
-		this.children = children;
-		
-		for (MatchNode child : children) {
-			child.parent = this;
-		}
-		
-		ghostChild = new ArgumentMatchNode(null, null);
-		ghostChild.parent = this;
-	}
-	
-	public MatchNode clone() {
+    public EffectMatchNode(final Effect effect, final String pattern, final MatchNode[] children) {
 
-		MatchNode[] childClones = new MatchNode[children.length];
-		
-		for (int i = 0; i < children.length; i++) {
-			childClones[i] = children[i].clone();
-		}
-		
-		EffectMatchNode clone = new EffectMatchNode(effect, pattern, childClones);
+        this.effect = effect;
+        this.pattern = pattern;
+        this.children = children;
 
-		clone.setMatchType(matchType);
-		return clone;
-	}
+        for (final MatchNode child : children) {
+            child.parent = this;
+        }
 
-	public Effect getEffect() {
-		
-		return effect;
-	}
+        ghostChild = new ArgumentMatchNode(null, null);
+        ghostChild.parent = this;
+    }
 
-	/**
-	 * Gets the pattern of the effect that was matched against.
-	 * @return
-	 */
-	public String getPattern() {
-		
-		return pattern;
-	}
-	
-	public MatchNode getChild(int index) {
-		
-		return children[index];
-	}
-	
-	public MatchNode getChild(String name) {
-		
-		for (int i = 0; i < effect.numParameters(); i++) {
-			
-			if (effect.getParameter(i).getName().equals(name)) return children[i];
-		}
-		
-		return null;
-	}
+    @Override
+    public MatchNode clone() {
 
-	public MatchNode[] getChildren() {
-		
-		return children;
-	}
-	
-	public int numChildren() {
-		
-		return children.length;
-	}
-	
-	public ArgumentMatchNode getGhostChild() {
-		
-		return ghostChild;
-	}
-	
-	/**
-	 * Gets whether or not this effect node is complete (all arguments are non-empty).
-	 * @return
-	 */
-	public boolean isComplete() {
-		
-		for (MatchNode child : children) {
-			
-			if (child instanceof ArgumentMatchNode) {
+        final MatchNode[] childClones = new MatchNode[children.length];
 
-				ArgumentMatchNode argChild = (ArgumentMatchNode) child;
-				if (argChild.getArgument() == null || argChild.getArgument().isEmpty()) return false;
-			}
-			else {
-				
-				EffectMatchNode effectChild = (EffectMatchNode) child;
-				if (!effectChild.isComplete()) return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Gets whether or not this effect node is empty (all arguments are empty).
-	 * @return
-	 */
-	public boolean isEmpty() {
-		
-		for (MatchNode child : children) {
-			
-			if (child instanceof ArgumentMatchNode) {
+        for (int i = 0; i < children.length; i++) {
+            childClones[i] = children[i].clone();
+        }
 
-				ArgumentMatchNode argChild = (ArgumentMatchNode) child;
-				if (argChild.getArgument() != null &&
-						!argChild.getArgument().isEmpty()) return false;
-			}
-			else {
-				
-				EffectMatchNode effectChild = (EffectMatchNode) child;
-				if (!effectChild.isEmpty()) return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	public boolean equals(Object other) {
+        final EffectMatchNode clone = new EffectMatchNode(effect, pattern, childClones);
 
-		if (!(other instanceof EffectMatchNode)) return false;
-		EffectMatchNode otherEffectNode = (EffectMatchNode) other;
-		
-		if (effect != otherEffectNode.getEffect()) return false;
+        clone.setMatchType(matchType);
+        return clone;
+    }
 
-		if (otherEffectNode.numChildren() != numChildren()) return false;
-		
-		for (int i = 0; i < numChildren(); i++) {
-			if (!getChild(i).equals(otherEffectNode.getChild(i))) return false;
-		}
-		
-		return true;
-	}
+    public Effect getEffect() {
+
+        return effect;
+    }
+
+    /**
+     * Gets the pattern of the effect that was matched against.
+     * 
+     * @return
+     */
+    public String getPattern() {
+
+        return pattern;
+    }
+
+    public MatchNode getChild(final int index) {
+
+        return children[index];
+    }
+
+    public MatchNode getChild(final String name) {
+
+        for (int i = 0; i < effect.numParameters(); i++) {
+
+            if (effect.getParameter(i).getName().equals(name)) {
+                return children[i];
+            }
+        }
+
+        return null;
+    }
+
+    public MatchNode[] getChildren() {
+
+        return children;
+    }
+
+    public int numChildren() {
+
+        return children.length;
+    }
+
+    public ArgumentMatchNode getGhostChild() {
+
+        return ghostChild;
+    }
+
+    /**
+     * Gets whether or not this effect node is complete (all arguments are non-empty).
+     * 
+     * @return
+     */
+    public boolean isComplete() {
+
+        for (final MatchNode child : children) {
+
+            if (child instanceof ArgumentMatchNode) {
+
+                final ArgumentMatchNode argChild = (ArgumentMatchNode) child;
+                if ((argChild.getArgument() == null) || argChild.getArgument().isEmpty()) {
+                    return false;
+                }
+            } else {
+
+                final EffectMatchNode effectChild = (EffectMatchNode) child;
+                if (!effectChild.isComplete()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets whether or not this effect node is empty (all arguments are empty).
+     * 
+     * @return
+     */
+    public boolean isEmpty() {
+
+        for (final MatchNode child : children) {
+
+            if (child instanceof ArgumentMatchNode) {
+
+                final ArgumentMatchNode argChild = (ArgumentMatchNode) child;
+                if ((argChild.getArgument() != null) && !argChild.getArgument().isEmpty()) {
+                    return false;
+                }
+            } else {
+
+                final EffectMatchNode effectChild = (EffectMatchNode) child;
+                if (!effectChild.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+
+        if (!(other instanceof EffectMatchNode)) {
+            return false;
+        }
+        final EffectMatchNode otherEffectNode = (EffectMatchNode) other;
+
+        if (effect != otherEffectNode.getEffect()) {
+            return false;
+        }
+
+        if (otherEffectNode.numChildren() != numChildren()) {
+            return false;
+        }
+
+        for (int i = 0; i < numChildren(); i++) {
+            if (!getChild(i).equals(otherEffectNode.getChild(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

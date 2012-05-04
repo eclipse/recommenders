@@ -27,7 +27,6 @@ import org.eclipse.recommenders.snipmatch.search.SearchClient;
 import org.eclipse.recommenders.snipmatch.search.SnipMatchSearchEngine;
 import org.eclipse.recommenders.snipmatch.web.ILoginListener;
 import org.eclipse.recommenders.snipmatch.web.ISendFeedbackListener;
-import org.eclipse.recommenders.snipmatch.web.RemoteMatchClient;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IStartup;
@@ -72,7 +71,7 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
      */
     private void reportIn() {
 
-        ISendFeedbackListener listener = new ISendFeedbackListener() {
+        final ISendFeedbackListener listener = new ISendFeedbackListener() {
             @Override
             public void sendFeedbackSucceeded() {
             }
@@ -82,23 +81,25 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
             }
         };
 
-        if (!workClient.isWorking())
+        if (!workClient.isWorking()) {
             workClient.startSendFeedback("", null, null, 1, false, false, true, SnipMatchPlugin.getClientId(), false,
                     listener);
+        }
     }
 
-    public void initSearchEngine(String snippetsDir, String indexDir) {
+    public void initSearchEngine(final String snippetsDir, final String indexDir) {
         if (!searchEngine.isInitialized(snippetsDir, indexDir)) {
             try {
                 searchEngine.initialize(snippetsDir, indexDir);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 return;
             }
         }
     }
 
-    public void start(BundleContext context) throws Exception {
+    @Override
+    public void start(final BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
 
@@ -113,22 +114,24 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
         profileBox = new ProfileBox();
         initSearchClient();
 
-        String snippetsDir = SnipMatchPlugin.getDefault().getPreferenceStore()
+        final String snippetsDir = SnipMatchPlugin.getDefault().getPreferenceStore()
                 .getString(PreferenceConstants.SNIPPETS_STORE_DIR);
-        String indexDir = SnipMatchPlugin.getDefault().getPreferenceStore()
+        final String indexDir = SnipMatchPlugin.getDefault().getPreferenceStore()
                 .getString(PreferenceConstants.SNIPPETS_INDEX_FILE);
         initSearchEngine(snippetsDir, indexDir);
     }
 
     public void initSearchClient() {
-        String searchClient = SnipMatchPlugin.getDefault().getPreferenceStore()
+        final String searchClient = SnipMatchPlugin.getDefault().getPreferenceStore()
                 .getString(PreferenceConstants.SEARCH_MODEL);
 
         if (searchClient.equals(PreferenceConstants.SEARCH_MODEL_LOCAL)) {
-            if (workClient instanceof LocalMatchClient)
+            if (workClient instanceof LocalMatchClient) {
                 return;
-            if (workClient instanceof RemoteMatchClient)
+            }
+            if (workClient instanceof RemoteMatchClient) {
                 workClient.cancelWork();
+            }
 
             workClient = localClient;
             loginBox.setSearchClient(localClient);
@@ -136,8 +139,9 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
             submitBox.setSearchClient(localClient);
             profileBox.setSearchClient(localClient);
         } else {
-            if (workClient instanceof RemoteMatchClient)
+            if (workClient instanceof RemoteMatchClient) {
                 return;
+            }
 
             workClient = remoteClient;
             loginBox.setSearchClient(remoteClient);
@@ -150,8 +154,9 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
 
     public static boolean isLoggedIn() {
 
-        if (plugin == null || plugin.workClient == null)
+        if ((plugin == null) || (plugin.workClient == null)) {
             return false;
+        }
         return plugin.workClient.isLoggedIn();
     }
 
@@ -162,8 +167,8 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
      */
     public static long getClientId() {
 
-        IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
-        long id = prefs.getLong("client.id", generateId());
+        final IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
+        final long id = prefs.getLong("client.id", generateId());
         prefs.putLong("client.id", id);
         return id;
     }
@@ -175,24 +180,26 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
      */
     private static long generateId() {
 
-        Random rand = new Random();
+        final Random rand = new Random();
         long id = rand.nextLong();
-        if (id < 0)
+        if (id < 0) {
             id *= -1;
+        }
         return id;
     }
 
-    public void stop(BundleContext context) throws Exception {
+    @Override
+    public void stop(final BundleContext context) throws Exception {
 
         plugin = null;
         super.stop(context);
     }
 
-    public void showLoginBox(Runnable onSuccess, Runnable onFail) {
+    public void showLoginBox(final Runnable onSuccess, final Runnable onFail) {
 
-        IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
-        String username = prefs.get("login.username", "guest");
-        String password = prefs.get("login.password", "guest");
+        final IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
+        final String username = prefs.get("login.username", "guest");
+        final String password = prefs.get("login.password", "guest");
 
         loginBox.show(username, password, onSuccess, onFail);
     }
@@ -206,8 +213,9 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
             @Override
             public void run() {
 
-                MessageBox popup = new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                        SWT.ICON_INFORMATION | SWT.OK | SWT.APPLICATION_MODAL);
+                final MessageBox popup = new MessageBox(
+                        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.ICON_INFORMATION | SWT.OK
+                                | SWT.APPLICATION_MODAL);
 
                 popup.setText("SnipMatch");
                 popup.setMessage("Signed out.");
@@ -228,7 +236,7 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
 
     private void showRegisterDialog() {
 
-        MessageBox popup = new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+        final MessageBox popup = new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                 SWT.ICON_INFORMATION | SWT.YES | SWT.NO | SWT.APPLICATION_MODAL);
 
         popup.setText("SnipMatch");
@@ -239,7 +247,7 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
             try {
                 PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser()
                         .openURL(new URL(SnipMatchPlugin.REGISTER_URL));
-            } catch (Exception e) {
+            } catch (final Exception e) {
             }
         }
     }
@@ -257,9 +265,9 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
             submitBox.show(effect);
         } else {
 
-            IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
-            String username = prefs.get("login.username", "guest");
-            String password = prefs.get("login.password", "guest");
+            final IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
+            final String username = prefs.get("login.username", "guest");
+            final String password = prefs.get("login.password", "guest");
 
             workClient.startLogin(username, password, new ILoginListener() {
 
@@ -282,7 +290,7 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
                 }
 
                 @Override
-                public void loginFailed(String error) {
+                public void loginFailed(final String error) {
 
                     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
@@ -311,9 +319,9 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
             profileBox.populate();
         } else {
 
-            IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
-            String username = prefs.get("login.username", "guest");
-            String password = prefs.get("login.password", "guest");
+            final IEclipsePreferences prefs = new InstanceScope().getNode(PLUGIN_ID);
+            final String username = prefs.get("login.username", "guest");
+            final String password = prefs.get("login.password", "guest");
 
             profileBox.show();
 
@@ -340,7 +348,7 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
                 }
 
                 @Override
-                public void loginFailed(String error) {
+                public void loginFailed(final String error) {
 
                     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
@@ -374,10 +382,11 @@ public class SnipMatchPlugin extends AbstractUIPlugin implements IStartup {
         new CheckUpdateThread(workClient).start();
     }
 
-    protected void initializeImageRegistry(ImageRegistry imageRegistry) {
+    @Override
+    protected void initializeImageRegistry(final ImageRegistry imageRegistry) {
 
         super.initializeImageRegistry(imageRegistry);
-        Bundle bundle = Platform.getBundle(PLUGIN_ID);
+        final Bundle bundle = Platform.getBundle(PLUGIN_ID);
 
         ImageDescriptor imgDesc = ImageDescriptor.createFromURL(FileLocator.find(bundle,
                 new Path("images/warning.gif"), null));

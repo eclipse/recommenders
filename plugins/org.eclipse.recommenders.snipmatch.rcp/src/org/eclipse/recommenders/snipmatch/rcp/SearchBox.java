@@ -79,9 +79,9 @@ public class SearchBox extends ClientSwitcher {
     }
 
     public void show(final String envName) {
-        IThemeManager themeManager = PlatformUI.getWorkbench().getThemeManager();
-        ITheme currentTheme = themeManager.getCurrentTheme();
-        ColorRegistry colorRegistry = currentTheme.getColorRegistry();
+        final IThemeManager themeManager = PlatformUI.getWorkbench().getThemeManager();
+        final ITheme currentTheme = themeManager.getCurrentTheme();
+        final ColorRegistry colorRegistry = currentTheme.getColorRegistry();
         queryBackColor = colorRegistry
                 .get("org.eclipse.recommenders.snipmatch.preferences.colorDefinition.queryBackColor");
         queryDisabledBackColor = colorRegistry
@@ -92,7 +92,7 @@ public class SearchBox extends ClientSwitcher {
         matchSelectOverviewBackColor = colorRegistry
                 .get("org.eclipse.recommenders.snipmatch.preferences.colorDefinition.selectionOverviewBackColor");
 
-        FontRegistry fontRegistry = currentTheme.getFontRegistry();
+        final FontRegistry fontRegistry = currentTheme.getFontRegistry();
         searchFont = fontRegistry.get("org.eclipse.recommenders.snipmatch.preferences.fontDefinition");
 
         if (envName.equals("javasnippet")) {
@@ -101,19 +101,20 @@ public class SearchBox extends ClientSwitcher {
 
             if (((JavaSnippetMatchEnvironment) env).getProject() == null) {
 
-                MessageBox popup = new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                        SWT.ICON_ERROR | SWT.OK | SWT.APPLICATION_MODAL);
+                final MessageBox popup = new MessageBox(
+                        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.ICON_ERROR | SWT.OK
+                                | SWT.APPLICATION_MODAL);
 
                 popup.setText("SnipMatch");
-                popup.setMessage("Searching from independent source files is not supported at this time. Please " +
-                		"make sure the source file is part of an open Java project.");
+                popup.setMessage("Searching from independent source files is not supported at this time. Please "
+                        + "make sure the source file is part of an open Java project.");
                 popup.open();
 
                 return;
             }
         }
 
-        if (shell == null || shell.isDisposed()) {
+        if ((shell == null) || shell.isDisposed()) {
 
             shell = new Shell(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NO_TRIM
                     | SWT.NO_FOCUS | SWT.NO_BACKGROUND);
@@ -131,7 +132,7 @@ public class SearchBox extends ClientSwitcher {
                 queryText.addModifyListener(new ModifyListener() {
 
                     @Override
-                    public void modifyText(ModifyEvent e) {
+                    public void modifyText(final ModifyEvent e) {
                         handleTyping();
                     }
                 });
@@ -139,11 +140,11 @@ public class SearchBox extends ClientSwitcher {
                 queryText.addKeyListener(new KeyListener() {
 
                     @Override
-                    public void keyReleased(KeyEvent e) {
+                    public void keyReleased(final KeyEvent e) {
                     }
 
                     @Override
-                    public void keyPressed(KeyEvent e) {
+                    public void keyPressed(final KeyEvent e) {
 
                         switch (e.keyCode) {
 
@@ -152,15 +153,15 @@ public class SearchBox extends ClientSwitcher {
                             // query to the next argument.
                             if (selection != -1) {
 
-                                EffectMatchNode match = (EffectMatchNode) matches.get(selection);
+                                final EffectMatchNode match = (EffectMatchNode) matches.get(selection);
 
-                                ArrayList<int[]> argRanges = new ArrayList<int[]>();
-                                ArrayList<int[]> blankArgRanges = new ArrayList<int[]>();
+                                final ArrayList<int[]> argRanges = new ArrayList<int[]>();
+                                final ArrayList<int[]> blankArgRanges = new ArrayList<int[]>();
 
                                 String matchString = "";
                                 try {
                                     matchString = buildMatchString(match, argRanges, blankArgRanges, false, 0);
-                                } catch (Exception matche) {
+                                } catch (final Exception matche) {
                                     matche.printStackTrace();
                                 }
 
@@ -175,7 +176,7 @@ public class SearchBox extends ClientSwitcher {
                                 int nextStop = queryText.getCharCount();
                                 boolean changed = false;
 
-                                for (int[] argRange : argRanges) {
+                                for (final int[] argRange : argRanges) {
 
                                     if (argRange[0] > nextStop) {
                                         nextStop = argRange[0];
@@ -183,12 +184,13 @@ public class SearchBox extends ClientSwitcher {
                                         break;
                                     }
 
-                                    if (argRange[1] == 0)
+                                    if (argRange[1] == 0) {
                                         break;
+                                    }
                                 }
 
-                                if (match.isComplete() && nextStop == queryText.getCharCount()
-                                        && nextStop < matchString.length()) {
+                                if (match.isComplete() && (nextStop == queryText.getCharCount())
+                                        && (nextStop < matchString.length())) {
                                     nextStop = matchString.length();
                                     changed = true;
                                 }
@@ -218,24 +220,25 @@ public class SearchBox extends ClientSwitcher {
         shell.addDisposeListener(new DisposeListener() {
 
             @Override
-            public void widgetDisposed(DisposeEvent evt) {
+            public void widgetDisposed(final DisposeEvent evt) {
                 cancelThreads();
                 env.reset();
                 /*
                  * If the search box was closed by confirming a selection rather than canceling it, then the selected
                  * result should be re-applied fully (not just the preview).
                  */
-                if (selectionConfirmed && selection != -1) {
+                if (selectionConfirmed && (selection != -1)) {
 
                     try {
                         ((JavaSnippetMatchEnvironment) env).applyMatch(matches.get(selection), true, getTotalHeight());
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         e.printStackTrace();
                     }
                 }
 
-                if (selection != -1)
+                if (selection != -1) {
                     sendUsageData();
+                }
             }
         });
 
@@ -244,7 +247,7 @@ public class SearchBox extends ClientSwitcher {
         if (env instanceof JavaSnippetMatchEnvironment) {
             // Set the initial position of the search box to be right below the
             // cursor.
-            Point anchor = ((JavaSnippetMatchEnvironment) env).getSearchBoxAnchor(getTotalHeight());
+            final Point anchor = ((JavaSnippetMatchEnvironment) env).getSearchBoxAnchor(getTotalHeight());
             shell.setLocation(anchor.x, anchor.y);
         }
 
@@ -261,7 +264,7 @@ public class SearchBox extends ClientSwitcher {
 
     private void sendUsageData() {
 
-        ISendFeedbackListener listener = new ISendFeedbackListener() {
+        final ISendFeedbackListener listener = new ISendFeedbackListener() {
             @Override
             public void sendFeedbackSucceeded() {
             }
@@ -271,9 +274,10 @@ public class SearchBox extends ClientSwitcher {
             }
         };
 
-        if (!client.isWorking())
+        if (!client.isWorking()) {
             client.startSendFeedback(queryText.getText(), matches.get(selection), null, 1, false, true, false,
                     SnipMatchPlugin.getClientId(), selectionConfirmed, listener);
+        }
     }
 
     /**
@@ -283,8 +287,9 @@ public class SearchBox extends ClientSwitcher {
      */
     private int getTotalHeight() {
         int totalHeight = shell.getSize().y;
-        if (matches != null && matches.size() != 0)
+        if ((matches != null) && (matches.size() != 0)) {
             totalHeight += idealHeight;
+        }
         return totalHeight;
     }
 
@@ -311,8 +316,9 @@ public class SearchBox extends ClientSwitcher {
          * If the query text field is not editable, then it means this was a programmatically invoked status message
          * change.
          */
-        if (!queryText.getEditable())
+        if (!queryText.getEditable()) {
             return;
+        }
         /*
          * If an invalid character was entered, ignore it, fix the query, and ignore the next text change as well,
          * because it will be due to the fix.
@@ -340,8 +346,9 @@ public class SearchBox extends ClientSwitcher {
 
         // Just in case? Don't remember what this was for, but it doesn't
         // hurt...
-        if (query.endsWith(System.getProperty("line.separator")))
+        if (query.endsWith(System.getProperty("line.separator"))) {
             return;
+        }
 
         // Following is remote search work model
         client.startSearch(query, env, new ISearchListener() {
@@ -351,7 +358,7 @@ public class SearchBox extends ClientSwitcher {
                 while (!completeMatchThreads.isEmpty()) {
                     try {
                         Thread.sleep(5);
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                     }
                 }
                 PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
@@ -373,8 +380,9 @@ public class SearchBox extends ClientSwitcher {
                              * If the user already pressed Enter before the search finished, then select and apply the
                              * first result automatically.
                              */
-                            if (selectionConfirmed)
+                            if (selectionConfirmed) {
                                 insertSelectCodeSnip();
+                            }
                         }
                     }
                 });
@@ -388,7 +396,7 @@ public class SearchBox extends ClientSwitcher {
                     @Override
                     public void run() {
 
-                        MessageBox popup = new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+                        final MessageBox popup = new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
                                 .getShell(), SWT.ICON_ERROR | SWT.OK | SWT.APPLICATION_MODAL);
 
                         popup.setText("SnipMatch");
@@ -405,10 +413,10 @@ public class SearchBox extends ClientSwitcher {
 
                 final CompleteMatchThread matchCompleter = new CompleteMatchThread(env, match);
 
-                ICompleteMatchListener listener = new ICompleteMatchListener() {
+                final ICompleteMatchListener listener = new ICompleteMatchListener() {
 
                     @Override
-                    public void completionFound(MatchNode match) {
+                    public void completionFound(final MatchNode match) {
                         addMatch(match);
                     }
 
@@ -437,13 +445,14 @@ public class SearchBox extends ClientSwitcher {
 
         for (int i = 0; i < matches.size(); i++) {
 
-            EffectMatchNode match = (EffectMatchNode) matches.get(place);
+            final EffectMatchNode match = (EffectMatchNode) matches.get(place);
 
             if (match.isEmpty()) {
                 matches.remove(match);
                 matches.add(match);
-            } else
+            } else {
                 place++;
+            }
         }
     }
 
@@ -451,7 +460,7 @@ public class SearchBox extends ClientSwitcher {
 
         client.cancelWork();
 
-        for (CompleteMatchThread completeMatchThread : completeMatchThreads) {
+        for (final CompleteMatchThread completeMatchThread : completeMatchThreads) {
             completeMatchThread.cancel();
         }
 
@@ -463,7 +472,7 @@ public class SearchBox extends ClientSwitcher {
      * 
      * @param match
      */
-    private void addMatch(MatchNode match) {
+    private void addMatch(final MatchNode match) {
 
         // If this is the first result of a search, then clear everything from
         // the previous search.
@@ -473,19 +482,20 @@ public class SearchBox extends ClientSwitcher {
         }
 
         // Prevent duplicates or extras.
-        if (matches.contains(match) || matches.size() >= maxMatches)
+        if (matches.contains(match) || (matches.size() >= maxMatches)) {
             return;
+        }
 
         matches.add(match);
     }
 
-    private Image resultImage = AbstractUIPlugin
-            .imageDescriptorFromPlugin(SnipMatchPlugin.PLUGIN_ID, "images/flag.gif").createImage();
+    private final Image resultImage = AbstractUIPlugin.imageDescriptorFromPlugin(SnipMatchPlugin.PLUGIN_ID,
+            "images/flag.gif").createImage();
 
-    private void resultDisplayTableSelection(Table resultDisplayTable, int type) {
-        if (resultDisplayTable != null && !resultDisplayTable.isDisposed()) {
-            int current = resultDisplayTable.getSelectionIndex();
-            int count = resultDisplayTable.getItemCount();
+    private void resultDisplayTableSelection(final Table resultDisplayTable, final int type) {
+        if ((resultDisplayTable != null) && !resultDisplayTable.isDisposed()) {
+            final int current = resultDisplayTable.getSelectionIndex();
+            final int count = resultDisplayTable.getItemCount();
             switch (type) {
             case 0: {
                 resultDisplayTable.setSelection(0);
@@ -493,13 +503,13 @@ public class SearchBox extends ClientSwitcher {
                 break;
             }
             case -1: {
-                int turn = (count + current - 1) % count;
+                final int turn = ((count + current) - 1) % count;
                 resultDisplayTable.setSelection(turn);
                 resultOverviewDisplay(turn);
                 break;
             }
             case 1: {
-                int turn = (current + 1) % count;
+                final int turn = (current + 1) % count;
                 resultDisplayTable.setSelection(turn);
                 resultOverviewDisplay(turn);
                 break;
@@ -515,11 +525,10 @@ public class SearchBox extends ClientSwitcher {
      * Search result overview display canvas
      * 
      * @param selection
-     * 
      *            TODO: add resize feature for resultoverview shell after mouse click event
      */
-    private void resultOverviewDisplay(int selection) {
-        if (resultOverviewShell == null || resultOverviewShell.isDisposed()) {
+    private void resultOverviewDisplay(final int selection) {
+        if ((resultOverviewShell == null) || resultOverviewShell.isDisposed()) {
             resultOverviewShell = new Shell(shell, SWT.BORDER);
             resultOverviewShell.setBackground(matchSelectOverviewBackColor);
             resultOverviewShell.setSize(idealWidth, idealHeight);
@@ -527,7 +536,7 @@ public class SearchBox extends ClientSwitcher {
             resultOverviewShell.addFocusListener(ignoredListener);
         }
 
-        if (resultOverviewPanel == null || resultOverviewPanel.isDisposed()) {
+        if ((resultOverviewPanel == null) || resultOverviewPanel.isDisposed()) {
             resultOverviewPanel = new StyledText(resultOverviewShell, SWT.WRAP | SWT.BORDER | SWT.H_SCROLL
                     | SWT.V_SCROLL);
             resultOverviewPanel.setEditable(false);
@@ -537,11 +546,11 @@ public class SearchBox extends ClientSwitcher {
             resultOverviewPanel.setAlwaysShowScrollBars(false);
         }
 
-        MatchNode match = matches.get(selection);
+        final MatchNode match = matches.get(selection);
         if (match instanceof EffectMatchNode) {
-            EffectMatchNode node = (EffectMatchNode) match;
-            Point point = resultDisplayShell.getLocation();
-            Object overViewText = ((JavaSnippetMatchEnvironment) env).evaluateMatchNodeOverview(node);
+            final EffectMatchNode node = (EffectMatchNode) match;
+            final Point point = resultDisplayShell.getLocation();
+            final Object overViewText = ((JavaSnippetMatchEnvironment) env).evaluateMatchNodeOverview(node);
             if (overViewText != null) {
                 resultOverviewPanel.setText(overViewText.toString());
             }
@@ -554,10 +563,10 @@ public class SearchBox extends ClientSwitcher {
         queryText.setFocus();
     }
 
-    private KeyListener resultDisplayKeyListener = new KeyListener() {
+    private final KeyListener resultDisplayKeyListener = new KeyListener() {
 
         @Override
-        public void keyPressed(KeyEvent e) {
+        public void keyPressed(final KeyEvent e) {
             if (e.keyCode == SWT.ARROW_UP) {
                 resultDisplayTableSelection(resultDisplayTable, -1);
             }
@@ -568,7 +577,7 @@ public class SearchBox extends ClientSwitcher {
         }
 
         @Override
-        public void keyReleased(KeyEvent e) {
+        public void keyReleased(final KeyEvent e) {
             if (e.keyCode == SWT.CR) {
                 insertSelectCodeSnip();
             }
@@ -576,21 +585,21 @@ public class SearchBox extends ClientSwitcher {
 
     };
 
-    private MouseListener resultDisplayMouseListener = new MouseListener() {
+    private final MouseListener resultDisplayMouseListener = new MouseListener() {
 
         @Override
-        public void mouseDoubleClick(MouseEvent e) {
+        public void mouseDoubleClick(final MouseEvent e) {
             insertSelectCodeSnip();
         }
 
         @Override
-        public void mouseDown(MouseEvent e) {
+        public void mouseDown(final MouseEvent e) {
             // update current selection status
             resultDisplayTableSelection(resultDisplayTable, Integer.MAX_VALUE);
         }
 
         @Override
-        public void mouseUp(MouseEvent e) {
+        public void mouseUp(final MouseEvent e) {
             resultDisplayTableSelection(resultDisplayTable, Integer.MAX_VALUE);
             queryText.setFocus();
         }
@@ -598,11 +607,11 @@ public class SearchBox extends ClientSwitcher {
     };
 
     private void insertSelectCodeSnip() {
-        int selection = resultDisplayTable.getSelectionIndex();
+        final int selection = resultDisplayTable.getSelectionIndex();
         // This signals that the user wishes to insert the
         // currently highlighted result.
         selectionConfirmed = true;
-        MatchNode matchSelection = matches.get(selection);
+        final MatchNode matchSelection = matches.get(selection);
         if (!client.isWorking() && completeMatchThreads.isEmpty()) {
             shell.close();
         }
@@ -610,7 +619,7 @@ public class SearchBox extends ClientSwitcher {
         env.reset();
         try {
             ((JavaSnippetMatchEnvironment) env).applyMatch(matchSelection, true, 10);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
 
@@ -620,18 +629,18 @@ public class SearchBox extends ClientSwitcher {
      * Updates the visual result listing based on the search results.
      */
     private void displayMatches() {
-        if (resultDisplayShell == null || resultDisplayShell.isDisposed()) {
+        if ((resultDisplayShell == null) || resultDisplayShell.isDisposed()) {
             resultDisplayShell = new Shell(shell, SWT.BORDER | SWT.RESIZE);
             resultDisplayShell.setBackground(matchSelectBackColor);
             resultDisplayShell.setSize(idealWidth, idealHeight);
             resultDisplayShell.setLayout(new FillLayout(SWT.VERTICAL));
         }
 
-        if (resultDisplayTable == null || resultDisplayTable.isDisposed()) {
+        if ((resultDisplayTable == null) || resultDisplayTable.isDisposed()) {
             resultDisplayTable = new Table(resultDisplayShell, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
             resultDisplayTable.setBackground(matchSelectBackColor);
             resultDisplayTable.setLinesVisible(false);
-            TableColumn col = new TableColumn(resultDisplayTable, SWT.LEFT);
+            final TableColumn col = new TableColumn(resultDisplayTable, SWT.LEFT);
             col.setText("");
 
         }
@@ -642,19 +651,19 @@ public class SearchBox extends ClientSwitcher {
         try {
             resultDisplayTable.removeAll();
             for (int i = 0; i < matches.size(); i++) {
-                MatchNode match = matches.get(i);
-                ArrayList<int[]> argRanges = new ArrayList<int[]>();
-                ArrayList<int[]> blankArgRanges = new ArrayList<int[]>();
+                final MatchNode match = matches.get(i);
+                final ArrayList<int[]> argRanges = new ArrayList<int[]>();
+                final ArrayList<int[]> blankArgRanges = new ArrayList<int[]>();
                 String dispStr = "";
                 try {
                     dispStr = buildMatchString(match, argRanges, blankArgRanges, true, 0);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     e.printStackTrace();
                     matches.remove(i);
                     i--;
                     continue;
                 }
-                TableItem item = new TableItem(resultDisplayTable, SWT.NONE);
+                final TableItem item = new TableItem(resultDisplayTable, SWT.NONE);
                 item.setText(new String[] { dispStr });
                 item.setImage(resultImage);
             }
@@ -662,7 +671,7 @@ public class SearchBox extends ClientSwitcher {
             resultDisplayTable.getColumn(0).pack();
 
             if (env instanceof JavaSnippetMatchEnvironment) {
-                Point anchor = ((JavaSnippetMatchEnvironment) env).getSearchBoxAnchor(getTotalHeight());
+                final Point anchor = ((JavaSnippetMatchEnvironment) env).getSearchBoxAnchor(getTotalHeight());
                 resultDisplayShell.setLocation(anchor.x, anchor.y + 35);
             }
         } finally {
@@ -672,8 +681,9 @@ public class SearchBox extends ClientSwitcher {
         resultDisplayShell.addFocusListener(ignoredListener);
         resultDisplayShell.open();
         resultDisplayTable.setFocus();
-        if (matches.size() > 0)
+        if (matches.size() > 0) {
             resultDisplayTableSelection(resultDisplayTable, 0);
+        }
     }
 
     /**
@@ -691,44 +701,48 @@ public class SearchBox extends ClientSwitcher {
      *            The current length of the string. Used for recursion.
      * @return A string representation of the match.
      */
-    private String buildMatchString(MatchNode match, ArrayList<int[]> argRanges, ArrayList<int[]> blankArgRanges,
-            boolean showBlanks, int length) throws Exception {
+    private String buildMatchString(final MatchNode match, final ArrayList<int[]> argRanges,
+            final ArrayList<int[]> blankArgRanges, final boolean showBlanks, final int length) throws Exception {
 
         if (match instanceof EffectMatchNode) {
 
-            StringBuilder sb = new StringBuilder();
-            String[] tokens = ((EffectMatchNode) match).getPattern().split("\\s+");
+            final StringBuilder sb = new StringBuilder();
+            final String[] tokens = ((EffectMatchNode) match).getPattern().split("\\s+");
 
-            if (length != 0 && showBlanks)
+            if ((length != 0) && showBlanks) {
                 sb.append("(");
+            }
 
-            for (String token : tokens) {
+            for (final String token : tokens) {
 
                 if (token.startsWith("$")) {
 
-                    MatchNode child = ((EffectMatchNode) match).getChild(token.substring(1));
+                    final MatchNode child = ((EffectMatchNode) match).getChild(token.substring(1));
                     sb.append(buildMatchString(child, argRanges, blankArgRanges, showBlanks, length + sb.length())
                             + " ");
-                } else
+                } else {
                     sb.append(token + " ");
+                }
             }
 
             sb.deleteCharAt(sb.length() - 1);
 
-            if (length != 0 && showBlanks)
+            if ((length != 0) && showBlanks) {
                 sb.append(")");
+            }
 
             return sb.toString();
         } else {
 
-            ArgumentMatchNode argNode = (ArgumentMatchNode) match;
+            final ArgumentMatchNode argNode = (ArgumentMatchNode) match;
 
             String token = argNode.getArgument();
 
             if (token.isEmpty()) {
 
-                if (showBlanks)
+                if (showBlanks) {
                     token = "<" + argNode.getParameter().getName() + ">";
+                }
 
                 blankArgRanges.add(new int[] { length, token.length() });
             }
@@ -742,14 +756,16 @@ public class SearchBox extends ClientSwitcher {
      * Clears the match list, and also the visual listings.
      */
     private void clearMatches() {
-        if (resultDisplayTable != null && !resultDisplayTable.isDisposed())
+        if ((resultDisplayTable != null) && !resultDisplayTable.isDisposed()) {
             resultDisplayTable.removeAll();
-        if (resultOverviewShell != null && !resultOverviewShell.isDisposed()) {
+        }
+        if ((resultOverviewShell != null) && !resultOverviewShell.isDisposed()) {
             resultOverviewShell.close();
         }
 
-        if (buttonBar != null && !buttonBar.isDisposed())
+        if ((buttonBar != null) && !buttonBar.isDisposed()) {
             buttonBar.dispose();
+        }
 
         matches.clear();
         selection = -1;
@@ -758,8 +774,9 @@ public class SearchBox extends ClientSwitcher {
 
     public void hide() {
 
-        if (!shell.isDisposed())
+        if (!shell.isDisposed()) {
             shell.close();
+        }
     }
 
     /**
