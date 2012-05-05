@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Code Recommenders: Tests for Recommender Developer Toolkit (Incubation)
+Bundle-SymbolicName: org.eclipse.recommenders.tests.rdk
+Bundle-Version: 0.0.0.qualifier
+Bundle-Vendor: Eclipse Code Recommenders
+Fragment-Host: org.eclipse.recommenders.rdk
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit4,
+ com.google.guava,
+ org.eclipse.xtext.xbase.lib,
+ org.eclipse.recommenders.tests
+

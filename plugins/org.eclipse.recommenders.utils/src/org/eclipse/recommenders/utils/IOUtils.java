@@ -19,15 +19,22 @@ public class IOUtils {
 
     public static final String LINE_SEPARATOR = SystemUtils.LINE_SEPARATOR;
 
-    public static void closeQuietly(Closeable s) {
+    /**
+     * 
+     * @return returns <code>true</code> if the given closeable could be closed or was <code>null</code> -
+     *         <code>false</code> in the case of an exception.
+     */
+    public static boolean closeQuietly(Closeable s) {
         if (s == null) {
-            return;
+            return true;
         }
         try {
             s.close();
+            return true;
         } catch (IOException e) {
             System.err.printf("Failed to close resource '%s'. Caught exception printed below.\n", s);
             e.printStackTrace();
+            return false;
         }
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
 
-<target name="Code Recommenders: Eclipse 4.2 Development and Build Server Target Platform" sequenceNumber="104">
+<target name="Code Recommenders: Eclipse 4.2 Development and Build Server Target Platform" sequenceNumber="105">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.recommenders.feature.3rd.nonorbit.feature.group" version="0.0.0"/>
