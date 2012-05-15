@@ -47,4 +47,13 @@
             commandId="org.eclipse.recommenders.completion.rcp.chain.commands.TriggerCompletion">
       </handler>
    </extension>
+   <extension
+       point="org.eclipse.ui.preferencePages">
+	<page
+          category="org.eclipse.recommenders.rcp.category.preferences"
+          class="org.eclipse.recommenders.internal.completion.rcp.chain.ChainPreferencePage"
+          id="org.eclipse.recommenders.internal.completion.rcp.chain.ChainPreferencePage"
+          name="Call Chains">
+    </page>
+ </extension>
 </plugin>

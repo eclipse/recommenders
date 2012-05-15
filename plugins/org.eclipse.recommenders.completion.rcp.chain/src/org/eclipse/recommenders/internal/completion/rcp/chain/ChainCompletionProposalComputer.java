@@ -263,7 +263,8 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
                     b.startChainSearch(findEnclosingElement(), entrypoints, expectedType, expectedDimension);
                     return null;
                 }
-            }, 3500, TimeUnit.MILLISECONDS, true);
+            }, ChainCompletionPlugin.getDefault().getPreferenceStore().getInt(ChainPreferencePage.ID_TIMEOUT),
+                    TimeUnit.SECONDS, true);
         } catch (final Exception e) {
             setError("Timeout limit hit during call chain computation.");
         }

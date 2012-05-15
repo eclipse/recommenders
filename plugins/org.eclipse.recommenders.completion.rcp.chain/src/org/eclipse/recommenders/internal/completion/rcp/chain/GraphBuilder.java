@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.recommenders.utils.rcp.JdtUtils;
 
 import com.google.common.base.Optional;
@@ -43,9 +44,6 @@ import com.google.common.collect.Table;
  * @see MemberEdge
  */
 public class GraphBuilder {
-
-    private static final int maxdepth = 4;
-    private static final int maxchains = 20;
 
     private static Predicate<IField> FILTER_FIELDS = new Predicate<IField>() {
 
@@ -81,6 +79,10 @@ public class GraphBuilder {
             final IType expectedType, final int expectedDimension) {
         final LinkedList<LinkedList<MemberEdge>> incompleteChains = prepareQueue(entrypoints);
         final IType enclosingType = (IType) enclosingElement.getAncestor(IJavaElement.TYPE);
+        final IPreferenceStore prefStore = ChainCompletionPlugin.getDefault().getPreferenceStore();
+        final int maxChains = prefStore.getInt(ChainPreferencePage.ID_MAX_CHAINS);
+        final int maxDepth = prefStore.getInt(ChainPreferencePage.ID_MAX_DEPTH);
+
         while (!incompleteChains.isEmpty()) {
             final LinkedList<MemberEdge> chain = incompleteChains.poll();
             final MemberEdge edge = chain.getLast();
@@ -91,13 +93,13 @@ public class GraphBuilder {
             if (isAssignableTo(edge, expectedType, expectedDimension)) {
                 if (chain.size() > 1) {
                     chains.add(chain);
-                    if (chains.size() == maxchains) {
+                    if (chains.size() == maxChains) {
                         break;
                     }
                 }
                 continue;
             }
-            if (chain.size() >= maxdepth) {
+            if (chain.size() >= maxDepth) {
                 continue;
             }
             final Collection<IMember> allMethodsAndFields = findAllFieldsAndMethods(returnTypeOpt.get(), enclosingType);
