@@ -7,7 +7,6 @@ Bundle-Activator: org.eclipse.recommenders.snipmatch.tests.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.recommenders.snipmatch;bundle-version="0.5.1",
- org.junit,
  org.eclipse.recommenders.utils;bundle-version="0.5.1",
  org.junit
 Bundle-ActivationPolicy: lazy
