@@ -20,10 +20,8 @@ import static org.eclipse.recommenders.utils.rcp.JdtUtils.findTypeOfField;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +46,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
@@ -62,13 +61,6 @@ import com.google.inject.Inject;
 @SuppressWarnings("restriction")
 public class ChainCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
-    private final Set<String> excludedTypes = new HashSet<String>() {
-        {
-            add("java.lang.Object");
-            add("java.lang.String");
-        }
-
-    };
     private IRecommendersCompletionContext ctx;
     private IType expectedType;
     private List<MemberEdge> entrypoints;
@@ -118,9 +110,14 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
         if (expectedType == null) {
             return false;
         }
-        if (excludedTypes.contains(expectedType.getFullyQualifiedName())) {
-            expectedType = null;
-            return false;
+        final String[] excludedTypes = ChainCompletionPlugin.getDefault().getPreferenceStore()
+                .getString(ChainPreferencePage.ID_IGNORE_TYPES).split("\\|");
+        final String fullyQualified = expectedType.getFullyQualifiedName();
+        for (final String excludedType : excludedTypes) {
+            if (excludedType.equals(fullyQualified)) {
+                expectedType = null;
+                return false;
+            }
         }
         return true;
     }
@@ -256,14 +253,17 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
     private List<ICompletionProposal> executeCallChainSearch() throws JavaModelException {
         final GraphBuilder b = new GraphBuilder();
         final int expectedDimension = Signature.getArrayCount(ctx.getExpectedTypeSignature().get().toCharArray());
+        final IPreferenceStore prefStore = ChainCompletionPlugin.getDefault().getPreferenceStore();
         try {
             new SimpleTimeLimiter().callWithTimeout(new Callable<Void>() {
 
                 public Void call() throws Exception {
-                    b.startChainSearch(findEnclosingElement(), entrypoints, expectedType, expectedDimension);
+                    b.startChainSearch(findEnclosingElement(), entrypoints, expectedType, expectedDimension,
+                            prefStore.getInt(ChainPreferencePage.ID_MAX_CHAINS),
+                            prefStore.getInt(ChainPreferencePage.ID_MAX_DEPTH));
                     return null;
                 }
-            }, 3500, TimeUnit.MILLISECONDS, true);
+            }, prefStore.getInt(ChainPreferencePage.ID_TIMEOUT), TimeUnit.SECONDS, true);
         } catch (final Exception e) {
             setError("Timeout limit hit during call chain computation.");
         }
