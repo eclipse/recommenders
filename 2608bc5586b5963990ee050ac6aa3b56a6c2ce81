@@ -1,0 +1,10 @@
+Change-Id: I2608bc5586b5963990ee050ac6aa3b56a6c2ce81
+Code-Review+1: Cheng Chen <chengchendoc@gmail.com>
+Code-Review+2: Doug Wightman <douglasw@gmail.com>
+IP-Clean+1: Doug Wightman <douglasw@gmail.com>
+Verified+1: Doug Wightman <douglasw@gmail.com>
+Submitted-by: Doug Wightman <douglasw@gmail.com>
+Submitted-at: Tue, 15 May 2012 23:07:11 -0400
+Reviewed-on: https://git.eclipse.org/r/5992
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
