@@ -18,3 +18,5 @@ Require-Bundle: com.google.guava,
  org.eclipse.recommenders.utils.rcp,
  org.eclipse.ui.editors
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Activator: org.eclipse.recommenders.internal.completion.rcp.chain.ChainCompletionPlugin
+Bundle-ActivationPolicy: lazy

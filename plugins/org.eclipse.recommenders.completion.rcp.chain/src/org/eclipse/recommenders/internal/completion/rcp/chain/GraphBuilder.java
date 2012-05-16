@@ -16,7 +16,6 @@ import static org.eclipse.jdt.internal.corext.util.JdtFlags.isStatic;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.rcp.JdtUtils.findAllRelevanFieldsAndMethods;
 import static org.eclipse.recommenders.utils.rcp.JdtUtils.hasPrimitiveReturnType;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.isVoid;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -44,9 +43,6 @@ import com.google.common.collect.Table;
  */
 public class GraphBuilder {
 
-    private static final int maxdepth = 4;
-    private static final int maxchains = 20;
-
     private static Predicate<IField> FILTER_FIELDS = new Predicate<IField>() {
 
         public boolean apply(final IField m) {
@@ -61,7 +57,7 @@ public class GraphBuilder {
 
         public boolean apply(final IMethod m) {
             try {
-                if (isVoid(m) || m.isConstructor() || isStatic(m) || hasPrimitiveReturnType(m)) {
+                if (JdtUtils.isVoid(m) || m.isConstructor() || isStatic(m) || hasPrimitiveReturnType(m)) {
                     return true;
                 }
                 return m.getElementName().equals("toString") && m.getSignature().equals("()java.lang.String;");
@@ -78,9 +74,10 @@ public class GraphBuilder {
     private final Table<MemberEdge, IType, Boolean> assignableCache = HashBasedTable.create();
 
     void startChainSearch(final IJavaElement enclosingElement, final List<MemberEdge> entrypoints,
-            final IType expectedType, final int expectedDimension) {
+            final IType expectedType, final int expectedDimension, final int maxChains, final int maxDepth) {
         final LinkedList<LinkedList<MemberEdge>> incompleteChains = prepareQueue(entrypoints);
         final IType enclosingType = (IType) enclosingElement.getAncestor(IJavaElement.TYPE);
+
         while (!incompleteChains.isEmpty()) {
             final LinkedList<MemberEdge> chain = incompleteChains.poll();
             final MemberEdge edge = chain.getLast();
@@ -91,13 +88,13 @@ public class GraphBuilder {
             if (isAssignableTo(edge, expectedType, expectedDimension)) {
                 if (chain.size() > 1) {
                     chains.add(chain);
-                    if (chains.size() == maxchains) {
+                    if (chains.size() == maxChains) {
                         break;
                     }
                 }
                 continue;
             }
-            if (chain.size() >= maxdepth) {
+            if (chain.size() >= maxDepth) {
                 continue;
             }
             final Collection<IMember> allMethodsAndFields = findAllFieldsAndMethods(returnTypeOpt.get(), enclosingType);

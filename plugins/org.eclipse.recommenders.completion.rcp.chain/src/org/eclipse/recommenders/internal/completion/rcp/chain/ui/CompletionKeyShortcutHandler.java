@@ -8,7 +8,7 @@
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.completion.rcp.chain;
+package org.eclipse.recommenders.internal.completion.rcp.chain.ui;
 
 import static org.eclipse.recommenders.utils.Throws.throwIllegalStateException;
 
