@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.recommenders.internal.completion.rcp.chain.ChainCompletionProposal;
 import org.eclipse.recommenders.internal.completion.rcp.chain.ChainCompletionProposalComputer;
@@ -15,6 +16,7 @@ import org.eclipse.recommenders.tests.CodeBuilder;
 import org.eclipse.recommenders.tests.SmokeTestScenarios;
 import org.eclipse.recommenders.tests.completion.rcp.JavaContentAssistContextMock;
 import org.eclipse.recommenders.tests.completion.rcp.RecommendersCompletionContextFactoryMock;
+import org.eclipse.recommenders.tests.completion.rcp.chain.PreferenceStoreMock;
 import org.eclipse.recommenders.tests.jdt.JavaProjectFixture;
 import org.eclipse.recommenders.utils.Tuple;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -60,7 +62,8 @@ public class ChainCompletionScenariosTest {
               JavaContentAssistContextMock _javaContentAssistContextMock = new JavaContentAssistContextMock(cu, (completionIndex).intValue());
               final JavaContentAssistContextMock ctx = _javaContentAssistContextMock;
               RecommendersCompletionContextFactoryMock _recommendersCompletionContextFactoryMock = new RecommendersCompletionContextFactoryMock();
-              ChainCompletionProposalComputer _chainCompletionProposalComputer = new ChainCompletionProposalComputer(_recommendersCompletionContextFactoryMock);
+              IPreferenceStore _create = PreferenceStoreMock.create();
+              ChainCompletionProposalComputer _chainCompletionProposalComputer = new ChainCompletionProposalComputer(_recommendersCompletionContextFactoryMock, _create);
               final ChainCompletionProposalComputer sut = _chainCompletionProposalComputer;
               sut.sessionStarted();
               sut.computeCompletionProposals(ctx, null);
@@ -74,7 +77,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("TODO: Doesn\'t seem to work for some target platforms")
+  @Ignore(value = "TODO: Doesn\'t seem to work for some target platforms")
   public void testAccessMethodParameter() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("public void method(final List list){");
@@ -393,7 +396,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Bug! However, it already existed in old version.")
+  @Ignore(value = "Bug! However, it already existed in old version.")
   public void testCompletionOnGenericTypeInMethod2() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("public List<String> findMe = new ArrayList<String>();");
@@ -460,7 +463,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Bug! However, it already existed in old version.")
+  @Ignore(value = "Bug! However, it already existed in old version.")
   public void testCompletionOnGenericTypeInMethod5() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("public List<String> findMe = new ArrayList<String>();");
@@ -505,7 +508,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Bug! However, it already existed in old version.")
+  @Ignore(value = "Bug! However, it already existed in old version.")
   public void testCompletionOnGenericTypeInMethod7() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("public List<String> findMe = new ArrayList<String>();");
@@ -569,7 +572,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Bug! Chains using this.a are expected as well.")
+  @Ignore(value = "Bug! Chains using this.a are expected as well.")
   public void testCompletionOnMemberCallChainDepth2() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("public class A {");
@@ -620,7 +623,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Bug! Chains using this.a are expected as well.")
+  @Ignore(value = "Bug! Chains using this.a are expected as well.")
   public void testCompletionOnMemberCallChainDepth3() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("public class A {");
@@ -757,7 +760,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Context does not seem to resolve primitives as target types")
+  @Ignore(value = "Context does not seem to resolve primitives as target types")
   public void testCompletionOnPrimitiveTypeInMethod1() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("private class A {");
@@ -951,7 +954,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("This doesn\'t seem to have worked before as well")
+  @Ignore(value = "This doesn\'t seem to have worked before as well")
   public void testCompletionViaGenericTypeInMethod() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("final Iterator<CompletionViaGenericTypeInMethod> useMe = Arrays.asList(");
@@ -1086,7 +1089,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Rework so it returns chains of more than 1 element")
+  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testFindLocalAnchorWithIsExactMatch() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.*;");
@@ -1205,7 +1208,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Rework so it returns chains of more than 1 element")
+  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testFindFieldInSuperType() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.*;");
@@ -1275,7 +1278,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Rework so it returns chains of more than 1 element")
+  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testCompletionOnLocaVariable() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.*;");
@@ -1424,7 +1427,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Rework so it returns chains of more than 1 element")
+  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testFindMatchingSubtypeForAssignment() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.concurrent.*;");
@@ -1453,7 +1456,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Rework so it returns chains of more than 1 element")
+  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testCompletionOnFieldField() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.awt.*;");
@@ -1482,7 +1485,7 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore("Rework so it returns chains of more than 1 element")
+  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testPrefixFilter() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.awt.*;");
@@ -1539,7 +1542,8 @@ public class ChainCompletionScenariosTest {
       JavaContentAssistContextMock _javaContentAssistContextMock = new JavaContentAssistContextMock(cu, (completionIndex).intValue());
       final JavaContentAssistContextMock ctx = _javaContentAssistContextMock;
       RecommendersCompletionContextFactoryMock _recommendersCompletionContextFactoryMock = new RecommendersCompletionContextFactoryMock();
-      ChainCompletionProposalComputer _chainCompletionProposalComputer = new ChainCompletionProposalComputer(_recommendersCompletionContextFactoryMock);
+      IPreferenceStore _create = PreferenceStoreMock.create();
+      ChainCompletionProposalComputer _chainCompletionProposalComputer = new ChainCompletionProposalComputer(_recommendersCompletionContextFactoryMock, _create);
       final ChainCompletionProposalComputer sut = _chainCompletionProposalComputer;
       sut.sessionStarted();
       final List<ICompletionProposal> proposals = sut.computeCompletionProposals(ctx, null);
