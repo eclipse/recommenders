@@ -1,0 +1,9 @@
+Change-Id: I0b48aadc5d57f86dd623805947f732cbae991121
+Verified+1: Hudson CI
+Code-Review+2: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+IP-Clean+1: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-by: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-at: Tue, 22 May 2012 00:28:07 -0400
+Reviewed-on: https://git.eclipse.org/r/6060
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
