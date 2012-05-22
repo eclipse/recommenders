@@ -10,12 +10,13 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp.subwords;
 
+import static org.eclipse.recommenders.internal.completion.rcp.subwords.SubwordsUtils.JDT_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.subwords.SubwordsUtils.MYLYN_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.subwords.SubwordsUtils.isMylynInstalled;
+
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
-import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.recommenders.utils.rcp.internal.AbstractEnablementPreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -25,14 +26,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import static org.eclipse.recommenders.internal.completion.rcp.subwords.SubwordsUtils.*;
-import com.google.common.collect.Sets;
 
-public class PreferencePage extends org.eclipse.jface.preference.PreferencePage implements IWorkbenchPreferencePage {
+public class PreferencePage extends AbstractEnablementPreferencePage {
 
-   
     private Button enablement;
 
     public PreferencePage() {
@@ -42,64 +39,48 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage 
     }
 
     @Override
-    protected Control createContents(Composite parent) {
-        Composite container = new Composite(parent, SWT.NONE);
+    protected Control createContents(final Composite parent) {
+        final Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout());
 
         final Link link = new Link(container, SWT.NONE | SWT.WRAP);
         link.setText("See <a>'Java > Editor > Content Assist > Advanced'</a> to configure content assist directly.");
         link.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(final SelectionEvent e) {
                 PreferencesUtil.createPreferenceDialogOn(getShell(),
                         "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null);
             }
         });
 
-        enablement = new Button(container, SWT.CHECK);
-        enablement.setText("Enable Java Subwords Proposals.");
-        enablement.addSelectionListener(new SelectionAdapter() {
-
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                Set<String> cats = Sets.newHashSet(PreferenceConstants.getExcludedCompletionProposalCategories());
-                if (enablement.getSelection()) {
-                    // enable subwords - disable mylyn and jdt
-                    cats.remove(SubwordsCompletionProposalComputer.CATEGORY_ID);
-                    cats.add(JDT_ALL_CATEGORY);
-                    cats.add(MYLYN_ALL_CATEGORY);
-                } else {
-                    // disable subwords - enable jdt -- or mylyn if installed.
-                    cats.add(SubwordsCompletionProposalComputer.CATEGORY_ID);
-                    if (isMylynInstalled()) {
-                        cats.remove(MYLYN_ALL_CATEGORY);
-                    } else {
-                        cats.remove(JDT_ALL_CATEGORY);
-                    }
-                }
-                PreferenceConstants.setExcludedCompletionProposalCategories(cats.toArray(new String[cats.size()]));
-            }
-
-        });
+        createEnablementButton(container, "Enable Java Subwords Proposals.");
 
         return container;
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        // respond to changes in Java > Editor > Content Assist > Advanced:
-        // this works only one-way. We respond to changes made in JDT but JDT page may show deprecated values.
-        enablement.setSelection(isSubwordsEnabled());
-        super.setVisible(visible);
-    }
-
-    private boolean isSubwordsEnabled() {
-        String[] excluded = PreferenceConstants.getExcludedCompletionProposalCategories();
-        return !ArrayUtils.contains(excluded, SubwordsCompletionProposalComputer.CATEGORY_ID);
+    public void init(final IWorkbench workbench) {
     }
 
     @Override
-    public void init(IWorkbench workbench) {
+    protected void additionalExcludedCompletionCategoriesUpdates(final boolean isEnabled, final Set<String> cats) {
+        if (isEnabled) {
+            // enable subwords - disable mylyn and jdt
+            cats.add(JDT_ALL_CATEGORY);
+            cats.add(MYLYN_ALL_CATEGORY);
+        } else {
+            // disable subwords - enable jdt -- or mylyn if installed.
+            if (isMylynInstalled()) {
+                cats.remove(MYLYN_ALL_CATEGORY);
+            } else {
+                cats.remove(JDT_ALL_CATEGORY);
+            }
+        }
+    }
+
+    @Override
+    protected String getCategoryId() {
+        return SubwordsCompletionProposalComputer.CATEGORY_ID;
     }
 
 }
