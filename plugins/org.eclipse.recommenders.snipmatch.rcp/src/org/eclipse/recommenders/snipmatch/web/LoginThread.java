@@ -21,92 +21,92 @@ import org.w3c.dom.Document;
  */
 class LoginThread extends PostThread {
 
-	private String username;
-	private String password;
-	private ArrayList<ILoginListener> listeners;
-	
-	public LoginThread(MatchClient client, String username, String password) {
+        private String username;
+        private String password;
+        private ArrayList<ILoginListener> listeners;
+        
+        public LoginThread(RemoteMatchClient client, String username, String password) {
 
-		super(client, MatchClient.LOGIN_URL);
-		this.username = username;
-		this.password = password;
-		this.listeners = new ArrayList<ILoginListener>();
-	}
-	
-	public void addListener(ILoginListener listener) {
-		
-		listeners.add(listener);
-	}
-	
-	public void removeListener(ILoginListener listener) {
-		
-		listeners.remove(listener);
-	}
+                super(client, RemoteMatchClient.LOGIN_URL);
+                this.username = username;
+                this.password = password;
+                this.listeners = new ArrayList<ILoginListener>();
+        }
+        
+        public void addListener(ILoginListener listener) {
+                
+                listeners.add(listener);
+        }
+        
+        public void removeListener(ILoginListener listener) {
+                
+                listeners.remove(listener);
+        }
 
-	public void clearListeners() {
-		
-		listeners.clear();
-	}
-	
-	@Override
-	public void run() {
+        public void clearListeners() {
+                
+                listeners.clear();
+        }
+        
+        @Override
+        public void run() {
 
-		addParameter("username", username);
-		addParameter("password", password);
-		addParameter("clientName", client.getName());
-		addParameter("clientVersion", client.getVersion());
+                addParameter("username", username);
+                addParameter("password", password);
+                addParameter("clientName", client.getName());
+                addParameter("clientVersion", client.getVersion());
 
-		InputStream response = post();
-		
-		if (response == null) {
-			
-			for (ILoginListener listener : listeners) {
-				listener.loginFailed("Connection error.");
-			}
+                InputStream response = post();
+                
+                if (response == null) {
+                        
+                        for (ILoginListener listener : listeners) {
+                                listener.loginFailed("Connection error.");
+                        }
 
-			done = true;
-			return;
-		}
-		
-		if (done) return;
+                        done = true;
+                        return;
+                }
+                
+                if (done) return;
 
-		DocumentBuilderFactory dbf;
-		DocumentBuilder db;
-		Document responseXml;
+                DocumentBuilderFactory dbf;
+                DocumentBuilder db;
+                Document responseXml;
 
-		try {
+                try {
 
-			dbf = DocumentBuilderFactory.newInstance();
-			db = dbf.newDocumentBuilder();
-			responseXml = db.parse(response);
-		}
-		catch (Exception e) {
+                        dbf = DocumentBuilderFactory.newInstance();
+                        db = dbf.newDocumentBuilder();
+                        responseXml = db.parse(response);
+                }
+                catch (Exception e) {
 
-			e.printStackTrace();
+                        e.printStackTrace();
 
-			for (ILoginListener listener : listeners) {
-				listener.loginFailed("Bad response format.");
-			}
-			
-			done = true;
-			return;
-		}
+                        for (ILoginListener listener : listeners) {
+                                listener.loginFailed("Bad response format.");
+                        }
+                        
+                        done = true;
+                        return;
+                }
 
-		String msg = responseXml.getDocumentElement().getTextContent();
-		
-		if (msg.equals("User authenticated.")) {
-			
-			for (ILoginListener listener : listeners) {
-				listener.loginSucceeded();
-			}
-		}
-		else {
-			
-			for (ILoginListener listener : listeners) {
-				listener.loginFailed(msg);
-			}
-		}
-		
-		done = true;
-	}
+                String msg = responseXml.getDocumentElement().getTextContent();
+                
+                if (msg.equals("User authenticated.")) {
+                        
+                        for (ILoginListener listener : listeners) {
+                                listener.loginSucceeded();
+                        }
+                }
+                else {
+                        
+                        for (ILoginListener listener : listeners) {
+                                listener.loginFailed(msg);
+                        }
+                }
+                
+                done = true;
+        }
 }
