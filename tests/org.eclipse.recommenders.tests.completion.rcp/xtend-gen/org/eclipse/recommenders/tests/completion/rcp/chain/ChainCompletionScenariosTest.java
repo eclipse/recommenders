@@ -16,7 +16,7 @@ import org.eclipse.recommenders.tests.CodeBuilder;
 import org.eclipse.recommenders.tests.SmokeTestScenarios;
 import org.eclipse.recommenders.tests.completion.rcp.JavaContentAssistContextMock;
 import org.eclipse.recommenders.tests.completion.rcp.RecommendersCompletionContextFactoryMock;
-import org.eclipse.recommenders.tests.completion.rcp.chain.PreferenceStoreMock;
+import org.eclipse.recommenders.tests.completion.rcp.chain.ChainPreferenceStoreMock;
 import org.eclipse.recommenders.tests.jdt.JavaProjectFixture;
 import org.eclipse.recommenders.utils.Tuple;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -62,7 +62,7 @@ public class ChainCompletionScenariosTest {
               JavaContentAssistContextMock _javaContentAssistContextMock = new JavaContentAssistContextMock(cu, (completionIndex).intValue());
               final JavaContentAssistContextMock ctx = _javaContentAssistContextMock;
               RecommendersCompletionContextFactoryMock _recommendersCompletionContextFactoryMock = new RecommendersCompletionContextFactoryMock();
-              IPreferenceStore _create = PreferenceStoreMock.create();
+              IPreferenceStore _create = ChainPreferenceStoreMock.create();
               ChainCompletionProposalComputer _chainCompletionProposalComputer = new ChainCompletionProposalComputer(_recommendersCompletionContextFactoryMock, _create);
               final ChainCompletionProposalComputer sut = _chainCompletionProposalComputer;
               sut.sessionStarted();
@@ -1542,7 +1542,7 @@ public class ChainCompletionScenariosTest {
       JavaContentAssistContextMock _javaContentAssistContextMock = new JavaContentAssistContextMock(cu, (completionIndex).intValue());
       final JavaContentAssistContextMock ctx = _javaContentAssistContextMock;
       RecommendersCompletionContextFactoryMock _recommendersCompletionContextFactoryMock = new RecommendersCompletionContextFactoryMock();
-      IPreferenceStore _create = PreferenceStoreMock.create();
+      IPreferenceStore _create = ChainPreferenceStoreMock.create();
       ChainCompletionProposalComputer _chainCompletionProposalComputer = new ChainCompletionProposalComputer(_recommendersCompletionContextFactoryMock, _create);
       final ChainCompletionProposalComputer sut = _chainCompletionProposalComputer;
       sut.sessionStarted();
