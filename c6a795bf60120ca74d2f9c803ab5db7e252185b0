@@ -1,0 +1,9 @@
+Change-Id: Ic6a795bf60120ca74d2f9c803ab5db7e252185b0
+Code-Review+2: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+IP-Clean+1: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Verified+1: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-by: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-at: Fri, 25 May 2012 16:46:47 -0400
+Reviewed-on: https://git.eclipse.org/r/6125
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
