@@ -1564,6 +1564,8 @@ public class ChainCompletionScenariosTest {
       _builder.append(" ");
       _builder.append("some expected values were not found ");
       _builder.append(expected, " ");
+      _builder.append(" in ");
+      _builder.append(proposals, " ");
       _builder.append(" ");
       String _string_1 = _builder.toString();
       boolean _isEmpty = expected.isEmpty();

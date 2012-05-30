@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.completion.rcp.chain;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.DocumentEvent;
@@ -50,7 +51,11 @@ public class ChainCompletionProposal implements IJavaCompletionProposal, IComple
     public List<String> getChainElementNames() {
         final List<String> b = new LinkedList<String>();
         for (final MemberEdge edge : chain) {
-            b.add(edge.getEdgeElement().getElementName());
+            if (edge.getEdgeElement() instanceof MethodBinding) {
+                b.add(String.valueOf(((MethodBinding) edge.getEdgeElement()).selector));
+            } else {
+                b.add(String.valueOf(edge.getEdgeElement().readableName()));
+            }
         }
         return b;
     }

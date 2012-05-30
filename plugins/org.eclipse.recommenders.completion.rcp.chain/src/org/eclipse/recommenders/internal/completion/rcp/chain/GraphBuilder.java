@@ -11,26 +11,20 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp.chain;
 
-import static org.eclipse.jdt.internal.corext.util.JdtFlags.isPublic;
-import static org.eclipse.jdt.internal.corext.util.JdtFlags.isStatic;
 import static org.eclipse.recommenders.utils.Checks.cast;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.findAllRelevanFieldsAndMethods;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.hasPrimitiveReturnType;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.recommenders.utils.rcp.JdtUtils;
-import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -42,28 +36,29 @@ import com.google.common.collect.Table;
  * 
  * @see MemberEdge
  */
+@SuppressWarnings("restriction")
 public class GraphBuilder {
 
-    private static final Predicate<IField> FILTER_FIELDS = new Predicate<IField>() {
+    private static final Predicate<FieldBinding> FILTER_FIELDS = new Predicate<FieldBinding>() {
 
         @Override
-        public boolean apply(final IField m) {
+        public boolean apply(final FieldBinding m) {
             try {
-                return isStatic(m);
+                return m.isStatic();
             } catch (final Exception e) {
                 return true;
             }
         }
     };
-    private static final Predicate<IMethod> FILTER_METHODS = new Predicate<IMethod>() {
+    private static final Predicate<MethodBinding> FILTER_METHODS = new Predicate<MethodBinding>() {
 
         @Override
-        public boolean apply(final IMethod m) {
+        public boolean apply(final MethodBinding m) {
             try {
-                if (JdtUtils.isVoid(m) || m.isConstructor() || isStatic(m) || hasPrimitiveReturnType(m)) {
+                if (ASTUtils.isVoid(m) || m.isConstructor() || m.isStatic() || ASTUtils.hasPrimitiveReturnType(m)) {
                     return true;
                 }
-                return m.getElementName().equals("toString") && m.getSignature().equals("()java.lang.String;");
+                return m.selector.equals("toString") && m.signature().equals("()java.lang.String;");
             } catch (final Exception e) {
                 return true;
             }
@@ -72,8 +67,8 @@ public class GraphBuilder {
 
     private final List<List<MemberEdge>> chains = Lists.newLinkedList();
 
-    private final Map<IJavaElement, MemberEdge> edgeCache = Maps.newHashMap();
-    private final Map<IType, Collection<IMember>> fieldsAndMethodsCache = Maps.newHashMap();
+    private final Map<Binding, MemberEdge> edgeCache = Maps.newHashMap();
+    private final Map<TypeBinding, Collection<Binding>> fieldsAndMethodsCache = Maps.newHashMap();
     private final Table<MemberEdge, IType, Boolean> assignableCache = HashBasedTable.create();
 
     void startChainSearch(final IJavaElement enclosingElement, final List<MemberEdge> entrypoints,
@@ -84,10 +79,6 @@ public class GraphBuilder {
         while (!incompleteChains.isEmpty()) {
             final LinkedList<MemberEdge> chain = incompleteChains.poll();
             final MemberEdge edge = chain.getLast();
-            final Optional<IType> returnTypeOpt = edge.getReturnType();
-            if (!returnTypeOpt.isPresent()) {
-                continue;
-            }
             if (isAssignableTo(edge, expectedType, expectedDimension)) {
                 if (chain.size() > 1) {
                     chains.add(chain);
@@ -100,8 +91,7 @@ public class GraphBuilder {
             if (chain.size() >= maxDepth) {
                 continue;
             }
-            final Collection<IMember> allMethodsAndFields = findAllFieldsAndMethods(returnTypeOpt.get(), enclosingType);
-            for (final IJavaElement element : allMethodsAndFields) {
+            for (final Binding element : findAllFieldsAndMethods(edge.getReturnType(), enclosingType)) {
                 final MemberEdge newEdge = createEdge(element);
                 if (!chain.contains(newEdge)) {
                     incompleteChains.add(cloneChainAndAppend(chain, newEdge));
@@ -121,6 +111,11 @@ public class GraphBuilder {
     private static LinkedList<LinkedList<MemberEdge>> prepareQueue(final List<MemberEdge> entrypoints) {
         final LinkedList<LinkedList<MemberEdge>> incompleteChains = Lists.newLinkedList();
         for (final MemberEdge entrypoint : entrypoints) {
+            // TODO: centralize filtering.
+            if (entrypoint.getEdgeElement() instanceof MethodBinding
+                    && ASTUtils.hasPrimitiveReturnType((MethodBinding) entrypoint.getEdgeElement())) {
+                continue;
+            }
             final LinkedList<MemberEdge> chain = Lists.newLinkedList();
             chain.add(entrypoint);
             incompleteChains.add(chain);
@@ -132,24 +127,21 @@ public class GraphBuilder {
         Boolean isAssignable = assignableCache.get(edge, expectedType);
         if (isAssignable == null) {
             isAssignable = expectedDimension <= edge.getDimension()
-                    && JdtUtils.isAssignable(expectedType, edge.getReturnType().get());
+                    && ASTUtils.isAssignable(expectedType, edge.getReturnType());
             assignableCache.put(edge, expectedType, isAssignable);
         }
         return isAssignable;
     }
 
-    private Collection<IMember> findAllFieldsAndMethods(final IType chainElementType, final IType contextEnclosingType) {
-        Collection<IMember> cached = fieldsAndMethodsCache.get(chainElementType);
+    private Collection<Binding> findAllFieldsAndMethods(final TypeBinding chainElementType,
+            final IType contextEnclosingType) {
+        Collection<Binding> cached = fieldsAndMethodsCache.get(chainElementType);
         if (cached == null) {
             cached = Lists.newLinkedList();
             final boolean isEverythingVisible = isVisibleFromCompletionContext(contextEnclosingType, chainElementType);
-            for (final IMember element : findAllRelevanFieldsAndMethods(chainElementType, FILTER_FIELDS, FILTER_METHODS)) {
-                try {
-                    if (!isEverythingVisible && !isPublic(element)) {
-                        continue;
-                    }
-                } catch (final Exception e) {
-                    RecommendersUtilsPlugin.logError(e, "Exception in JDT");
+            for (final Binding element : ASTUtils.findAllRelevanFieldsAndMethods(chainElementType, FILTER_FIELDS,
+                    FILTER_METHODS)) {
+                if (!isEverythingVisible && !isPublic(element)) {
                     continue;
                 }
                 cached.add(element);
@@ -159,12 +151,21 @@ public class GraphBuilder {
         return cached;
     }
 
-    private static boolean isVisibleFromCompletionContext(final IType contextEnclosingType, final IType element) {
+    private static boolean isVisibleFromCompletionContext(final IType contextEnclosingType, final TypeBinding element) {
         // TODO: Check type hierarchy and visibility levels.
-        return contextEnclosingType.equals(element);
+        return contextEnclosingType.getKey().equals(String.valueOf(element.signature()));
     }
 
-    private MemberEdge createEdge(final IJavaElement member) {
+    private boolean isPublic(final Binding element) {
+        if (element instanceof MethodBinding) {
+            return ((MethodBinding) element).isPublic();
+        } else if (element instanceof FieldBinding) {
+            return ((FieldBinding) element).isPublic();
+        }
+        throw new IllegalArgumentException(element.toString());
+    }
+
+    private MemberEdge createEdge(final Binding member) {
         MemberEdge cached = edgeCache.get(member);
         if (cached == null) {
             cached = new MemberEdge(member);

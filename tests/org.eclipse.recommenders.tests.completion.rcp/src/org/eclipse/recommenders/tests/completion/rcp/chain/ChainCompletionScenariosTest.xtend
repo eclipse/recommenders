@@ -974,7 +974,7 @@ class ChainCompletionScenariosTest {
 			val names = (proposal as org.eclipse.recommenders.internal.completion.rcp.chain.ChainCompletionProposal).getChainElementNames
 			assertTrue('''couldn't find «names» in expected.'''.toString, expected.remove(names))
 		} 
-		assertTrue(''' some expected values were not found «expected» '''.toString, expected.empty)
+		assertTrue(''' some expected values were not found «expected» in «proposals» '''.toString, expected.empty)
 	}
 	
 	
