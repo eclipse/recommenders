@@ -10,15 +10,6 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp.chain;
 
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.createUnresolvedField;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.createUnresolvedLocaVariable;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.createUnresolvedType;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.findAllPublicInstanceFieldsAndNonVoidNonPrimitiveInstanceMethods;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.findTypeFromSignature;
-import static org.eclipse.recommenders.utils.rcp.JdtUtils.findTypeOfField;
-
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,21 +18,19 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMemberAccess;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnQualifiedNameReference;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
+import org.eclipse.jdt.internal.compiler.util.ObjectVector;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -59,7 +48,6 @@ import org.eclipse.recommenders.internal.completion.rcp.chain.ui.ChainPreference
 import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
@@ -71,7 +59,7 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
     static final String CATEGORY_ID = "org.eclipse.recommenders.completion.rcp.chain.category";
 
     private IRecommendersCompletionContext ctx;
-    private IType expectedType;
+    private TypeBinding expectedType;
     private List<MemberEdge> entrypoints;
     private String error;
     private final IRecommendersCompletionContextFactory ctxFactory;
@@ -110,8 +98,12 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 
     @VisibleForTesting
     protected boolean shouldMakeProposals() {
-        String[] excluded = PreferenceConstants.getExcludedCompletionProposalCategories();
-        Set<String> ex = Sets.newHashSet(excluded);
+        // TODO: Why do we disable it all the time? :)
+        if (true) {
+            return true;
+        }
+        final String[] excluded = PreferenceConstants.getExcludedCompletionProposalCategories();
+        final Set<String> ex = Sets.newHashSet(excluded);
         if (!ex.contains(CATEGORY_ID)) {
             new DisableContentAssistCategoryJob(CATEGORY_ID).schedule();
             return false;
@@ -133,18 +125,18 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
     }
 
     private boolean findExpectedType() {
-        expectedType = ctx.getExpectedType().orNull();
-        if (expectedType == null) {
+        final IType expected = ctx.getExpectedType().orNull();
+        if (expected == null) {
             return false;
         }
         final String[] excludedTypes = prefStore.getString(ChainPreferencePage.ID_IGNORE_TYPES).split("\\|");
-        final String fullyQualified = expectedType.getFullyQualifiedName();
+        final String fullyQualified = expected.getFullyQualifiedName();
         for (final String excludedType : excludedTypes) {
             if (excludedType.equals(fullyQualified)) {
-                expectedType = null;
                 return false;
             }
         }
+        expectedType = TypeBindingHack.resolveBindingForExpectedType(ctx);
         return true;
     }
 
@@ -169,30 +161,19 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
         }
         switch (b.kind()) {
         case Binding.TYPE:
-            final Optional<IType> type = createUnresolvedType((TypeBinding) b);
-            if (type.isPresent()) {
-                addPublicStaticMembersToEntrypoints(type.get());
-            }
+            addPublicStaticMembersToEntrypoints((TypeBinding) b);
             break;
         case Binding.FIELD:
-            final Optional<IField> field = createUnresolvedField((FieldBinding) b);
-            if (!field.isPresent()) {
-                break;
-            }
-            final Optional<IType> optType = findTypeOfField(field.get());
-            if (optType.isPresent()) {
-                addPublicInstanceMembersToEntrypoints(optType.get());
-            }
+            addPublicInstanceMembersToEntrypoints(((FieldBinding) b).type);
             break;
         case Binding.LOCAL:
-            final ILocalVariable var = createUnresolvedLocaVariable((VariableBinding) b, findEnclosingElement());
-            addPublicInstanceMembersToEntrypoints(var);
+            addPublicInstanceMembersToEntrypoints((VariableBinding) b);
             break;
         }
     }
 
-    private void addPublicStaticMembersToEntrypoints(final IType type) {
-        for (final IMember m : findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods(type)) {
+    private void addPublicStaticMembersToEntrypoints(final TypeBinding type) {
+        for (final Binding m : ASTUtils.findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods(type)) {
             if (matchesExpectedPrefix(m)) {
                 final MemberEdge edge = new MemberEdge(m);
                 entrypoints.add(edge);
@@ -200,24 +181,20 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
         }
     }
 
-    private boolean matchesExpectedPrefix(final IMember m) {
-        return m.getElementName().startsWith(ctx.getPrefix());
+    private boolean matchesExpectedPrefix(final Binding m) {
+        return String.valueOf(m.readableName()).startsWith(ctx.getPrefix());
     }
 
     private JavaElement findEnclosingElement() {
         return (JavaElement) ctx.getEnclosingElement().get();
     }
 
-    private void addPublicInstanceMembersToEntrypoints(final ILocalVariable var) {
-        final Optional<IType> optType = findTypeFromSignature(var.getTypeSignature(), var);
-        if (!optType.isPresent()) {
-            return;
-        }
-        addPublicInstanceMembersToEntrypoints(optType.get());
+    private void addPublicInstanceMembersToEntrypoints(final VariableBinding var) {
+        addPublicInstanceMembersToEntrypoints(var.type);
     }
 
-    private void addPublicInstanceMembersToEntrypoints(final IType type) {
-        for (final IMember m : findAllPublicInstanceFieldsAndNonVoidNonPrimitiveInstanceMethods(type)) {
+    private void addPublicInstanceMembersToEntrypoints(final TypeBinding type) {
+        for (final Binding m : ASTUtils.findAllPublicInstanceFieldsAndNonVoidNonPrimitiveInstanceMethods(type)) {
             if (matchesExpectedPrefix(m)) {
                 entrypoints.add(new MemberEdge(m));
             }
@@ -231,60 +208,59 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
         }
         switch (b.kind()) {
         case Binding.TYPE:
-            final Optional<IType> type = createUnresolvedType((TypeBinding) b);
             // note: not static!
-            if (type.isPresent()) {
-                addPublicInstanceMembersToEntrypoints(type.get());
-            }
+            addPublicInstanceMembersToEntrypoints((TypeBinding) b);
             break;
         case Binding.LOCAL:
             // TODO Review: could this be a field?
-            final ILocalVariable var = createUnresolvedLocaVariable((VariableBinding) b, findEnclosingElement());
-            addPublicInstanceMembersToEntrypoints(var);
+            addPublicInstanceMembersToEntrypoints((VariableBinding) b);
             break;
         }
     }
 
     private void findEntrypointsForCompletionOnSingleName() {
-        resolveEntrypoints(ctx.getVisibleFields());
-        resolveEntrypoints(ctx.getVisibleLocals());
-        resolveEntrypoints(ctx.getVisibleMethods());
+        final InternalCompletionContext context = (InternalCompletionContext) ctx.getJavaContext().getCoreContext();
+        resolveEntrypoints(context.getVisibleFields());
+        resolveEntrypoints(context.getVisibleLocalVariables());
+        resolveEntrypoints(context.getVisibleMethods());
     }
 
-    private void resolveEntrypoints(final Collection<? extends IJavaElement> elements) {
-        for (final IJavaElement decl : elements) {
+    private void resolveEntrypoints(final ObjectVector elements) {
+        for (int i = elements.size(); i-- > 0;) {
+            final Binding decl = (Binding) elements.elementAt(i);
             if (!matchesPrefixToken(decl)) {
                 continue;
             }
             final MemberEdge e = new MemberEdge(decl);
-            if (e.getReturnType().isPresent()) {
+            if (e.getReturnType() != null) {
                 entrypoints.add(e);
             }
         }
     }
 
-    private boolean matchesPrefixToken(final IJavaElement decl) {
-        return decl.getElementName().startsWith(ctx.getPrefix());
+    private boolean matchesPrefixToken(final Binding decl) {
+        return String.valueOf(decl.readableName()).startsWith(ctx.getPrefix());
     }
 
     private List<ICompletionProposal> executeCallChainSearch() throws JavaModelException {
-        final GraphBuilder b = new GraphBuilder();
-        final int expectedDimension = Signature.getArrayCount(ctx.getExpectedTypeSignature().get().toCharArray());
+        final GraphBuilder b = new GraphBuilder(expectedType);
         try {
             new SimpleTimeLimiter().callWithTimeout(new Callable<Void>() {
 
                 @Override
                 public Void call() throws Exception {
-                    b.startChainSearch(findEnclosingElement(), entrypoints, expectedType, expectedDimension,
+                    b.startChainSearch(findEnclosingElement(), entrypoints,
                             prefStore.getInt(ChainPreferencePage.ID_MAX_CHAINS),
                             prefStore.getInt(ChainPreferencePage.ID_MAX_DEPTH));
                     return null;
                 }
             }, prefStore.getInt(ChainPreferencePage.ID_TIMEOUT), TimeUnit.SECONDS, true);
         } catch (final Exception e) {
+            e.printStackTrace();
             setError("Timeout limit hit during call chain computation.");
         }
-        return buildCompletionProposals(b.getChains(), expectedDimension);
+        return buildCompletionProposals(b.getChains(),
+                expectedType instanceof ArrayBinding ? ((ArrayBinding) expectedType).dimensions() : 0);
     }
 
     private List<ICompletionProposal> buildCompletionProposals(final List<List<MemberEdge>> chains,

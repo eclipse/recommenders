@@ -78,7 +78,6 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore(value = "TODO: Doesn\'t seem to work for some target platforms")
   public void testAccessMethodParameter() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("public void method(final List list){");
@@ -89,9 +88,15 @@ public class ChainCompletionScenariosTest {
     _builder.append("}");
     _builder.newLine();
     final CharSequence code = CodeBuilder.classbody(_builder);
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("list iterator");
-    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
-    this.exercise(code, _w);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
+      "list iterator", 
+      "list listIterator", 
+      "list listIterator", 
+      "list subList iterator", 
+      "list subList listIterator", 
+      "list subList listIterator");
+    List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, expected);
   }
   
   @Test
@@ -1028,25 +1033,25 @@ public class ChainCompletionScenariosTest {
     final CharSequence code = CodeBuilder.method(_builder);
     ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
       "bigInt divideAndRemainder", 
-      "bigInt nextProbablePrime divideAndRemainder", 
-      "bigInt add divideAndRemainder", 
-      "bigInt subtract divideAndRemainder", 
-      "bigInt multiply divideAndRemainder", 
-      "bigInt divide divideAndRemainder", 
-      "bigInt remainder divideAndRemainder", 
-      "bigInt pow divideAndRemainder", 
-      "bigInt gcd divideAndRemainder", 
       "bigInt abs divideAndRemainder", 
-      "bigInt negate divideAndRemainder", 
-      "bigInt mod divideAndRemainder", 
-      "bigInt modPow divideAndRemainder", 
-      "bigInt modInverse divideAndRemainder", 
-      "bigInt shiftLeft divideAndRemainder", 
-      "bigInt shiftRight divideAndRemainder", 
+      "bigInt add divideAndRemainder", 
       "bigInt and divideAndRemainder", 
+      "bigInt andNot divideAndRemainder", 
+      "bigInt clearBit divideAndRemainder", 
+      "bigInt divide divideAndRemainder", 
+      "bigInt flipBit divideAndRemainder", 
+      "bigInt gcd divideAndRemainder", 
+      "bigInt max divideAndRemainder", 
+      "bigInt min divideAndRemainder", 
+      "bigInt mod divideAndRemainder", 
+      "bigInt modInverse divideAndRemainder", 
+      "bigInt modPow divideAndRemainder", 
+      "bigInt multiply divideAndRemainder", 
+      "bigInt negate divideAndRemainder", 
+      "bigInt nextProbablePrime divideAndRemainder", 
+      "bigInt not divideAndRemainder", 
       "bigInt or divideAndRemainder", 
-      "bigInt xor divideAndRemainder", 
-      "bigInt not divideAndRemainder");
+      "bigInt pow divideAndRemainder");
     List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, expected);
   }
@@ -1084,7 +1089,24 @@ public class ChainCompletionScenariosTest {
     ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
       "pool submit", 
       "pool submit", 
-      "pool submit");
+      "pool submit", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll subList get", 
+      "pool invokeAll subList remove", 
+      "pool invokeAll subList set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous");
     List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, expected);
   }
@@ -1143,7 +1165,24 @@ public class ChainCompletionScenariosTest {
     ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
       "pool submit", 
       "pool submit", 
-      "pool submit");
+      "pool submit", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll subList get", 
+      "pool invokeAll subList remove", 
+      "pool invokeAll subList set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous");
     List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, expected);
   }
@@ -1173,7 +1212,24 @@ public class ChainCompletionScenariosTest {
     ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
       "pool submit", 
       "pool submit", 
-      "pool submit");
+      "pool submit", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll subList get", 
+      "pool invokeAll subList remove", 
+      "pool invokeAll subList set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous");
     List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, expected);
   }
@@ -1203,7 +1259,24 @@ public class ChainCompletionScenariosTest {
     ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
       "pool submit", 
       "pool submit", 
-      "pool submit");
+      "pool submit", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll get", 
+      "pool invokeAll remove", 
+      "pool invokeAll set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous", 
+      "pool invokeAll subList get", 
+      "pool invokeAll subList remove", 
+      "pool invokeAll subList set", 
+      "pool invokeAll iterator next", 
+      "pool invokeAll listIterator next", 
+      "pool invokeAll listIterator previous");
     List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, expected);
   }
@@ -1312,26 +1385,26 @@ public class ChainCompletionScenariosTest {
     _builder.append("Iterator<String> l = Collections.$");
     final CharSequence code = CodeBuilder.method(_builder);
     ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
-      "unmodifiableCollection iterator", 
-      "unmodifiableSet iterator", 
-      "unmodifiableSortedSet iterator", 
-      "unmodifiableList iterator", 
-      "unmodifiableList listIterator", 
-      "unmodifiableList listIterator", 
-      "synchronizedCollection iterator", 
-      "synchronizedSet iterator", 
-      "synchronizedSortedSet iterator", 
-      "synchronizedList iterator", 
-      "synchronizedList listIterator", 
-      "synchronizedList listIterator", 
       "checkedCollection iterator", 
-      "checkedSet iterator", 
-      "checkedSortedSet iterator", 
       "checkedList iterator", 
       "checkedList listIterator", 
       "checkedList listIterator", 
+      "checkedSet iterator", 
+      "emptyList iterator", 
+      "emptyList listIterator", 
+      "emptyList listIterator", 
       "emptySet iterator", 
-      "emptyList iterator");
+      "list iterator", 
+      "list listIterator", 
+      "list listIterator", 
+      "nCopies iterator", 
+      "nCopies listIterator", 
+      "nCopies listIterator", 
+      "newSetFromMap iterator", 
+      "singleton iterator", 
+      "singletonList iterator", 
+      "singletonList listIterator", 
+      "singletonList listIterator");
     List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, expected);
   }
@@ -1347,7 +1420,7 @@ public class ChainCompletionScenariosTest {
     _builder.append("Iterator<String> m(){");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("List<Object> l;");
+    _builder.append("List<String> l;");
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("return $");
@@ -1564,6 +1637,8 @@ public class ChainCompletionScenariosTest {
       _builder.append(" ");
       _builder.append("some expected values were not found ");
       _builder.append(expected, " ");
+      _builder.append(" in ");
+      _builder.append(proposals, " ");
       _builder.append(" ");
       String _string_1 = _builder.toString();
       boolean _isEmpty = expected.isEmpty();
