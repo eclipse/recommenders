@@ -41,15 +41,22 @@ class ChainCompletionScenariosTest {
 		}
 	}
 	
-	@Test
-	@Ignore("TODO: Doesn't seem to work for some target platforms")
+	@Test 
 	def void testAccessMethodParameter(){
 		val code = CodeBuilder::classbody('''
 			public void method(final List list){
 				Iterator it = $
 			}
 		''')
-		exercise(code, w(newArrayList("list iterator")));
+		var expected = w(newArrayList(
+			"list iterator",
+			"list listIterator",
+			"list listIterator",
+			"list subList iterator",
+			"list subList listIterator",
+			"list subList listIterator"
+			))
+		exercise(code, expected);
 	}
 	
 	@Test
@@ -276,7 +283,7 @@ class ChainCompletionScenariosTest {
 		exercise(code, w(newArrayList()));
 	}
 	
-	@Test 
+	@Test
 	def void testCompletionOnGenericTypeInMethod6(){
 		val code = CodeBuilder::classbody("CompletionOnGenericTypeInMethod", '''
 			public List<String> findMe = new ArrayList<String>();
@@ -373,7 +380,7 @@ class ChainCompletionScenariosTest {
 				final File c = $
 			}
 		''')
-		exercise(code, w(newArrayList("a b findMethod", "a b findMember", "a b findMethod", "a b findMember")));
+		exercise(code, w(newArrayList("a b findMethod", "a b findMember", "this a b findMethod", "this a b findMember")));
 	}
 	
 	@Test
@@ -416,7 +423,6 @@ class ChainCompletionScenariosTest {
 	}
 	
 	@Test
-	// TODO: More methods from this fixture
 	def void testCompletionOnNonPublicMemberInMethod1(){
 		val code = CodeBuilder::classbody("CompletionOnNonPublicMemberInMethod", '''
 			protected AtomicBoolean findMe1 = new AtomicBoolean();
@@ -432,7 +438,6 @@ class ChainCompletionScenariosTest {
 	}
 	
 	@Test
-	// TODO: More methods from this fixture
 	@Ignore("Context does not seem to resolve primitives as target types")
 	def void testCompletionOnPrimitiveTypeInMethod1(){
 		val code = CodeBuilder::classbody('''
@@ -464,23 +469,7 @@ class ChainCompletionScenariosTest {
 				final InputStream c = $
 			}
 		''')
-		var expected = w(newArrayList(
-			"useMe findMe",
-			"useMe getClass getResourceAsStream",
-			"useMe getClass getClassLoader getResourceAsStream",
-			"useMe getClass getSuperclass getResourceAsStream",
-			"useMe getClass getInterfaces getResourceAsStream",
-			"useMe getClass getComponentType getResourceAsStream",
-			"useMe getClass getDeclaringClass getResourceAsStream",
-			"useMe getClass getEnclosingClass getResourceAsStream",
-			"useMe getClass getClasses getResourceAsStream",
-			"useMe getClass getDeclaredClasses getResourceAsStream",
-			"useMe getClass getResource openStream",
-			"useMe getClass asSubclass getResourceAsStream",
-			"useMe clone getClass getResourceAsStream",
-			"useMe toString getClass getResourceAsStream"
-			))
-		exercise(code, expected);
+		exercise(code, w(newArrayList("useMe findMe")));
 	}
 	
 	@Test
@@ -546,7 +535,7 @@ class ChainCompletionScenariosTest {
 				Integer i = S.$
 			}
 		''')
-		exercise(code, w(newArrayList("getInstance findMe")));
+		exercise(code, w(newArrayList("INSTANCE findMe", "getInstance findMe")));
 	}
 	
 	@Test
@@ -596,25 +585,25 @@ class ChainCompletionScenariosTest {
 		''')
 		var expected = w(newArrayList(
 			"bigInt divideAndRemainder",
-			"bigInt nextProbablePrime divideAndRemainder",
-			"bigInt add divideAndRemainder",
-			"bigInt subtract divideAndRemainder",
-			"bigInt multiply divideAndRemainder",
-			"bigInt divide divideAndRemainder",
-			"bigInt remainder divideAndRemainder",
-			"bigInt pow divideAndRemainder",
-			"bigInt gcd divideAndRemainder",
 			"bigInt abs divideAndRemainder",
-			"bigInt negate divideAndRemainder",
-			"bigInt mod divideAndRemainder",
-			"bigInt modPow divideAndRemainder",
-			"bigInt modInverse divideAndRemainder",
-			"bigInt shiftLeft divideAndRemainder",
-			"bigInt shiftRight divideAndRemainder",
+			"bigInt add divideAndRemainder",
 			"bigInt and divideAndRemainder",
+			"bigInt andNot divideAndRemainder",
+			"bigInt clearBit divideAndRemainder",
+			"bigInt divide divideAndRemainder",
+			"bigInt flipBit divideAndRemainder",
+			"bigInt gcd divideAndRemainder",
+			"bigInt max divideAndRemainder",
+			"bigInt min divideAndRemainder",
+			"bigInt mod divideAndRemainder",
+			"bigInt modInverse divideAndRemainder",
+			"bigInt modPow divideAndRemainder",
+			"bigInt multiply divideAndRemainder",
+			"bigInt negate divideAndRemainder",
+			"bigInt nextProbablePrime divideAndRemainder",
+			"bigInt not divideAndRemainder",
 			"bigInt or divideAndRemainder",
-			"bigInt xor divideAndRemainder",
-			"bigInt not divideAndRemainder"
+			"bigInt pow divideAndRemainder"
 			))
 		exercise(code, expected);
 	}
@@ -641,7 +630,24 @@ class ChainCompletionScenariosTest {
 		var expected = w(newArrayList(
 			"pool submit", // different args
 			"pool submit", // different args
-			"pool submit"  // different args
+			"pool submit",  // different args
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll subList get",
+			"pool invokeAll subList remove",
+			"pool invokeAll subList set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous"
 			))
 		exercise(code, expected);
 	}
@@ -667,7 +673,6 @@ class ChainCompletionScenariosTest {
 		exercise(code, expected);
 	}
 	
-	
 	@Test
 	def void testFindFieldAnchor(){
 		val code = '''
@@ -682,7 +687,24 @@ class ChainCompletionScenariosTest {
 		var expected = w(newArrayList(
 			"pool submit", // different args
 			"pool submit", // different args
-			"pool submit"  // different args
+			"pool submit",  // different args
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll subList get",
+			"pool invokeAll subList remove",
+			"pool invokeAll subList set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous"
 			))
 			
 		exercise(code, expected);
@@ -702,7 +724,24 @@ class ChainCompletionScenariosTest {
 		var expected = w(newArrayList(
 			"pool submit", // different args
 			"pool submit", // different args
-			"pool submit"  // different args
+			"pool submit",  // different args
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll subList get",
+			"pool invokeAll subList remove",
+			"pool invokeAll subList set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous"
 			))
 			
 		exercise(code, expected);
@@ -721,7 +760,24 @@ class ChainCompletionScenariosTest {
 		var expected = w(newArrayList(
 			"pool submit", // different args
 			"pool submit", // different args
-			"pool submit"  // different args
+			"pool submit",  // different args
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll get",
+			"pool invokeAll remove",
+			"pool invokeAll set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous",
+			"pool invokeAll subList get",
+			"pool invokeAll subList remove",
+			"pool invokeAll subList set",
+			"pool invokeAll iterator next",
+			"pool invokeAll listIterator next",
+			"pool invokeAll listIterator previous"
 			))
 		exercise(code, expected);
 	}
@@ -769,14 +825,7 @@ class ChainCompletionScenariosTest {
 			"getRuntime exec getInputStream",
 			"getRuntime exec getErrorStream",
 			"getRuntime exec getInputStream",
-			"getRuntime exec getErrorStream",
-			"getRuntime getClass getResourceAsStream",
-			"getRuntime exec getClass getResourceAsStream",
-			"getRuntime exec getClass getResourceAsStream",
-			"getRuntime exec getClass getResourceAsStream",
-			"getRuntime exec getClass getResourceAsStream",
-			"getRuntime exec getClass getResourceAsStream",
-			"getRuntime exec getClass getResourceAsStream"
+			"getRuntime exec getErrorStream"
 			))
 		exercise(code, expected);
 	}
@@ -805,26 +854,26 @@ class ChainCompletionScenariosTest {
 		
 		// need to def expectations
 		var expected = w(newArrayList(
-			"unmodifiableCollection iterator",
-			"unmodifiableSet iterator",
-			"unmodifiableSortedSet iterator",
-			"unmodifiableList iterator",
-			"unmodifiableList listIterator",
-			"unmodifiableList listIterator",
-			"synchronizedCollection iterator",
-			"synchronizedSet iterator",
-			"synchronizedSortedSet iterator",
-			"synchronizedList iterator",
-			"synchronizedList listIterator",
-			"synchronizedList listIterator",
 			"checkedCollection iterator",
-			"checkedSet iterator",
-			"checkedSortedSet iterator",
 			"checkedList iterator",
 			"checkedList listIterator",
 			"checkedList listIterator",
+			"checkedSet iterator",
+			"emptyList iterator",
+			"emptyList listIterator",
+			"emptyList listIterator",
 			"emptySet iterator",
-			"emptyList iterator"
+			"list iterator",
+			"list listIterator",
+			"list listIterator",
+			"nCopies iterator",
+			"nCopies listIterator",
+			"nCopies listIterator",
+			"newSetFromMap iterator",
+			"singleton iterator",
+			"singletonList iterator",
+			"singletonList listIterator",
+			"singletonList listIterator"
 			))
 		exercise(code, expected);
 	}
@@ -835,7 +884,7 @@ class ChainCompletionScenariosTest {
 		import java.util.*;
 		class MyClass {
 			Iterator<String> m(){
-				List<Object> l;
+				List<String> l;
 				return $
 			}
 		}''' 
@@ -907,7 +956,6 @@ class ChainCompletionScenariosTest {
 			
 		exercise(code, expected);
 	}
-
 	
 	@Test
 	@Ignore("Rework so it returns chains of more than 1 element")
@@ -974,7 +1022,7 @@ class ChainCompletionScenariosTest {
 			val names = (proposal as org.eclipse.recommenders.internal.completion.rcp.chain.ChainCompletionProposal).getChainElementNames
 			assertTrue('''couldn't find «names» in expected.'''.toString, expected.remove(names))
 		} 
-		assertTrue(''' some expected values were not found «expected» '''.toString, expected.empty)
+		assertTrue(''' some expected values were not found «expected» in «proposals» '''.toString, expected.empty)
 	}
 	
 	

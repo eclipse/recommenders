@@ -10,15 +10,13 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp.chain;
 
-import static org.eclipse.jdt.ui.JavaElementLabels.M_PARAMETER_NAMES;
-import static org.eclipse.jdt.ui.JavaElementLabels.M_PARAMETER_TYPES;
-import static org.eclipse.jdt.ui.JavaElementLabels.getElementLabel;
-
 import java.util.List;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -31,13 +29,13 @@ import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.recommenders.utils.HashBag;
-import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 import org.eclipse.swt.graphics.Image;
 
 // TODO: field access may need to be qualified using "this." This is completely ignored ATM
 /**
  * Creates the templates for a give call chain.
  */
+@SuppressWarnings("restriction")
 public class CompletionTemplateBuilder {
 
     private HashBag<String> varNames;
@@ -58,13 +56,16 @@ public class CompletionTemplateBuilder {
             switch (edge.getEdgeType()) {
             case FIELD:
             case LOCAL_VARIABLE:
-                final IJavaElement var = edge.getEdgeElement();
-                sb.append(var.getElementName());
+                final VariableBinding var = edge.getEdgeElement();
+                if (var instanceof FieldBinding && sb.length() == 0) {
+                    sb.append("this.");
+                }
+                sb.append(var.name);
                 break;
             case METHOD:
-                final IMethod method = edge.getEdgeElement();
-                final String label = getElementLabel(method, M_PARAMETER_NAMES | M_PARAMETER_TYPES);
-                sb.append(label);
+                final MethodBinding method = edge.getEdgeElement();
+                // final String label = getElementLabel(method, M_PARAMETER_NAMES | M_PARAMETER_TYPES);
+                sb.append(method.readableName());
             }
             for (int i = edge.getDimension(); i-- > 0;) {
                 sb.append("[]");
@@ -82,55 +83,47 @@ public class CompletionTemplateBuilder {
             switch (edge.getEdgeType()) {
             case FIELD:
             case LOCAL_VARIABLE:
-                final IJavaElement var = edge.getEdgeElement();
-                appendIdentifier(var);
+                final VariableBinding var = edge.getEdgeElement();
+                if (var instanceof FieldBinding && sb.length() == 0) {
+                    sb.append("this.");
+                }
+                sb.append(var.name);
                 break;
             case METHOD:
-                final IMethod method = edge.getEdgeElement();
-                appendIdentifier(method);
+                final MethodBinding method = edge.getEdgeElement();
+                sb.append(method.selector);
                 appendParameters(method);
             }
             appendArrayDimensions(edge.getDimension(), expectedDimension);
             sb.append(".");
         }
         deleteLastChar();
+        System.err.println(sb.toString());
         return sb.toString();
     }
 
-    private StringBuilder appendIdentifier(final IJavaElement var) {
-        return sb.append(var.getElementName());
-    }
-
-    private void appendParameters(final IMethod method) {
+    // TODO: Resolve parameter names
+    private void appendParameters(final MethodBinding method) {
         sb.append("(");
-        try {
-            final String[] paramNames = method.getParameterNames();
-            final String[] paramTypes = method.getParameterTypes();
-            final int numberOfParams = paramNames.length;
-            for (int i = 0; i < numberOfParams; ++i) {
-                appendTemplateVariable(paramNames[i], paramTypes[i]);
-                sb.append(", ");
-            }
-            if (numberOfParams > 0) {
-                deleteLastChar();
-                deleteLastChar();
-            }
-        } catch (final JavaModelException e) {
-            RecommendersUtilsPlugin.log(e);
+        for (final TypeBinding parameter : method.parameters) {
+            final String parameterName = StringUtils.uncapitalize(String.valueOf(parameter.shortReadableName()));
+            appendTemplateVariable(parameterName);
+            sb.append(", ");
+        }
+        if (method.parameters.length > 0) {
+            deleteLastChar();
+            deleteLastChar();
         }
         sb.append(")");
     }
 
-    private void appendTemplateVariable(final String varname, final String varType) {
+    private void appendTemplateVariable(final String varname) {
         varNames.add(varname);
         sb.append("${").append(varname);
         final int count = varNames.count(varname);
         if (count > 1) {
             sb.append(count);
         }
-        // final String resolvedTypeName = JdtUtils.resolveUnqualifiedTypeNamesAndStripOffGenericsAndArrayDimension(
-        // varType, context.getCompilationUnit().findPrimaryType()).or("null");
-        // sb.append(":var(").append(resolvedTypeName).append(")");
         sb.append("}");
     }
 
@@ -141,7 +134,7 @@ public class CompletionTemplateBuilder {
     private void appendArrayDimensions(final int dimension, final int expectedDimension) {
         for (int i = dimension; i-- > expectedDimension;) {
             sb.append("[");
-            appendTemplateVariable("i", "I");
+            appendTemplateVariable("i");
             sb.append("]");
         }
     }
