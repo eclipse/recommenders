@@ -1,0 +1,9 @@
+Verified+1: Hudson CI
+Code-Review+2: Cheng Chen <chengchendoc@gmail.com>
+IP-Clean+1: Cheng Chen <chengchendoc@gmail.com>
+Verified+1: Cheng Chen <chengchendoc@gmail.com>
+Submitted-by: Cheng Chen <chengchendoc@gmail.com>
+Submitted-at: Tue, 19 Jun 2012 07:30:07 -0400
+Reviewed-on: https://git.eclipse.org/r/6442
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
