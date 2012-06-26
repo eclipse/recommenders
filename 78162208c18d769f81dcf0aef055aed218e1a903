@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+2: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+IP-Clean+1: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-by: Marcel Bruch <bruch@st.informatik.tu-darmstadt.de>
+Submitted-at: Tue, 26 Jun 2012 04:17:43 -0400
+Reviewed-on: https://git.eclipse.org/r/6478
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
