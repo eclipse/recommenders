@@ -23,9 +23,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.recommenders.extdoc.rcp.providers.ExtdocProvider;
 import org.eclipse.recommenders.extdoc.rcp.providers.ExtdocProviderDescription;
-import org.eclipse.recommenders.internal.extdoc.rcp.preferences.PreferencesFacade;
-import org.eclipse.recommenders.internal.extdoc.rcp.preferences.ProviderConfigurationPersistenceService;
-import org.eclipse.recommenders.internal.extdoc.rcp.ui.ExtdocIconLoader;
+import org.eclipse.recommenders.internal.extdoc.rcp.ui.ExtdocPreferences;
 import org.eclipse.recommenders.internal.extdoc.rcp.wiring.ManualModelStoreWiring.ClassOverridesModelStore;
 import org.eclipse.recommenders.internal.extdoc.rcp.wiring.ManualModelStoreWiring.ClassOverridesPatternsModelStore;
 import org.eclipse.recommenders.internal.extdoc.rcp.wiring.ManualModelStoreWiring.ClassSelfcallsModelStore;
@@ -47,22 +45,11 @@ public class ExtdocModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(ExtdocIconLoader.class).in(Scopes.SINGLETON);
-        bind(PreferencesFacade.class).in(Scopes.SINGLETON);
-        bind(ProviderConfigurationPersistenceService.class).in(Scopes.SINGLETON);
-
+        bind(ExtdocPreferences.class).in(Scopes.SINGLETON);
         bind(ClassOverridesPatternsModelStore.class).in(Scopes.SINGLETON);
         bind(ClassOverridesModelStore.class).in(Scopes.SINGLETON);
         bind(ClassSelfcallsModelStore.class).in(Scopes.SINGLETON);
         bind(MethodSelfcallsModelStore.class).in(Scopes.SINGLETON);
-
-    }
-
-    @Provides
-    @Singleton
-    @Extdoc
-    EventBus provideEventBus() {
-        return new EventBus("extdoc-eventbus");
     }
 
     @Provides
@@ -74,11 +61,8 @@ public class ExtdocModule extends AbstractModule {
 
     @Provides
     @Singleton
-    List<ExtdocProvider> provideProviders(@Extdoc final EventBus extdocBus,
-            final ProviderConfigurationPersistenceService providerService) {
+    List<ExtdocProvider> provideProviders() {
         final List<ExtdocProvider> providers = instantiateProvidersFromRegistry();
-        providerService.initializeProviderConfiguration(providers);
-        extdocBus.register(providerService);
         return providers;
     }
 
