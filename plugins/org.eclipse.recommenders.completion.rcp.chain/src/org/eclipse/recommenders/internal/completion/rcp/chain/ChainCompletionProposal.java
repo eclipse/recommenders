@@ -13,6 +13,8 @@ package org.eclipse.recommenders.internal.completion.rcp.chain;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.DocumentEvent;
@@ -38,10 +40,10 @@ import org.eclipse.swt.graphics.Point;
 public class ChainCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension2,
         ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension6 {
 
-    private final List<MemberEdge> chain;
+    private final List<ChainElement> chain;
     private final TemplateProposal completion;
 
-    public ChainCompletionProposal(final TemplateProposal completion, final List<MemberEdge> chain) {
+    public ChainCompletionProposal(final TemplateProposal completion, final List<ChainElement> chain) {
         this.completion = completion;
         this.chain = chain;
     }
@@ -49,8 +51,13 @@ public class ChainCompletionProposal implements IJavaCompletionProposal, IComple
     @Testing
     public List<String> getChainElementNames() {
         final List<String> b = new LinkedList<String>();
-        for (final MemberEdge edge : chain) {
-            b.add(edge.getEdgeElement().getElementName());
+        for (final ChainElement edge : chain) {
+            final Binding binding = edge.getElementBinding();
+            if (binding instanceof MethodBinding) {
+                b.add(String.valueOf(((MethodBinding) binding).selector));
+            } else {
+                b.add(String.valueOf(binding.readableName()));
+            }
         }
         return b;
     }
