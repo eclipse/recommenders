@@ -71,6 +71,8 @@ public class SearchBox extends ClientSwitcher {
     private Table resultDisplayTable = null;
     private Shell resultOverviewShell = null;
     private StyledText resultOverviewPanel = null;
+    
+    private String lastSearchText = null;
 
     public SearchBox() {
     }
@@ -261,6 +263,10 @@ public class SearchBox extends ClientSwitcher {
             ignoreTextChange = false;
             return;
         }
+        
+        //If search query does not change exactly, do not search again
+        if(lastSearchText != null && lastSearchText.trim().equals(query.trim()))
+            return;
 
         // Set the tool tip to the query, in case the query doesn't fit in the
         // search box.
@@ -306,6 +312,7 @@ public class SearchBox extends ClientSwitcher {
                         }
                     }
                 });
+                lastSearchText = query;
             }
 
             @Override
