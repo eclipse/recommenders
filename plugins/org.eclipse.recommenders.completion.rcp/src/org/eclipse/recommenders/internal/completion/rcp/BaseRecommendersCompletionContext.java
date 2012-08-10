@@ -17,6 +17,8 @@ import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -53,6 +55,15 @@ import com.google.common.base.Optional;
 @SuppressWarnings("restriction")
 public abstract class BaseRecommendersCompletionContext implements IRecommendersCompletionContext {
 
+    private final class TimeoutProgressMonitor extends NullProgressMonitor {
+        long limit = System.currentTimeMillis() + 5000;
+
+        @Override
+        public boolean isCanceled() {
+            return System.currentTimeMillis() - limit > 0;
+        }
+    }
+
     private final JavaContentAssistInvocationContext javaContext;
     private InternalCompletionContext coreContext;
     private final IAstProvider astProvider;
@@ -73,7 +84,7 @@ public abstract class BaseRecommendersCompletionContext implements IRecommenders
 
         collector = new ProposalCollectingCompletionRequestor(javaContext);
         try {
-            cu.codeComplete(getInvocationOffset(), collector);
+            cu.codeComplete(getInvocationOffset(), collector, new TimeoutProgressMonitor());
         } catch (final JavaModelException e) {
             RecommendersPlugin.log(e);
         }
