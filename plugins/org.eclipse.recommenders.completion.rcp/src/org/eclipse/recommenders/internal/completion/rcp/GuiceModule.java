@@ -10,11 +10,22 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp;
 
+import java.util.Set;
+
+import javax.inject.Singleton;
+
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 
 public class GuiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
+    }
+
+    @Provides
+    @Singleton
+    SessionProcessorDescriptor[] provideSessionProcessorDescriptors() {
+        return SessionProcessorDescriptor.parseExtensions();
     }
 }
