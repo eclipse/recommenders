@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMessageSend;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.util.ObjectVector;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
+import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 
 import com.google.common.base.Optional;
@@ -201,21 +203,35 @@ public final class TypeBindingAnalyzer {
         return base;
     }
 
-    public static Optional<TypeBinding> resolveBindingForExpectedType(final IRecommendersCompletionContext ctx) {
+    public static List<Optional<TypeBinding>> resolveBindingsForExpectedTypes(final IRecommendersCompletionContext ctx) {
         final InternalCompletionContext context = (InternalCompletionContext) ctx.getJavaContext().getCoreContext();
         final ASTNode parent = context.getCompletionNodeParent();
+        final List<Optional<TypeBinding>> bindings = Lists.newLinkedList();
         if (parent instanceof LocalDeclaration) {
-            return Optional.fromNullable(((LocalDeclaration) parent).type.resolvedType);
+            bindings.add(Optional.fromNullable(((LocalDeclaration) parent).type.resolvedType));
         } else if (parent instanceof ReturnStatement) {
-            return resolveReturnStatement(context);
+            bindings.add(resolveReturnStatement(context));
         } else if (parent instanceof FieldDeclaration) {
-            return Optional.fromNullable(((FieldDeclaration) parent).type.resolvedType);
+            bindings.add(Optional.fromNullable(((FieldDeclaration) parent).type.resolvedType));
         } else if (parent instanceof Assignment) {
-            return Optional.fromNullable(((Assignment) parent).resolvedType);
+            bindings.add(Optional.fromNullable(((Assignment) parent).resolvedType));
+        } else if (context.getCompletionNode() instanceof CompletionOnMessageSend) {
+            types: for (final ITypeName type : ctx.getExpectedTypeNames()) {
+                final String typeSignature = type.getIdentifier() + ";";
+                final ObjectVector methods = context.getVisibleMethods();
+                for (int i = 0; i < methods.size; ++i) {
+                    for (final TypeBinding param : ((MethodBinding) methods.elementAt(i)).parameters) {
+                        if (typeSignature.equals(String.valueOf(param.computeUniqueKey()))) {
+                            bindings.add(Optional.of(param));
+                            continue types;
+                        }
+                    }
+                }
+            }
         } else {
             RecommendersUtilsPlugin.logWarning("Can't handle %s as parent of completion location.", parent.getClass());
-            return Optional.absent();
         }
+        return bindings;
     }
 
     private static Optional<TypeBinding> resolveReturnStatement(final InternalCompletionContext context) {

@@ -25,46 +25,55 @@ import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public class ChainFinder {
 
-    private final TypeBinding expectedType;
-    private final int expectedDimension;
+    private final List<Optional<TypeBinding>> expectedTypes;
 
     private final InvocationSite invocationSite;
     private final Scope scope;
 
-    private final List<List<ChainElement>> chains = Lists.newLinkedList();
+    private final List<Chain> chains = Lists.newLinkedList();
 
     private final Map<Binding, ChainElement> edgeCache = Maps.newHashMap();
     private final Map<TypeBinding, Collection<Binding>> fieldsAndMethodsCache = Maps.newHashMap();
     private final Map<ChainElement, Boolean> assignableCache = Maps.newHashMap();
 
-    ChainFinder(final TypeBinding expectedType, final InvocationSite invocationSite, final Scope scope) {
-        if (expectedType instanceof ArrayBinding) {
-            this.expectedType = TypeBindingAnalyzer.removeArrayWrapper(expectedType);
-            expectedDimension = ((ArrayBinding) expectedType).dimensions();
-        } else {
-            this.expectedType = expectedType;
-            expectedDimension = 0;
-        }
+    ChainFinder(final List<Optional<TypeBinding>> expectedTypes, final InvocationSite invocationSite, final Scope scope) {
+        this.expectedTypes = expectedTypes;
         this.invocationSite = invocationSite;
         this.scope = scope;
     }
 
     void startChainSearch(final List<ChainElement> entrypoints, final int maxChains, final int minDepth,
             final int maxDepth) {
+        for (final Optional<TypeBinding> expected : expectedTypes) {
+            if (expected.isPresent()) {
+                TypeBinding expectedType = expected.get();
+                int expectedDimension = 0;
+                if (expectedType instanceof ArrayBinding) {
+                    expectedDimension = ((ArrayBinding) expectedType).dimensions();
+                    expectedType = TypeBindingAnalyzer.removeArrayWrapper(expectedType);
+                }
+                searchChainsForExpectedType(expectedType, expectedDimension, entrypoints, maxChains, minDepth, maxDepth);
+            }
+        }
+    }
+
+    private void searchChainsForExpectedType(final TypeBinding expectedType, final int expectedDimensions,
+            final List<ChainElement> entrypoints, final int maxChains, final int minDepth, final int maxDepth) {
         final LinkedList<LinkedList<ChainElement>> incompleteChains = prepareQueue(entrypoints);
 
         while (!incompleteChains.isEmpty()) {
             final LinkedList<ChainElement> chain = incompleteChains.poll();
             final ChainElement edge = chain.getLast();
-            if (isValidEndOfChain(edge)) {
+            if (isValidEndOfChain(edge, expectedType, expectedDimensions)) {
                 if (isValidChain(chain, minDepth)) {
-                    chains.add(chain);
+                    chains.add(new Chain(chain, expectedDimensions));
                     if (chains.size() == maxChains) {
                         break;
                     }
@@ -81,7 +90,7 @@ public class ChainFinder {
      * Returns the potentially incomplete list of call chains that could be found before a time out happened. The
      * contents of this list are mutable and may change as the search makes progress.
      */
-    public List<List<ChainElement>> getChains() {
+    public List<Chain> getChains() {
         return chains;
     }
 
@@ -95,7 +104,8 @@ public class ChainFinder {
         return incompleteChains;
     }
 
-    private boolean isValidEndOfChain(final ChainElement edge) {
+    private boolean isValidEndOfChain(final ChainElement edge, final TypeBinding expectedType,
+            final int expectedDimension) {
         Boolean isAssignable = assignableCache.get(edge);
         if (isAssignable == null) {
             isAssignable = TypeBindingAnalyzer.isAssignable(edge, expectedType, expectedDimension);
