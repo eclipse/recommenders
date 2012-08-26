@@ -1474,7 +1474,7 @@ public class ChainCompletionScenariosTest {
     _builder.append("}");
     _builder.newLine();
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("clazz pool");
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("pool", "clazz pool");
     List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, _w);
   }

@@ -936,7 +936,7 @@ class ChainCompletionScenariosTest {
 			}
 		}
 		'''
-		exercise(code, w(newArrayList("clazz pool")));
+		exercise(code, w(newArrayList("pool", "clazz pool")));
 	}
 	
 	// TODO we should qualify the proposed field with "this." 
