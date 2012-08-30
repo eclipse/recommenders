@@ -1097,7 +1097,6 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testFindLocalAnchorWithIsExactMatch() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.*;");
@@ -1118,11 +1117,9 @@ public class ChainCompletionScenariosTest {
     _builder.newLine();
     _builder.append("}");
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
-      "findMe", 
-      "findMe subList");
-    List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
-    this.exercise(code, expected);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("findMe");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
   }
   
   @Test
@@ -1267,7 +1264,6 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testFindFieldInSuperType() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.*;");
@@ -1287,10 +1283,9 @@ public class ChainCompletionScenariosTest {
     _builder.newLine();
     _builder.append("}");
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
-      "evt");
-    List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
-    this.exercise(code, expected);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("evt");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
   }
   
   @Test
@@ -1330,7 +1325,6 @@ public class ChainCompletionScenariosTest {
   }
   
   @Test
-  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testCompletionOnLocaVariable() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.*;");
@@ -1351,10 +1345,9 @@ public class ChainCompletionScenariosTest {
     _builder.newLine();
     _builder.append("}");
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
-      "subList");
-    List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
-    this.exercise(code, expected);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("subList");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
   }
   
   @Test
@@ -1474,13 +1467,12 @@ public class ChainCompletionScenariosTest {
     _builder.append("}");
     _builder.newLine();
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("clazz pool");
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("pool", "clazz pool");
     List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, _w);
   }
   
   @Test
-  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testFindMatchingSubtypeForAssignment() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.util.concurrent.*;");
@@ -1502,14 +1494,12 @@ public class ChainCompletionScenariosTest {
     _builder.append("}");
     _builder.newLine();
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
-      "pool");
-    List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
-    this.exercise(code, expected);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("pool");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
   }
   
   @Test
-  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testCompletionOnFieldField() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.awt.*;");
@@ -1531,14 +1521,12 @@ public class ChainCompletionScenariosTest {
     _builder.append("}");
     _builder.newLine();
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
-      "evt");
-    List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
-    this.exercise(code, expected);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("evt");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
   }
   
   @Test
-  @Ignore(value = "Rework so it returns chains of more than 1 element")
   public void testPrefixFilter() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import java.awt.*;");
@@ -1563,10 +1551,9 @@ public class ChainCompletionScenariosTest {
     _builder.append("}");
     _builder.newLine();
     final CharSequence code = _builder;
-    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList(
-      "aevt", "aevt evt");
-    List<List<String>> expected = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
-    this.exercise(code, expected);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("aevt");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
   }
   
   @Test
@@ -1581,6 +1568,56 @@ public class ChainCompletionScenariosTest {
     _builder.newLine();
     final CharSequence code = CodeBuilder.classbody(_builder);
     ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("f _public", "f _protected");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
+  }
+  
+  @Test
+  public void testParameters1() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("ThreadPoolExecutor pool;");
+    _builder.newLine();
+    _builder.append("public void test() {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("pool.getKeepAliveTime($);");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("private TimeUnit getTimeUnit() {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("return TimeUnit.MICROSECONDS;");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final CharSequence code = CodeBuilder.classbody(_builder);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("getTimeUnit");
+    List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
+    this.exercise(code, _w);
+  }
+  
+  @Test
+  public void testParameters2() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("ThreadPoolExecutor pool;");
+    _builder.newLine();
+    _builder.append("public void test() {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("pool.getKeepAliveTime(g$);");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("private TimeUnit getTimeUnit() {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("return TimeUnit.MICROSECONDS;");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final CharSequence code = CodeBuilder.classbody(_builder);
+    ArrayList<String> _newArrayList = CollectionLiterals.<String>newArrayList("getTimeUnit");
     List<List<String>> _w = this.w(((String[])Conversions.unwrapArray(_newArrayList, String.class)));
     this.exercise(code, _w);
   }
