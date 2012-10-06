@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Sebastian Proksch - initial API and implementation
+ *     Patrick Gottschaemmer, Olav Lenz - add Drag'n'Drop support
  */
 package org.eclipse.recommenders.internal.extdoc.rcp.ui;
 
@@ -29,12 +30,13 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.recommenders.extdoc.rcp.providers.ExtdocProvider;
-import org.eclipse.recommenders.internal.extdoc.rcp.wiring.ExtdocModule.Extdoc;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.rcp.events.JavaSelectionEvent;
 import org.eclipse.recommenders.utils.rcp.PartListener2Adapter;
@@ -42,6 +44,12 @@ import org.eclipse.recommenders.utils.rcp.RCPUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
@@ -116,7 +124,10 @@ public class ExtdocView extends ViewPart {
     }
 
     private void createProviderOverview() {
-        viewer = new TableViewer(sash);
+        viewer = new TableViewer(sash, SWT.SINGLE);
+
+        addDnDSupport();
+
         viewer.setContentProvider(new ArrayContentProvider());
         viewer.setLabelProvider(new LabelProvider() {
 
@@ -153,6 +164,76 @@ public class ExtdocView extends ViewPart {
             }
         });
         viewer.setSelection(new StructuredSelection(Iterables.getFirst(providers, null)));
+    }
+
+    private void addDnDSupport() {
+        final int operations = DND.DROP_MOVE;
+        final Transfer[] transferTypes = new Transfer[] { ExtdocProviderTransfer.getInstance() };
+
+        viewer.addDragSupport(operations, transferTypes, new DragSourceListener() {
+
+            @Override
+            public void dragStart(final DragSourceEvent event) {
+                // nothing to do here....
+            }
+
+            @Override
+            public void dragSetData(final DragSourceEvent event) {
+                final IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+
+                if (ExtdocProviderTransfer.getInstance().isSupportedType(event.dataType)) {
+                    final ExtdocProvider selectedProvider = (ExtdocProvider) selection.getFirstElement();
+                    ExtdocProviderTransfer.getInstance().setExtdocProvider(selectedProvider);
+                }
+            }
+
+            @Override
+            public void dragFinished(final DragSourceEvent event) {
+                // nothing to do here....
+            }
+        });
+
+        viewer.addDropSupport(operations, transferTypes, new ViewerDropAdapter(viewer) {
+
+            private int newIndex;
+
+            @Override
+            public boolean validateDrop(final Object target, final int operation, final TransferData transferType) {
+                return ExtdocProviderTransfer.getInstance().isSupportedType(transferType);
+            }
+
+            @Override
+            public void dragOver(final DropTargetEvent event) {
+                event.feedback = DND.FEEDBACK_INSERT_BEFORE;
+            }
+
+            @Override
+            public void drop(final DropTargetEvent event) {
+                if (event.item != null) {
+                    newIndex = providers.indexOf(event.item.getData());
+                } else {
+                    newIndex = providers.size();
+                }
+                performDrop(event.data);
+            }
+
+            @Override
+            public boolean performDrop(final Object data) {
+                final ExtdocProvider provider = (ExtdocProvider) data;
+                final int oldIndex = providers.indexOf(provider);
+
+                if (newIndex > oldIndex) {
+                    newIndex--;
+                }
+
+                if (newIndex != oldIndex) {
+                    final ExtdocProvider movedProvider = providers.remove(oldIndex);
+                    providers.add(newIndex, movedProvider);
+                    viewer.refresh();
+                }
+                return true;
+            }
+        });
     }
 
     private void createContentArea() {
