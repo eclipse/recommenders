@@ -14,14 +14,18 @@ import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 import static org.eclipse.recommenders.utils.Throws.throwUnhandledException;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.Date;
@@ -30,7 +34,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.recommenders.utils.IOUtils;
-import org.eclipse.recommenders.utils.Throws;
 import org.eclipse.recommenders.utils.names.IFieldName;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
@@ -45,6 +48,8 @@ import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 public class GsonUtil {
@@ -88,28 +93,41 @@ public class GsonUtil {
     public static <T> T deserialize(final String json, final Type classOfT) {
         ensureIsNotNull(json);
         ensureIsNotNull(classOfT);
-        return getInstance().fromJson(json, classOfT);
+        try {
+            return getInstance().fromJson(json, classOfT);
+        } catch (final JsonParseException e) {
+            throw throwUnhandledException(e);
+        }
     }
 
     public static <T> T deserialize(final InputStream jsonStream, final Type classOfT) {
         ensureIsNotNull(jsonStream);
         ensureIsNotNull(classOfT);
-        final InputStreamReader reader = new InputStreamReader(jsonStream);
-        final T res = getInstance().fromJson(reader, classOfT);
-        IOUtils.closeQuietly(reader);
-        return res;
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(jsonStream, "UTF-8");
+            return getInstance().fromJson(reader, classOfT);
+        } catch (final JsonParseException e) {
+            throw throwUnhandledException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw throwUnhandledException(e);
+        } finally {
+            IOUtils.closeQuietly(reader);
+        }
     }
 
     public static <T> T deserialize(final File jsonFile, final Type classOfT) {
         ensureIsNotNull(jsonFile);
         ensureIsNotNull(classOfT);
-        InputStream fis;
+        InputStream in = null;
         try {
-            fis = new BufferedInputStream(new FileInputStream(jsonFile));
+            in = new BufferedInputStream(new FileInputStream(jsonFile));
+            return deserialize(in, classOfT);
         } catch (final FileNotFoundException e) {
-            throw Throws.throwUnhandledException(e, "Unable to deserialize from file " + jsonFile.getAbsolutePath());
+            throw throwUnhandledException(e);
+        } finally {
+            IOUtils.closeQuietly(in);
         }
-        return deserialize(fis, classOfT);
     }
 
     public static String serialize(final Object obj) {
@@ -122,20 +140,40 @@ public class GsonUtil {
     public static void serialize(final Object obj, final Appendable writer) {
         ensureIsNotNull(obj);
         ensureIsNotNull(writer);
-        getInstance().toJson(obj, writer);
+        try {
+            getInstance().toJson(obj, writer);
+        } catch (final JsonIOException e) {
+            throw throwUnhandledException(e);
+        }
     }
 
-    public static void serialize(final Object obj, final File dest) {
-        ensureIsNotNull(obj, "object to serialize cannot be null");
-        ensureIsNotNull(dest, "serialization destination cannot be null");
-        Writer fw = null;
+    public static void serialize(final Object obj, final File jsonFile) {
+        ensureIsNotNull(obj);
+        ensureIsNotNull(jsonFile);
+        OutputStream out = null;
         try {
-            fw = new BufferedWriter(new FileWriter(dest));
-            getInstance().toJson(obj, fw);
-        } catch (final IOException x) {
-            throwUnhandledException(x);
+            out = new BufferedOutputStream(new FileOutputStream(jsonFile));
+            serialize(obj, out);
+        } catch (final FileNotFoundException e) {
+            throw throwUnhandledException(e);
         } finally {
-            IOUtils.closeQuietly(fw);
+            IOUtils.closeQuietly(out);
+        }
+    }
+
+    public static void serialize(final Object obj, final OutputStream out) {
+        ensureIsNotNull(obj);
+        ensureIsNotNull(out);
+        Writer writer = null;
+        try {
+            writer = new OutputStreamWriter(out, "UTF-8");
+            getInstance().toJson(obj, writer);
+        } catch (final JsonIOException e) {
+            throw throwUnhandledException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw throwUnhandledException(e);
+        } finally {
+            IOUtils.closeQuietly(writer);
         }
     }
 
@@ -149,9 +187,7 @@ public class GsonUtil {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
-                    final InputStreamReader reader = new InputStreamReader(zis);
-                    final T data = getInstance().fromJson(reader, classOfT);
-                    res.add(data);
+                    res.add(GsonUtil.<T>deserialize(zis, classOfT));
                 }
             }
         } finally {
