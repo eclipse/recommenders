@@ -270,8 +270,13 @@ public class ExtdocView extends ViewPart {
     }
 
     @VisibleForTesting
-    public void moveBefore(int newIndex, int oldIndex) {
+    public void moveBefore(int oldIndex, int newIndex) {
         move(oldIndex, newIndex, MOVE_BEFORE);
+    }
+
+    @VisibleForTesting
+    public List<ExtdocProvider> getProviderRanking() {
+        return providerRanking;
     }
 
     private void createContentArea() {
