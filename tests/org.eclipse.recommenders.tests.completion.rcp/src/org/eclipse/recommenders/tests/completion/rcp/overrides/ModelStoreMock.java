@@ -14,6 +14,7 @@ import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.Comparator;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.core.IType;
@@ -35,7 +36,19 @@ public class ModelStoreMock extends DefaultModelArchiveStore<IType, ClassOverrid
     @Override
     public Optional<ClassOverridesNetwork> aquireModel(final IType type) {
         final ClassOverridesNetwork net = Mockito.mock(ClassOverridesNetwork.class);
-        when(net.getRecommendedMethodOverrides(anyDouble())).thenReturn(new TreeSet<Tuple<IMethodName, Double>>() {
+        final Comparator<Tuple<IMethodName, Double>> c = new Comparator<Tuple<IMethodName, Double>>() {
+
+            @Override
+            public int compare(Tuple<IMethodName, Double> o1, Tuple<IMethodName, Double> o2) {
+                if (o1.getSecond() != o2.getSecond()) {
+                    double diff = o1.getSecond() - o2.getSecond();
+                    return diff > 0 ? 1 : -1;
+                }
+                return o1.getFirst().toString().compareTo(o2.getFirst().toString());
+            }
+        };
+
+        when(net.getRecommendedMethodOverrides(anyDouble())).thenReturn(new TreeSet<Tuple<IMethodName, Double>>(c) {
             {
                 add(Tuple.newTuple((IMethodName) VmMethodName.get("Ljava/lang/Object.hashCode()I"), 0.8d));
             }
