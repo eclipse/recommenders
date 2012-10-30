@@ -16,6 +16,7 @@ import org.junit.Test
 import static junit.framework.Assert.*
 import static org.eclipse.recommenders.tests.SmokeTestScenarios.*
 import static org.eclipse.recommenders.tests.completion.rcp.chain.ChainCompletionScenariosTest.*
+import org.apache.commons.lang3.SystemUtils
  
 class ChainCompletionScenariosTest { 
   
@@ -833,10 +834,7 @@ class ChainCompletionScenariosTest {
 	def void testCompletionOnStaticType() {
 		val code =  CodeBuilder::method('''Iterator<String> l = Collections.$''')
 		
-		// need to def expectations
-		var expected = w(newArrayList(
-			// JDK 7 only: "emptyIterator",
-			// JDK 7 only: "emptyListIterator",
+			val wanted = newArrayList(
 			"asLifoQueue iterator",
 			"checkedCollection iterator",
 			"checkedList iterator",
@@ -857,7 +855,16 @@ class ChainCompletionScenariosTest {
 			"nCopies listIterator",
 			"nCopies listIterator",
 			"newSetFromMap iterator"
-			))
+			)
+		if(SystemUtils::IS_JAVA_1_7){
+			wanted.add("emptyIterator")
+			wanted.add("emptyListIterator")
+			// limit to 20 proposals?
+			wanted.remove("singleton iterator")
+			wanted.remove("singletonList iterator")
+		}
+		// need to def expectations
+		var expected = w(wanted)
 		exercise(code, expected);
 	}
 	
