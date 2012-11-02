@@ -19,10 +19,12 @@
 	<packaging>pom</packaging>
 	<properties>
         <recommenders-version>1.0.0-SNAPSHOT</recommenders-version>
-		<tycho-version>0.15.0</tycho-version>
+		<tycho-version>0.16.0</tycho-version>
 		<jacoco-version>0.5.4.201111111111</jacoco-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<build-alias>b000</build-alias>
+		<!-- To ensure build reproducibility, locally-built artifact installed by previous Tycho builds are ignored. -->
+		<typcho.localArtifacts>ignore</typcho.localArtifacts>
 		<coverage.skip>false</coverage.skip>
 		<coverage.filter>org.eclipse.recommenders.*</coverage.filter>
 		<coverage.destFile>../target/jacoco.exec</coverage.destFile>
@@ -141,7 +143,6 @@
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-maven-plugin</artifactId>
 					<version>${tycho-version}</version>
-					<!-- MB: why do we need extensions=true? -->
 					<extensions>true</extensions>
 				</plugin>
 				<plugin>
