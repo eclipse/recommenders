@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, 2011 Darmstadt University of Technology.
+ * Copyright (c) 2010, 2012 Darmstadt University of Technology.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,42 +13,71 @@ package org.eclipse.recommenders.internal.extdoc.rcp.ui;
 import static java.lang.Integer.parseInt;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.recommenders.extdoc.rcp.providers.ExtdocProvider;
 import org.eclipse.recommenders.internal.extdoc.rcp.wiring.ExtdocPlugin;
-import org.eclipse.recommenders.utils.Throws;
+import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 
 public class ExtdocPreferences {
 
-    private final IEclipsePreferences preferences;
-
-    private static final String PROVIDER_NAMES = "providerNames";
+    public static final String PROVIDER_RANKING = "providerRanking";
     private static final String DISABLED_PROVIDERS = "disabledProviders";
     private static final String SASH_WEIGHTS = "sashWeights";
 
+    private final IEclipsePreferences preferences;
+    private final Preferences providerRankingNode;
+
     public ExtdocPreferences() {
         preferences = InstanceScope.INSTANCE.getNode(ExtdocPlugin.PLUGIN_ID);
+        providerRankingNode = preferences.node(PROVIDER_RANKING);
     }
 
-    public void storeOrderedProviders(final List<ExtdocProvider> providers) {
-        final String[] providerNames = getProviderNames(providers);
-        final String toSave = createString(providerNames);
-        preferences.put(PROVIDER_NAMES, toSave);
+    public void storeProviderRanking(final List<ExtdocProvider> providerRanking) {
+        clearNode(providerRankingNode);
+
+        for (int i = 0; i < providerRanking.size(); i++) {
+            providerRankingNode.put(Integer.toString(i), providerRanking.get(i).getDescription().getName());
+        }
         flush();
     }
 
-    private static String[] getProviderNames(final List<ExtdocProvider> providers) {
-        final String[] names = new String[providers.size()];
-        int i = 0;
-        for (final ExtdocProvider p : providers) {
-            names[i] = p.getDescription().getName();
-            i++;
+    public List<String> loadOrderedProviderNames() {
+        String[] keys = fetchKeys(providerRankingNode);
+        List<String> providerNames = new LinkedList<String>();
+
+        for (int i = 0; i < keys.length; i++) {
+            String tmp = providerRankingNode.get(Integer.toString(i), null);
+            if (tmp != null) {
+                providerNames.add(tmp);
+            } else {
+                RecommendersPlugin.logWarning("Loading entry for key " + i + " failed. No such entry.");
+            }
         }
-        return names;
+        return providerNames;
+    }
+
+    private String[] fetchKeys(Preferences node) {
+        String[] keys = new String[0];
+        try {
+            keys = node.keys();
+        } catch (BackingStoreException e) {
+            RecommendersPlugin.logError(e, "Exception during loading the keys of: " + node.absolutePath());
+        }
+        return keys;
+    }
+
+    private void clearNode(Preferences node) {
+        try {
+            node.clear();
+        } catch (BackingStoreException e) {
+            RecommendersPlugin.logError(e, "Exception during clearing the preference node: " + node.absolutePath());
+        }
     }
 
     private String createString(final String[] names) {
@@ -61,12 +90,6 @@ public class ExtdocPreferences {
         } else {
             return "";
         }
-    }
-
-    public String[] loadOrderedProviderNames() {
-        final String orderedNameString = preferences.get(PROVIDER_NAMES, "");
-        final String[] orderedNames = orderedNameString.split(",");
-        return orderedNames;
     }
 
     public boolean isProviderEnabled(final ExtdocProvider p) {
@@ -113,8 +136,8 @@ public class ExtdocPreferences {
     private void flush() {
         try {
             preferences.flush();
-        } catch (final BackingStoreException e) {
-            Throws.throwUnhandledException(e);
+        } catch (BackingStoreException e) {
+            RecommendersPlugin.logError(e, "Exception during saving the order of the ExtdocProviders");
         }
     }
 }

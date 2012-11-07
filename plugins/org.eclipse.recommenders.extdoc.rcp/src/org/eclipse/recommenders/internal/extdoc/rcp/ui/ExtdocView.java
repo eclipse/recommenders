@@ -17,8 +17,10 @@ import static org.eclipse.recommenders.internal.extdoc.rcp.ui.ExtdocUtils.setInf
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -107,7 +109,31 @@ public class ExtdocView extends ViewPart {
         this.subscriptionManager = subscriptionManager;
         this.providers = providers;
         this.preferences = preferences;
-        this.providerRanking = new LinkedList<ExtdocProvider>(providers);
+        this.providerRanking = new LinkedList<ExtdocProvider>();
+        loadProviderRankingFromPreferences();
+    }
+
+    private HashMap<String, ExtdocProvider> fillProviderMap() {
+        HashMap<String, ExtdocProvider> providerMap = new HashMap<String, ExtdocProvider>();
+        for (ExtdocProvider provider : providers) {
+            providerMap.put(provider.getDescription().getName(), provider);
+        }
+        return providerMap;
+    }
+
+    private void loadProviderRankingFromPreferences() {
+        Map<String, ExtdocProvider> providerMap = fillProviderMap();
+        List<String> providerNames = preferences.loadOrderedProviderNames();
+        LinkedList<ExtdocProvider> additionalProviders = new LinkedList<ExtdocProvider>(providers);
+
+        for (String providerName : providerNames) {
+            ExtdocProvider tmpProvider = providerMap.get(providerName);
+            if (tmpProvider != null) {
+                providerRanking.add(tmpProvider);
+                additionalProviders.remove(tmpProvider);
+            }
+        }
+        providerRanking.addAll(additionalProviders);
     }
 
     @Override
@@ -246,6 +272,7 @@ public class ExtdocView extends ViewPart {
                 } else {
                     moveBefore(oldIndex, newIndex);
                 }
+                storeProviderRanking();
                 viewer.refresh();
                 return true;
             }
@@ -277,6 +304,11 @@ public class ExtdocView extends ViewPart {
     @VisibleForTesting
     public List<ExtdocProvider> getProviderRanking() {
         return providerRanking;
+    }
+
+    @VisibleForTesting
+    public void storeProviderRanking() {
+        preferences.storeProviderRanking(providerRanking);
     }
 
     private void createContentArea() {

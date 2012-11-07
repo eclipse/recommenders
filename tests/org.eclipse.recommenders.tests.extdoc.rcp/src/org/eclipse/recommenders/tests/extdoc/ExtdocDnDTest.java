@@ -11,7 +11,9 @@
 package org.eclipse.recommenders.tests.extdoc;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -41,14 +43,22 @@ public class ExtdocDnDTest {
         EventBus bus = mock(EventBus.class);
         SubscriptionManager subManger = mock(SubscriptionManager.class);
 
-        provider0 = mock(ExtdocProvider.class);
-        provider1 = mock(ExtdocProvider.class);
-        provider2 = mock(ExtdocProvider.class);
-        provider3 = mock(ExtdocProvider.class);
-        provider4 = mock(ExtdocProvider.class);
+        provider0 = mock(ExtdocProvider.class, RETURNS_DEEP_STUBS);
+        when(provider0.getDescription().getName()).thenReturn("provider0");
+
+        provider1 = mock(ExtdocProvider.class, RETURNS_DEEP_STUBS);
+        when(provider1.getDescription().getName()).thenReturn("provider1");
+
+        provider2 = mock(ExtdocProvider.class, RETURNS_DEEP_STUBS);
+        when(provider2.getDescription().getName()).thenReturn("provider2");
+
+        provider3 = mock(ExtdocProvider.class, RETURNS_DEEP_STUBS);
+        when(provider3.getDescription().getName()).thenReturn("provider3");
+
+        provider4 = mock(ExtdocProvider.class, RETURNS_DEEP_STUBS);
+        when(provider4.getDescription().getName()).thenReturn("provider4");
 
         List<ExtdocProvider> providers = Lists.newArrayList(provider0, provider1, provider2, provider3, provider4);
-
         defaultOrder = new LinkedList<ExtdocProvider>(providers);
 
         ExtdocPreferences preferences = mock(ExtdocPreferences.class);
