@@ -1,6 +1,7 @@
 package org.eclipse.recommenders.tests
 
 import java.util.Arrays
+
 import static org.eclipse.recommenders.tests.CodeBuilder.*
 
 class SmokeTestScenarios {
@@ -9,7 +10,9 @@ class SmokeTestScenarios {
 		Arrays::asList(
 			IMPORT_01, IMPORT_02, 
 			PACKAGE_01, PACKAGE_02, PACKAGE_03,
-			METHOD_STMT_01, METHOD_STMT_02, METHOD_STMT_03, METHOD_STMT_04, METHOD_STMT_05,METHOD_STMT_06, 
+			CLASSBODY_01, CLASSBODY_02, CLASSBODY_03, CLASSBODY_04, CLASSBODY_05,
+			METHOD_STMT_01, METHOD_STMT_02, METHOD_STMT_03, METHOD_STMT_04, METHOD_STMT_05,METHOD_STMT_06,
+			METHOD_STMT_07, METHOD_STMT_08, METHOD_STMT_09, METHOD_STMT_10, METHOD_STMT_11,
 			COMMENTS_01, COMMENTS_02
 		)
 	}
@@ -47,6 +50,22 @@ class SmokeTestScenarios {
 		«someClass»
 		'''
 		
+	public static CharSequence CLASSBODY_01 = classDeclaration(
+		'''class ExtendingClass1 extends ArayList''',
+		'''$'''
+	)
+	
+	public static CharSequence CLASSBODY_02 = classDeclaration(
+		'''class ExtendingClass2 extends ArayList''',
+		'''siz$'''
+	)
+	
+	public static CharSequence CLASSBODY_03 = classbody('''private Strign text = $''')
+	
+	public static CharSequence CLASSBODY_04 = classbody('''prvat Object o = $''')
+	
+	public static CharSequence CLASSBODY_05 = classbody('''public List = $''')
+	
 	public static CharSequence METHOD_STMT_01 = method('''Ob$;''')
 
 	public static CharSequence METHOD_STMT_02 = method('''Object $''')
@@ -63,8 +82,19 @@ class SmokeTestScenarios {
 	public static CharSequence METHOD_STMT_06 = classbody('''void <T> m(T t){
 		t.$
 		}''')
-		
-		
+	
+	public static CharSequence METHOD_STMT_07 = method('''Sysetm.$exit$($)''')
+	
+	public static CharSequence METHOD_STMT_08 = method('''Obejct o = new $File($to$String())''')
+	
+	public static CharSequence METHOD_STMT_09 = method('''
+		Objetc o = "";
+		o.$''')
+	
+	public static CharSequence METHOD_STMT_10 = method('''Lsit l = $''')
+	
+	public static CharSequence METHOD_STMT_11 = method('''equasl($)''')
+	
 	public static CharSequence COMMENTS_01 = 
 		'''
 		/**
@@ -91,8 +121,8 @@ class SmokeTestScenarios {
 		*/
 		static {
 		}''')
-				
-
+		
+		
 	def static OLD_TEST_CLASS(){
 		'''
 		/**
