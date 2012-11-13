@@ -47,6 +47,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.swt.graphics.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +59,14 @@ public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
 
     private Logger log = LoggerFactory.getLogger(getClass());
     private final Map<IJavaCompletionProposal, CompletionProposal> proposals = Maps.newIdentityHashMap();
-    private final JavaContentAssistInvocationContext jdtuiContext;
+    private JavaContentAssistInvocationContext jdtuiContext;
     private CompletionProposalCollector collector;
     private InternalCompletionContext compilerContext;
+
+    @Testing
+    ProposalCollectingCompletionRequestor() {
+        super(true);
+    }
 
     public ProposalCollectingCompletionRequestor(final JavaContentAssistInvocationContext ctx) {
         super(false);
