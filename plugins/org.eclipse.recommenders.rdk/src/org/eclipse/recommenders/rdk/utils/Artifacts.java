@@ -75,6 +75,34 @@ public class Artifacts {
     }
 
     /**
+     * Creates a glob artifact from the give glob string. Glob strings may consist of group-id:[artifact-id:[version]]
+     * and may use '*' and '?' at any location.
+     * <p>
+     * Examples:
+     * <ul>
+     * <li>"*:*:*"
+     * <li>"com.*:*:*"
+     * <li>"com.*" matches all artifacts whose group id starts with 'com.'
+     * <li>"*:*core*" -&gt; matches all artifacts that have 'core' in their name
+     * </ul>
+     */
+    public static Artifact createGlobArtifact(String coordinate) {
+        // defaults:
+        String gid = "", aid = "", ext = "", ver = "";
+
+        String[] segments = coordinate.split(":");
+        switch (segments.length) {
+        case 3:
+            ver = segments[2];
+        case 2:
+            aid = segments[1];
+        case 1:
+            gid = segments[0];
+        }
+        return new DefaultArtifact(gid, aid, ext, ver);
+    }
+
+    /**
      * @return the repository-relative path to this artifact.
      */
     public static File asFile(Artifact pom) {
