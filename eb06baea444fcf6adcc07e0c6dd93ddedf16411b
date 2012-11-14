@@ -1,0 +1,9 @@
+Change-Id: I15ead40de733e198769db969c81658f192428ff1
+Code-Review+2: Marcel Bruch <marcel.bruch@codetrails.com>
+IP-Clean+1: Marcel Bruch <marcel.bruch@codetrails.com>
+Verified+1: Marcel Bruch <marcel.bruch@codetrails.com>
+Submitted-by: Marcel Bruch <marcel.bruch@codetrails.com>
+Submitted-at: Wed, 14 Nov 2012 03:25:23 -0500
+Reviewed-on: https://git.eclipse.org/r/8663
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
