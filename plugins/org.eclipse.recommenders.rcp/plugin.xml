@@ -29,9 +29,15 @@
      <extension
            point="org.eclipse.ui.preferencePages">
         <page
-              class="org.eclipse.recommenders.internal.rcp.ui.PreferencePage"
+              class="org.eclipse.recommenders.internal.rcp.ui.RecommendersPreferencePage"
               id="org.eclipse.recommenders.rcp.category.preferences"
               name="Code Recommenders">
+        </page>
+        <page
+              category="org.eclipse.recommenders.rcp.category.preferences"
+              class="org.eclipse.recommenders.internal.rcp.ui.ModelPreferencePage"
+              id="org.eclipse.recommenders.rcp.modelpreferences"
+              name="Models">
         </page>
      </extension>
      <extension
