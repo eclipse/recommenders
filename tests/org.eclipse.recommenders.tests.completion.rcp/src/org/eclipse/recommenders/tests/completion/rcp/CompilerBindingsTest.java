@@ -15,8 +15,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
+import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
 import org.eclipse.recommenders.utils.rcp.CompilerBindings;
 import org.junit.Test;
@@ -41,9 +44,31 @@ public class CompilerBindingsTest {
         assertEquals(VmTypeName.LONG, actual.get());
     }
 
+    @Test
+    public void testCanParseMethod() {
+        final MethodBinding mock = createMethodBinding("Ljava/lang/Object;.equals(Ljava/lang/Object;)Z");
+
+        final Optional<IMethodName> actual = CompilerBindings.toMethodName(mock);
+        assertEquals(VmMethodName.get("Ljava/lang/Object.equals(Ljava/lang/Object;)Z"), actual.get());
+    }
+
+    @Test
+    public void testCanParseConstructor() {
+        final MethodBinding mock = createMethodBinding("Ljava/lang/Object;.()V");
+
+        final Optional<IMethodName> actual = CompilerBindings.toMethodName(mock);
+        assertEquals(VmMethodName.get("Ljava/lang/Object.<init>()V"), actual.get());
+    }
+
     private ReferenceBinding createSimpleBinding(final String type) {
         final ReferenceBinding mock = mock(ReferenceBinding.class);
-        when(mock.computeUniqueKey()).thenReturn("J".toCharArray());
+        when(mock.computeUniqueKey()).thenReturn(type.toCharArray());
+        return mock;
+    }
+
+    private MethodBinding createMethodBinding(final String method) {
+        final MethodBinding mock = mock(MethodBinding.class);
+        when(mock.computeUniqueKey()).thenReturn(method.toCharArray());
         return mock;
     }
 }
