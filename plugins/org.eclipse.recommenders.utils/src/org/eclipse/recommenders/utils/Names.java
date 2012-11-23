@@ -18,10 +18,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.recommenders.utils.names.IAnnotation;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.IName;
 import org.eclipse.recommenders.utils.names.IPackageName;
 import org.eclipse.recommenders.utils.names.ITypeName;
+import org.eclipse.recommenders.utils.names.VmAnnotation;
 import org.eclipse.recommenders.utils.names.VmTypeName;
 
 /**
@@ -400,6 +402,10 @@ public class Names {
         ensureIsNotNull(vmTypeDescriptor, "vmTypeName");
         //
         return internal_vm2srcTypeName(vmTypeDescriptor.toCharArray(), 0);
+    }
+
+    public static IAnnotation vmType2vmAnnotation(final ITypeName annotationType) {
+        return VmAnnotation.get(annotationType);
     }
 
     public static ITypeName java2vmType(final Class<?> clazz) {
