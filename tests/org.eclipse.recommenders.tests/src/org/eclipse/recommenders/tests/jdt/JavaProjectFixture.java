@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
+ *    Kevin Munk - Extension for package creation and some helper methods.
  */
 package org.eclipse.recommenders.tests.jdt;
 
@@ -22,6 +23,7 @@ import static org.eclipse.recommenders.utils.Throws.throwUnhandledException;
 import static org.eclipse.recommenders.utils.Tuple.newTuple;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -219,24 +221,135 @@ public class JavaProjectFixture {
         return cu;
     }
 
-    public Tuple<ICompilationUnit, Set<Integer>> createFileAndParseWithMarkers(final CharSequence contentWithMarkers) throws CoreException {
-        final Tuple<String, Set<Integer>> content = findMarkers(contentWithMarkers);
-        final String fileName = findClassName(content.getFirst()) + ".java";
+	/**
+	 * Creates the file with the content, but without markers. The package
+	 * specified in the content will not be created. Then the project will 
+	 * be refreshed and built.
+	 * 
+	 * @param contentWithMarkers
+	 *            the code with markers(see {@link AstUtils}.MARKER)
+	 * @return the Tuple of the ICompilationUnit and the List of marker
+	 *         positions in the code provided
+	 * @throws CoreException
+	 */
+	public Tuple<ICompilationUnit, Set<Integer>> createFileAndParseWithMarkers(
+			final CharSequence contentWithMarkers) throws CoreException {
+		final Tuple<String, Set<Integer>> content = findMarkers(contentWithMarkers);
 
-        final IProject project = javaProject.getProject();
-        final IPath path = new Path(fileName);
-        final IFile file = project.getFile(fileName);
-        if (file.exists()) {
-            file.delete(true, null);
-        }
-        final ByteArrayInputStream is = new ByteArrayInputStream(content.getFirst().getBytes());
-        file.create(is, true, null);
-        final ICompilationUnit cu = (ICompilationUnit) javaProject.findElement(path);
-        project.refreshLocal(IResource.DEPTH_INFINITE, null);
-        project.build(IncrementalProjectBuilder.FULL_BUILD, null);
-        return Tuple.newTuple(cu, content.getSecond());
-    }
+		final ICompilationUnit cu = createFile(content.getFirst(), false, true);
 
+		return Tuple.newTuple(cu, content.getSecond());
+	}
+
+	/**
+	 * Creates the package and the file with the content, but without markers.
+	 * Then the project will be refreshed and built.
+	 * 
+	 * @param contentWithMarkers
+	 *            the code with markers(see {@link AstUtils}.MARKER)
+	 * @return the Tuple of the ICompilationUnit and the List of marker
+	 *         positions in the code provided
+	 * @throws CoreException
+	 */
+	public Tuple<ICompilationUnit, Set<Integer>> createFileAndPackageAndParseWithMarkers(
+			final CharSequence contentWithMarkers) throws CoreException {
+		final Tuple<String, Set<Integer>> content = findMarkers(contentWithMarkers);
+
+		final ICompilationUnit cu = createFile(content.getFirst(), true, true);
+
+		return Tuple.newTuple(cu, content.getSecond());
+	}
+
+	/**
+	 * Refreshes the resources of this project and initiates a full build.
+	 * 
+	 * @throws CoreException
+	 */
+	public void refreshAndBuildProject() throws CoreException {
+		final IProject project = javaProject.getProject();
+		project.refreshLocal(IResource.DEPTH_INFINITE, null);
+		project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+	}
+
+	/**
+	 * Creates the package found in the contents package declaration if wished.
+	 * Then creates the compilation unit with the class name found in the content.
+	 * <br>
+	 * <br>
+	 * To create a file that has markers in it, use the method
+	 * createFileAndParseWithMarkers().
+	 * 
+	 * @param content
+	 *            the content of the compilation unit. Must be java source code
+	 *            with or without package declaration but with a java class
+	 *            definition
+	 * @param createPackage
+	 *            if the package inside the content should be created and the
+	 *            compilation unit should be placed inside this created package.
+	 * @param buildProject
+	 *            if the project should be refreshed and built after creation of
+	 *            the compilation unit
+	 * @return the created compilation compilation unit
+	 * @throws CoreException
+	 */
+	public ICompilationUnit createFile(final String content,
+			boolean createPackage, boolean buildProject) throws CoreException {
+		final IProject project = javaProject.getProject();
+		String packageName = "";
+
+		if (createPackage) {
+			// get package from the code if declared
+			packageName = findPackageName(content);
+		}
+
+		// get filename
+		final String fileName = findClassName(content) + ".java";
+		StringBuilder relativeFilePath = new StringBuilder();
+
+		if (!packageName.equalsIgnoreCase("")) {
+			// append project and package folders
+			IPath projectPath = project.getLocation().addTrailingSeparator();
+
+			relativeFilePath.append(packageName.replace('.', Path.SEPARATOR));
+			relativeFilePath.append(String.valueOf(Path.SEPARATOR));
+
+			// create package folders
+			IPath packagePath = new Path(projectPath.toString()
+					+ relativeFilePath.toString());
+			File packageDirectory = packagePath.toFile();
+			packageDirectory.mkdirs();
+
+			// refresh to prevent that the file creation fails
+			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+		}
+
+		// add the file name and get the file
+		relativeFilePath.append(fileName);
+		final IPath path = new Path(relativeFilePath.toString());
+		final IFile file = project.getFile(path);
+
+		// delete file
+		if (file.exists())
+			file.delete(true, null);
+
+		// create file
+		final ByteArrayInputStream is = new ByteArrayInputStream(
+				content.getBytes());
+		file.create(is, true, null);
+		final ICompilationUnit cu = (ICompilationUnit) javaProject
+				.findElement(path);
+
+		if (buildProject)
+			refreshAndBuildProject();
+
+		return cu;
+	}
+
+	/**
+	 * Goes through the project and deletes all Java and Class files.
+	 * 
+	 * @throws CoreException
+	 */
     public void clear() throws CoreException {
 
         final IProject project = javaProject.getProject();
@@ -254,10 +367,32 @@ public class JavaProjectFixture {
         });
     }
 
+	/**
+	 * Deletes the project inclusive content from the disk. <b>Warning:</b> This
+	 * Fixture is no longer usable after doing this.
+	 * 
+	 * @throws CoreException
+	 */
+	public void deleteProject() throws CoreException {
+		javaProject.getProject().delete(true, true, null);
+	}
+
+	/**
+	 * Retrieves the inner java project managed by this fixture.
+	 * 
+	 * @return the inner java project managed by this fixture
+	 */
     public IJavaProject getJavaProject() {
         return javaProject;
     }
 
+	/**
+	 * Removes all markers from the content.
+	 * 
+	 * @param content
+	 *            where the markers will be removed
+	 * @return the content without any markers
+	 */
     public String removeMarkers(final String content) {
         return content.replaceAll(MARKER_ESCAPE, "");
     }
