@@ -13,6 +13,7 @@ package org.eclipse.recommenders.tests.jdt;
 import static org.eclipse.recommenders.tests.jdt.JavaProjectFixture.findAnonymousClassNames;
 import static org.eclipse.recommenders.tests.jdt.JavaProjectFixture.findClassName;
 import static org.eclipse.recommenders.tests.jdt.JavaProjectFixture.findInnerClassNames;
+import static org.eclipse.recommenders.tests.jdt.JavaProjectFixture.findPackageName;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
@@ -170,5 +171,109 @@ public class JavaProjectFixtureTest {
         List<String> actuals = findAnonymousClassNames(code);
         List<String> expecteds = Lists.newArrayList("Class1$1");
         assertEquals(expecteds, actuals);
+    }
+
+    @Test
+    public void extractNoPackageName() {
+        String actual = findPackageName(code);
+        String expected = "";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractNoPackageNameFaultyPackage1() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package ");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractNoPackageNameFaultyPackage2() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package test.");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractNoPackageNameFaultyPackage3() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package test.blub.");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractNoPackageNameFaultyPackage4() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package test.;");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractNoPackageNameFaultyPackage5() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package test.blub.;");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractPackageName() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package test;");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "test";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractPackageName2() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("@SomeAnnotation");
+        sb.append("package test.blub.bla;");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "test.blub.bla";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void extractPackageName3() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package a.b.c.d.e.f;");
+        sb.append("public class Class1 {");
+        sb.append("}");
+
+        String actual = findPackageName(sb);
+        String expected = "a.b.c.d.e.f";
+        assertEquals(expected, actual);
     }
 }
