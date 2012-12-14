@@ -99,6 +99,26 @@ public class JavaProjectFixture {
         return names;
     }
 
+	/**
+	 * Finds the package name from the package declaration inside the source
+	 * code.
+	 * 
+	 * @param source
+	 *            the source code
+	 * @return the package name or "" if no package declaration was found
+	 */
+	public static String findPackageName(final CharSequence source) {
+		Pattern p = Pattern.compile(
+				".*?package[ \\t\\x08\\x0c]+([a-zA-Z_0-9.]+[a-zA-Z_0-9]+)[;]+.*",
+				Pattern.DOTALL);
+		Matcher matcher = p.matcher(source);
+		if (matcher.matches()) {
+			final String group = matcher.group(1);
+			return group;
+		}
+		return "";
+	}
+
     private IJavaProject javaProject;
     private ASTParser parser;
 
