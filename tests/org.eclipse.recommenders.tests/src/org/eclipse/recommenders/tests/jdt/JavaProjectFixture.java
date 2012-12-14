@@ -56,10 +56,10 @@ import com.google.common.collect.Sets;
 public class JavaProjectFixture {
 
     public static String findClassName(final CharSequence source) {
-        Pattern p = Pattern.compile(".*?class\\s+(\\w+).*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(".*?class\\s+" + getJavaIdentifierRegEx() + ".*", Pattern.DOTALL);
         Matcher matcher = p.matcher(source);
         if (!matcher.matches()) {
-            p = Pattern.compile(".*interface\\s+(\\w+).*", Pattern.DOTALL);
+            p = Pattern.compile(".*interface\\s+" + getJavaIdentifierRegEx() + ".*", Pattern.DOTALL);
             matcher = p.matcher(source);
         }
         assertTrue(matcher.matches());
@@ -71,7 +71,7 @@ public class JavaProjectFixture {
         String declaringType = findClassName(source);
         List<String> names = newArrayList();
 
-        Pattern p = Pattern.compile("(class|interface)\\s+(\\w+)", Pattern.DOTALL);
+        Pattern p = Pattern.compile("(class|interface)\\s+" + getJavaIdentifierRegEx(), Pattern.DOTALL);
         Matcher matcher = p.matcher(source);
         while (matcher.find()) {
             final String name = matcher.group(2);
@@ -88,7 +88,8 @@ public class JavaProjectFixture {
         List<String> names = newArrayList();
 
         // new <name> ( ... ) {
-        Pattern p = Pattern.compile("new\\s*?(\\w+)\\s*?\\([^)]*?\\)\\s*?\\{", Pattern.DOTALL);
+        Pattern p = Pattern
+                .compile("new\\s*?" + getJavaIdentifierRegEx() + "\\s*?\\([^)]*?\\)\\s*?\\{", Pattern.DOTALL);
         Matcher matcher = p.matcher(source);
         while (matcher.find()) {
             final String name = matcher.group(1);
@@ -97,6 +98,43 @@ public class JavaProjectFixture {
             }
         }
         return names;
+    }
+
+    /**
+     * Finds the package name from the package declaration inside the source code.
+     * 
+     * @param source
+     *            the source code
+     * @return the package name or "" if no package declaration was found
+     */
+    public static String findPackageName(final CharSequence source) {
+        Pattern p = Pattern.compile(".*" // any characters at the beginning
+                + "package\\s+" // package declaration
+                + "(" // beginning of the package name group
+                + getJavaIdentifierRegEx() // the first part of the package
+                + "{1}" // must occur one time
+                + "([.]{1}" // the following parts of the package must begin with a dot
+                + getJavaIdentifierRegEx() // followed by a java identifier
+                + ")*" // the (.identifier) group can occur multiple times or not at all
+                + ")" // closing of the package name group
+                + "[;]+.*", // the following ; and the rest of the source code
+                Pattern.DOTALL);
+        Matcher matcher = p.matcher(source);
+        if (matcher.matches()) {
+            final String group = matcher.group(1);
+            return group;
+        }
+        return "";
+    }
+
+    /**
+     * Returns a regular expression group that can be used to match Java identifier. Java identifier can not start with
+     * a digit, but can contain underscore and dollar signs.
+     * 
+     * @return a regular expression group for matching Java identifier
+     */
+    private static String getJavaIdentifierRegEx() {
+        return "([a-zA-Z_$]{1}[a-zA-Z_$0-9]*)";
     }
 
     private IJavaProject javaProject;
