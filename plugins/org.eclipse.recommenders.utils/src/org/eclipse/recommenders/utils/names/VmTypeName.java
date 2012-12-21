@@ -58,7 +58,7 @@ public class VmTypeName implements ITypeName {
 
     public static final VmTypeName VOID = get("V");
 
-    public static VmTypeName get(String typeName) {
+    public static synchronized VmTypeName get(String typeName) {
         typeName = removeGenerics(typeName);
         VmTypeName res = index.get(typeName);
         if (res == null) {
@@ -74,14 +74,10 @@ public class VmTypeName implements ITypeName {
 
     private String identifier;
 
-    protected VmTypeName() {
-        // no-one should instantiate this class. O
-    }
-
     /**
      * @see #get(String)
      */
-    protected VmTypeName(final String vmTypeName) {
+    private VmTypeName(final String vmTypeName) {
         ensureIsNotNull(vmTypeName);
         ensureIsFalse(vmTypeName.length() == 0, "empty size for type name not permitted");
         if (vmTypeName.length() == 1) {

@@ -30,7 +30,7 @@ public class VmVariableName implements IVariableName {
      * @param variableName
      * @return
      */
-    public static VmVariableName get(final String variableName) {
+    public static synchronized VmVariableName get(final String variableName) {
 
         VmVariableName res = index.get(variableName);
         if (res == null) {
@@ -42,14 +42,10 @@ public class VmVariableName implements IVariableName {
 
     private String identifier;
 
-    protected VmVariableName() {
-        // no-one should instantiate this class. O
-    }
-
     /**
      * @see #get(String)
      */
-    protected VmVariableName(final String vmVariableName) {
+    private VmVariableName(final String vmVariableName) {
         identifier = vmVariableName;
         ensureIsNotNull(identifier);
         ensureIsNotNull(getDeclaringMethod());

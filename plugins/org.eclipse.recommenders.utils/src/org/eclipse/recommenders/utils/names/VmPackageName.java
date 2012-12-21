@@ -21,7 +21,7 @@ public class VmPackageName implements IPackageName {
     private static Map<String/* name 2 */, VmPackageName> index = new MapMaker().weakValues().makeMap();
     public static IPackageName DEFAULT_PACKAGE = get("");
 
-    public static VmPackageName get(final String vmPackageName) {
+    public static synchronized VmPackageName get(final String vmPackageName) {
         VmPackageName res = index.get(vmPackageName);
         if (res == null) {
             res = new VmPackageName(vmPackageName);

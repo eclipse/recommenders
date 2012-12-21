@@ -29,7 +29,7 @@ public class VmFieldName implements IFieldName {
      * @param fieldName
      * @return
      */
-    public static VmFieldName get(final String fieldName) {
+    public static synchronized VmFieldName get(final String fieldName) {
         // typeName = removeGenerics(typeName);
         VmFieldName res = index.get(fieldName);
         if (res == null) {
@@ -41,14 +41,10 @@ public class VmFieldName implements IFieldName {
 
     private String identifier;
 
-    protected VmFieldName() {
-        // no-one should instantiate this class. O
-    }
-
     /**
      * @see #get(String)
      */
-    protected VmFieldName(final String vmFieldName) {
+    private VmFieldName(final String vmFieldName) {
         identifier = vmFieldName;
         ensureIsNotNull(identifier);
         ensureIsNotNull(getDeclaringType());
