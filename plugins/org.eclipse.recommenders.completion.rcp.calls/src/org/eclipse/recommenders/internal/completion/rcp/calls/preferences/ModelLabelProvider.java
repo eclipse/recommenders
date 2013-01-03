@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    Marcel Bruch- initial API and implementation.
+ *    Patrick Gottschaemmer, Olav Lenz - externalize Strings.
  */
 package org.eclipse.recommenders.internal.completion.rcp.calls.preferences;
 
@@ -15,6 +16,7 @@ import static org.eclipse.recommenders.utils.Checks.cast;
 import java.io.File;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.recommenders.completion.rcp.calls.i18n.Messages;
 import org.eclipse.recommenders.internal.rcp.models.ModelArchiveMetadata;
 import org.eclipse.recommenders.rcp.ClasspathEntryInfo;
 import org.eclipse.recommenders.rcp.repo.IModelRepository;
@@ -25,8 +27,8 @@ import org.sonatype.aether.artifact.Artifact;
 import com.google.common.base.Optional;
 
 public class ModelLabelProvider extends ColumnLabelProvider {
-    public static final String NLS_UNKNOWN = "No model for this dependency";
-    public static final String NLS_KNOWN = "Model for this dependency is available";
+    public static final String NLS_UNKNOWN = Messages.ModelLabelProvider_0;
+    public static final String NLS_KNOWN = Messages.ModelLabelProvider_1;
     private final Image modelImage;
     private final Image modelUnknownImage;
     private final IModelRepository repository;

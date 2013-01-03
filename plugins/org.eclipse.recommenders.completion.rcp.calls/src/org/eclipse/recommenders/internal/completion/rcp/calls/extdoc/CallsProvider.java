@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    Stefan Henss - initial API and implementation.
+ *    Patrick Gottschaemmer, Olav Lenz - externalize Strings.
  */
 package org.eclipse.recommenders.internal.completion.rcp.calls.extdoc;
 
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.recommenders.completion.rcp.calls.i18n.Messages;
 import org.eclipse.recommenders.extdoc.rcp.providers.ExtdocProvider;
 import org.eclipse.recommenders.extdoc.rcp.providers.JavaSelectionSubscriber;
 import org.eclipse.recommenders.internal.completion.rcp.calls.engine.AstBasedObjectUsageResolver;
@@ -190,12 +192,12 @@ public final class CallsProvider extends ExtdocProvider {
             setInfoBackgroundColor(preamble2);
             preamble2.setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 0).create());
             if (methodCalls.isEmpty()) {
-                preamble2.setText(format("For %s %s no recommendations are made.",
+                preamble2.setText(format(Messages.CallsProvider_0,
                         receiverType.getElementName(),
                         varName));
             } else {
                 preamble2
-                        .setText(format("For %s %s the following recommendations are made.\nIf you want to invoke a method on %s, then you...",
+                        .setText(format(Messages.CallsProvider_1,
                                 receiverType.getElementName(),
                                 varName,
                                 varName));
@@ -211,52 +213,52 @@ public final class CallsProvider extends ExtdocProvider {
                         COLOR_INFO_FOREGROUND,
                         false);
 
-                createLabel(container, "call", false);
+                createLabel(container, Messages.CallsProvider_2, false);
                 createMethodLink(container, rec.getFirst());
-                createLabel(container, " - " + percentage + "%", false);
+                createLabel(container, " - " + percentage + "%", false); //$NON-NLS-1$ //$NON-NLS-2$
             }
             new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
-            createLabel(container, "", false);
-            createLabel(container, "", false);
-            createLabel(container, "", false);
+            createLabel(container, "", false); //$NON-NLS-1$
+            createLabel(container, "", false); //$NON-NLS-1$
+            createLabel(container, "", false); //$NON-NLS-1$
 
             final Label preamble = new Label(container, SWT.NONE);
             preamble.setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 5).create());
             setInfoForegroundColor(preamble);
             setInfoBackgroundColor(preamble);
             final String text =
-                    format("Proposals were computed based on variable type '%s' in '%s'.",
+                    format(Messages.CallsProvider_8,
                             receiverType.getElementName(),
-                            ctx == VmMethodName.NULL ? "untrained context" : Names.vm2srcSimpleTypeName(ctx
-                                    .getDeclaringType()) + "." + Names.vm2srcSimpleMethod(ctx));
+                            ctx == VmMethodName.NULL ? Messages.CallsProvider_9 : Names.vm2srcSimpleTypeName(ctx
+                                    .getDeclaringType()) + "." + Names.vm2srcSimpleMethod(ctx)); //$NON-NLS-1$
             preamble.setText(text);
 
             new Label(container, SWT.NONE).setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 5)
                     .hint(SWT.DEFAULT, 1).create());
 
             if (def != null) {
-                createLabel(container, "defined by", true, false, SWT.COLOR_DARK_GRAY, false);
-                createLabel(container, "", false, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, Messages.CallsProvider_11, true, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, "", false, false, SWT.COLOR_DARK_GRAY, false); //$NON-NLS-1$
                 if (def == VmMethodName.NULL) {
-                    createLabel(container, "untrained definition", false, false, SWT.COLOR_DARK_GRAY, false);
+                    createLabel(container, Messages.CallsProvider_13, false, false, SWT.COLOR_DARK_GRAY, false);
                 } else {
                     createMethodLink(container, def);
                 }
-                createLabel(container, "- " + kind.toString().toLowerCase(), true, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, "- " + kind.toString().toLowerCase(), true, false, SWT.COLOR_DARK_GRAY, false); //$NON-NLS-1$
 
             }
 
             for (final IMethodName observedCall : calls) {
-                createLabel(container, "observed", true, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, Messages.CallsProvider_15, true, false, SWT.COLOR_DARK_GRAY, false);
 
-                createLabel(container, " call", false, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, Messages.CallsProvider_16, false, false, SWT.COLOR_DARK_GRAY, false);
                 createMethodLink(container, observedCall);
-                createLabel(container, "", true, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, "", true, false, SWT.COLOR_DARK_GRAY, false); //$NON-NLS-1$
             }
         }
 
         Link createMethodLink(final Composite parent, final IMethodName method) {
-            final String text = "<a>" + (method.isInit() ? "new " : "") + Names.vm2srcSimpleMethod(method) + "</a>";
+            final String text = "<a>" + (method.isInit() ? "new " : "") + Names.vm2srcSimpleMethod(method) + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             final String tooltip = Names.vm2srcQualifiedMethod(method);
 
             final Link link = new Link(parent, SWT.NONE);

@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
+ *    Patrick Gottschaemmer, Olav Lenz - externalize Strings.
  */
 package org.eclipse.recommenders.internal.completion.rcp.calls.preferences;
 
@@ -14,14 +15,15 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.recommenders.completion.rcp.calls.i18n.Messages;
 import org.eclipse.recommenders.internal.rcp.models.ModelArchiveMetadata;
 import org.eclipse.recommenders.rcp.ClasspathEntryInfo;
 import org.eclipse.recommenders.utils.Tuple;
 import org.eclipse.swt.graphics.Image;
 
 public class VersionLabelProvider extends ColumnLabelProvider {
-    public static final String NLS_UNKNOWN = "Some details are unknown for this dependency";
-    public static final String NLS_KNOWN = "Name and version of dependency is known";
+    public static final String NLS_UNKNOWN = Messages.VersionLabelProvider_0;
+    public static final String NLS_KNOWN = Messages.VersionLabelProvider_1;
     private final Image versionUnknownImage;
     private final Image versionImage;
 
