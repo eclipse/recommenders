@@ -8,6 +8,7 @@
  * Contributors:
  *    Johannes Lerch - initial API and implementation.
  *    Marcel Bruch - adapted UI for latest model archive store.
+ *    Patrick Gottschaemmer, Olav Lenz - externalize Strings.
  */
 package org.eclipse.recommenders.internal.completion.rcp.calls.preferences;
 
@@ -49,6 +50,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.recommenders.completion.rcp.calls.l10n.Messages;
 import org.eclipse.recommenders.internal.completion.rcp.calls.engine.CallsCompletionProposalComputer;
 import org.eclipse.recommenders.internal.completion.rcp.calls.net.IObjectMethodCallsNet;
 import org.eclipse.recommenders.internal.completion.rcp.calls.wiring.CallsCompletionPlugin;
@@ -85,8 +87,8 @@ import com.google.common.collect.Lists;
 
 public class CallPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IPropertyChangeListener {
 
-    public static final String ID_MAX_PROPOSALS = "recommenders.calls.max_proposals";
-    public static final String ID_MIN_PROBABILITY = "recommenders.calls.min_probability";
+    public static final String ID_MAX_PROPOSALS = "recommenders.calls.max_proposals"; //$NON-NLS-1$
+    public static final String ID_MIN_PROBABILITY = "recommenders.calls.min_probability"; //$NON-NLS-1$
 
     private final IClasspathEntryInfoProvider cpeInfoProvider;
     private final IModelArchiveStore<IType, IObjectMethodCallsNet> modelStore;
@@ -117,7 +119,7 @@ public class CallPreferencePage extends PreferencePage implements IWorkbenchPref
     @Override
     public void init(final IWorkbench workbench) {
         setPreferenceStore(CallsCompletionPlugin.getDefault().getPreferenceStore());
-        setDescription("Recommenders' intelligent call completion proposes likely method calls based on previously collected usage statistics.");
+        setDescription(Messages.PrefPage_description);
     }
 
     @Override
@@ -130,13 +132,13 @@ public class CallPreferencePage extends PreferencePage implements IWorkbenchPref
     }
 
     private void createConfigurationBlock(final Composite composite) {
-        enablement = new ContentAssistEnablementBlock(composite, "Enable intelligent call completion",
+        enablement = new ContentAssistEnablementBlock(composite, Messages.PrefPage_enable_call_completion,
                 CallsCompletionProposalComputer.CATEGORY_ID);
         final Composite group = new Composite(composite, SWT.NONE);
         group.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
         group.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
-        maxProposals = createIntegerField(group, ID_MAX_PROPOSALS, "Maximum number of proposals:", 1, 100);
-        minProbability = createIntegerField(group, ID_MIN_PROBABILITY, "Minimum proposal probability (%):", 1, 100);
+        maxProposals = createIntegerField(group, ID_MAX_PROPOSALS, Messages.PrefPage_max_number_of_proposals, 1, 100);
+        minProbability = createIntegerField(group, ID_MIN_PROBABILITY, Messages.PrefPage_min_probability_of_proposal, 1, 100);
     }
 
     private IntegerFieldEditor createIntegerField(final Composite parent, final String name, final String text,
@@ -152,8 +154,7 @@ public class CallPreferencePage extends PreferencePage implements IWorkbenchPref
 
     private void createModelInformationBlock(final Composite composite) {
         new Label(composite, SWT.NONE)
-                .setText("Lists all known class-path dependencies and their associated recommendation models if any. "
-                        + "Select\nmodels to view detail information.");
+                .setText(Messages.PrefPage_table_descripion);
         computeMappings();
         final SashForm form = new SashForm(composite, SWT.HORIZONTAL);
         form.setLayout(new FillLayout());
@@ -210,29 +211,29 @@ public class CallPreferencePage extends PreferencePage implements IWorkbenchPref
         final GridDataFactory f = GridDataFactory.fillDefaults().grab(true, false);
         {
             final Group rootContainer = new Group(parent, SWT.SHADOW_ETCHED_IN);
-            rootContainer.setText("Package Root Info:");
+            rootContainer.setText(Messages.PrefPage_package_root_info);
             rootContainer.setLayout(new GridLayout(2, false));
             rootContainer.setLayoutData(f.create());
 
-            createLabel(rootContainer, "Name:");
+            createLabel(rootContainer, Messages.PrefPage_package_root_name);
             rootName = createText(rootContainer, READ_ONLY | BORDER);
 
-            createLabel(rootContainer, "Version:");
+            createLabel(rootContainer, Messages.PrefPage_package_root_version);
             rootVersion = createText(rootContainer, READ_ONLY | BORDER);
 
-            createLabel(rootContainer, "Fingerprint:");
+            createLabel(rootContainer, Messages.PrefPage_package_root_fingerprint);
             rootFingerprint = createText(rootContainer, READ_ONLY | BORDER);
         }
         {
             final Group modelContainer = new Group(parent, SWT.SHADOW_ETCHED_IN);
-            modelContainer.setText("Model Info:");
+            modelContainer.setText(Messages.PrefPage_model_info);
             modelContainer.setLayout(new GridLayout(2, false));
             modelContainer.setLayoutData(f.create());
 
-            createLabel(modelContainer, "Model Coordinate:");
+            createLabel(modelContainer, Messages.PrefPage_model_coordinate);
             modelCoordinate = createText(modelContainer, SWT.BORDER);
 
-            createLabel(modelContainer, "Resolution Status:");
+            createLabel(modelContainer, Messages.PrefPage_model_resolution_status);
             modelStatus = new ComboViewer(modelContainer, SWT.BORDER);
             modelStatus.setContentProvider(new ArrayContentProvider());
             modelStatus.setInput(ModelArchiveResolutionStatus.values());
@@ -271,21 +272,21 @@ public class CallPreferencePage extends PreferencePage implements IWorkbenchPref
         });
 
         final TableColumnLayout tableColumnLayout = new TableColumnLayout();
-        final Image versionImage = loadImage("/icons/obj16/file_version.png");
-        final Image versionUnknownImage = loadImage("/icons/obj16/file_version_unknown.png");
-        final Image modelImage = loadImage("/icons/obj16/model.png");
-        final Image modelUnknownImage = loadImage("/icons/obj16/model_unknown.png");
+        final Image versionImage = loadImage("/icons/obj16/file_version.png"); //$NON-NLS-1$
+        final Image versionUnknownImage = loadImage("/icons/obj16/file_version_unknown.png"); //$NON-NLS-1$
+        final Image modelImage = loadImage("/icons/obj16/model.png"); //$NON-NLS-1$
+        final Image modelUnknownImage = loadImage("/icons/obj16/model_unknown.png"); //$NON-NLS-1$
 
         ColumnViewerToolTipSupport.enableFor(tableViewer);
-        TableViewerColumn column = createTableViewerColumn(tableViewer, "File", 200, 0);
+        TableViewerColumn column = createTableViewerColumn(tableViewer, Messages.PrefPage_table_column_file, 200, 0);
         tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(100));
         column.setLabelProvider(new PackageFragmentRootLabelProvider());
 
-        column = createTableViewerColumn(tableViewer, "", 20, 1);
+        column = createTableViewerColumn(tableViewer, "", 20, 1); //$NON-NLS-1$
         tableColumnLayout.setColumnData(column.getColumn(), new ColumnPixelData(20));
         column.setLabelProvider(new VersionLabelProvider(versionUnknownImage, versionImage));
 
-        column = createTableViewerColumn(tableViewer, "", 20, 2);
+        column = createTableViewerColumn(tableViewer, "", 20, 2); //$NON-NLS-1$
         tableColumnLayout.setColumnData(column.getColumn(), new ColumnPixelData(20));
         column.setLabelProvider(new ModelLabelProvider(repository, modelImage, modelUnknownImage));
         tContainer.setLayout(tableColumnLayout);
