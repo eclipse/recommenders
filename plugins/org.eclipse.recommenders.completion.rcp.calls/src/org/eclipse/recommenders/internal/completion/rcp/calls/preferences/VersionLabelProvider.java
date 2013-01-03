@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
+ *    Patrick Gottschaemmer, Olav Lenz - externalize Strings.
  */
 package org.eclipse.recommenders.internal.completion.rcp.calls.preferences;
 
@@ -14,14 +15,20 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.recommenders.completion.rcp.calls.l10n.Messages;
 import org.eclipse.recommenders.internal.rcp.models.ModelArchiveMetadata;
 import org.eclipse.recommenders.rcp.ClasspathEntryInfo;
 import org.eclipse.recommenders.utils.Tuple;
 import org.eclipse.swt.graphics.Image;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class VersionLabelProvider extends ColumnLabelProvider {
-    public static final String NLS_UNKNOWN = "Some details are unknown for this dependency";
-    public static final String NLS_KNOWN = "Name and version of dependency is known";
+    @VisibleForTesting
+    public static final String UNKNOWN_DETAILS_DEPENDENCY = Messages.PrefPage_unknown_dependency_details;
+    @VisibleForTesting
+    public static final String KNOWN_DETAILS_DEPENDENCY = Messages.PrefPage_know_dependency_details;
+
     private final Image versionUnknownImage;
     private final Image versionImage;
 
@@ -37,7 +44,11 @@ public class VersionLabelProvider extends ColumnLabelProvider {
 
     @Override
     public String getToolTipText(final Object element) {
-        return hasDependencyInformation(element) ? NLS_KNOWN : NLS_UNKNOWN;
+        if (hasDependencyInformation(element)){
+            return UNKNOWN_DETAILS_DEPENDENCY;
+        }else{
+            return KNOWN_DETAILS_DEPENDENCY;
+        }
     }
 
     private boolean hasDependencyInformation(final Object element) {
