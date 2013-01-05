@@ -7,8 +7,11 @@ class CodeBuilder {
 	public static CharSequence someClass = '''public class C {}'''
 	private static AtomicInteger classCounter = new AtomicInteger()
 
+	def static classname(){
+		"Class"+ classCounter.addAndGet(1)
+	}
 	def static classbody(CharSequence classbody){
-		classbody("Class"+ classCounter.addAndGet(1), classbody);
+		classbody(classname, classbody);
 	}
 	
 	def static classbody(CharSequence classname, CharSequence classbody){

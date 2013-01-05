@@ -21,10 +21,15 @@ public class CodeBuilder {
     }
   }.apply();
   
-  public static CharSequence classbody(final CharSequence classbody) {
+  public static String classname() {
     int _addAndGet = CodeBuilder.classCounter.addAndGet(1);
     String _plus = ("Class" + Integer.valueOf(_addAndGet));
-    CharSequence _classbody = CodeBuilder.classbody(_plus, classbody);
+    return _plus;
+  }
+  
+  public static CharSequence classbody(final CharSequence classbody) {
+    String _classname = CodeBuilder.classname();
+    CharSequence _classbody = CodeBuilder.classbody(_classname, classbody);
     return _classbody;
   }
   
