@@ -51,11 +51,11 @@ class SmokeTestScenarios {
 		«someClass»
 		'''
 	
-	public static CharSequence EXTENDS_01 = '''interface MyInterface extends $Clo$sable {}'''
+	public static CharSequence EXTENDS_01 = '''interface «genClassname» extends $Clo$sable {}'''
 	
-	public static CharSequence EXTENDS_02 = '''class MyClass extends $Your$Class {}'''
+	public static CharSequence EXTENDS_02 = '''class «genClassname» extends $Your$Class {}'''
 	
-	public static CharSequence IMPLEMENTS_01 = '''class SomeClass implements $Closab$le {}'''
+	public static CharSequence IMPLEMENTS_01 = '''class «genClassname» implements $Closab$le {}'''
 		
 	public static CharSequence CLASSBODY_01 = classDeclaration(
 		'''class ExtendingClass1 extends UnknownType''',

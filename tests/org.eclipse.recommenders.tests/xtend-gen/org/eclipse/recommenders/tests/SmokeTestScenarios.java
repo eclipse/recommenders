@@ -97,7 +97,10 @@ public class SmokeTestScenarios {
   public static CharSequence EXTENDS_01 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("interface MyInterface extends $Clo$sable {}");
+      _builder.append("interface ");
+      String _genClassname = CodeBuilder.genClassname();
+      _builder.append(_genClassname, "");
+      _builder.append(" extends $Clo$sable {}");
       return _builder;
     }
   }.apply();
@@ -105,7 +108,10 @@ public class SmokeTestScenarios {
   public static CharSequence EXTENDS_02 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("class MyClass extends $Your$Class {}");
+      _builder.append("class ");
+      String _genClassname = CodeBuilder.genClassname();
+      _builder.append(_genClassname, "");
+      _builder.append(" extends $Your$Class {}");
       return _builder;
     }
   }.apply();
@@ -113,7 +119,10 @@ public class SmokeTestScenarios {
   public static CharSequence IMPLEMENTS_01 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("class SomeClass implements $Closab$le {}");
+      _builder.append("class ");
+      String _genClassname = CodeBuilder.genClassname();
+      _builder.append(_genClassname, "");
+      _builder.append(" implements $Closab$le {}");
       return _builder;
     }
   }.apply();
