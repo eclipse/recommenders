@@ -136,7 +136,9 @@ public abstract class BaseRecommendersCompletionContext implements IRecommenders
         try {
             cu.codeComplete(getInvocationOffset(), collector, new TimeoutProgressMonitor());
         } catch (final Exception e) {
-            RecommendersPlugin.logError(e, "Exception during code completion");
+
+            RecommendersPlugin.logError(e, "Exception during code completion at pos " + getInvocationOffset() + " in "
+                    + cu);
         }
         coreContext = collector.getCoreContext();
     }
