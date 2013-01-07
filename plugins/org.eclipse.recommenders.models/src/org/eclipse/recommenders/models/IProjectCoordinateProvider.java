@@ -1,5 +1,6 @@
 package org.eclipse.recommenders.models;
 
+
 /**
  * Maps an IDE specific code element to a {@link ProjectCoordinate}.
  * <p>

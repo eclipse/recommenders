@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.recommenders.models.ProjectCoordinate;
+import org.eclipse.recommenders.models.archives.IModelArchiveCoordinateProvider;
 import org.eclipse.recommenders.models.archives.ModelArchiveCache;
 import org.eclipse.recommenders.models.archives.ModelArchiveCacheEvents;
 import org.eclipse.recommenders.models.archives.ModelArchiveCoordinate;
@@ -21,7 +22,7 @@ public class UsingModelArchiveCache {
     }
 
     void findLocalModelArchive(ModelArchiveCoordinate model, ModelArchiveCache repository) throws IOException {
-        if (!repository.location(model).isPresent()) {
+        if (!repository.getLocation(model).isPresent()) {
             repository.resolve(model, newMonitor());
         }
     }
@@ -34,18 +35,17 @@ public class UsingModelArchiveCache {
         repository.delete(ModelArchiveCache.INDEX, newMonitor());
     }
 
-    void findAllModelArtifacts(ProjectCoordinate[] gavs, String[] knownModelTypes, ModelArchiveCache repository) {
+    void findAllModelArtifacts(ProjectCoordinate[] gavs, ModelArchiveCache cache,
+            IModelArchiveCoordinateProvider[] modelProviders) {
 
         Table<ProjectCoordinate, String, Pair<ModelArchiveCoordinate, Boolean>> mappings = HashBasedTable.create();
-        for (ProjectCoordinate gav : gavs) {
-            for (String modelType : knownModelTypes) {
-                ModelArchiveCoordinate coord =
-                        repository.searchModelArchive(gav, modelType).or(ModelArchiveCoordinate.UNKNOWN);
-                Boolean downloaded = false;
-                if (coord != ModelArchiveCoordinate.UNKNOWN) {
-                    downloaded = repository.location(coord).isPresent();
+        for (ProjectCoordinate projectCoord : gavs) {
+            for (IModelArchiveCoordinateProvider modelProvider : modelProviders) {
+                ModelArchiveCoordinate modelCoord = modelProvider.get(projectCoord).orNull();
+                if (modelCoord != null) {
+                    boolean cached = cache.isCached(modelCoord);
+                    mappings.put(projectCoord, modelProvider.getType(), Pair.of(modelCoord, cached));
                 }
-                mappings.put(gav, modelType, Pair.of(coord, downloaded));
             }
         }
         // update ui...

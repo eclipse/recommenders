@@ -60,14 +60,19 @@ public abstract class ModelArchiveCache {
     public abstract void delete(ModelArchiveCoordinate model, IProgressMonitor monitor) throws IOException;
 
     /**
+     * Checks if the file for the given coordinate exists in the local file system.
+     */
+    public abstract boolean isCached(ModelArchiveCoordinate coord);
+
+    /**
      * Returns the file for the given coordinate - if it exists. Note that this call does <b>not</b> download any
      * resources from the remote repository. It only touches the local file system.
      */
-    public abstract Optional<File> location(ModelArchiveCoordinate coord);
+    public abstract Optional<File> getLocation(ModelArchiveCoordinate coord);
 
     /**
-     * Searches for the best matching model in the model repository.
+     * Searches the model index for all model archives matching the given {@link ProjectCoordinate} and model-type.
      */
-    public abstract Optional<ModelArchiveCoordinate> searchModelArchive(ProjectCoordinate gav, String modeltype);
+    public abstract Optional<ModelArchiveCoordinate> findModelArchives(ProjectCoordinate projectCoord, String modelType);
 
 }

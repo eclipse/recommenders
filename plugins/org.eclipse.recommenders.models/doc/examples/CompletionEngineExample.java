@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.eclipse.recommenders.models.IBasedName;
 import org.eclipse.recommenders.models.IModelProvider;
-import org.eclipse.recommenders.models.IProjectCoordinateProvider;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.names.ITypeName;
 
@@ -14,7 +13,7 @@ import examples.UsingModelProvider.RecommendationModel;
 
 public class CompletionEngineExample {
 
-    void resolveGavFromPackgeFragmentRoot(IPackageFragementRoot jdtElement, IProjectCoordinateProvider r) {
+    void resolveGavFromPackgeFragmentRoot(IPackageFragementRoot jdtElement, EclipseProjectCoordinateProvider r) {
         if (jdtElement.isjar()) {
             // ignore what type jdtElement is exactly!
         } else if (jdtElement.isSourceFolder()) {
@@ -23,17 +22,17 @@ public class CompletionEngineExample {
         Optional<ProjectCoordinate> gav = r.map(jdtElement);
     }
 
-    void resolveGavFromIJavaElement(IJavaElement jdtElement, IProjectCoordinateProvider r) {
+    void resolveGavFromIJavaElement(IJavaElement jdtElement, EclipseProjectCoordinateProvider r) {
         // same for jar, src folder, package etc.:
         Optional<ProjectCoordinate> gav = r.map(jdtElement);
     }
 
-    void resolveGavFromSourceFolder(IPackageFragementRoot srcFolder, IProjectCoordinateProvider r) {
+    void resolveGavFromSourceFolder(IPackageFragementRoot srcFolder, EclipseProjectCoordinateProvider r) {
     }
 
     private static final class CompletionEngine {
         IModelProvider<IBasedName<ITypeName>, RecommendationModel> modelProvider;
-        IProjectCoordinateProvider coordService;
+        EclipseProjectCoordinateProvider coordService;
 
         void computeProposals(IJavaElement e) {
             ProjectCoordinate gav = coordService.map(e).orNull();
@@ -55,7 +54,7 @@ public class CompletionEngineExample {
         ITypeName getITypeName();
     }
 
-    interface IPackageFragementRoot {
+    interface IPackageFragementRoot extends IJavaElement {
 
         // it's slightly more complicated but...
         File getFile();

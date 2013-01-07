@@ -17,7 +17,12 @@ import com.google.common.base.Optional;
 public interface IModelArchiveCoordinateProvider extends Closeable {
 
     /**
-     * Framework callback that allows an implementor to perform some IO operations like loding manual mappings from a
+     * Returns the model-type this provider returns models for, e.g., calls, ovrs etc.
+     */
+    public String getType();
+
+    /**
+     * Framework callback that allows an implementor to perform some IO operations like loading manual mappings from a
      * file etc.
      * 
      * @throws IOException
@@ -26,7 +31,9 @@ public interface IModelArchiveCoordinateProvider extends Closeable {
 
     /**
      * Returns the best matching {@link ModelArchiveCoordinate} for the given {@link ProjectCoordinate} - if any. This
-     * call may lookup the best matches from the {@link ModelArchiveCache}'s model index.
+     * call may lookup the best matches from the {@link ModelArchiveCache}'s model index. If a manual mapping was
+     * specified before (using {@link #set(ProjectCoordinate, ModelArchiveCoordinate)}) that coordinate will be
+     * returned.
      */
     Optional<ModelArchiveCoordinate> get(ProjectCoordinate projectId);
 
@@ -37,8 +44,14 @@ public interface IModelArchiveCoordinateProvider extends Closeable {
     void set(ProjectCoordinate projectId, ModelArchiveCoordinate modelId);
 
     /**
+     * Returns for the model in the model repository.
+     */
+    public abstract Optional<ModelArchiveCoordinate> searchModelArchive(ProjectCoordinate gav, String modeltype);
+
+    /**
      * Removes a previously found mapping from {@link ProjectCoordinate} to any {@link ModelArchiveCoordinate}. If the
      * mapping was persisted previously, this mapping should still be gone after restart.
      */
     void remove(ProjectCoordinate projectId);
+
 }
