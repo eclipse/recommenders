@@ -1,0 +1,32 @@
+/**
+ * Copyright (c) 2010, 2013 Darmstadt University of Technology.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Olav Lenz - initial API and implementation
+ */
+package org.eclipse.recommenders.models.mapping;
+
+import java.util.List;
+
+import org.eclipse.recommenders.models.ProjectCoordinate;
+
+import com.google.common.base.Optional;
+
+/**
+ * The Mapping interface provide the functionality for the mapping between IElementInfoand ProjectCoordinate
+ */
+public interface IMappingProvider {
+
+    public Optional<ProjectCoordinate> getProjectCoordinate(IElementInfo element);
+
+    public List<IMappingStrategy> getStrategies();
+
+    public void addStrategy(IMappingStrategy strategy);
+
+    // Missing till now:
+    // Possibility to reorder strategies
+}

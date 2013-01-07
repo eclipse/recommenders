@@ -22,6 +22,7 @@
 		<module>org.eclipse.recommenders.completion.rcp.subwords</module>
 		<module>org.eclipse.recommenders.completion.rcp.sandbox</module>
 		<module>org.eclipse.recommenders.doc</module>
+		<module>org.eclipse.recommenders.models</module>
 		<module>org.eclipse.recommenders.completion.rcp.templates</module>
 		<module>org.eclipse.recommenders.extdoc</module>
 		<module>org.eclipse.recommenders.extdoc.rcp</module>
