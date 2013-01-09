@@ -20,20 +20,15 @@ public class SmokeTestScenarios {
     return _asList;
   }
   
-  public static CharSequence someClass = new Function0<CharSequence>() {
-    public CharSequence apply() {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("public class C {}");
-      return _builder;
-    }
-  }.apply();
-  
   public static CharSequence IMPORT_01 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("$i$mport$ $java$.$uti$l.$");
       _builder.newLine();
-      _builder.append(CodeBuilder.someClass, "");
+      _builder.append("public class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" {}");
       _builder.newLineIfNotEmpty();
       return _builder;
     }
@@ -44,7 +39,10 @@ public class SmokeTestScenarios {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("import $stat$ic$ $java$.$uti$l.Collection.$");
       _builder.newLine();
-      _builder.append(CodeBuilder.someClass, "");
+      _builder.append("public class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" {}");
       _builder.newLineIfNotEmpty();
       return _builder;
     }
@@ -55,7 +53,10 @@ public class SmokeTestScenarios {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("$");
       _builder.newLine();
-      _builder.append(CodeBuilder.someClass, "");
+      _builder.append("public class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" {}");
       _builder.newLineIfNotEmpty();
       return _builder;
     }
@@ -66,7 +67,10 @@ public class SmokeTestScenarios {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("$");
       _builder.newLine();
-      _builder.append(CodeBuilder.someClass, "");
+      _builder.append("public class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" {}");
       _builder.newLineIfNotEmpty();
       return _builder;
     }
@@ -77,7 +81,10 @@ public class SmokeTestScenarios {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("pack$age $");
       _builder.newLine();
-      _builder.append(CodeBuilder.someClass, "");
+      _builder.append("public class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" {}");
       _builder.newLineIfNotEmpty();
       return _builder;
     }
@@ -88,7 +95,10 @@ public class SmokeTestScenarios {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("package org.$");
       _builder.newLine();
-      _builder.append(CodeBuilder.someClass, "");
+      _builder.append("public class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" {}");
       _builder.newLineIfNotEmpty();
       return _builder;
     }
@@ -97,7 +107,10 @@ public class SmokeTestScenarios {
   public static CharSequence EXTENDS_01 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("interface MyInterface extends $Clo$sable {}");
+      _builder.append("interface ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" extends $Clo$sable {}");
       return _builder;
     }
   }.apply();
@@ -105,7 +118,10 @@ public class SmokeTestScenarios {
   public static CharSequence EXTENDS_02 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("class MyClass extends $Your$Class {}");
+      _builder.append("class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" extends $Your$Class {}");
       return _builder;
     }
   }.apply();
@@ -113,7 +129,10 @@ public class SmokeTestScenarios {
   public static CharSequence IMPLEMENTS_01 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("class SomeClass implements $Closab$le {}");
+      _builder.append("class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" implements $Closab$le {}");
       return _builder;
     }
   }.apply();
@@ -121,7 +140,10 @@ public class SmokeTestScenarios {
   public static CharSequence CLASSBODY_01 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("class ExtendingClass1 extends UnknownType");
+      _builder.append("class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" extends UnknownType");
       StringConcatenation _builder_1 = new StringConcatenation();
       _builder_1.append("$");
       CharSequence _classDeclaration = CodeBuilder.classDeclaration(_builder, _builder_1);
@@ -132,7 +154,10 @@ public class SmokeTestScenarios {
   public static CharSequence CLASSBODY_02 = new Function0<CharSequence>() {
     public CharSequence apply() {
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("class ExtendingClass2 extends UnknownType");
+      _builder.append("class ");
+      String _classname = CodeBuilder.classname();
+      _builder.append(_classname, "");
+      _builder.append(" extends UnknownType");
       StringConcatenation _builder_1 = new StringConcatenation();
       _builder_1.append("siz$");
       CharSequence _classDeclaration = CodeBuilder.classDeclaration(_builder, _builder_1);
