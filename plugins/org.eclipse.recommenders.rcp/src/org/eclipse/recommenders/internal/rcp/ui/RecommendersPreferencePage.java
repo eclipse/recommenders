@@ -11,9 +11,9 @@
 package org.eclipse.recommenders.internal.rcp.ui;
 
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -25,8 +25,13 @@ public class RecommendersPreferencePage extends PreferencePage implements IWorkb
     }
 
     @Override
-    protected Control createContents(Composite parent) {
+    protected Control createContents(final Composite parent) {
+        String description = "Expand the tree to edit preferences for a specific feature.";
+
+        final Label label = new Label(parent, 0);
+        label.setText(description);
+
         noDefaultAndApplyButton();
-        return new Composite(parent, SWT.NONE);
+        return label;
     }
 }
