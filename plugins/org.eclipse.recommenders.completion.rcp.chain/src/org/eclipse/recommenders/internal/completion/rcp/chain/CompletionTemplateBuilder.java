@@ -42,7 +42,7 @@ public final class CompletionTemplateBuilder {
         final String title = createChainCode(chain, true, 0);
         final String body = createChainCode(chain, false, chain.getExpectedDimensions());
 
-        final Template template = new Template(title, chain.getElements().size() + " elements", "java", body, false);
+        final Template template = new Template(title, chain.getElements().size() + " elements", "java", body, false); //$NON-NLS-1$ //$NON-NLS-2$
         return createTemplateProposal(template, context);
     }
 
@@ -65,11 +65,11 @@ public final class CompletionTemplateBuilder {
                 }
                 break;
             default:
-                RecommendersUtilsPlugin.logWarning("Can't handle %s's element type.", edge);
+                RecommendersUtilsPlugin.logWarning("Can't handle %s's element type.", edge); //$NON-NLS-1$
             }
             final boolean appendVariables = !createAsTitle;
             appendArrayDimensions(sb, edge.getReturnTypeDimension(), expectedDimension, appendVariables, varNames);
-            sb.append(".");
+            sb.append("."); //$NON-NLS-1$
         }
         deleteLastChar(sb);
         return sb.toString();
@@ -77,46 +77,46 @@ public final class CompletionTemplateBuilder {
 
     private static void appendVariableString(final ChainElement edge, final StringBuilder sb) {
         if (edge.requiresThisForQualification() && sb.length() == 0) {
-            sb.append("this.");
+            sb.append("this."); //$NON-NLS-1$
         }
         sb.append(((VariableBinding) edge.getElementBinding()).name);
     }
 
     private static void appendParameters(final StringBuilder sb, final MethodBinding method,
             final HashBag<String> varNames) {
-        sb.append("(");
+        sb.append("("); //$NON-NLS-1$
         for (final TypeBinding parameter : method.parameters) {
             String parameterName = StringUtils.uncapitalize(String.valueOf(parameter.shortReadableName()));
-            parameterName = StringUtils.substringBefore(parameterName, "<");
+            parameterName = StringUtils.substringBefore(parameterName, "<"); //$NON-NLS-1$
             appendTemplateVariable(sb, parameterName, varNames);
-            sb.append(", ");
+            sb.append(", "); //$NON-NLS-1$
         }
         if (method.parameters.length > 0) {
             deleteLastChar(sb);
             deleteLastChar(sb);
         }
-        sb.append(")");
+        sb.append(")"); //$NON-NLS-1$
     }
 
     private static void appendTemplateVariable(final StringBuilder sb, final String varname,
             final HashBag<String> varNames) {
         varNames.add(varname);
-        sb.append("${").append(varname);
+        sb.append("${").append(varname); //$NON-NLS-1$
         final int count = varNames.count(varname);
         if (count > 1) {
             sb.append(count);
         }
-        sb.append("}");
+        sb.append("}"); //$NON-NLS-1$
     }
 
     private static void appendArrayDimensions(final StringBuilder sb, final int dimension, final int expectedDimension,
             final boolean appendVariables, final HashBag<String> varNames) {
         for (int i = dimension; i-- > expectedDimension;) {
-            sb.append("[");
+            sb.append("["); //$NON-NLS-1$
             if (appendVariables) {
-                appendTemplateVariable(sb, "i", varNames);
+                appendTemplateVariable(sb, "i", varNames); //$NON-NLS-1$
             }
-            sb.append("]");
+            sb.append("]"); //$NON-NLS-1$
         }
     }
 
