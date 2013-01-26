@@ -42,6 +42,7 @@ import org.eclipse.recommenders.rcp.events.JavaModelEvents.JarPackageFragmentRoo
 import org.eclipse.recommenders.rcp.events.JavaModelEvents.JarPackageFragmentRootRemoved;
 import org.eclipse.recommenders.rcp.events.JavaModelEvents.JavaProjectClosed;
 import org.eclipse.recommenders.rcp.events.JavaModelEvents.JavaProjectOpened;
+import org.eclipse.recommenders.rcp.l10n.Messages;
 
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -60,7 +61,7 @@ public class JavaModelEventsProvider implements IElementChangedListener {
     }
 
     private void simulateProjectOpenEvents() {
-        new SimulateOpenJavaProjectsJob("Initializing projects with recommenders nature").schedule();
+        new SimulateOpenJavaProjectsJob(Messages.JOB_INITIALIZE_PROJECTS).schedule();
     }
 
     @Override
@@ -227,7 +228,7 @@ public class JavaModelEventsProvider implements IElementChangedListener {
         @Override
         public IStatus runInWorkspace(final IProgressMonitor monitor) throws CoreException {
             final Set<IProject> openProjects = getAllOpenProjects();
-            monitor.beginTask("", openProjects.size());
+            monitor.beginTask("", openProjects.size()); //$NON-NLS-1$
             for (final IProject project : openProjects) {
                 if (JavaProject.hasJavaNature(project)) {
                     final IJavaProject javaProject = toJavaProject(project);

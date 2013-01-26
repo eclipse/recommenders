@@ -124,26 +124,26 @@ public class ModelRepository implements IModelRepository {
     public Optional<String> remoteEtag(Artifact artifact) {
 
         try {
-            String remoteBaseurl = StringUtils.removeEnd(remote.getUrl(), "/");
-            String url = String.format("%1$s/%2$s", remoteBaseurl, computePath(artifact));
-            if (url.startsWith("file:")) {
+            String remoteBaseurl = StringUtils.removeEnd(remote.getUrl(), "/"); //$NON-NLS-1$
+            String url = String.format("%1$s/%2$s", remoteBaseurl, computePath(artifact)); //$NON-NLS-1$
+            if (url.startsWith("file:")) { //$NON-NLS-1$
                 // try file:
                 File file = new File(new URI(url));
                 if (file.exists())
-                    return of(file.lastModified() + "");
+                    return of(file.lastModified() + ""); //$NON-NLS-1$
                 return absent();
             }
             Response r = http.prepareHead(url).execute().get();
 
-            String header = r.getHeader("ETag");
+            String header = r.getHeader("ETag"); //$NON-NLS-1$
             if (isNotEmpty(header)) {
-                header = StringUtils.remove(header, "\"");
+                header = StringUtils.remove(header, "\""); //$NON-NLS-1$
                 return of(header);
             }
         } catch (Exception e) {
             log.debug(e.getMessage());
         }
-        log.warn("'{}' did not send ETAG header for '{}'.", remote, artifact);
+        log.warn("'{}' did not send ETAG header for '{}'.", remote, artifact); //$NON-NLS-1$
         return absent();
     }
 
@@ -163,7 +163,7 @@ public class ModelRepository implements IModelRepository {
     }
 
     private File etagFile(Artifact artifact) {
-        return new File(location(artifact).getAbsolutePath() + ".etag");
+        return new File(location(artifact).getAbsolutePath() + ".etag"); //$NON-NLS-1$
     }
 
     @Override
@@ -199,7 +199,7 @@ public class ModelRepository implements IModelRepository {
     @Override
     public synchronized File resolve(Artifact artifact, final IProgressMonitor monitor)
             throws DependencyResolutionException {
-        monitor.subTask("Resolving...");
+        monitor.subTask("Resolving..."); //$NON-NLS-1$
         DefaultRepositorySystemSession session = newSession();
         session.setDependencySelector(new TheArtifactOnlyDependencySelector());
         session.setTransferListener(new TransferListener(monitor));
@@ -207,12 +207,12 @@ public class ModelRepository implements IModelRepository {
 
             @Override
             public void artifactDownloaded(org.sonatype.aether.RepositoryEvent event) {
-                monitor.subTask("downloaded " + event.getArtifact());
+                monitor.subTask("downloaded " + event.getArtifact()); //$NON-NLS-1$
                 saveEtag(event.getArtifact());
             };
         });
 
-        Dependency dependency = new Dependency(artifact, "model");
+        Dependency dependency = new Dependency(artifact, "model"); //$NON-NLS-1$
 
         CollectRequest collectRequest = new CollectRequest();
         collectRequest.setRoot(dependency);
@@ -233,7 +233,7 @@ public class ModelRepository implements IModelRepository {
             try {
                 Files.write(remoteEtag.get(), etagFile, Charset.defaultCharset());
             } catch (Exception e) {
-                log.error("Failed to write etag to file " + etagFile, e);
+                log.error("Failed to write etag to file " + etagFile, e); //$NON-NLS-1$
             }
         }
     }
@@ -244,7 +244,7 @@ public class ModelRepository implements IModelRepository {
         InstallRequest r = new InstallRequest();
         r.addArtifact(artifact);// .addArtifact(pom);
         system.install(session, r);
-        log.info("installed '{}' to {}", artifact, location);
+        log.info("installed '{}' to {}", artifact, location); //$NON-NLS-1$
     }
 
     public void deploy(Artifact artifact) throws DeploymentException {
@@ -253,7 +253,7 @@ public class ModelRepository implements IModelRepository {
         r.addArtifact(artifact);
         r.setRepository(remote);
         system.deploy(session, r);
-        log.info("deployed '{}' to {}", artifact, remote.getUrl());
+        log.info("deployed '{}' to {}", artifact, remote.getUrl()); //$NON-NLS-1$
     }
 
     @Override
@@ -285,7 +285,7 @@ public class ModelRepository implements IModelRepository {
             VersionRangeResult range = system.resolveVersionRange(newSession(), rangeRequest);
             return of(range);
         } catch (Exception e) {
-            log.error("Failed to resolve version range for artifact " + a + ".", e);
+            log.error("Failed to resolve version range for artifact " + a + ".", e); //$NON-NLS-1$ //$NON-NLS-2$
             return absent();
         }
     }
@@ -311,7 +311,7 @@ public class ModelRepository implements IModelRepository {
      */
     @Override
     public synchronized void setRemote(String url) {
-        remote = new RemoteRepository("remote-models", "default", url);
+        remote = new RemoteRepository("remote-models", "default", url); //$NON-NLS-1$ //$NON-NLS-2$
         remote.setProxy(proxySelector.getProxy(remote));
     }
 
