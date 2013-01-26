@@ -21,17 +21,17 @@ import org.eclipse.recommenders.internal.rcp.models.ModelArchiveMetadata;
 import org.eclipse.recommenders.rcp.ClasspathEntryInfo;
 import org.eclipse.recommenders.rcp.repo.IModelRepository;
 import org.eclipse.recommenders.utils.Tuple;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.swt.graphics.Image;
 import org.sonatype.aether.artifact.Artifact;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 public class ModelLabelProvider extends ColumnLabelProvider {
 
-    @VisibleForTesting
+    @Testing
     public static final String MODEL_NOT_AVAILABLE = Messages.PREFPAGE_MODLE_NOT_AVAILABLE;
-    @VisibleForTesting
+    @Testing
     public static final String MODEL_AVAILABLE = Messages.PREFPAGE_MODEL_AVAILABLE;
 
     private final Image modelImage;

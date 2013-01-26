@@ -51,9 +51,9 @@ import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContextFac
 import org.eclipse.recommenders.internal.completion.rcp.DisableContentAssistCategoryJob;
 import org.eclipse.recommenders.internal.completion.rcp.chain.ChainCompletionModule.ChainCompletion;
 import org.eclipse.recommenders.internal.completion.rcp.chain.ui.ChainPreferencePage;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -98,7 +98,7 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
         return executeCallChainSearch();
     }
 
-    @VisibleForTesting
+    @Testing
     /**
      * Ensures that we only make recommendations if we are not on the default tab. Disables this engine if the user
      *   has activated chain completion on default content assist list

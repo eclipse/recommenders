@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.recommenders.internal.rcp.wiring.RecommendersModule.LocalModelRepositoryLocation;
 import org.eclipse.recommenders.internal.rcp.wiring.RecommendersModule.RemoteModelRepositoryLocation;
 import org.eclipse.recommenders.rcp.repo.IModelRepository;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.aether.AbstractRepositoryListener;
@@ -62,7 +63,6 @@ import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
 import org.sonatype.aether.version.Version;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -120,7 +120,7 @@ public class ModelRepository implements IModelRepository {
         return remoteEtag.equals(localEtag);
     }
 
-    @VisibleForTesting
+    @Testing
     public Optional<String> remoteEtag(Artifact artifact) {
 
         try {

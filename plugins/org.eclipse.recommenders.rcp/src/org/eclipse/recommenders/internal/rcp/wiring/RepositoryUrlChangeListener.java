@@ -14,8 +14,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.rcp.repo.IModelRepository;
+import org.eclipse.recommenders.utils.annotations.Testing;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 
 public class RepositoryUrlChangeListener implements IPropertyChangeListener {
@@ -28,7 +28,7 @@ public class RepositoryUrlChangeListener implements IPropertyChangeListener {
         hookRegister();
     }
 
-    @VisibleForTesting
+    @Testing
     protected void hookRegister() {
         RecommendersPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 

@@ -56,6 +56,7 @@ import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.utils.Throws;
 import org.eclipse.recommenders.utils.Tuple;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.rcp.JavaElementResolver;
@@ -66,7 +67,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -108,23 +108,23 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         final Bundle bundle = FrameworkUtil.getBundle(TemplatesCompletionProposalComputer.class);
         icon = null;
         if (bundle != null) {
-            final ImageDescriptor desc = AbstractUIPlugin.imageDescriptorFromPlugin(bundle.getSymbolicName(),
-                    "metadata/icon2.gif");
+            final ImageDescriptor desc =
+                    AbstractUIPlugin.imageDescriptorFromPlugin(bundle.getSymbolicName(), "metadata/icon2.gif");
             icon = desc.createImage();
         }
     }
 
-    @VisibleForTesting
+    @Testing
     public CompletionMode getCompletionMode() {
         return mode;
     }
 
-    @VisibleForTesting
+    @Testing
     public String getVariableName() {
         return variableName;
     }
 
-    @VisibleForTesting
+    @Testing
     public String getMethodPrefix() {
         return methodPrefix;
     }
@@ -154,7 +154,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         return proposalBuilder.createProposals();
     }
 
-    @VisibleForTesting
+    @Testing
     protected boolean shouldMakeProposals() {
         String[] excluded = PreferenceConstants.getExcludedCompletionProposalCategories();
         Set<String> ex = Sets.newHashSet(excluded);
@@ -188,8 +188,8 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
                     continue;
                 }
 
-                final PatternRecommendation pattern = new PatternRecommendation(patternId, model.getType(), calls,
-                        p.getSecond());
+                final PatternRecommendation pattern =
+                        new PatternRecommendation(patternId, model.getType(), calls, p.getSecond());
                 proposalBuilder.addPattern(pattern);
             }
         }
@@ -408,8 +408,8 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         final Set<IType> result = Sets.newHashSet();
         try {
             final JavaProject project = (JavaProject) rCtx.getProject();
-            final SearchableEnvironment environment = project
-                    .newSearchableNameEnvironment(DefaultWorkingCopyOwner.PRIMARY);
+            final SearchableEnvironment environment =
+                    project.newSearchableNameEnvironment(DefaultWorkingCopyOwner.PRIMARY);
             environment.findExactTypes(simpleTypeName, false, IJavaSearchConstants.TYPE, new ISearchRequestor() {
                 @Override
                 public void acceptConstructor(final int modifiers, final char[] simpleTypeName,

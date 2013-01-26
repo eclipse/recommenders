@@ -44,11 +44,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.recommenders.rcp.events.JavaSelectionEvent.JavaSelectionLocation;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.rcp.EclipseLogger;
 import org.eclipse.ui.IEditorPart;
 import org.slf4j.Logger;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 /**
@@ -57,7 +57,7 @@ import com.google.common.base.Optional;
 @SuppressWarnings("restriction")
 public class JavaSelectionUtils {
 
-    @VisibleForTesting
+    @Testing
     public static Logger log = new EclipseLogger();
 
     @SuppressWarnings("serial")

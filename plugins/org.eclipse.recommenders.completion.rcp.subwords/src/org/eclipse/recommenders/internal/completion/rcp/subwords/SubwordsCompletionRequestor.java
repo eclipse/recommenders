@@ -46,8 +46,8 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.recommenders.internal.completion.rcp.subwords.proposals.ProposalFactory;
+import org.eclipse.recommenders.utils.annotations.Testing;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -111,12 +111,12 @@ public class SubwordsCompletionRequestor extends CompletionRequestor {
         collector.setRequireExtendedContext(true);
     }
 
-    @VisibleForTesting
+    @Testing
     protected boolean shouldFillArgumentNames() {
         try {
             // when running a test suite this throws a NPE
-            return PreferenceConstants.getPreferenceStore()
-                    .getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
+            return PreferenceConstants.getPreferenceStore().getBoolean(
+                    PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
         } catch (final Exception e) {
             return true;
         }
@@ -146,9 +146,8 @@ public class SubwordsCompletionRequestor extends CompletionRequestor {
     }
 
     private String[] getFavoriteStaticMembers() {
-        final String serializedFavorites =
-                PreferenceConstants.getPreferenceStore()
-                        .getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+        final String serializedFavorites = PreferenceConstants.getPreferenceStore().getString(
+                PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
         if (serializedFavorites != null && serializedFavorites.length() > 0) {
             return serializedFavorites.split(";"); //$NON-NLS-1$
         }
@@ -195,8 +194,8 @@ public class SubwordsCompletionRequestor extends CompletionRequestor {
         collector.accept(proposal);
         // order matters ;)
         final IJavaCompletionProposal[] jdtProposals = collector.getJavaCompletionProposals();
-        final IJavaCompletionProposal[] newProposals =
-                ArrayUtils.subarray(jdtProposals, oldLength, jdtProposals.length);
+        final IJavaCompletionProposal[] newProposals = ArrayUtils
+                .subarray(jdtProposals, oldLength, jdtProposals.length);
         return newProposals;
     }
 

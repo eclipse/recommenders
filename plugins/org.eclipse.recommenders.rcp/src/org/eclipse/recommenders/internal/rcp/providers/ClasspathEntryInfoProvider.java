@@ -50,6 +50,7 @@ import org.eclipse.recommenders.rcp.events.JavaModelEvents.JarPackageFragmentRoo
 import org.eclipse.recommenders.rcp.events.JavaModelEvents.JavaProjectOpened;
 import org.eclipse.recommenders.rcp.events.NewClasspathEntryFound;
 import org.eclipse.recommenders.utils.Version;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.archive.ArchiveDetailsExtractor;
 import org.eclipse.recommenders.utils.gson.GsonUtil;
 import org.eclipse.recommenders.utils.parser.OsgiVersionParser;
@@ -58,7 +59,6 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
@@ -90,7 +90,7 @@ public class ClasspathEntryInfoProvider implements IClasspathEntryInfoProvider {
         initialize(workspace);
     }
 
-    @VisibleForTesting
+    @Testing
     protected void initialize(final IWorkspaceRoot workspace) {
         new Job("") {
             {

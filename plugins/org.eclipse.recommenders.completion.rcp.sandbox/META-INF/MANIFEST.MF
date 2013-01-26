@@ -11,7 +11,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.ui,
  org.eclipse.recommenders.injection,
- com.google.guava;bundle-version="[10.0.0,11.0.0)",
  org.apache.commons.lang3,
  org.eclipse.jface,
  org.eclipse.recommenders.utils,
@@ -20,3 +19,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.common.base;version="[10.0.0,11.0.0)",
+ com.google.common.collect;version="[10.0.0,11.0.0)"

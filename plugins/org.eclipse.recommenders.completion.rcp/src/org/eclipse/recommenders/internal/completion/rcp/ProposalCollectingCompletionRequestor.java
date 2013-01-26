@@ -47,11 +47,11 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.swt.graphics.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 
 public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
@@ -116,15 +116,16 @@ public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
     private void adjustProposalReplacementLength() {
         ITextViewer viewer = jdtuiContext.getViewer();
         Point selection = viewer.getSelectedRange();
-        if (selection.y > 0) collector.setReplacementLength(selection.y);
+        if (selection.y > 0)
+            collector.setReplacementLength(selection.y);
     }
 
-    @VisibleForTesting
+    @Testing
     protected boolean shouldFillArgumentNames() {
         try {
             // when running a test suite this throws a NPE
-            return PreferenceConstants.getPreferenceStore()
-                    .getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
+            return PreferenceConstants.getPreferenceStore().getBoolean(
+                    PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
         } catch (final Exception e) {
             return true;
         }
@@ -152,9 +153,8 @@ public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
     }
 
     private String[] getFavoriteStaticMembers() {
-        final String serializedFavorites =
-                PreferenceConstants.getPreferenceStore()
-                        .getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+        final String serializedFavorites = PreferenceConstants.getPreferenceStore().getString(
+                PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
         if (serializedFavorites != null && serializedFavorites.length() > 0) {
             return serializedFavorites.split(";"); //$NON-NLS-1$
         }

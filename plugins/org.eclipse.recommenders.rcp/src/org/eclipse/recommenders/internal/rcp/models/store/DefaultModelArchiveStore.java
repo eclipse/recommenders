@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.aether.artifact.Artifact;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
@@ -122,7 +121,7 @@ public class DefaultModelArchiveStore<K extends IMember, V> implements Closeable
         }
     }
 
-    @VisibleForTesting
+    @Testing
     protected Optional<File> getLocation(final IPackageFragmentRoot root) {
         return JdtUtils.getLocation(root);
     }
@@ -213,7 +212,8 @@ public class DefaultModelArchiveStore<K extends IMember, V> implements Closeable
     @Override
     public void releaseModel(final V model) {
         final IModelArchive<K, V> archive = pool.get(model);
-        if (archive != null) archive.releaseModel(model);
+        if (archive != null)
+            archive.releaseModel(model);
     }
 
     @Override

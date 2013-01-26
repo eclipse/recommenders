@@ -19,15 +19,14 @@ import org.eclipse.recommenders.completion.rcp.calls.l10n.Messages;
 import org.eclipse.recommenders.internal.rcp.models.ModelArchiveMetadata;
 import org.eclipse.recommenders.rcp.ClasspathEntryInfo;
 import org.eclipse.recommenders.utils.Tuple;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.swt.graphics.Image;
-
-import com.google.common.annotations.VisibleForTesting;
 
 public class VersionLabelProvider extends ColumnLabelProvider {
 
-    @VisibleForTesting
+    @Testing
     public static final String DEPENDENCY_DETAILS_UNKNOWN = Messages.PREFPAGE_DEPENDENCY_DETAILS_UNKNOWN;
-    @VisibleForTesting
+    @Testing
     public static final String DEPENDENCY_DETAILS_KNOWN = Messages.PREFPAGE_DEPENDENCY_DETAILS_KNOWN;
 
     private final Image versionUnknownImage;

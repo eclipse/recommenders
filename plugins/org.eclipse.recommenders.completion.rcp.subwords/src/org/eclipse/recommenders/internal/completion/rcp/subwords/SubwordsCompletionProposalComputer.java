@@ -28,10 +28,10 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 import org.eclipse.swt.graphics.Point;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -44,11 +44,12 @@ public class SubwordsCompletionProposalComputer implements IJavaCompletionPropos
     @Override
     public List computeCompletionProposals(final ContentAssistInvocationContext context, final IProgressMonitor monitor) {
         ctx = (JavaContentAssistInvocationContext) context;
-        if (!shouldReturnResults()) return Collections.emptyList();
+        if (!shouldReturnResults())
+            return Collections.emptyList();
         return findSubwordMatchingProposals(new TimeDelimitedProgressMonitor(monitor, TIMEOUT));
     }
 
-    @VisibleForTesting
+    @Testing
     protected boolean shouldReturnResults() {
         Set<String> cats = Sets.newHashSet(PreferenceConstants.getExcludedCompletionProposalCategories());
         if (cats.contains(CATEGORY_ID)) {
@@ -76,7 +77,8 @@ public class SubwordsCompletionProposalComputer implements IJavaCompletionPropos
 
     private String getToken() {
         CompletionContext coreCtx = ctx.getCoreContext();
-        if (coreCtx == null) return "";
+        if (coreCtx == null)
+            return "";
         final char[] token = coreCtx.getToken();
         if (token == null) {
             return "";

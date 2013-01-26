@@ -24,8 +24,8 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContextFactory;
 import org.eclipse.recommenders.internal.completion.rcp.proposals.ProcessableProposalFactory;
+import org.eclipse.recommenders.utils.annotations.Testing;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 public class RecommendersAllCompletionProposalProcessor extends ProcessableCompletionProposalComputer {
@@ -58,12 +58,13 @@ public class RecommendersAllCompletionProposalProcessor extends ProcessableCompl
     public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
             IProgressMonitor monitor) {
 
-        if (!shouldReturnResults()) return Collections.emptyList();
+        if (!shouldReturnResults())
+            return Collections.emptyList();
 
         return super.computeCompletionProposals(context, monitor);
     }
 
-    @VisibleForTesting
+    @Testing
     protected boolean shouldReturnResults() {
         Set<String> cats = Sets.newHashSet(PreferenceConstants.getExcludedCompletionProposalCategories());
         if (cats.contains(CATEGORY_ID)) {

@@ -7,10 +7,10 @@ Bundle-Vendor: Eclipse Code Recommenders
 Export-Package: org.eclipse.recommenders.webclient,
  org.eclipse.recommenders.webclient.exceptions,
  org.eclipse.recommenders.webclient.results
-Require-Bundle: com.google.guava,
- org.apache.commons.lang3,
+Require-Bundle: org.apache.commons.lang3,
  org.eclipse.recommenders.injection,
  org.eclipse.recommenders.utils,
  com.sun.jersey.client;visibility:=reexport,
  com.sun.jersey.core;visibility:=reexport
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.common.collect;version="[10.0.0,11.0.0)"

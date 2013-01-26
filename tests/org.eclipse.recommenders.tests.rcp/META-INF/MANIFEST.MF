@@ -6,7 +6,6 @@ Bundle-Version: 1.0.3.qualifier
 Bundle-Vendor: Eclipse Code Recommenders
 Fragment-Host: org.eclipse.recommenders.rcp
 Require-Bundle: org.eclipse.ui,
- com.google.guava,
  org.apache.commons.lang3,
  org.apache.commons.io,
  org.eclipse.core.runtime,

@@ -55,6 +55,7 @@ import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
 import org.eclipse.recommenders.internal.utils.codestructs.Variable;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.utils.Tuple;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.rcp.CompletionProposalDecorator;
@@ -62,7 +63,6 @@ import org.eclipse.recommenders.utils.rcp.JavaElementResolver;
 import org.eclipse.recommenders.utils.rcp.JdtUtils;
 import org.eclipse.recommenders.utils.rcp.ast.MethodDeclarationFinder;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -87,7 +87,7 @@ public class CallsCompletionProposalComputer implements IJavaCompletionProposalC
     private IRecommendersCompletionContext ctx;
     private String receiverName;
     private IType receiverType;
-    @VisibleForTesting
+    @Testing
     public ObjectUsage query;
     private IObjectMethodCallsNet model;
     private List<ICompletionProposal> proposals;

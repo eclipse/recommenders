@@ -46,13 +46,13 @@ import org.eclipse.recommenders.internal.utils.codestructs.ObjectUsage;
 import org.eclipse.recommenders.internal.utils.codestructs.Variable;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.utils.Tuple;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.rcp.JavaElementResolver;
 import org.eclipse.recommenders.utils.rcp.JdtUtils;
 import org.eclipse.recommenders.utils.rcp.ast.MethodDeclarationFinder;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -75,7 +75,7 @@ public class CallsSessionProcessor extends SessionProcessor {
     private IRecommendersCompletionContext ctx;
     private String receiverName;
     private IType receiverType;
-    @VisibleForTesting
+    @Testing
     public ObjectUsage query;
     private IObjectMethodCallsNet model;
     private List<CallsRecommendation> recommendations;
@@ -224,8 +224,8 @@ public class CallsSessionProcessor extends SessionProcessor {
 
         final double minProbability = prefStore.getInt(CallPreferencePage.ID_MIN_PROBABILITY) * 0.01;
         final int maxProposals = prefStore.getInt(CallPreferencePage.ID_MAX_PROPOSALS);
-        final SortedSet<Tuple<IMethodName, Double>> recommendedMethodCalls =
-                model.getRecommendedMethodCalls(minProbability);
+        final SortedSet<Tuple<IMethodName, Double>> recommendedMethodCalls = model
+                .getRecommendedMethodCalls(minProbability);
 
         final Variable var = Variable.create(receiverName, jdtResolver.toRecType(receiverType), null);
 
@@ -264,7 +264,8 @@ public class CallsSessionProcessor extends SessionProcessor {
             final ProposalMatcher matcher = new ProposalMatcher(coreProposal);
             for (final CallsRecommendation call : recommendations) {
                 final IMethodName crMethod = call.method;
-                if (!matcher.match(crMethod)) continue;
+                if (!matcher.match(crMethod))
+                    continue;
 
                 final int percentage = (int) rint(call.probability * 100);
                 int increment = 200 + percentage;

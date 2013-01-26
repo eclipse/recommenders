@@ -46,6 +46,7 @@ import org.eclipse.recommenders.extdoc.rcp.l10n.Messages;
 import org.eclipse.recommenders.extdoc.rcp.providers.ExtdocProvider;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.rcp.events.JavaSelectionEvent;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.eclipse.recommenders.utils.rcp.PartListener2Adapter;
 import org.eclipse.recommenders.utils.rcp.RCPUtils;
 import org.eclipse.swt.SWT;
@@ -67,7 +68,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.part.ViewPart;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.eventbus.AllowConcurrentEvents;
@@ -139,7 +139,7 @@ public class ExtdocView extends ViewPart {
         return providerMap;
     }
 
-    @VisibleForTesting
+    @Testing
     public void storeProviderRanking() {
         preferences.storeProviderRanking(providerRanking);
     }
@@ -299,17 +299,17 @@ public class ExtdocView extends ViewPart {
         }
     }
 
-    @VisibleForTesting
+    @Testing
     public void moveAfter(int oldIndex, int newIndex) {
         move(oldIndex, newIndex, MOVE_AFTER);
     }
 
-    @VisibleForTesting
+    @Testing
     public void moveBefore(int oldIndex, int newIndex) {
         move(oldIndex, newIndex, MOVE_BEFORE);
     }
 
-    @VisibleForTesting
+    @Testing
     public List<ExtdocProvider> getProviderRanking() {
         return providerRanking;
     }

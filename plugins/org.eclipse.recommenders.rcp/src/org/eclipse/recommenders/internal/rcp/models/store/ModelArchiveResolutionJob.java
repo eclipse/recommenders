@@ -31,9 +31,9 @@ import org.eclipse.recommenders.rcp.RecommendersPlugin;
 import org.eclipse.recommenders.rcp.repo.IModelRepository;
 import org.eclipse.recommenders.rcp.repo.IModelRepositoryIndex;
 import org.eclipse.recommenders.utils.Version;
+import org.eclipse.recommenders.utils.annotations.Testing;
 import org.sonatype.aether.artifact.Artifact;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -64,7 +64,7 @@ public class ModelArchiveResolutionJob extends Job {
     }
 
     @Override
-    @VisibleForTesting
+    @Testing
     public IStatus run(IProgressMonitor monitor) {
         if (!isAutoDownloadAllowed()) {
             return Status.CANCEL_STATUS;
@@ -104,7 +104,7 @@ public class ModelArchiveResolutionJob extends Job {
         }
     }
 
-    @VisibleForTesting
+    @Testing
     protected boolean isAutoDownloadAllowed() {
         IPreferenceStore store = RecommendersPlugin.getDefault().getPreferenceStore();
         return store.getBoolean(RecommendersPlugin.P_REPOSITORY_ENABLE_AUTO_DOWNLOAD);
