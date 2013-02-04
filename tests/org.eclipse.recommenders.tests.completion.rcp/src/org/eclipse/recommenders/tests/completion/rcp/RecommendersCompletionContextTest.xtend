@@ -14,6 +14,8 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode
 import com.google.common.base.Optional
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMemberAccess
 import org.eclipse.recommenders.utils.names.VmTypeName
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference
+
 class RecommendersCompletionContextTest { 
   
 	@Test
@@ -55,6 +57,93 @@ class RecommendersCompletionContextTest {
 		assertTrue(sut.methodDef.present)
 	}
 	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument() {
+		val code = classbody("TestClass", 'List<S$>')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
+	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument2() {
+		val code = classbody("TestClass", 'List<S$>;')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
+	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument3() {
+		val code = classbody("TestClass", 'List<S$> field')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
+	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument4() {
+		val code = classbody("TestClass", 'List<S$> field;')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
+	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument5() {
+		val code = classbody("TestClass", 'Map<String, S$>')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
+	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument6() {
+		val code = classbody("TestClass", 'Map<String, S$>;')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
+	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument7() {
+		val code = classbody("TestClass", 'Map<String, S$> field')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
+	
+	/**
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+	 */
+	@Test
+	def void testEnclosingTypeOfGenericArgument8() {
+		val code = classbody("TestClass", 'Map<String, S$> field;')
+		val sut = exercise(code)
+		assertCompletionNode(sut, typeof(CompletionOnSingleTypeReference));
+		assertEquals("TestClass", sut.enclosingType.get.elementName)
+	}
 	
 	@Test
 	def void testTypeParameters01() {

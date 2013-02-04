@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMemberAccess;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnQualifiedNameReference;
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
@@ -61,6 +62,118 @@ public class RecommendersCompletionContextTest {
     Optional<IMethodName> _methodDef = sut.getMethodDef();
     boolean _isPresent = _methodDef.isPresent();
     Assert.assertTrue(_isPresent);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "List<S$>");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument2() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "List<S$>;");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument3() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "List<S$> field");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument4() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "List<S$> field;");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument5() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "Map<String, S$>");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument6() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "Map<String, S$>;");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument7() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "Map<String, S$> field");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
+  }
+  
+  /**
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=399800">Bug 399800</a>
+   */
+  @Test
+  public void testEnclosingTypeOfGenericArgument8() {
+    final CharSequence code = CodeBuilder.classbody("TestClass", "Map<String, S$> field;");
+    final IRecommendersCompletionContext sut = this.exercise(code);
+    this.assertCompletionNode(sut, CompletionOnSingleTypeReference.class);
+    Optional<IType> _enclosingType = sut.getEnclosingType();
+    IType _get = _enclosingType.get();
+    String _elementName = _get.getElementName();
+    Assert.assertEquals("TestClass", _elementName);
   }
   
   @Test
