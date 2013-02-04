@@ -14,6 +14,8 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode
 import com.google.common.base.Optional
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMemberAccess
 import org.eclipse.recommenders.utils.names.VmTypeName
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference
+
 class RecommendersCompletionContextTest { 
   
 	@Test
@@ -54,7 +56,6 @@ class RecommendersCompletionContextTest {
 		assertCompletionNode(sut, typeof(CompletionOnMemberAccess));
 		assertTrue(sut.methodDef.present)
 	}
-	
 	
 	@Test
 	def void testTypeParameters01() {
