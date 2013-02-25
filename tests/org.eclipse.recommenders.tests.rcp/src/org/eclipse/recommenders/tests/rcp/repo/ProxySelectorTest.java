@@ -49,6 +49,14 @@ public class ProxySelectorTest {
     }
 
     @Test
+    public void testNonHostUrl() {
+        IProxyService proxyService = mockThrowingProxyService(PROXY_ENABLED);
+        ProxySelector proxySelector = new ServiceBasedProxySelector(proxyService);
+
+        assertNull(proxySelector.getProxy(mockRemoteRepository("file:/tmp")));
+    }
+
+    @Test
     public void testNoProxyDataEntries() {
         IProxyService proxyService = mockProxyService(PROXY_ENABLED, EMPTY_PROXY_DATA);
         ProxySelector proxySelector = new ServiceBasedProxySelector(proxyService);
@@ -85,6 +93,13 @@ public class ProxySelectorTest {
         IProxyService proxyService = mock(IProxyService.class);
         when(proxyService.isProxiesEnabled()).thenReturn(proxyEnabled);
         when(proxyService.select(Mockito.any(URI.class))).thenReturn(entries);
+        return proxyService;
+    }
+
+    private IProxyService mockThrowingProxyService(boolean proxyEnabled) {
+        IProxyService proxyService = mock(IProxyService.class);
+        when(proxyService.isProxiesEnabled()).thenReturn(proxyEnabled);
+        when(proxyService.select(Mockito.any(URI.class))).thenThrow(new RuntimeException());
         return proxyService;
     }
 
