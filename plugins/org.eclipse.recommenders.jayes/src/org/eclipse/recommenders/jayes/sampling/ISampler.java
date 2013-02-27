@@ -17,10 +17,18 @@ import org.eclipse.recommenders.jayes.BayesNode;
 
 public interface ISampler {
 
-    public void setBN(BayesNet net);
+    /**
+     * @deprecated still here for compatibility reasons, but for the sake of uniformity, setNetwork should be used
+     */
+    @Deprecated
+    void setBN(BayesNet net);
 
-    public void setEvidence(Map<BayesNode, String> evidence);
+    void setNetwork(BayesNet net);
 
-    public Map<BayesNode, String> sample();
+    void setEvidence(Map<BayesNode, String> evidence);
+
+    Map<BayesNode, String> sample();
+
+    void seed(long seed);
 
 }
