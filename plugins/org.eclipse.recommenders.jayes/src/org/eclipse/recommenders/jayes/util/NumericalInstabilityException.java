@@ -18,22 +18,18 @@ public class NumericalInstabilityException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public NumericalInstabilityException() {
-        // TODO Auto-generated constructor stub
     }
 
     public NumericalInstabilityException(String arg0) {
         super(arg0);
-        // TODO Auto-generated constructor stub
     }
 
     public NumericalInstabilityException(Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
     public NumericalInstabilityException(String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
 }
