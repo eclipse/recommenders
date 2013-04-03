@@ -325,15 +325,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.0.1</version>
-					<executions>
-						<execution>
-							<id>enforce-files-exist</id>
-							<goals>
-								<goal>enforce</goal>
-							</goals>
-						</execution>
-					</executions>
+					<version>1.2</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
