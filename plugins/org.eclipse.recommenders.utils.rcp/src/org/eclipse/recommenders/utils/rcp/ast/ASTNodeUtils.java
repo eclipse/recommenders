@@ -13,6 +13,7 @@ package org.eclipse.recommenders.utils.rcp.ast;
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
 import static org.eclipse.recommenders.utils.Throws.throwCancelationException;
+import static org.eclipse.recommenders.utils.Throws.throwUnreachable;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -29,7 +30,12 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.recommenders.utils.names.IMethodName;
@@ -44,13 +50,45 @@ public class ASTNodeUtils {
     @Inject
     private static JavaElementResolver resolver;
 
+    /**
+     * Returns the names top-level identifier, i.e., for "java.lang.String" --&gt; "String" and "String" --&gt; "String"
+     * 
+     * @param name
+     * @return
+     */
+    public static SimpleName stripQualifier(Name name) {
+        switch (name.getNodeType()) {
+        case ASTNode.SIMPLE_NAME:
+            return (SimpleName) name;
+        case ASTNode.QUALIFIED_NAME:
+            return ((QualifiedName) name).getName();
+        default:
+            throw throwUnreachable("unknow subtype of name: '%s'", name.getClass());
+        }
+    }
+
     public static boolean sameSimpleName(final Type jdtParam, final ITypeName crParam) {
-        final String jdtSimpleName = jdtParam.toString();
+
+        SimpleName jdtTypeName;
+        switch (jdtParam.getNodeType()) {
+        case ASTNode.SIMPLE_TYPE: {
+            SimpleType t = (SimpleType) jdtParam;
+            jdtTypeName = stripQualifier(t.getName());
+            break;
+        }
+        case ASTNode.QUALIFIED_TYPE: {
+            QualifiedType t = (QualifiedType) jdtParam;
+            jdtTypeName = stripQualifier(t.getName());
+        }
+        // TODO: XXX put handling of generics in here too? Not required yet but...
+        default:
+            return false;
+        }
         String crSimpleName = crParam.getClassName();
         if (crSimpleName.contains("$")) {
             crSimpleName = StringUtils.substringAfterLast(crSimpleName, "$");
         }
-        return jdtSimpleName.equals(crSimpleName);
+        return jdtTypeName.getIdentifier().equals(crSimpleName);
     }
 
     public static Type getBaseType(final Type jdtType) {
