@@ -55,14 +55,14 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
 
     private final class BuggyEventsPredicate implements Predicate<CompletionEvent> {
         @Override
-        public boolean apply(CompletionEvent input) {
-            return input.numberOfProposals < 1 || input.sessionEnded < input.sessionStarted;
+        public boolean apply(final CompletionEvent input) {
+            return (input.numberOfProposals < 1) || (input.sessionEnded < input.sessionStarted);
         }
     }
 
     private final class HasAppliedProposalPredicate implements Predicate<CompletionEvent> {
         @Override
-        public boolean apply(CompletionEvent e) {
+        public boolean apply(final CompletionEvent e) {
             return e.applied != null;
         }
     }
@@ -84,24 +84,24 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
     private void setDescription() {
         String date = "the beginning of recording";
         if (okayEvents.size() > 0) {
-            Date start = new Date(Iterables.getFirst(okayEvents, null).sessionStarted);
+            final Date start = new Date(Iterables.getFirst(okayEvents, null).sessionStarted);
             date = format("%tF", start);
         }
         setDescription("Here is a summary of your code completion activity since " + date + ":");
     }
 
     @Override
-    public void init(IWorkbench workbench) {
+    public void init(final IWorkbench workbench) {
         loadEvents();
         setDescription();
     }
 
     @Override
-    protected Control createContents(Composite parent) {
+    protected Control createContents(final Composite parent) {
         createWidgets(parent);
         appendNumberOfCompletionEvents();
-        appendTimeSpent();
         appendNumberOfKeystrokesSaved();
+        appendTimeSpent();
         appendNumberOfCompletionsByCompletionKind();
         appendNumberOfCompletionsByReceiverType();
 
@@ -109,27 +109,27 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         return container;
     }
 
-    private void createWidgets(Composite parent) {
+    private void createWidgets(final Composite parent) {
         container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout());
         styledText = new StyledText(container, SWT.READ_ONLY | SWT.WRAP);
         styledText.setBackground(container.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
         styledString = new StyledString();
-        GridData data = new GridData(GridData.FILL_BOTH);
+        final GridData data = new GridData(GridData.FILL_BOTH);
         data.widthHint = 400;
         styledText.setLayoutData(data);
     }
 
     private void loadEvents() {
-        File log = StatisticsSessionProcessor.getCompletionLogLocation();
-        Gson gson = StatisticsSessionProcessor.getCompletionLogSerializer();
-        LinkedList<CompletionEvent> events = Lists.newLinkedList();
+        final File log = StatisticsSessionProcessor.getCompletionLogLocation();
+        final Gson gson = StatisticsSessionProcessor.getCompletionLogSerializer();
+        final LinkedList<CompletionEvent> events = Lists.newLinkedList();
         try {
-            for (String json : Files.readLines(log, Charsets.UTF_8)) {
-                CompletionEvent event = gson.fromJson(json, CompletionEvent.class);
+            for (final String json : Files.readLines(log, Charsets.UTF_8)) {
+                final CompletionEvent event = gson.fromJson(json, CompletionEvent.class);
                 events.add(event);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         buggyEvents = Collections2.filter(events, new BuggyEventsPredicate());
@@ -140,45 +140,57 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
 
     private void appendNumberOfCompletionEvents() {
         int total = 0;
-        for (CompletionEvent e : okayEvents) {
+        for (final CompletionEvent e : okayEvents) {
             total += e.numberOfProposals;
         }
-        int selected = appliedEvents.size();
+        final int completedInPercent = calculatePercentData(appliedEvents);
         styledString.append("Number of times code completion triggered: ")
                 .append(format("%,d", okayEvents.size()), COUNTER_STYLER).append("\n");
-        int aborted = abortedEvents.size();
+        final int abortedInPercent = calculatePercentData(abortedEvents);
+
+        styledString.append("Number of concluded completions: ")
+                .append(appliedEvents.size() + " (" + completedInPercent + "%)", COUNTER_STYLER).append("\n");
+        styledString.append("Number of aborted completions: ")
+                .append(abortedEvents.size() + " (" + abortedInPercent + "%)", COUNTER_STYLER).append("\n");
         styledString.append("Number of proposals offered by code completion: ").append(total + "", COUNTER_STYLER)
                 .append("\n");
-        styledString.append("Number of aborted completions: ").append(aborted + "", COUNTER_STYLER).append("\n");
-        styledString.append("Number of concluded completions: ").append(selected + "", COUNTER_STYLER).append("\n");
+    }
+
+    private int calculatePercentData(final Collection<CompletionEvent> list) {
+        if (okayEvents.size() == 0) {
+            return okayEvents.size();
+        }
+        final double division = (list.size() / (double) okayEvents.size()) * 100;
+        return (int) Math.round(division);
     }
 
     private void appendNumberOfKeystrokesSaved() {
-        ArrayDoubleList strokes = new ArrayDoubleList();
-        for (CompletionEvent e : appliedEvents) {
-            int prefix = e.prefix == null ? 0 : e.prefix.length();
-            int completionLength = e.completion == null ? 0 : e.completion.length();
-            int saved = Math.max(0, completionLength - prefix);
+        final ArrayDoubleList strokes = new ArrayDoubleList();
+        for (final CompletionEvent e : appliedEvents) {
+            final int prefix = e.prefix == null ? 0 : e.prefix.length();
+            final int completionLength = e.completion == null ? 0 : e.completion.length();
+            final int saved = Math.max(0, completionLength - prefix);
             strokes.add(saved);
         }
 
-        double total = sum(strokes.toArray());
+        final double total = sum(strokes.toArray());
         styledString.append("\nTotal number of keystrokes saved by using code completion: ")
                 .append(format("%.0f", total), COUNTER_STYLER).append("\n");
 
-        double mean = mean(strokes.toArray());
+        final double mean = mean(strokes.toArray());
         styledString.append("Average number of keystrokes saved per completion: ").append(format("%.2f", mean),
                 COUNTER_STYLER);
+        styledString.append("\n");
     }
 
     private void appendTimeSpent() {
-        ArrayDoubleList spentApplied = computeTimeSpentInCompletion(appliedEvents);
-        long totalApplied = round(sum(spentApplied.toArray()));
-        long meanApplied = round(mean(spentApplied.toArray()));
+        final ArrayDoubleList spentApplied = computeTimeSpentInCompletion(appliedEvents);
+        final long totalApplied = round(sum(spentApplied.toArray()));
+        final long meanApplied = round(mean(spentApplied.toArray()));
 
-        ArrayDoubleList spentAborted = computeTimeSpentInCompletion(abortedEvents);
-        long totalAborted = round(sum(spentAborted.toArray()));
-        long meanAborted = round(mean(spentAborted.toArray()));
+        final ArrayDoubleList spentAborted = computeTimeSpentInCompletion(abortedEvents);
+        final long totalAborted = round(sum(spentAborted.toArray()));
+        final long meanAborted = round(mean(spentAborted.toArray()));
 
         styledString.append("\nTotal Time spent in completion window on ")
         //
@@ -190,19 +202,17 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         //
                 .append("\n   - concluded session:    ").append(format("%,d ms", meanApplied), COUNTER_STYLER)
                 //
-                .append("\n   - aborted session:     ").append(format("%,d ms", meanAborted), COUNTER_STYLER)
-                //
-                .append("\n");
+                .append("\n   - aborted session:     ").append(format("%,d ms", meanAborted), COUNTER_STYLER);
     }
 
-    private String toTimeString(long time) {
+    private String toTimeString(final long time) {
         return format("%d min, %d sec", MILLISECONDS.toMinutes(time),
                 MILLISECONDS.toSeconds(time) - MINUTES.toSeconds(MILLISECONDS.toMinutes(time)));
     }
 
-    private ArrayDoubleList computeTimeSpentInCompletion(Collection<CompletionEvent> events) {
-        ArrayDoubleList spent = new ArrayDoubleList();
-        for (CompletionEvent e : events) {
+    private ArrayDoubleList computeTimeSpentInCompletion(final Collection<CompletionEvent> events) {
+        final ArrayDoubleList spent = new ArrayDoubleList();
+        for (final CompletionEvent e : events) {
             long ms = e.sessionEnded - e.sessionStarted;
             if (ms > MAX_TIME_IN_COMPLETION) {
                 ms = MAX_TIME_IN_COMPLETION;
@@ -214,15 +224,16 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
 
     private void appendNumberOfCompletionsByCompletionKind() {
 
-        Bag<ProposalKind> b = TreeBag.newTreeBag();
+        final Bag<ProposalKind> b = TreeBag.newTreeBag();
         for (final ProposalKind kind : ProposalKind.values()) {
-            Collection<CompletionEvent> byKind = Collections2.filter(okayEvents, new Predicate<CompletionEvent>() {
+            final Collection<CompletionEvent> byKind = Collections2.filter(okayEvents,
+                    new Predicate<CompletionEvent>() {
 
-                @Override
-                public boolean apply(CompletionEvent input) {
-                    return kind == input.applied;
-                }
-            });
+                        @Override
+                        public boolean apply(final CompletionEvent input) {
+                            return kind == input.applied;
+                        }
+                    });
             if (byKind.size() > 0) {
                 b.add(kind, byKind.size());
             }
@@ -230,7 +241,7 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
 
         styledString.append("\n\nMost frequently selected completion types were:\n");
 
-        for (ProposalKind kind : b.topElements(20)) {
+        for (final ProposalKind kind : b.topElements(20)) {
             styledString.append("   - completion on ").append(kind.toString().toLowerCase().replace('_', ' '))
                     .append(": ").append(b.count(kind) + "", COUNTER_STYLER).append("\n");
         }
@@ -239,15 +250,15 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
     private void appendNumberOfCompletionsByReceiverType() {
         styledString.append("\nCode completion was triggered most frequently on variables of these types:")
                 .append("\n");
-        Bag<ITypeName> b = TreeBag.newTreeBag();
-        for (CompletionEvent e : okayEvents) {
+        final Bag<ITypeName> b = TreeBag.newTreeBag();
+        for (final CompletionEvent e : okayEvents) {
             if (e.receiverType == null) {
                 continue;
             }
             b.add(e.receiverType);
         }
 
-        for (ITypeName type : b.topElements(20)) {
+        for (final ITypeName type : b.topElements(20)) {
             styledString.append("   - ").append(Names.vm2srcQualifiedType(type)).append(": ")
                     .append(b.count(type) + "", COUNTER_STYLER).append("\n");
         }
