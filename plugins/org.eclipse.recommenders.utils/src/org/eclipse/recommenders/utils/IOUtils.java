@@ -12,30 +12,43 @@ package org.eclipse.recommenders.utils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.lang3.SystemUtils;
 
 public class IOUtils {
 
-	public static final String LINE_SEPARATOR = SystemUtils.LINE_SEPARATOR;
+    public static final String LINE_SEPARATOR = SystemUtils.LINE_SEPARATOR;
 
-	public static boolean closeQuietly(Closeable s) {
-		if (s == null) {
-			return true;
-		}
-		try {
-			s.close();
-			return true;
-		} catch (IOException e) {
-			System.err
-					.printf("Failed to close resource '%s'. Caught exception printed below.\n",
-							s);
-			e.printStackTrace();
-			return false;
-		}
-	}
+    public static boolean closeQuietly(Closeable s) {
+        if (s == null) {
+            return true;
+        }
+        try {
+            s.close();
+            return true;
+        } catch (IOException e) {
+            System.err.printf("Failed to close resource '%s'. Caught exception printed below.\n", s);
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	private IOUtils() {
-		// pure utility class - do not instantiate.
-	}
+    public static boolean closeQuietly(ZipFile z) {
+        if (z == null) {
+            return true;
+        }
+        try {
+            z.close();
+            return true;
+        } catch (IOException e) {
+            System.err.printf("Failed to close zip '%s'. Caught exception printed below.\n", z.getName());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private IOUtils() {
+        // pure utility class - do not instantiate.
+    }
 }
