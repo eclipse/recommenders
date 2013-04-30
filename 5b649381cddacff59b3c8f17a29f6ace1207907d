@@ -1,0 +1,9 @@
+Change-Id: I5b649381cddacff59b3c8f17a29f6ace1207907d
+Verified+1: Hudson CI
+Code-Review+2: Andreas Sewe <andreas.sewe@codetrails.com>
+IP-Clean+1: Andreas Sewe <andreas.sewe@codetrails.com>
+Submitted-by: Andreas Sewe <andreas.sewe@codetrails.com>
+Submitted-at: Tue, 30 Apr 2013 10:17:47 -0400
+Reviewed-on: https://git.eclipse.org/r/12372
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
