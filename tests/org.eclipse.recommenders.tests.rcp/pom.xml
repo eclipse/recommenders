@@ -8,6 +8,28 @@
 	</parent>
 	<artifactId>org.eclipse.recommenders.tests.rcp</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-surefire-plugin</artifactId>
+					<configuration>
+						<dependencies combine.children="append">
+							<dependency>
+								<artifactId>org.eclipse.jdt.core</artifactId>
+								<type>eclipse-plugin</type>
+							</dependency>
+							<dependency>
+								<artifactId>org.eclipse.jdt.launching</artifactId>
+								<type>eclipse-plugin</type>
+							</dependency>
+						</dependencies>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 	<profiles>
 		<profile>
 			<id>mac</id>
