@@ -85,7 +85,7 @@
          id="org.slf4j.api"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.7.2"
          unpack="false"/>
 
    <plugin
