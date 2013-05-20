@@ -89,12 +89,26 @@
 							<!-- Exclude 3rd party plugins without sources (or with remote sources). -->
 							<!-- See https://bugs.eclipse.org/bugs/show_bug.cgi?id=374663 -->
 							<excludes>
+								<plugin id="ch.qos.logback.classic"/>
+								<plugin id="ch.qos.logback.core"/>
+								<plugin id="ch.qos.logback.slf4j"/>
 								<plugin id="com.google.gson"/>
+								<plugin id="com.google.guava"/>
+								<plugin id="com.google.inject"/>
 								<plugin id="com.google.inject.assistedinject"/>
 								<plugin id="com.google.inject.multibindings"/>
 								<plugin id="com.ning.async-http-client"/>
+								<plugin id="javax.inject"/>
+								<plugin id="org.apache.commons.io"/>
+								<plugin id="org.apache.commons.math"/>
+								<plugin id="org.apache.commons.pool"/>
+								<plugin id="org.apache.lucene"/>
+								<plugin id="org.apache.lucene.core"/>
+								<plugin id="org.apache.lucene.misc"/>
+								<plugin id="org.apache.lucene.queries"/>
 								<plugin id="org.eclipse.recommenders.aether"/>
 								<plugin id="org.jboss.netty"/>
+								<plugin id="org.slf4j.api"/>
 							</excludes>
 							<!-- Non-breakable space, as normal spaces are trimmed. -->
 							<labelSuffix>&#xA0;(Sources)</labelSuffix>
