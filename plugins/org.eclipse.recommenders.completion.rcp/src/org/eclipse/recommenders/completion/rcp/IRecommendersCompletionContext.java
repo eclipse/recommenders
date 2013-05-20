@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -76,7 +77,6 @@ public interface IRecommendersCompletionContext {
      * <li> {@code List<MyClass>} --> {@code List}, and
      * <li> {@code MyClass MyClass[][] c} --> {@code MyClass}.
      * </ul>
-     * 
      * See {@link #getReceiverTypeSignature()} if you need the exact type signature including array literals or
      * generics.
      */
@@ -122,4 +122,22 @@ public interface IRecommendersCompletionContext {
 
     @Provisional
     Optional<Scope> getAssistScope();
+
+    /**
+     * Returns the annotation of the enclosing element. If completion was triggered in a method body, it will return the
+     * method's annotations. When triggered after a field delclaration (Field f = |) it returns the annotation of the
+     * field declaration. When triggered elsewhere in the class body it returns the annotations of the enclosing type.
+     * <p>
+     * Note that the annoations of an incomplete field declaration are yet not returned, i.e., When triggering at
+     * 
+     * <pre>
+     * @Inject P|
+     * </pre>
+     * 
+     * it wont find that this is an field declaration with an @inject annotation. For if you want to make
+     * recommendations based on incomplete field declarations, check whether
+     * {@link IRecommendersCompletionContext#getCompletionNode()) is of type <code>CompletionOnFieldType</code> and if
+     * so get its public field named <code>annotations</code>.
+     */
+    IAnnotation[] getEnclosingElementAnnotations();
 }

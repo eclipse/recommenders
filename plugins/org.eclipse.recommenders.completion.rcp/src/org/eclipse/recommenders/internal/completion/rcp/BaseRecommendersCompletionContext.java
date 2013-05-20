@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -206,6 +208,20 @@ public abstract class BaseRecommendersCompletionContext implements IRecommenders
             // we silently ignore that and return nothing instead.
         }
         return absent();
+    }
+
+    @Override
+    public IAnnotation[] getEnclosingElementAnnotations() {
+        IJavaElement enclosing = getEnclosingElement().orNull();
+        if (enclosing instanceof IAnnotatable) {
+            IAnnotatable annotable = cast(enclosing);
+            try {
+                return annotable.getAnnotations();
+            } catch (JavaModelException e) {
+                log.error("Exception while fetching annotations of " + enclosing.getElementName(), e);
+            }
+        }
+        return new IAnnotation[0];
     }
 
     @Override
