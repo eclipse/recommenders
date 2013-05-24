@@ -28,7 +28,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.primitives.ArrayDoubleList;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.recommenders.internal.completion.rcp.sandbox.CompletionEvent.ProposalKind;
 import org.eclipse.recommenders.utils.Bag;
 import org.eclipse.recommenders.utils.Names;
@@ -102,7 +107,7 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         appendNumberOfCompletionEvents();
         appendNumberOfKeystrokesSaved();
         appendTimeSpent();
-        appendNumberOfCompletionsByCompletionKind();
+        appendNumberOfCompletionsByCompletionKind(parent);
         appendNumberOfCompletionsByReceiverType();
 
         insertStyledText();
@@ -222,18 +227,16 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         return spent;
     }
 
-    private void appendNumberOfCompletionsByCompletionKind() {
-
+    private void appendNumberOfCompletionsByCompletionKind(Composite parent) {
         Bag<ProposalKind> b = TreeBag.newTreeBag();
         for (final ProposalKind kind : ProposalKind.values()) {
-            Collection<CompletionEvent> byKind = Collections2.filter(okayEvents,
-                    new Predicate<CompletionEvent>() {
+            Collection<CompletionEvent> byKind = Collections2.filter(okayEvents, new Predicate<CompletionEvent>() {
 
-                        @Override
-                        public boolean apply(CompletionEvent input) {
-                            return kind == input.applied;
-                        }
-                    });
+                @Override
+                public boolean apply(CompletionEvent input) {
+                    return kind == input.applied;
+                }
+            });
             if (byKind.size() > 0) {
                 b.add(kind, byKind.size());
             }
@@ -245,6 +248,8 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
             styledString.append("   - completion on ").append(kind.toString().toLowerCase().replace('_', ' '))
                     .append(": ").append(b.count(kind) + "", COUNTER_STYLER).append("\n");
         }
+
+        showCompletionsKindInViewer(parent, b);
     }
 
     private void appendNumberOfCompletionsByReceiverType() {
@@ -264,8 +269,65 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         }
     }
 
+    private void showCompletionsKindInViewer(Composite parent, final Bag<ProposalKind> b) {
+        final TableViewer viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
+                | SWT.FULL_SELECTION | SWT.BORDER);
+        viewer.getTable().setHeaderVisible(true);
+        viewer.getTable().setLinesVisible(true);
+        viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        createColumn("Completion Type", viewer, 150);
+        createColumn("Used", viewer, 100);
+        createColumn("Last used", viewer, 100);
+
+        viewer.setContentProvider(new ArrayContentProvider());
+        viewer.setLabelProvider(new ProposalLabelProvider(b));
+        viewer.setInput(b.topElements(30));
+    }
+
+    private TableViewerColumn createColumn(String header, TableViewer viewer, int width) {
+        final TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
+        column.getColumn().setText(header);
+        column.getColumn().setToolTipText(header);
+        column.getColumn().setMoveable(true);
+        column.getColumn().setAlignment(SWT.CENTER);
+        column.getColumn().setResizable(true);
+        column.getColumn().setWidth(width);
+        return column;
+    }
+
     private void insertStyledText() {
         styledText.setText(styledString.toString());
         styledText.setStyleRanges(styledString.getStyleRanges());
+    }
+
+    private class ProposalLabelProvider extends CellLabelProvider {
+        private Bag<ProposalKind> bag;
+
+        public ProposalLabelProvider(Bag<ProposalKind> bag) {
+            super();
+            this.bag = bag;
+        }
+
+        @Override
+        public void update(ViewerCell cell) {
+            String cellText = null;
+            ProposalKind proposal = (ProposalKind) cell.getElement();
+
+            switch (cell.getColumnIndex()) {
+            case 0:
+                cellText = proposal.toString().toLowerCase().replace('_', ' ');
+                break;
+            case 1:
+                cellText = Integer.toString(bag.count(proposal));
+                break;
+            case 2:
+                break;
+            }
+
+            if (cellText != null) {
+                cell.setText(cellText);
+            }
+        }
     }
 }
