@@ -1,0 +1,10 @@
+Change-Id: I166d217c9b2e1496f2d7e8368a9435ac84f8a831
+Verified+1: Hudson CI
+Code-Review+2: Marcel Bruch <marcel.bruch@codetrails.com>
+IP-Clean+1: Marcel Bruch <marcel.bruch@codetrails.com>
+Code-Review+1: Andreas Sewe <andreas.sewe@codetrails.com>
+Submitted-by: Marcel Bruch <marcel.bruch@codetrails.com>
+Submitted-at: Tue, 11 Jun 2013 06:07:00 -0400
+Reviewed-on: https://git.eclipse.org/r/13728
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
