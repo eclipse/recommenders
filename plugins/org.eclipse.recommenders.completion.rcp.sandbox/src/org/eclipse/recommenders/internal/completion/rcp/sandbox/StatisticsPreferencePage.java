@@ -7,7 +7,7 @@
  *
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
- *    Timur Achmetow - some small enhancements
+ *    Timur Achmetow - Refined display of completion data events
  */
 package org.eclipse.recommenders.internal.completion.rcp.sandbox;
 
@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.primitives.ArrayDoubleList;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -159,15 +160,21 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         }
         int completedInPercent = calculatePercentData(appliedEvents);
         styledString.append("Number of times code completion triggered: ")
-                .append(format("%,d", okayEvents.size()), COUNTER_STYLER).append("\n");
+                .append(format(addTabs(3) + "%,d", okayEvents.size()), COUNTER_STYLER).append("\n");
         int abortedInPercent = calculatePercentData(abortedEvents);
 
         styledString.append("Number of concluded completions: ")
-                .append(appliedEvents.size() + " (" + completedInPercent + "%)", COUNTER_STYLER).append("\n");
-        styledString.append("Number of aborted completions: ")
-                .append(abortedEvents.size() + " (" + abortedInPercent + "%)", COUNTER_STYLER).append("\n");
-        styledString.append("Number of proposals offered by code completion: ").append(total + "", COUNTER_STYLER)
+                .append(addTabs(7) + appliedEvents.size() + " (" + completedInPercent + "%)", COUNTER_STYLER)
                 .append("\n");
+        styledString.append("Number of aborted completions: ")
+                .append(addTabs(8) + abortedEvents.size() + " (" + abortedInPercent + "%)", COUNTER_STYLER)
+                .append("\n");
+        styledString.append("Number of proposals offered by code completion: ")
+                .append(addTabs(1) + total + "", COUNTER_STYLER).append("\n");
+    }
+
+    private String addTabs(int count) {
+        return StringUtils.repeat("\t", count);
     }
 
     private int calculatePercentData(Collection<CompletionEvent> list) {
@@ -188,12 +195,10 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         }
 
         double total = sum(strokes.toArray());
-        styledString.append("\nTotal number of keystrokes saved by using code completion: ")
-                .append(format("%.0f", total), COUNTER_STYLER).append("\n");
-
+        styledString.append("\nKeystrokes saved by using code completion");
+        styledString.append("\n   - total number: ").append(format(addTabs(3) + "%.0f", total), COUNTER_STYLER);
         double mean = mean(strokes.toArray());
-        styledString.append("Average number of keystrokes saved per completion: ").append(format("%.2f", mean),
-                COUNTER_STYLER);
+        styledString.append("\n   - average number: ").append(format(addTabs(1) + "%.2f", mean), COUNTER_STYLER);
         styledString.append("\n");
     }
 
@@ -206,17 +211,23 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         long totalAborted = round(sum(spentAborted.toArray()));
         long meanAborted = round(mean(spentAborted.toArray()));
 
-        styledString.append("\nTotal Time spent in completion window on ")
-        //
-                .append("\n   - concluded sessions:    ").append(toTimeString(totalApplied), COUNTER_STYLER)
+        styledString
+                .append("\nTotal Time spent in completion window on ")
                 //
-                .append("\n   - aborted sessions:      ").append(toTimeString(totalAborted), COUNTER_STYLER);
+                .append("\n   - concluded sessions:    ")
+                .append(addTabs(1) + toTimeString(totalApplied), COUNTER_STYLER)
+                //
+                .append("\n   - aborted sessions:      ")
+                .append(addTabs(2) + toTimeString(totalAborted), COUNTER_STYLER);
 
-        styledString.append("\n\nAverage time spent in completion window per")
-        //
-                .append("\n   - concluded session:    ").append(format("%,d ms", meanApplied), COUNTER_STYLER)
+        styledString
+                .append("\n\nAverage time spent in completion window per")
                 //
-                .append("\n   - aborted session:     ").append(format("%,d ms", meanAborted), COUNTER_STYLER);
+                .append("\n   - concluded session:    ")
+                .append(format(addTabs(1) + "%,d ms", meanApplied), COUNTER_STYLER)
+                //
+                .append("\n   - aborted session:     ")
+                .append(format(addTabs(2) + "%,d ms", meanAborted), COUNTER_STYLER);
     }
 
     private String toTimeString(long time) {
@@ -237,7 +248,7 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
     }
 
     private void showCompletionKindInViewer(Composite parent) {
-        Bag<ProposalKind> b = TreeBag.newTreeBag();
+        Bag<ProposalKind> proposalKindBag = TreeBag.newTreeBag();
         final Multimap<ProposalKind, CompletionEvent> multiMap = ArrayListMultimap.create();
 
         for (final ProposalKind kind : ProposalKind.values()) {
@@ -254,7 +265,7 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
                 }
             });
             if (byKind.size() > 0) {
-                b.add(kind, byKind.size());
+                proposalKindBag.add(kind, byKind.size());
             }
         }
 
@@ -264,13 +275,19 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         final TableColumnLayout layout = createTableColumnLayout(comp);
 
         final TableViewer viewer = createTableViewer(comp);
-        createColumn("Completion Type", viewer, 150, layout, 50);
-        createColumn("Used", viewer, 60, layout, 15);
-        createColumn("Last used", viewer, 110, layout, 35);
+        TablerSorterUtil sorter = new TablerSorterUtil();
+        TableViewerColumn completionTypeColumn = createColumn("Completion Type", viewer, 150, layout, 50);
+        sorter.setCompletionTypeSorter(viewer, completionTypeColumn);
+        TableViewerColumn usedCompletionColumn = createColumn("Used", viewer, 60, layout, 15);
+        sorter.setUsedCompletionSorter(viewer, usedCompletionColumn, multiMap);
+        TableViewerColumn lastUsedColumn = createColumn("Last used", viewer, 110, layout, 35);
+        sorter.setLastUsedSorter(viewer, lastUsedColumn, multiMap);
+        usedCompletionColumn.getColumn().getParent().setSortColumn(usedCompletionColumn.getColumn());
+        usedCompletionColumn.getColumn().getParent().setSortDirection(SWT.UP);
 
         viewer.setContentProvider(new ArrayContentProvider());
         viewer.setLabelProvider(new ProposalLabelProvider(multiMap));
-        viewer.setInput(b.topElements(30));
+        viewer.setInput(proposalKindBag.topElements(30));
     }
 
     private void showReceiverTypeInViewer(Composite parent) {
@@ -290,8 +307,13 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         final TableColumnLayout layout = createTableColumnLayout(comp);
 
         final TableViewer viewer = createTableViewer(comp);
-        createColumn("Type", viewer, 450, layout, 60);
-        createColumn("Count", viewer, 100, layout, 30);
+        TablerSorterUtil sorter = new TablerSorterUtil();
+        TableViewerColumn typeColumn = createColumn("Type", viewer, 450, layout, 60);
+        sorter.setTypeSorter(viewer, typeColumn);
+        TableViewerColumn countColumn = createColumn("Count", viewer, 100, layout, 30);
+        sorter.setCountSorter(viewer, countColumn, b);
+        countColumn.getColumn().getParent().setSortColumn(countColumn.getColumn());
+        countColumn.getColumn().getParent().setSortDirection(SWT.UP);
 
         viewer.setContentProvider(new ArrayContentProvider());
         viewer.setLabelProvider(new TypeNameLabelProvider(b));
@@ -367,7 +389,7 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
         }
     }
 
-    private class ProposalLabelProvider extends CellLabelProvider {
+    public class ProposalLabelProvider extends CellLabelProvider {
         private final Multimap<ProposalKind, CompletionEvent> multiMap;
 
         public ProposalLabelProvider(Multimap<ProposalKind, CompletionEvent> multiMap) {
@@ -398,7 +420,7 @@ public class StatisticsPreferencePage extends PreferencePage implements IWorkben
             }
         }
 
-        private Long getLastSessionStartedFor(ProposalKind proposal) {
+        public Long getLastSessionStartedFor(ProposalKind proposal) {
             Collection<CompletionEvent> collection = multiMap.get(proposal);
             TreeSet<Long> sessionSet = new TreeSet<Long>();
             for (CompletionEvent completionEvent : collection) {
