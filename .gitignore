@@ -11,6 +11,10 @@ target/
 aggregators/
 screenshots/
 
+## xtend-gen or generated sources should not be checked in
+generated-sources/
+xtend-gen/
+
 ## jrebel project config files
 rebel.xml
 
