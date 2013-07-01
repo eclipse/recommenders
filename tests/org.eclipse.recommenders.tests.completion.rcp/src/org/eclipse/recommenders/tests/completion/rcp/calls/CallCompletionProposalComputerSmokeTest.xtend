@@ -10,7 +10,7 @@ import org.eclipse.recommenders.tests.CodeBuilder
 import org.eclipse.recommenders.tests.completion.rcp.JavaContentAssistContextMock
 import org.eclipse.recommenders.tests.completion.rcp.RecommendersCompletionContextFactoryMock
 import org.eclipse.recommenders.tests.jdt.JavaProjectFixture
-import org.eclipse.recommenders.utils.Tuple
+import org.eclipse.recommenders.utils.Pair
 import org.eclipse.recommenders.utils.rcp.JavaElementResolver
 import org.junit.Before
 import org.junit.Test
@@ -137,7 +137,7 @@ class CallCompletionProposalComputerSmokeTest {
 		}
 	}
 
- 	def static Tuple<List<IJavaCompletionProposal>, CallsCompletionProposalComputer> exercise(CharSequence code){
+ 	def static Pair<List<IJavaCompletionProposal>, CallsCompletionProposalComputer> exercise(CharSequence code){
  		val fixture = new JavaProjectFixture(ResourcesPlugin::getWorkspace(),"test")
  		fixture.clear
 		val struct = fixture.createFileAndParseWithMarkers(code.toString)
@@ -150,7 +150,7 @@ class CallCompletionProposalComputerSmokeTest {
             new RecommendersCompletionContextFactoryMock(), CallsPreferenceStoreMock::create())
         val proposals = sut.computeCompletionProposals(new JavaContentAssistContextMock(cu, struct.second.head), new NullProgressMonitor());
         
-        Tuple::newTuple(proposals, sut) as Tuple
+        Pair::newPair(proposals, sut) as Pair
  }
 	
 	

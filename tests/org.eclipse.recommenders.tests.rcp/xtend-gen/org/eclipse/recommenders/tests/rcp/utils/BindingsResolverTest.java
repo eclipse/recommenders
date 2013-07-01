@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.recommenders.tests.CodeBuilder;
 import org.eclipse.recommenders.tests.jdt.JavaProjectFixture;
-import org.eclipse.recommenders.utils.Tuple;
+import org.eclipse.recommenders.utils.Pair;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.rcp.JavaElementResolver;
 import org.eclipse.recommenders.utils.rcp.ast.BindingUtils;
@@ -60,7 +60,7 @@ public class BindingsResolverTest {
     JavaProjectFixture _javaProjectFixture = new JavaProjectFixture(_workspace, "test");
     final JavaProjectFixture fixture = _javaProjectFixture;
     String _string = code.toString();
-    final Tuple<CompilationUnit,Set<Integer>> struct = fixture.parseWithMarkers(_string);
+    final Pair<CompilationUnit,Set<Integer>> struct = fixture.parseWithMarkers(_string);
     final CompilationUnit cu = struct.getFirst();
     Set<Integer> _second = struct.getSecond();
     final Integer pos = IterableExtensions.<Integer>head(_second);
