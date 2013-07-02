@@ -150,7 +150,7 @@ class CallCompletionProposalComputerSmokeTest {
             new RecommendersCompletionContextFactoryMock(), CallsPreferenceStoreMock::create())
         val proposals = sut.computeCompletionProposals(new JavaContentAssistContextMock(cu, struct.second.head), new NullProgressMonitor());
         
-        Tuple::newTuple(proposals, sut) as Tuple
+        Tuple::newPair(proposals, sut) as Tuple
  }
 	
 	
