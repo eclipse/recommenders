@@ -26,3 +26,4 @@ Require-Bundle: org.junit;bundle-version="4.10.0",
  org.eclipse.jface.text,
  org.eclipse.xtext.xbase.lib
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.recommenders.internal.completion.rcp
