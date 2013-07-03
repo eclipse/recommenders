@@ -25,7 +25,7 @@ import com.google.common.collect.Ordering;
 @Beta
 public class Recommendations {
 
-    public static final Comparator<Recommendation<?>> BY_RELEVANCE = new Comparator<Recommendation<?>>() {
+    private static final Comparator<Recommendation<?>> C_BY_RELEVANCE = new Comparator<Recommendation<?>>() {
 
         @Override
         public int compare(Recommendation<?> o1, Recommendation<?> o2) {
@@ -33,7 +33,7 @@ public class Recommendations {
         }
     };
 
-    public static final Comparator<Recommendation<?>> BY_NAME = new Comparator<Recommendation<?>>() {
+    private static final Comparator<Recommendation<?>> C_BY_NAME = new Comparator<Recommendation<?>>() {
 
         @Override
         public int compare(Recommendation<?> o1, Recommendation<?> o2) {
@@ -41,7 +41,7 @@ public class Recommendations {
         }
     };
 
-    private static final Predicate<Recommendation<IMethodName>> VOID = new Predicate<Recommendation<IMethodName>>() {
+    private static final Predicate<Recommendation<IMethodName>> P_VOID = new Predicate<Recommendation<IMethodName>>() {
 
         @Override
         public boolean apply(Recommendation<IMethodName> input) {
@@ -49,18 +49,47 @@ public class Recommendations {
         }
     };
 
+    private static final Predicate<Recommendation<?>> newMinimumRelevancePredicate(final double min) {
+        return new Predicate<Recommendation<?>>() {
+
+            @Override
+            public boolean apply(Recommendation<?> input) {
+                return input.getRelevance() >= min;
+            }
+        };
+    }
+
     /**
-     * Returns the top k elements of the given iterable, sorted by proposal relevance in descending order.
+     * Returns the top k elements of the given list of recommendations, sorted by proposal relevance in descending
+     * order.
      */
     public static <T> List<Recommendation<T>> top(Iterable<Recommendation<T>> recommendations, int numberOfTopElements) {
-        return Ordering.from(BY_RELEVANCE).greatestOf(recommendations, numberOfTopElements);
+        return Ordering.from(C_BY_RELEVANCE).greatestOf(recommendations, numberOfTopElements);
+    }
+
+    /**
+     * Returns the top k elements of the given list of recommendations that satisfy the minimum relevance criterion,
+     * sorted by proposal relevance in descending order.
+     */
+    public static <T> List<Recommendation<T>> top(Iterable<Recommendation<T>> recommendations, int numberOfTopElements,
+            double minRelevance) {
+        return Ordering.from(C_BY_RELEVANCE).greatestOf(filterRelevance(recommendations, minRelevance),
+                numberOfTopElements);
     }
 
     /**
      * Filters all void methods from the list of method recommendations.
      */
     public static Iterable<Recommendation<IMethodName>> filterVoid(Iterable<Recommendation<IMethodName>> recommendations) {
-        return Iterables.filter(recommendations, VOID);
+        return Iterables.filter(recommendations, P_VOID);
+    };
+
+    /**
+     * Filters all proposals whose relevance is below the given threshold.
+     */
+    public static <T> Iterable<Recommendation<T>> filterRelevance(Iterable<Recommendation<T>> recommendations,
+            double min) {
+        return Iterables.filter(recommendations, newMinimumRelevancePredicate(min));
     };
 
     /**
@@ -68,6 +97,6 @@ public class Recommendations {
      * output.
      */
     public static <T> List<Recommendation<T>> sortByName(Iterable<Recommendation<T>> recommendations) {
-        return Ordering.from(BY_NAME).sortedCopy(recommendations);
+        return Ordering.from(C_BY_NAME).sortedCopy(recommendations);
     }
 }
