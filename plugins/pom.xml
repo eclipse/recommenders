@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-<!--		<module>org.eclipse.recommenders.codegen</module> -->
+		<!-- <module>org.eclipse.recommenders.codegen</module> -->
 		<module>org.eclipse.recommenders.completion.rcp</module>
 		<module>org.eclipse.recommenders.completion.rcp.calls</module>
 		<module>org.eclipse.recommenders.completion.rcp.chain</module>
@@ -44,10 +44,25 @@
 					<name>env.BUILD_NUMBER</name>
 				</property>
 			</activation>
-
 			<properties>
 				<build-alias>b${env.BUILD_NUMBER}</build-alias>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.cbi.maven.plugins</groupId>
+						<artifactId>eclipse-jarsigner-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign</id>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 
@@ -56,6 +71,51 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-pack200a-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>pack200-normalize</id>
+						<goals>
+							<goal>normalize</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.cbi.maven.plugins</groupId>
+				<artifactId>eclipse-jarsigner-plugin</artifactId>
+				<!-- Pull in execution of "sign" defined in the profile above. -->
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-pack200b-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>pack200-pack</id>
+						<goals>
+							<goal>pack</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>p2-metadata</id>
+						<goals>
+							<goal>p2-metadata</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<defaultP2Metadata>false</defaultP2Metadata>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -108,7 +168,8 @@
 						</configuration>
 					</execution>
 					<execution>
-						<!-- (Transitive) dependencies must meet our execution environment compatibility requirements -->
+						<!-- (Transitive) dependencies must meet our execution environment 
+							compatibility requirements -->
 						<id>enforce-bytecode-version</id>
 						<goals>
 							<goal>enforce</goal>

@@ -8,9 +8,9 @@
 		<version>1.100.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>org.eclipse.recommenders.repository.rcp.train.e43</artifactId>
+	<artifactId>org.eclipse.recommenders.repository.rcp.stable</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<name>Code Recommenders: Kepler Release Train Update Site</name>
+	<name>Code Recommenders: Stable Update Site</name>
 
 	<properties>
 		<signer-input-directory>/home/data/httpd/download-staging.priv/technology/recommenders</signer-input-directory>
