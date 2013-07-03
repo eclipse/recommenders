@@ -10,7 +10,8 @@
 <!-- http://git.eclipse.org/c/tycho/org.eclipse.tycho.git/tree/tycho-demo -->
 <!-- http://timezra.blogspot.com/2010/05/tycho-tests-without-osgi.html -->
 <!-- http://www.java-forum.org/deployment/116917-tycho-unit-tests.html -->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.recommenders</groupId>
@@ -47,7 +48,8 @@
 		<recommenders-version>1.100.0-SNAPSHOT</recommenders-version>
 		<java-version>1.6</java-version>
 		<tycho-version>0.18.0</tycho-version>
-		<!-- Use HTTP, as it provides the most firewall-friendly access to the repository. -->
+		<!-- Use HTTP, as it provides the most firewall-friendly access to the 
+			repository. -->
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/recommenders/org.eclipse.recommenders.git</tycho.scmUrl>
 		<jacoco-version>0.5.4.201111111111</jacoco-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -93,12 +95,17 @@
 		</profile>
 	</profiles>
 	<pluginRepositories>
+		<!-- TODO Needed? -->
 		<pluginRepository>
 			<id>eclipse</id>
 			<url>http://maven.eclipse.org/nexus/content/groups/public/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>m2e-cbi</id>
+			<url>http://download.eclipse.org/technology/m2e/maven/</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<build>
@@ -123,6 +130,7 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<executionEnvironmentDefault>JavaSE-${java-version}</executionEnvironmentDefault>
+						<includePackedArtifacts>true</includePackedArtifacts>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -196,6 +204,21 @@
 					<groupId>org.eclipse.tycho.extras</groupId>
 					<artifactId>tycho-source-feature-plugin</artifactId>
 					<version>${tycho-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>tycho-pack200a-plugin</artifactId>
+					<version>${tycho-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>tycho-pack200b-plugin</artifactId>
+					<version>${tycho-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.cbi.maven.plugins</groupId>
+					<artifactId>eclipse-jarsigner-plugin</artifactId>
+					<version>1.0.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -292,7 +315,8 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.6.2.201302030002</version>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
