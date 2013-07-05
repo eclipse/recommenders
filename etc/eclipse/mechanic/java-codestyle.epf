@@ -1,0 +1,9 @@
+# @title Code Style
+# @description code style related settings
+# @task_type LASTMOD
+#
+# Created by the Workspace Mechanic Preference Recorder
+#Thu Nov 03 08:55:12 CET 2011
+file_export_version=3.0
+/instance/org.eclipse.jdt.core/org.eclipse.jdt.core.codeComplete.argumentSuffixes=
+/instance/org.eclipse.jdt.ui/org.eclipse.jdt.ui.staticondemandthreshold=2
