@@ -1,0 +1,12 @@
+# @title Content Assist favorites
+# @description adds some packages as favorites to the content assitance
+# @task_type LASTMOD
+#
+# Created by the Workspace Mechanic Preference Recorder
+#Tue Oct 04 16:00:09 CEST 2011
+file_export_version=3.0
+/instance/org.eclipse.jdt.ui/content_assist_autoactivation_triggers_java=.
+/instance/org.eclipse.jdt.ui/content_assist_autoactivation_delay=50
+/instance/org.eclipse.jdt.ui/content_assist_insert_completion=false
+/instance/org.eclipse.jdt.core/org.eclipse.jdt.core.codeComplete.deprecationCheck=enabled
+/instance/org.eclipse.jdt.ui/content_assist_favorite_static_members=com.google.common.base.Throwables.*;com.google.common.base.Optional.*;com.google.common.collect.Lists.*;com.google.common.collect.Sets.*;org.junit.Assert.*;org.mockito.Matchers.*;org.mockito.Mockito.*
