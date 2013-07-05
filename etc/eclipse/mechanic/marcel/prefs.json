@@ -1,0 +1,14 @@
+{
+  type : 'com.google.eclipse.mechanic.UriTaskProviderModel',
+  metadata : {
+    name: 'Optional Workspace Mechanic Tasks for Eclipse Code Recommenders',
+    description: 'Workspace Mechanic tasks to get optional settings for Eclipse',
+    contact: 'recommenders-dev@eclipse.org'
+  },  
+  tasks: [
+    'keys-maven.epf',
+    'line-numbers.epf',
+    'm2e-xmlpom.epf',
+    'organize-imports.epf'
+  ]
+}

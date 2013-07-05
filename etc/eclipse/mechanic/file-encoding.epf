@@ -1,0 +1,10 @@
+# @title File encoding
+# @description set encoding to UTF-8 and line end to unix
+# @task_type LASTMOD
+#
+# Created by the Workspace Mechanic Preference Recorder
+#Mon Jul 25 08:54:29 CEST 2011
+file_export_version=3.0
+/instance/org.eclipse.core.resources/refresh.lightweight.enabled=true
+/instance/org.eclipse.core.resources/encoding=UTF-8
+/instance/org.eclipse.core.runtime/line.separator=\n
