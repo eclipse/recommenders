@@ -1,0 +1,14 @@
+# @title Set space-friendly visualization in editors
+# @description This task uses spaces for tabs, sets 4 character tab width and shows whitespace characters where they are misplaced.
+# @task_type LASTMOD
+#
+file_export_version=3.0
+/instance/org.eclipse.ui.editors/spacesForTabs=true
+/instance/org.eclipse.ui.editors/showWhitespaceCharacters=true
+/instance/org.eclipse.ui.editors/tabWidth=4
+/instance/org.eclipse.ui.editors/showLineFeed=false
+/instance/org.eclipse.ui.editors/showCarriageReturn=false
+/instance/org.eclipse.ui.editors/showEnclosedSpaces=false
+/instance/org.eclipse.ui.editors/showLeadingSpaces=false
+/instance/org.eclipse.ui.editors/spacesForTabs=true
+/instance/org.eclipse.ui.editors/tabWidth=4
