@@ -1,0 +1,10 @@
+# @title Show line numbers in editor
+# @description Show line numbers in editor
+# @task_type LASTMOD
+#
+# Created by the Workspace Mechanic Preference Recorder
+#Tue Jul 17 08:39:13 CEST 2012
+
+/instance/org.eclipse.ui.editors/showWhitespaceCharacters=true
+/instance/org.eclipse.ui.editors/lineNumberRuler=true
+file_export_version=3.0
