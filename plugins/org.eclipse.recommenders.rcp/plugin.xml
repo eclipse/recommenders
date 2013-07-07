@@ -30,7 +30,13 @@
             category="org.eclipse.recommenders.rcp.category.views"
             class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.rcp.ui.ModelIndexView"
             id="org.eclipse.recommenders.internal.rcp.ui.ModelIndexView"
-            name="Model Index ">
+            name="Model Index">
+      </view>
+      <view
+            category="org.eclipse.recommenders.rcp.category.views"
+            class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.rcp.ui.ProjectCoordinatesView"
+            id="org.eclipse.recommenders.internal.rcp.ui.ProjectCoordinatesView"
+            name="Project Coordinates">
       </view>
    </extension>
      <extension
