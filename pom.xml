@@ -245,7 +245,7 @@
 									<validHeader>license-amann-2012.txt</validHeader>
 								</validHeaders>
 								<includes>
-									<include>${project.build.sourceDirectory}/**/*.java</include>
+									<include>src/**/*.java</include>
 								</includes>
 							</configuration>
 						</execution>
