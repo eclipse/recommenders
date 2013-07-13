@@ -1,0 +1,58 @@
+/**
+ * Copyright (c) 2013 Timur Achmetow.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Timur Achmetow - Initial API and implementation
+ */
+package org.eclipse.recommenders.internal.completion.rcp.sandbox;
+
+import java.text.MessageFormat;
+
+/**
+ *  Domain object for the UI tab "commands". This objects will be persisted to the eclipse workspace. 
+ *  
+ *  Example 1, which will be persisted: 
+ *  {"commandID":"org.eclipse.ui.window.showKeyAssist","name":"Show Key Assist","description":"Show the key assist dialog",
+ *  "date":1374179225838,"categoryName":"Window","categoryID":"org.eclipse.ui.category.window"}
+ *  
+ *  Example 2:
+ *  {"commandID":"org.eclipse.ui.edit.copy","name":"Copy","description":"Copy the selection to the clipboard",
+ *  "date":1374179228788,"categoryName":"Edit","categoryID":"org.eclipse.ui.category.edit"}
+ *
+ */
+public class TriggeredCommand {
+    public final String commandID;
+    public final String name;
+    public final String description;
+    public final long sessionStarted;
+    public int count;
+    public final String categoryName;
+    public final String categoryID;
+
+    public TriggeredCommand(String commandID, String name, String description, long date, 
+            String categoryName, String categoryID) {
+        this.commandID = commandID;
+        this.name = name;
+        this.description = description;
+        this.sessionStarted = date;
+        this.categoryName = categoryName;
+        this.categoryID = categoryID;
+    }
+    
+    /**
+     * Collects the triggered command counts, for example: o.e.c.edit.cut : 5 times
+     */
+    public void incrementCounter()
+    {
+        count += 1;
+    }
+    
+    @Override
+    public String toString() {
+        return MessageFormat.format("Command: {0}, ID: {1}", name, commandID);
+    }
+}
