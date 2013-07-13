@@ -59,6 +59,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
@@ -109,7 +111,7 @@ public class StatisticsDialog extends TitleAreaDialog {
     @Override
     protected Control createContents(Composite parent) {
         super.createContents(parent);
-        getShell().setText("Statistics Dialog");
+        getShell().setText("Developer Activity Report");
         getShell().setSize(550, 725);
         setMessage(getDescriptionText(), IMessageProvider.INFORMATION);
         return parent;
@@ -118,12 +120,25 @@ public class StatisticsDialog extends TitleAreaDialog {
     @Override
     protected Control createDialogArea(Composite parent) {
         parent.setLayout(new GridLayout());
-        createWidgets(parent);
+
+        final TabFolder folder = new TabFolder(parent, SWT.NONE);
+        folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        final TabItem statsTab = new TabItem(folder, SWT.NONE);
+        statsTab.setText("Content Assist");
+
+        Composite firstComp = new Composite(folder, SWT.NONE);
+        firstComp.setLayout(new GridLayout());
+
+        final TabItem commandsTab = new TabItem(folder, SWT.NONE);
+        commandsTab.setText("Commands");
+
+        createWidgets(firstComp);
         appendNumberOfCompletionEvents();
         appendNumberOfKeystrokesSaved();
         appendTimeSpent();
 
-        SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
+        SashForm sashForm = new SashForm(firstComp, SWT.VERTICAL);
         GridData data = new GridData(GridData.FILL_BOTH);
         sashForm.setLayoutData(data);
 
@@ -132,6 +147,11 @@ public class StatisticsDialog extends TitleAreaDialog {
 
         sashForm.setWeights(new int[] { 50, 50 });
         insertStyledText();
+
+        statsTab.setControl(firstComp);
+        Composite secondComp = new TriggeredCommandsTab().createContent(folder);
+        commandsTab.setControl(secondComp);
+
         return parent;
     }
 
@@ -139,7 +159,7 @@ public class StatisticsDialog extends TitleAreaDialog {
         container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout());
         styledText = new StyledText(container, SWT.READ_ONLY | SWT.WRAP);
-        styledText.setBackground(container.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+        styledText.setBackground(parent.getBackground());
         styledString = new StyledString();
     }
 
@@ -365,7 +385,7 @@ public class StatisticsDialog extends TitleAreaDialog {
             Date start = new Date(Iterables.getFirst(okayEvents, null).sessionStarted);
             date = format("%tF", start);
         }
-        return "Here is a summary of your code completion activity since " + date;
+        return "Here is a summary of your activities since " + date;
     }
 
     private void loadEvents() {
