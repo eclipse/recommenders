@@ -69,5 +69,11 @@
          </command>
       </menuContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.eclipse.recommenders.internal.completion.rcp.sandbox.TriggeredCommandCollector">
+      </startup>
+   </extension>
 
 </plugin>

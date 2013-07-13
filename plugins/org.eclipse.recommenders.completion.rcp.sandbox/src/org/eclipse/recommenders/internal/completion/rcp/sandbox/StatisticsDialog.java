@@ -17,7 +17,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.apache.commons.math.stat.StatUtils.mean;
 import static org.apache.commons.math.stat.StatUtils.sum;
-import static org.eclipse.jface.viewers.StyledString.COUNTER_STYLER;
 import static org.eclipse.recommenders.internal.completion.rcp.sandbox.TableSorters.setCompletionTypeSorter;
 import static org.eclipse.recommenders.internal.completion.rcp.sandbox.TableSorters.setCountSorter;
 import static org.eclipse.recommenders.internal.completion.rcp.sandbox.TableSorters.setLastUsedSorter;
@@ -26,6 +25,7 @@ import static org.eclipse.recommenders.internal.completion.rcp.sandbox.TableSort
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
@@ -33,15 +33,15 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.primitives.ArrayDoubleList;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -52,13 +52,14 @@ import org.eclipse.recommenders.utils.TreeBag;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
@@ -79,24 +80,22 @@ public class StatisticsDialog extends TitleAreaDialog {
     private Collection<CompletionEvent> abortedEvents;
 
     private Composite container;
-    private StyledText styledText;
-    private StyledString styledString;
 
     private final class BuggyEventsPredicate implements Predicate<CompletionEvent> {
         @Override
-        public boolean apply(CompletionEvent input) {
-            return input.numberOfProposals < 1 || input.sessionEnded < input.sessionStarted;
+        public boolean apply(final CompletionEvent input) {
+            return (input.numberOfProposals < 1) || (input.sessionEnded < input.sessionStarted);
         }
     }
 
     private final class HasAppliedProposalPredicate implements Predicate<CompletionEvent> {
         @Override
-        public boolean apply(CompletionEvent e) {
+        public boolean apply(final CompletionEvent e) {
             return e.applied != null;
         }
     }
 
-    public StatisticsDialog(Shell parentShell) {
+    public StatisticsDialog(final Shell parentShell) {
         super(parentShell);
         setHelpAvailable(false);
         loadEvents();
@@ -107,127 +106,158 @@ public class StatisticsDialog extends TitleAreaDialog {
     }
 
     @Override
-    protected Control createContents(Composite parent) {
+    protected Control createContents(final Composite parent) {
         super.createContents(parent);
-        getShell().setText("Statistics Dialog");
-        getShell().setSize(550, 725);
+        getShell().setText("Developer Activity Report");
+        getShell().setSize(550, 800);
         setMessage(getDescriptionText(), IMessageProvider.INFORMATION);
         return parent;
     }
 
     @Override
-    protected Control createDialogArea(Composite parent) {
+    protected Control createDialogArea(final Composite parent) {
         parent.setLayout(new GridLayout());
-        createWidgets(parent);
+
+        final TabFolder folder = new TabFolder(parent, SWT.NONE);
+        folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        final TabItem statsTab = new TabItem(folder, SWT.NONE);
+        statsTab.setText("Content Assist");
+
+        final Composite firstComp = new Composite(folder, SWT.NONE);
+        firstComp.setLayout(new GridLayout());
+
+        final TabItem commandsTab = new TabItem(folder, SWT.NONE);
+        commandsTab.setText("Commands");
+
+        createWidgets(firstComp);
         appendNumberOfCompletionEvents();
         appendNumberOfKeystrokesSaved();
         appendTimeSpent();
 
-        SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
-        GridData data = new GridData(GridData.FILL_BOTH);
+        final SashForm sashForm = new SashForm(firstComp, SWT.VERTICAL);
+        final GridData data = new GridData(GridData.FILL_BOTH);
         sashForm.setLayoutData(data);
 
         showCompletionKindInViewer(sashForm);
         showReceiverTypeInViewer(sashForm);
 
         sashForm.setWeights(new int[] { 50, 50 });
-        insertStyledText();
+
+        statsTab.setControl(firstComp);
+        final Composite secondComp = new TriggeredCommandsTab().createContent(folder);
+        commandsTab.setControl(secondComp);
+
         return parent;
     }
 
-    private void createWidgets(Composite parent) {
+    private void createWidgets(final Composite parent) {
         container = new Composite(parent, SWT.NONE);
-        container.setLayout(new GridLayout());
-        styledText = new StyledText(container, SWT.READ_ONLY | SWT.WRAP);
-        styledText.setBackground(container.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-        styledString = new StyledString();
+        GridLayout grid = new GridLayout(2, false);
+        grid.marginHeight = 5;
+        grid.horizontalSpacing = 0;
+        grid.verticalSpacing = 0;
+        container.setLayout(grid);
     }
 
     private void appendNumberOfCompletionEvents() {
         int total = 0;
-        for (CompletionEvent e : okayEvents) {
+        for (final CompletionEvent e : okayEvents) {
             total += e.numberOfProposals;
         }
-        int completedInPercent = calculatePercentData(appliedEvents);
-        styledString.append("Number of times code completion triggered: ")
-                .append(format(addTabs(3) + "%,d", okayEvents.size()), COUNTER_STYLER).append("\n");
-        int abortedInPercent = calculatePercentData(abortedEvents);
+        final int completedInPercent = calculatePercentData(appliedEvents);
+        new Label(container, SWT.NONE).setText("Number of times code completion triggered: ");
+        createLabelWithColor(MessageFormat.format("{0}", okayEvents.size()));
+        final int abortedInPercent = calculatePercentData(abortedEvents);
 
-        styledString.append("Number of concluded completions: ")
-                .append(addTabs(7) + appliedEvents.size() + " (" + completedInPercent + "%)", COUNTER_STYLER)
-                .append("\n");
-        styledString.append("Number of aborted completions: ")
-                .append(addTabs(8) + abortedEvents.size() + " (" + abortedInPercent + "%)", COUNTER_STYLER)
-                .append("\n");
-        styledString.append("Number of proposals offered by code completion: ")
-                .append(addTabs(1) + total + "", COUNTER_STYLER).append("\n");
+        new Label(container, SWT.NONE).setText("Number of concluded completions: ");
+        createLabelWithColor(MessageFormat.format("{0} ({1}%)", appliedEvents.size(), completedInPercent));
+
+        new Label(container, SWT.NONE).setText("Number of aborted completions: ");
+        createLabelWithColor(MessageFormat.format("{0} ({1}%)", abortedEvents.size(), abortedInPercent));
+
+        new Label(container, SWT.NONE).setText("Number of proposals offered by code completion: ");
+        createLabelWithColor(MessageFormat.format("{0}", total));
     }
 
-    private String addTabs(int count) {
-        return StringUtils.repeat("\t", count);
+    private void createLabelWithColor(String text) {
+        Label label = new Label(container, SWT.NONE);
+        label.setText(text);
+        label.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.COUNTER_COLOR));
     }
 
-    private int calculatePercentData(Collection<CompletionEvent> list) {
+    private int calculatePercentData(final Collection<CompletionEvent> list) {
         if (okayEvents.size() == 0) {
             return okayEvents.size();
         }
-        double division = list.size() / (double) okayEvents.size() * 100;
+        final double division = (list.size() / (double) okayEvents.size()) * 100;
         return (int) Math.round(division);
     }
 
     private void appendNumberOfKeystrokesSaved() {
-        ArrayDoubleList strokes = new ArrayDoubleList();
-        for (CompletionEvent e : appliedEvents) {
-            int prefix = e.prefix == null ? 0 : e.prefix.length();
-            int completionLength = e.completion == null ? 0 : e.completion.length();
-            int saved = Math.max(0, completionLength - prefix);
+        final ArrayDoubleList strokes = new ArrayDoubleList();
+        for (final CompletionEvent e : appliedEvents) {
+            final int prefix = e.prefix == null ? 0 : e.prefix.length();
+            final int completionLength = e.completion == null ? 0 : e.completion.length();
+            final int saved = Math.max(0, completionLength - prefix);
             strokes.add(saved);
         }
 
-        double total = sum(strokes.toArray());
-        styledString.append("\nKeystrokes saved by using code completion");
-        styledString.append("\n   - total number: ").append(format(addTabs(3) + "%.0f", total), COUNTER_STYLER);
-        double mean = mean(strokes.toArray());
-        styledString.append("\n   - average number: ").append(format(addTabs(1) + "%.2f", mean), COUNTER_STYLER);
-        styledString.append("\n");
+        final double total = sum(strokes.toArray());
+
+        new Label(container, SWT.NONE).setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+        createFilledLabel("Keystrokes saved by using code completion");
+
+        new Label(container, SWT.NONE).setText("Total number: ");
+        createLabelWithColor(MessageFormat.format("{0}", total));
+
+        final double mean = mean(strokes.toArray());
+        new Label(container, SWT.NONE).setText("Average number:");
+        createLabelWithColor(MessageFormat.format("{0}", mean));
     }
 
     private void appendTimeSpent() {
-        ArrayDoubleList spentApplied = computeTimeSpentInCompletion(appliedEvents);
-        long totalApplied = round(sum(spentApplied.toArray()));
-        long meanApplied = round(mean(spentApplied.toArray()));
+        final ArrayDoubleList spentApplied = computeTimeSpentInCompletion(appliedEvents);
+        final long totalApplied = round(sum(spentApplied.toArray()));
+        final long meanApplied = round(mean(spentApplied.toArray()));
 
-        ArrayDoubleList spentAborted = computeTimeSpentInCompletion(abortedEvents);
-        long totalAborted = round(sum(spentAborted.toArray()));
-        long meanAborted = round(mean(spentAborted.toArray()));
+        final ArrayDoubleList spentAborted = computeTimeSpentInCompletion(abortedEvents);
+        final long totalAborted = round(sum(spentAborted.toArray()));
+        final long meanAborted = round(mean(spentAborted.toArray()));
 
-        styledString
-                .append("\nTotal Time spent in completion window on ")
-                //
-                .append("\n   - concluded sessions:    ")
-                .append(addTabs(1) + toTimeString(totalApplied), COUNTER_STYLER)
-                //
-                .append("\n   - aborted sessions:      ")
-                .append(addTabs(2) + toTimeString(totalAborted), COUNTER_STYLER);
+        new Label(container, SWT.NONE).setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+        createFilledLabel("Total Time spent in completion window on");
 
-        styledString
-                .append("\n\nAverage time spent in completion window per")
-                //
-                .append("\n   - concluded session:    ")
-                .append(format(addTabs(1) + "%,d ms", meanApplied), COUNTER_STYLER)
-                //
-                .append("\n   - aborted session:     ")
-                .append(format(addTabs(2) + "%,d ms", meanAborted), COUNTER_STYLER);
+        new Label(container, SWT.NONE).setText("Concluded sessions:");
+        createLabelWithColor(MessageFormat.format("{0}", toTimeString(totalApplied)));
+
+        new Label(container, SWT.NONE).setText("Aborted sessions:");
+        createLabelWithColor(MessageFormat.format("{0}", toTimeString(totalAborted)));
+
+        new Label(container, SWT.NONE).setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+        createFilledLabel("Average time spent in completion window per");
+
+        new Label(container, SWT.NONE).setText("Concluded sessions:");
+        createLabelWithColor(MessageFormat.format("{0}", meanApplied));
+
+        new Label(container, SWT.NONE).setText("Aborted sessions:");
+        createLabelWithColor(MessageFormat.format("{0}", meanAborted));
     }
 
-    private String toTimeString(long time) {
+    private void createFilledLabel(String text) {
+        Label label2 = new Label(container, SWT.NONE);
+        label2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+        label2.setText(text);
+    }
+
+    private String toTimeString(final long time) {
         return format("%d min, %d sec", MILLISECONDS.toMinutes(time),
                 MILLISECONDS.toSeconds(time) - MINUTES.toSeconds(MILLISECONDS.toMinutes(time)));
     }
 
-    private ArrayDoubleList computeTimeSpentInCompletion(Collection<CompletionEvent> events) {
-        ArrayDoubleList spent = new ArrayDoubleList();
-        for (CompletionEvent e : events) {
+    private ArrayDoubleList computeTimeSpentInCompletion(final Collection<CompletionEvent> events) {
+        final ArrayDoubleList spent = new ArrayDoubleList();
+        for (final CompletionEvent e : events) {
             long ms = e.sessionEnded - e.sessionStarted;
             if (ms > MAX_TIME_IN_COMPLETION) {
                 ms = MAX_TIME_IN_COMPLETION;
@@ -237,23 +267,24 @@ public class StatisticsDialog extends TitleAreaDialog {
         return spent;
     }
 
-    private void showCompletionKindInViewer(Composite parent) {
-        Bag<ProposalKind> proposalKindBag = TreeBag.newTreeBag();
+    private void showCompletionKindInViewer(final Composite parent) {
+        final Bag<ProposalKind> proposalKindBag = TreeBag.newTreeBag();
         final Multimap<ProposalKind, CompletionEvent> multiMap = ArrayListMultimap.create();
 
         for (final ProposalKind kind : ProposalKind.values()) {
-            Collection<CompletionEvent> byKind = Collections2.filter(okayEvents, new Predicate<CompletionEvent>() {
-                @Override
-                public boolean apply(CompletionEvent input) {
-                    if (kind == input.applied) {
-                        if (!multiMap.containsEntry(kind, input)) {
-                            multiMap.put(kind, input);
+            final Collection<CompletionEvent> byKind = Collections2.filter(okayEvents,
+                    new Predicate<CompletionEvent>() {
+                        @Override
+                        public boolean apply(final CompletionEvent input) {
+                            if (kind == input.applied) {
+                                if (!multiMap.containsEntry(kind, input)) {
+                                    multiMap.put(kind, input);
+                                }
+                                return true;
+                            }
+                            return false;
                         }
-                        return true;
-                    }
-                    return false;
-                }
-            });
+                    });
             if (byKind.size() > 0) {
                 proposalKindBag.add(kind, byKind.size());
             }
@@ -265,11 +296,11 @@ public class StatisticsDialog extends TitleAreaDialog {
         final TableColumnLayout layout = createTableColumnLayout(comp);
 
         final TableViewer viewer = createTableViewer(comp);
-        TableViewerColumn completionTypeColumn = createColumn("Completion Type", viewer, 150, layout, 50);
+        final TableViewerColumn completionTypeColumn = createColumn("Completion Type", viewer, 150, layout, 50);
         setCompletionTypeSorter(viewer, completionTypeColumn);
-        TableViewerColumn usedCompletionColumn = createColumn("Used", viewer, 60, layout, 15);
+        final TableViewerColumn usedCompletionColumn = createColumn("Used", viewer, 60, layout, 15);
         setUsedCompletionSorter(viewer, usedCompletionColumn, multiMap);
-        TableViewerColumn lastUsedColumn = createColumn("Last used", viewer, 110, layout, 35);
+        final TableViewerColumn lastUsedColumn = createColumn("Last used", viewer, 110, layout, 35);
         setLastUsedSorter(viewer, lastUsedColumn, multiMap);
         usedCompletionColumn.getColumn().getParent().setSortColumn(usedCompletionColumn.getColumn());
         usedCompletionColumn.getColumn().getParent().setSortDirection(SWT.DOWN);
@@ -279,9 +310,9 @@ public class StatisticsDialog extends TitleAreaDialog {
         viewer.setInput(proposalKindBag.topElements(30));
     }
 
-    private void showReceiverTypeInViewer(Composite parent) {
+    private void showReceiverTypeInViewer(final Composite parent) {
         final Bag<ITypeName> b = TreeBag.newTreeBag();
-        for (CompletionEvent e : okayEvents) {
+        for (final CompletionEvent e : okayEvents) {
             if (e.receiverType == null) {
                 continue;
             }
@@ -296,9 +327,9 @@ public class StatisticsDialog extends TitleAreaDialog {
         final TableColumnLayout layout = createTableColumnLayout(comp);
 
         final TableViewer viewer = createTableViewer(comp);
-        TableViewerColumn typeColumn = createColumn("Type", viewer, 450, layout, 60);
+        final TableViewerColumn typeColumn = createColumn("Type", viewer, 450, layout, 60);
         setTypeSorter(viewer, typeColumn);
-        TableViewerColumn countColumn = createColumn("Count", viewer, 100, layout, 30);
+        final TableViewerColumn countColumn = createColumn("Count", viewer, 100, layout, 30);
         setCountSorter(viewer, countColumn, b);
         countColumn.getColumn().getParent().setSortColumn(countColumn.getColumn());
         countColumn.getColumn().getParent().setSortDirection(SWT.DOWN);
@@ -308,16 +339,11 @@ public class StatisticsDialog extends TitleAreaDialog {
         viewer.setInput(b.topElements(30));
     }
 
-    private Composite createWrapperComposite(Composite parent) {
+    private Composite createWrapperComposite(final Composite parent) {
         final Composite newComp = new Composite(parent, SWT.NONE);
         newComp.setLayout(new GridLayout());
         newComp.setLayoutData(new GridData(GridData.FILL_BOTH));
         return newComp;
-    }
-
-    private void insertStyledText() {
-        styledText.setText(styledString.toString());
-        styledText.setStyleRanges(styledString.getStyleRanges());
     }
 
     private TableColumnLayout createTableColumnLayout(final Composite comp) {
@@ -327,7 +353,7 @@ public class StatisticsDialog extends TitleAreaDialog {
         return layout;
     }
 
-    private TableViewer createTableViewer(Composite parent) {
+    private TableViewer createTableViewer(final Composite parent) {
         final TableViewer viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION
                 | SWT.BORDER);
         viewer.getTable().setHeaderVisible(true);
@@ -336,8 +362,8 @@ public class StatisticsDialog extends TitleAreaDialog {
         return viewer;
     }
 
-    private TableViewerColumn createColumn(String header, TableViewer viewer, int width, TableColumnLayout layout,
-            int weight) {
+    private TableViewerColumn createColumn(final String header, final TableViewer viewer, final int width,
+            final TableColumnLayout layout, final int weight) {
         final TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
         column.getColumn().setText(header);
         column.getColumn().setToolTipText(header);
@@ -362,22 +388,22 @@ public class StatisticsDialog extends TitleAreaDialog {
     private String getDescriptionText() {
         String date = "the beginning of recording";
         if (okayEvents.size() > 0) {
-            Date start = new Date(Iterables.getFirst(okayEvents, null).sessionStarted);
+            final Date start = new Date(Iterables.getFirst(okayEvents, null).sessionStarted);
             date = format("%tF", start);
         }
-        return "Here is a summary of your code completion activity since " + date;
+        return "Here is a summary of your activities since " + date;
     }
 
     private void loadEvents() {
-        File log = StatisticsSessionProcessor.getCompletionLogLocation();
-        Gson gson = StatisticsSessionProcessor.getCompletionLogSerializer();
-        LinkedList<CompletionEvent> events = Lists.newLinkedList();
+        final File log = StatisticsSessionProcessor.getCompletionLogLocation();
+        final Gson gson = StatisticsSessionProcessor.getCompletionLogSerializer();
+        final LinkedList<CompletionEvent> events = Lists.newLinkedList();
         try {
-            for (String json : Files.readLines(log, Charsets.UTF_8)) {
-                CompletionEvent event = gson.fromJson(json, CompletionEvent.class);
+            for (final String json : Files.readLines(log, Charsets.UTF_8)) {
+                final CompletionEvent event = gson.fromJson(json, CompletionEvent.class);
                 events.add(event);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         okayEvents = Collections2.filter(events, not(new BuggyEventsPredicate()));
@@ -388,15 +414,15 @@ public class StatisticsDialog extends TitleAreaDialog {
     public class TypeNameLabelProvider extends CellLabelProvider {
         private final Bag<ITypeName> bag;
 
-        public TypeNameLabelProvider(Bag<ITypeName> b) {
+        public TypeNameLabelProvider(final Bag<ITypeName> b) {
             super();
             this.bag = b;
         }
 
         @Override
-        public void update(ViewerCell cell) {
+        public void update(final ViewerCell cell) {
             String cellText = null;
-            ITypeName type = (ITypeName) cell.getElement();
+            final ITypeName type = (ITypeName) cell.getElement();
 
             switch (cell.getColumnIndex()) {
             case 0:
@@ -416,15 +442,15 @@ public class StatisticsDialog extends TitleAreaDialog {
     public class ProposalLabelProvider extends CellLabelProvider {
         private final Multimap<ProposalKind, CompletionEvent> multiMap;
 
-        public ProposalLabelProvider(Multimap<ProposalKind, CompletionEvent> multiMap) {
+        public ProposalLabelProvider(final Multimap<ProposalKind, CompletionEvent> multiMap) {
             super();
             this.multiMap = multiMap;
         }
 
         @Override
-        public void update(ViewerCell cell) {
+        public void update(final ViewerCell cell) {
             String cellText = null;
-            ProposalKind proposal = (ProposalKind) cell.getElement();
+            final ProposalKind proposal = (ProposalKind) cell.getElement();
 
             switch (cell.getColumnIndex()) {
             case 0:
@@ -434,7 +460,7 @@ public class StatisticsDialog extends TitleAreaDialog {
                 cellText = Integer.toString(multiMap.get(proposal).size());
                 break;
             case 2:
-                Date past = new Date(getLastSessionStartedFor(proposal));
+                final Date past = new Date(getLastSessionStartedFor(proposal));
                 cellText = new DateFormatter().formatUnit(past, new Date());
                 break;
             }
@@ -444,10 +470,10 @@ public class StatisticsDialog extends TitleAreaDialog {
             }
         }
 
-        public Long getLastSessionStartedFor(ProposalKind proposal) {
-            Collection<CompletionEvent> collection = multiMap.get(proposal);
-            TreeSet<Long> sessionSet = new TreeSet<Long>();
-            for (CompletionEvent completionEvent : collection) {
+        public Long getLastSessionStartedFor(final ProposalKind proposal) {
+            final Collection<CompletionEvent> collection = multiMap.get(proposal);
+            final TreeSet<Long> sessionSet = new TreeSet<Long>();
+            for (final CompletionEvent completionEvent : collection) {
                 sessionSet.add(completionEvent.sessionEnded);
             }
             return sessionSet.last();
