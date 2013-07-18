@@ -7,4 +7,6 @@ Bundle-Vendor: Eclipe Code Recommenders
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.xtend.lib;bundle-version="[2.4.0,3.0.0)",
  com.google.guava;bundle-version="[14.0.0,15.0.0)",
- org.eclipse.xtext.xbase.lib;bundle-version="[2.4.0,3.0.0)"
+ org.eclipse.xtext.xbase.lib;bundle-version="[2.4.0,3.0.0)",
+ org.slf4j.api;bundle-version="1.7.2";resolution:=optional
+Export-Package: org.eclipse.recommenders.codegen
