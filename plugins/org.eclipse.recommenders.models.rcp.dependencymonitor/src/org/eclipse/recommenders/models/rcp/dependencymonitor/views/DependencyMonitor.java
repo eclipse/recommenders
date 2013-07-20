@@ -16,9 +16,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -45,6 +47,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.part.ViewPart;
 
@@ -68,6 +71,7 @@ public class DependencyMonitor extends ViewPart {
     private TableViewerColumn locationColumn;
     private TableViewerColumn coordinateColumn;
     private TableComparator comparator;
+    private Table table;
 
     @Inject
     public DependencyMonitor(final EventBus workspaceBus, final EclipseDependencyListener eclipseDependencyListener,
@@ -125,7 +129,13 @@ public class DependencyMonitor extends ViewPart {
     @Override
     public void createPartControl(final Composite parent) {
         this.parent = parent;
-        tableViewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+
+        Composite composite = new Composite(parent, SWT.NONE);
+        TableColumnLayout tableLayout = new TableColumnLayout();
+        composite.setLayout(tableLayout);
+
+        tableViewer = new TableViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+
         tableViewer.setLabelProvider(new ViewLabelProvider());
         contentProvider = new ContentProvider();
         tableViewer.setContentProvider(contentProvider);
@@ -135,23 +145,25 @@ public class DependencyMonitor extends ViewPart {
 
         ColumnViewerToolTipSupport.enableFor(tableViewer, ToolTip.NO_RECREATE);
 
-        tableViewer.getTable().setHeaderVisible(true);
-        tableViewer.getTable().setLinesVisible(true);
-
         locationColumn = new TableViewerColumn(tableViewer, SWT.NONE);
         TableColumn tableColumn = locationColumn.getColumn();
         tableColumn.setText("Location");
-        tableColumn.setWidth(200);
+        // tableColumn.setWidth(200);
         tableColumn.addSelectionListener(new SelectionListener(tableColumn, 0));
+        tableLayout.setColumnData(tableColumn, new ColumnWeightData(1, ColumnWeightData.MINIMUM_WIDTH, true));
 
         coordinateColumn = new TableViewerColumn(tableViewer, SWT.NONE);
         tableColumn = coordinateColumn.getColumn();
         tableColumn.setText("Coordinate");
-        tableColumn.setWidth(450);
+        // tableColumn.setWidth(450);
         tableColumn.addSelectionListener(new SelectionListener(tableColumn, 1));
+        tableLayout.setColumnData(tableColumn, new ColumnWeightData(1, ColumnWeightData.MINIMUM_WIDTH, true));
 
-        tableViewer.getTable().setSortDirection(SWT.UP);
-        tableViewer.getTable().setSortColumn(locationColumn.getColumn());
+        table = tableViewer.getTable();
+        table.setHeaderVisible(true);
+        table.setLinesVisible(true);
+        table.setSortDirection(SWT.UP);
+        table.setSortColumn(locationColumn.getColumn());
 
         checkForDependencyUpdates();
     }
@@ -216,6 +228,8 @@ public class DependencyMonitor extends ViewPart {
             }
         }
 
+        // TODO Olav, don't create new images every time. load them only once, reuse, and dispose them when the view is
+        // closed. Memory Leak!
         private Image loadImage(final String name) {
             ImageDescriptor imageDescriptor = Activator.getImageDescriptor(name);
             if (imageDescriptor != null) {
