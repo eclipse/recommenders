@@ -17,6 +17,8 @@ import static org.eclipse.recommenders.utils.rcp.JdtUtils.getLocation;
 
 import java.io.File;
 
+import javax.inject.Inject;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -32,10 +34,10 @@ import com.google.common.base.Optional;
 
 public class ProjectCoordinateProvider {
 
+    @Inject
     private IMappingProvider mappingProvider;
 
     public ProjectCoordinateProvider() {
-
     }
 
     public ProjectCoordinateProvider(IMappingProvider mappingProvider) {
