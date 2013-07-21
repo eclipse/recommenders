@@ -1,13 +1,12 @@
-package org.eclipse.recommenders.rdk.utils;
+package org.eclipse.recommenders.utils;
 
 import static java.lang.String.format;
-import static org.eclipse.recommenders.rdk.utils.Artifacts.asArtifact;
-import static org.eclipse.recommenders.rdk.utils.Artifacts.createGlobArtifact;
-import static org.eclipse.recommenders.rdk.utils.Artifacts.matches;
+import static org.eclipse.recommenders.utils.Artifacts.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.recommenders.utils.Artifacts;
 import org.junit.Test;
 import org.sonatype.aether.artifact.Artifact;
 
