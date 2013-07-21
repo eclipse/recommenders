@@ -16,8 +16,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.models.IBasedName;
+import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.ModelArchiveCoordinate;
-import org.eclipse.recommenders.models.ModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
 import org.eclipse.recommenders.utils.Zips;
 import org.eclipse.recommenders.utils.names.ITypeName;
@@ -26,14 +26,8 @@ import com.google.common.base.Optional;
 
 public class CallsDemoModelProvider extends PoolingModelProvider<IBasedName<ITypeName>, Object> {
 
-    public CallsDemoModelProvider(ModelRepository repo) {
+    public CallsDemoModelProvider(IModelRepository repo) {
         super(repo, "call");
-    }
-
-    @Override
-    public void open() throws IOException {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

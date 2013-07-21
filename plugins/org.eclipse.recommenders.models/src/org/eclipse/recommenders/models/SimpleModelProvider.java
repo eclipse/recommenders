@@ -19,11 +19,9 @@ import static org.eclipse.recommenders.utils.Zips.closeQuietly;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.recommenders.internal.rcp.repo.ModelRepository;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
@@ -31,7 +29,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import com.google.common.reflect.Reflection;
 
 /**
  * A non-thread-safe implementation of {@link IModelProvider} that loads models from model zip files using a
@@ -40,24 +37,21 @@ import com.google.common.reflect.Reflection;
  */
 public abstract class SimpleModelProvider<K extends IBasedName<?>, M> implements IModelProvider<K, M> {
 
-    private final LoadingCache<ModelArchiveCoordinate, ZipFile> openZips = CacheBuilder.newBuilder()
-            .maximumSize(10)
-            .expireAfterAccess(1, MINUTES)
-            .removalListener(new ZipRemovalListener())
-            .build(new ZipCacheLoader());
+    private final LoadingCache<ModelArchiveCoordinate, ZipFile> openZips = CacheBuilder.newBuilder().maximumSize(10)
+            .expireAfterAccess(1, MINUTES).removalListener(new ZipRemovalListener()).build(new ZipCacheLoader());
 
-    protected final ModelRepository archiveStore;
+    protected final IModelRepository repository;
     protected final String modelType;
 
-    public SimpleModelProvider(ModelRepository cache, String modelType) {
-        this.archiveStore = cache;
+    public SimpleModelProvider(IModelRepository cache, String modelType) {
+        this.repository = cache;
         this.modelType = modelType;
     }
 
     @Override
     public Optional<M> acquireModel(K key) {
         try {
-            ModelArchiveCoordinate coord = archiveStore.findBestModelArchive(key.getBase(), modelType).or(UNKNOWN);
+            ModelArchiveCoordinate coord = repository.findBestModelArchive(key.getBase(), modelType).or(UNKNOWN);
             ZipFile zip = openZips.get(coord);
             return loadModel(zip, key);
         } catch (Exception e) {
@@ -83,27 +77,17 @@ public abstract class SimpleModelProvider<K extends IBasedName<?>, M> implements
     }
 
     /**
-     * Fake ZipFile implementation that seves as NULL object for the cache.
-     */
-    private static final ZipFile FAKE = Reflection.newProxy(ZipFile.class, new InvocationHandler() {
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            return null;
-        }
-    });
-
-    /**
      * Resolves the given model archive coordinate from models store, puts the zip file into the cache, and loads the
      * file contents completely in memory for faster data access.
      */
     private final class ZipCacheLoader extends CacheLoader<ModelArchiveCoordinate, ZipFile> {
         @Override
         public ZipFile load(ModelArchiveCoordinate key) throws Exception {
-            archiveStore.resolve(key, new NullProgressMonitor());
-            File location = archiveStore.getLocation(key).orNull();
+            repository.resolve(key);
+            File location = repository.getLocation(key).orNull();
             if (location == null) {
-                return FAKE;
+                repository.resolve(key);
+                return null;
             }
             // read file in memory to speed up access
             toByteArray(newInputStreamSupplier(location));

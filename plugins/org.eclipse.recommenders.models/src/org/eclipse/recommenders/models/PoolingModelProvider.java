@@ -10,12 +10,12 @@
  */
 package org.eclipse.recommenders.models;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.*;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 import static org.eclipse.recommenders.utils.Zips.closeQuietly;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -23,7 +23,6 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.eclipse.recommenders.models.ModelRepository.ModelRepositoryEvents.ModelArchiveInstalledEvent;
 import org.eclipse.recommenders.utils.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.Subscribe;
 
 public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implements IModelProvider<K, M> {
 
@@ -42,13 +40,13 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
     private final Map<ModelArchiveCoordinate, ZipFile> openZips = Maps.newHashMap();
 
     // which models are currently pooled?
-    private final ListMultimap<ModelArchiveCoordinate, K> pooledModels = LinkedListMultimap.create();
+    private final ListMultimap<ModelArchiveCoordinate, M> pooledModels = LinkedListMultimap.create();
 
     // which models are currently borrowed to someone?
     private final IdentityHashMap<M, K> borrowedModels = Maps.newIdentityHashMap();
 
     // the cache to load the model archives from
-    private final ModelRepository modelCache;
+    private final IModelRepository repository;
 
     // model pool
     // REVIEW: we may want to make pool creation configurable later?
@@ -56,8 +54,8 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
 
     private final String modelType;
 
-    public PoolingModelProvider(ModelRepository modelCache, String modelType) {
-        this.modelCache = modelCache;
+    public PoolingModelProvider(IModelRepository repository, String modelType) {
+        this.repository = repository;
         this.modelType = modelType;
     }
 
@@ -75,13 +73,11 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
 
     @Override
     public Optional<M> acquireModel(K key) {
-        Optional<ModelArchiveCoordinate> opt = modelCache.findBestModelArchive(key.getBase(), modelType);
-        if (!opt.isPresent()) {
-            return Optional.absent();
-        }
         try {
             M model = modelPool.borrowObject(key);
-            return of(model);
+            if (model != null)
+                borrowedModels.put(model, key);
+            return fromNullable(model);
         } catch (Exception e) {
             log.error("Couldn't obtain model for " + key, e);
             return absent();
@@ -107,13 +103,6 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
     protected void destroyModel(K key, M model, ModelArchiveCoordinate modelId) {
     };
 
-    @Subscribe
-    public void onEvent(ModelArchiveInstalledEvent e) {
-        ModelArchiveCoordinate modelId = e.coordinate;
-        closeZipFile(modelId);
-        clearPooledModels(modelId);
-    }
-
     private void closeZipFile(@Nullable ModelArchiveCoordinate modelId) {
         ZipFile zip = openZips.remove(modelId);
         if (zip == null) {
@@ -122,10 +111,8 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
         closeQuietly(zip);
     }
 
-    private void clearPooledModels(ModelArchiveCoordinate modelId) {
-        for (K key : pooledModels.get(modelId)) {
-            modelPool.clear(key);
-        }
+    @Override
+    public void open() throws IOException {
     }
 
     @Override
@@ -155,14 +142,21 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
         @Override
         @Nullable
         public M makeObject(K key) throws Exception {
-            ModelArchiveCoordinate modelId = ensureIsNotNull(modelCache.findBestModelArchive(key.getBase(), modelType)
-                    .orNull());
-            ZipFile zipFile = openZips.get(modelId);
-            if (zipFile == null) {
-                return null;
+            ProjectCoordinate projectCoord = key.getBase();
+            ModelArchiveCoordinate modelCoord = repository.findBestModelArchive(projectCoord, modelType).orNull();
+            ZipFile zip = openZips.get(modelCoord);
+            if (zip == null) {
+                File location = repository.getLocation(modelCoord).orNull();
+                if (location == null) {
+                    repository.resolve(modelCoord);
+                    return null;
+                } else {
+                    zip = new ZipFile(location);
+                    openZips.put(modelCoord, zip);
+                }
             }
-            M model = createModel(key, zipFile, modelId).orNull();
-            pooledModels.put(modelId, key);
+            M model = createModel(key, zip, modelCoord).orNull();
+            pooledModels.put(modelCoord, model);
             return model;
         }
 
@@ -174,7 +168,7 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
          */
         @Override
         public void destroyObject(K key, M model) throws Exception {
-            ModelArchiveCoordinate modelId = ensureIsNotNull(modelCache.findBestModelArchive(key.getBase(), modelType)
+            ModelArchiveCoordinate modelId = ensureIsNotNull(repository.findBestModelArchive(key.getBase(), modelType)
                     .orNull());
             pooledModels.remove(key, model);
             // if there are no more models loaded
@@ -186,7 +180,7 @@ public abstract class PoolingModelProvider<K extends IBasedName<?>, M> implement
 
         @Override
         public void passivateObject(K key, M model) throws Exception {
-            ModelArchiveCoordinate modelId = ensureIsNotNull(modelCache.findBestModelArchive(key.getBase(), modelType)
+            ModelArchiveCoordinate modelId = ensureIsNotNull(repository.findBestModelArchive(key.getBase(), modelType)
                     .orNull());
             passivateModel(key, model, modelId);
         }
