@@ -21,6 +21,7 @@ import org.eclipse.recommenders.models.dependencies.impl.FingerprintStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.JREExecutionEnvironmentStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.JREReleaseFileStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.MappingProvider;
+import org.eclipse.recommenders.models.dependencies.impl.MavenCentralFingerprintSearchStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.MavenPomPropertiesStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.OsgiManifestStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.SimpleIndexSearcher;
@@ -64,6 +65,7 @@ public class ModelsRCPModule extends AbstractModule implements Module {
         mappingProvider.addStrategy(new JREReleaseFileStrategy());
         mappingProvider.addStrategy(new OsgiManifestStrategy());
         mappingProvider.addStrategy(new FingerprintStrategy(searcher));
+        mappingProvider.addStrategy(new MavenCentralFingerprintSearchStrategy());
         return mappingProvider;
     }
 
