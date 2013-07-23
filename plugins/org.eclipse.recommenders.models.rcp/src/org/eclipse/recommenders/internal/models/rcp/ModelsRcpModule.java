@@ -10,7 +10,8 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.io.File;
@@ -31,6 +32,7 @@ import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.JREExecutionEnvironmentStrategy;
 import org.eclipse.recommenders.models.JREReleaseFileStrategy;
 import org.eclipse.recommenders.models.MappingProvider;
+import org.eclipse.recommenders.models.MavenCentralFingerprintSearchStrategy;
 import org.eclipse.recommenders.models.MavenPomPropertiesStrategy;
 import org.eclipse.recommenders.models.OsgiManifestStrategy;
 import org.eclipse.recommenders.models.SimpleIndexSearcher;
@@ -121,6 +123,7 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         mappingProvider.addStrategy(new JREReleaseFileStrategy());
         mappingProvider.addStrategy(new OsgiManifestStrategy());
         mappingProvider.addStrategy(new FingerprintStrategy(searcher));
+        mappingProvider.addStrategy(new MavenCentralFingerprintSearchStrategy());
         return mappingProvider;
     }
 
