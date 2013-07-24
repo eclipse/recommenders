@@ -11,7 +11,9 @@
 package org.eclipse.recommenders.tests.models;
 
 import static com.google.common.base.Optional.fromNullable;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
@@ -132,27 +134,6 @@ public class ProjectCoordinateProviderTest {
                 new File("example.jar"), DependencyType.JAR));
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
-    }
-
-    @Test
-    public void testMappingCacheMissAtFirstTime() {
-        MappingProvider sut = new MappingProvider();
-        sut.addStrategy(createMockedStrategy(EXPECTED_PROJECT_COORDINATE));
-        DependencyInfo dependencyInfo = new DependencyInfo(new File("example.jar"), DependencyType.JAR);
-        sut.searchForProjectCoordinate(dependencyInfo);
-        sut.getHitCount();
-        assertEquals(1, sut.getMissCount());
-    }
-
-    @Test
-    public void testMappingCacheHitAtSecondTime() {
-        MappingProvider sut = new MappingProvider();
-        sut.addStrategy(createMockedStrategy(EXPECTED_PROJECT_COORDINATE));
-        DependencyInfo dependencyInfo = new DependencyInfo(new File("example.jar"), DependencyType.JAR);
-        sut.searchForProjectCoordinate(dependencyInfo);
-        sut.searchForProjectCoordinate(dependencyInfo);
-
-        assertEquals(1, sut.getHitCount());
     }
 
     @Test
