@@ -11,9 +11,11 @@
 package org.eclipse.recommenders.models.rcp.wiring;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.inject.Singleton;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.recommenders.internal.rcp.wiring.RecommendersModule.ModelRepositoryIndexLocation;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.dependencies.IMappingProvider;
@@ -27,18 +29,34 @@ import org.eclipse.recommenders.models.dependencies.impl.SimpleIndexSearcher;
 import org.eclipse.recommenders.models.dependencies.rcp.EclipseDependencyListener;
 import org.eclipse.recommenders.models.rcp.EclipseModelRepository;
 import org.eclipse.recommenders.models.rcp.ProjectCoordinateProvider;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.io.Files;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.name.Names;
 
 public class ModelsRCPModule extends AbstractModule implements Module {
 
+    public static final String IDENTIFIED_PACKAGE_FRAGMENT_ROOTS = "IDENTIFIED_PACKAGE_FRAGMENT_ROOTS";
+
     @Override
     protected void configure() {
-        //
+        Bundle bundle = FrameworkUtil.getBundle(getClass());
+        File stateLocation = Platform.getStateLocation(bundle).toFile();
+
+        File cachePersistence = new File(stateLocation, "cache/identified-package-fragment-roots.json");
+        try {
+            Files.createParentDirs(cachePersistence);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        bind(File.class).annotatedWith(Names.named(IDENTIFIED_PACKAGE_FRAGMENT_ROOTS)).toInstance(cachePersistence);
         bind(ProjectCoordinateProvider.class).in(Scopes.SINGLETON);
         bind(IModelRepository.class).to(EclipseModelRepository.class).in(Scopes.SINGLETON);
     }
