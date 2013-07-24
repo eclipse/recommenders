@@ -11,16 +11,19 @@
 package org.eclipse.recommenders.calls;
 
 import static com.google.common.base.Optional.of;
-import static org.eclipse.recommenders.utils.Zips.*;
+import static org.eclipse.recommenders.utils.Zips.closeQuietly;
+import static org.eclipse.recommenders.utils.Zips.readFully;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.models.BasedTypeName;
 import org.eclipse.recommenders.utils.Openable;
+import org.eclipse.recommenders.utils.Zips;
 import org.eclipse.recommenders.utils.names.ITypeName;
 
 import com.google.common.annotations.Beta;
@@ -69,6 +72,10 @@ public class OneZipCallModelProvider implements ICallModelProvider, Openable {
             e.printStackTrace();
             return Optional.absent();
         }
+    }
+
+    public Set<ITypeName> acquireableTypes() {
+        return Zips.coveredTypes(zip.entries(), ".data");
     }
 
     @Override
