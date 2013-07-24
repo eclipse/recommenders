@@ -27,11 +27,11 @@ import com.google.common.collect.Sets;
  * completion, for instance, may perform a lightweight static analysis on the AST of the active editor and then query
  * one or more models for their recommendations.
  */
-public class SingelZipCallRecommender {
+public class SingleZipCallRecommender {
 
     private final OneZipCallModelProvider store;
 
-    public SingelZipCallRecommender(final File models) throws IOException {
+    public SingleZipCallRecommender(final File models) throws IOException {
         store = new OneZipCallModelProvider(models);
         store.open();
     }

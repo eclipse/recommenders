@@ -20,6 +20,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -35,6 +38,7 @@ import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -122,6 +126,19 @@ public class Zips {
     public static ITypeName type(ZipEntry entry, @Nullable String suffix) {
         String name = StringUtils.removeEnd(entry.getName(), suffix);
         return VmTypeName.get("L" + name);
+    }
+
+    public static Set<ITypeName> coveredTypes(Enumeration<? extends ZipEntry> entries, String strippedSuffix) {
+        TreeSet<ITypeName> content = Sets.newTreeSet();
+        while (entries.hasMoreElements()) {
+            ZipEntry next = entries.nextElement();
+            if (next.isDirectory() || next.getName().startsWith("META-INF/")) {
+                continue;
+            }
+            ITypeName type = Zips.type(next, strippedSuffix);
+            content.add(type);
+        }
+        return content;
     }
 
     public static IMethodName method(ZipEntry e, String suffix) {
