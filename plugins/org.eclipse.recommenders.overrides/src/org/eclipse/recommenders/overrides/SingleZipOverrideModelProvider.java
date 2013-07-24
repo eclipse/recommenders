@@ -10,14 +10,12 @@
  */
 package org.eclipse.recommenders.overrides;
 
-import static org.eclipse.recommenders.utils.Zips.*;
+import static org.eclipse.recommenders.utils.Zips.closeQuietly;
+import static org.eclipse.recommenders.utils.Zips.readFully;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.models.BasedTypeName;
@@ -27,7 +25,6 @@ import org.eclipse.recommenders.utils.Zips;
 import org.eclipse.recommenders.utils.names.ITypeName;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 
 /**
  * A model provider that uses a single zip file to resolve and load call models from.
@@ -56,17 +53,8 @@ public class SingleZipOverrideModelProvider implements IOverrideModelProvider, O
         closeQuietly(zip);
     }
 
-    public Set<ITypeName> content() {
-        TreeSet<ITypeName> content = Sets.newTreeSet();
-        for (Enumeration<? extends ZipEntry> e = zip.entries(); e.hasMoreElements();) {
-            ZipEntry next = e.nextElement();
-            if (next.isDirectory() || next.getName().startsWith("META-INF")) {
-                continue;
-            }
-            ITypeName type = Zips.type(next, ".json");
-            content.add(type);
-        }
-        return content;
+    public Set<ITypeName> acquireableTypes() {
+        return Zips.coveredTypes(zip.entries(), ".json");
     }
 
     @Override
