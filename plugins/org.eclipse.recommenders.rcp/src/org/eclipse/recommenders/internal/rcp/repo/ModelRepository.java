@@ -43,7 +43,6 @@ import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.DependencyCollectionContext;
 import org.sonatype.aether.collection.DependencySelector;
-import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
 import org.sonatype.aether.deployment.DeployRequest;
@@ -102,7 +101,6 @@ public class ModelRepository implements IModelRepository {
         locator.setServices(WagonProvider.class, new ManualWagonProvider());
         locator.addService(RepositoryConnectorFactory.class, WagonRepositoryConnectorFactory.class);
         // import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
-        locator.addService(RepositoryConnectorFactory.class, FileRepositoryConnectorFactory.class);
         return locator.getService(RepositorySystem.class);
     }
 

@@ -36,15 +36,15 @@
       <feature id="org.eclipse.recommenders.feature.completion.rcp.intellig" version="1.100.0.qualifier"/>
       <feature id="org.eclipse.recommenders.feature.completion.rcp.subwords" version="1.100.0.qualifier"/>
       <feature id="org.eclipse.recommenders.feature.extdoc.rcp" version="1.100.0.qualifier"/>
-      <feature id="org.eclipse.recommenders.feature.3rd.nonorbit"/>
-      <feature id="org.eclipse.recommenders.feature.3rd.orbit"/>
+      <feature id="org.eclipse.recommenders.feature.3rd.orbit" version="1.100.0.qualifier"/>
+      <feature id="org.eclipse.recommenders.feature.3rd.rcp.nonorbit" version="1.100.0.qualifier"/>
       <feature id="org.eclipse.recommenders.feature.rcp.core" version="1.100.0.qualifier"/>
       <feature id="org.eclipse.recommenders.feature.jayes" version="1.100.0.qualifier"/>
       <feature id="org.eclipse.recommenders.feature.completion.rcp.sandbox" version="1.100.0.qualifier"/>
+      <feature id="org.eclipse.recommenders.feature.overrides.rcp" version="1.100.0.qualifier"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.equinox.p2.core.feature"/>
-      <feature id="org.eclipse.recommenders.feature.overrides.rcp" version="1.100.0.qualifier"/>
    </features>
 
 

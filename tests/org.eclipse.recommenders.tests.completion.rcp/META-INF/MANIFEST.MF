@@ -34,3 +34,4 @@ Require-Bundle: org.mockito,
  org.eclipse.recommenders.completion.rcp.templates,
  org.eclipse.recommenders.completion.rcp.sandbox
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.sonatype.aether.artifact

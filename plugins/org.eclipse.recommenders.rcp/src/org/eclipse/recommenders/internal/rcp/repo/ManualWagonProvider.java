@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.internal.rcp.repo;
 
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.providers.file.FileWagon;
 import org.sonatype.maven.wagon.AhcWagon;
 
 /**
@@ -26,8 +27,11 @@ public class ManualWagonProvider implements org.sonatype.aether.connector.wagon.
             ahcWagon.setTimeout(300*1000);
             return ahcWagon;
             // return new WebDavWagon();
+        } else if ("file".equals(roleHint)) {
+            return new FileWagon();
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
