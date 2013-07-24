@@ -10,12 +10,22 @@
  */
 package org.eclipse.recommenders.models.rcp.wiring;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 import javax.inject.Singleton;
 
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.recommenders.internal.rcp.wiring.RecommendersModule.ModelRepositoryIndexLocation;
 import org.eclipse.recommenders.models.IModelRepository;
+import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.dependencies.IMappingProvider;
 import org.eclipse.recommenders.models.dependencies.impl.FingerprintStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.JREExecutionEnvironmentStrategy;
@@ -27,26 +37,60 @@ import org.eclipse.recommenders.models.dependencies.impl.SimpleIndexSearcher;
 import org.eclipse.recommenders.models.dependencies.rcp.EclipseDependencyListener;
 import org.eclipse.recommenders.models.rcp.EclipseModelRepository;
 import org.eclipse.recommenders.models.rcp.ProjectCoordinateProvider;
+import org.eclipse.recommenders.models.rcp.json.OptionalJsonUtilities;
+import org.eclipse.recommenders.models.rcp.json.PackageFragmentRootJsonUtilities;
+import org.eclipse.recommenders.models.rcp.json.ProjectCoordinateJsonUtilities;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
+import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.name.Names;
 
 public class ModelsRCPModule extends AbstractModule implements Module {
 
     @Override
     protected void configure() {
         //
+
+        Bundle bundle = FrameworkUtil.getBundle(getClass());
+        File stateLocation = Platform.getStateLocation(bundle).toFile();
+
+        File persistence = new File(stateLocation, "persistence");
+        persistence.mkdirs();
+        File cachePersistence = new File(persistence, "cachepersistence.json");
+
+        bind(File.class).annotatedWith(Names.named("CachePersistenceFile")).toInstance(cachePersistence);
         bind(ProjectCoordinateProvider.class).in(Scopes.SINGLETON);
         bind(IModelRepository.class).to(EclipseModelRepository.class).in(Scopes.SINGLETON);
     }
 
     @Singleton
     @Provides
+    protected Gson provideGson() {
+        return new GsonBuilder().registerTypeAdapter(ProjectCoordinate.class, new ProjectCoordinateJsonUtilities())
+                .registerTypeAdapter(Optional.class, new OptionalJsonUtilities<ProjectCoordinate>())
+                .registerTypeAdapter(IPackageFragmentRoot.class, new PackageFragmentRootJsonUtilities())
+                .enableComplexMapKeySerialization().create();
+    }
+
+    @Singleton
+    @Provides
     protected EclipseDependencyListener provideMappingProvider(EventBus bus) {
         return new EclipseDependencyListener(bus);
+    }
+
+    @BindingAnnotation
+    @Target({ FIELD, PARAMETER, METHOD })
+    @Retention(RUNTIME)
+    public static @interface CachePersistanceFile {
     }
 
     @Singleton

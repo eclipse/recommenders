@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
+ *    Olav Lenz - add caching and storage functionality.
  */
 package org.eclipse.recommenders.models.rcp;
 
@@ -16,10 +17,14 @@ import static org.eclipse.recommenders.models.dependencies.DependencyType.JAR;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.rcp.JdtUtils.getLocation;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-
-import javax.inject.Inject;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,28 +34,37 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.recommenders.internal.rcp.wiring.RecommendersModule.AutoCloseOnWorkbenchShutdown;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.dependencies.DependencyInfo;
 import org.eclipse.recommenders.models.dependencies.DependencyType;
 import org.eclipse.recommenders.models.dependencies.IMappingProvider;
 import org.eclipse.recommenders.models.dependencies.rcp.EclipseDependencyListener;
+import org.eclipse.recommenders.utils.Openable;
 import org.eclipse.recommenders.utils.rcp.JdtUtils;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.io.Files;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-public class ProjectCoordinateProvider {
+@AutoCloseOnWorkbenchShutdown
+public class ProjectCoordinateProvider implements Openable, Closeable {
 
-    @Inject
-    private IMappingProvider mappingProvider;
+    private final IMappingProvider mappingProvider;
+    private final File persistenceFile;
+    private final Gson cacheGson;
 
-    private LoadingCache<IPackageFragmentRoot, Optional<ProjectCoordinate>> cache = null;
+    @SuppressWarnings("serial")
+    private final Type cacheType = new TypeToken<Map<IPackageFragmentRoot, Optional<ProjectCoordinate>>>() {
+    }.getType();
 
-    public ProjectCoordinateProvider() {
-        initializeCache();
-    }
+    private LoadingCache<IPackageFragmentRoot, Optional<ProjectCoordinate>> cache;
 
     private void initializeCache() {
         /*
@@ -66,11 +80,20 @@ public class ProjectCoordinateProvider {
                     }
 
                 });
+
     }
 
-    public ProjectCoordinateProvider(IMappingProvider mappingProvider) {
-        this();
+    @Inject
+    public ProjectCoordinateProvider(@Named("CachePersistenceFile") File persistenceFile, IMappingProvider mappingProvider, Gson cacheGson) {
+        this.persistenceFile = persistenceFile;
         this.mappingProvider = mappingProvider;
+        this.cacheGson = cacheGson;
+        initializeCache();
+        try {
+            open();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Optional<ProjectCoordinate> resolve(ITypeBinding binding) {
@@ -162,6 +185,28 @@ public class ProjectCoordinateProvider {
 
     public Optional<ProjectCoordinate> resolve(DependencyInfo info) {
         return mappingProvider.searchForProjectCoordinate(info);
+    }
+
+    public Map<IPackageFragmentRoot, Optional<ProjectCoordinate>> deserializeCache(String json) {
+        Map<IPackageFragmentRoot, Optional<ProjectCoordinate>> fromJson = cacheGson.fromJson(json, cacheType);
+        return fromJson;
+    }
+
+    @Override
+    public void close() throws IOException {
+        String json = cacheGson.toJson(cache.asMap(), cacheType);
+        Files.write(json, persistenceFile, Charset.forName("UTF-8"));
+    }
+
+    @Override
+    public void open() throws IOException {
+        String json = Files.toString(persistenceFile, Charset.forName("UTF-8"));
+
+        Map<IPackageFragmentRoot, Optional<ProjectCoordinate>> deserializedCache = cacheGson.fromJson(json, cacheType);
+
+        for (Entry<IPackageFragmentRoot, Optional<ProjectCoordinate>> entry : deserializedCache.entrySet()) {
+            cache.put(entry.getKey(), entry.getValue());
+        }
     }
 
 }

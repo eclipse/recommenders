@@ -30,9 +30,9 @@ public class ProjectCoordinate {
      */
     public static final ProjectCoordinate UNKNOWN = new ProjectCoordinate("UNKNOWN", "UNKNOWN", "-1");
 
-    private final String groupId;
-    private final String artifactId;
-    private final String version;
+    private String groupId = "";
+    private String artifactId = "";
+    private String version = "";
 
     /**
      * Creates a new coordinate. Note that <code>null</code> values are replaced with an empty string.
@@ -72,11 +72,7 @@ public class ProjectCoordinate {
 
     public static ProjectCoordinate valueOf(String coord) {
         String[] segments = coord.split(":");
-        Checks.ensureIsInRange(segments.length,
-                3,
-                3,
-                "Coordiante '%s' has invalid number of segments: %d",
-                coord,
+        Checks.ensureIsInRange(segments.length, 3, 3, "Coordiante '%s' has invalid number of segments: %d", coord,
                 segments.length);
         return new ProjectCoordinate(segments[0], segments[1], segments[2]);
     }
