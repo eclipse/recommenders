@@ -10,10 +10,9 @@
  */
 package org.eclipse.recommenders.utils.rcp;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Optional.*;
+import static com.google.common.collect.Iterators.*;
 import static java.net.NetworkInterface.getNetworkInterfaces;
-import static org.eclipse.recommenders.utils.GenericEnumerationUtils.iterable;
 
 import java.net.NetworkInterface;
 import java.util.Enumeration;
@@ -21,8 +20,8 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.recommenders.utils.rcp.internal.PreferencesInitalizer;
-import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
+import org.eclipse.recommenders.internal.utils.rcp.PreferencesInitalizer;
+import org.eclipse.recommenders.internal.utils.rcp.RecommendersUtilsPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -66,7 +65,7 @@ public class UUIDHelper {
     private static Optional<String> generateUUIDFromMacAddress() {
         try {
             final Enumeration<NetworkInterface> e = getNetworkInterfaces();
-            for (final NetworkInterface net : iterable(e)) {
+            for (final NetworkInterface net : toArray(forEnumeration(e), NetworkInterface.class)) {
                 final byte[] mac = net.getHardwareAddress();
                 if (ArrayUtils.isEmpty(mac)) {
                     continue;

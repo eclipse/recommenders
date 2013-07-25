@@ -14,7 +14,7 @@ import static java.lang.String.format;
 import static org.eclipse.core.runtime.IStatus.ERROR;
 import static org.eclipse.core.runtime.IStatus.INFO;
 import static org.eclipse.core.runtime.IStatus.WARNING;
-import static org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin.log;
+import static org.eclipse.recommenders.internal.utils.rcp.RecommendersUtilsPlugin.log;
 
 import org.eclipse.core.runtime.IStatus;
 import org.slf4j.helpers.MarkerIgnoringBase;
