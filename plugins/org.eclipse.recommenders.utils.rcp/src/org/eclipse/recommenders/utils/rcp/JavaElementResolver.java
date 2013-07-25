@@ -39,13 +39,13 @@ import org.eclipse.jdt.internal.codeassist.impl.AssistSourceType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+import org.eclipse.recommenders.internal.utils.rcp.RecommendersUtilsPlugin;
 import org.eclipse.recommenders.utils.Names;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.IName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
-import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;

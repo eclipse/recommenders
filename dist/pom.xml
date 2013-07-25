@@ -15,10 +15,10 @@
 			<id>e43</id>
 			<modules>
 				<!-- Contains all features produced by Eclipse Code Recommenders (including test features). -->
-				<module>org.eclipse.recommenders.repository.rcp.head</module>
+				<module>head</module>
 				<!-- May contain features that have not undergone a release review. -->
-				<module>org.eclipse.recommenders.repository.rcp.milestone</module>
-				<module>org.eclipse.recommenders.repository.rcp.stable</module>
+				<module>milestone</module>
+				<module>stable</module>
 			</modules>
 		</profile>
 	</profiles>

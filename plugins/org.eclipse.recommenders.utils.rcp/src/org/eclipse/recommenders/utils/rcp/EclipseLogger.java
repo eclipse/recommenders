@@ -14,7 +14,7 @@ import static java.lang.String.format;
 import static org.eclipse.core.runtime.IStatus.ERROR;
 import static org.eclipse.core.runtime.IStatus.INFO;
 import static org.eclipse.core.runtime.IStatus.WARNING;
-import static org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin.log;
+import static org.eclipse.recommenders.internal.utils.rcp.RecommendersUtilsPlugin.log;
 
 import org.eclipse.core.runtime.IStatus;
 import org.slf4j.helpers.MarkerIgnoringBase;
@@ -23,6 +23,7 @@ public class EclipseLogger extends MarkerIgnoringBase {
 
     private static final long serialVersionUID = 1L;
 
+    @Override
     public void error(String format, Object arg) {
         IStatus newStatus = newStatus(ERROR, format, arg);
         log(newStatus);
