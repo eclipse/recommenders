@@ -4,7 +4,8 @@ Bundle-Name: Models
 Bundle-SymbolicName: org.eclipse.recommenders.models;singleton:=true
 Bundle-Version: 1.100.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.base;version="[14.0.0,15.0.0)",
+Import-Package: com.google.common.annotations;version="[14.0.0,15.0.0)",
+ com.google.common.base;version="[14.0.0,15.0.0)",
  com.google.common.cache;version="[14.0.0,15.0.0)",
  com.google.common.collect;version="[14.0.0,15.0.0)",
  com.google.common.eventbus;version="[14.0.0,15.0.0)",
@@ -19,11 +20,11 @@ Import-Package: com.google.common.base;version="[14.0.0,15.0.0)",
  org.apache.commons.pool.impl;version="[1.6.0,2.0.0)",
  org.apache.maven.repository.internal,
  org.apache.maven.wagon,
+ org.apache.maven.wagon.providers.file,
  org.slf4j;version="[1.6.0,2.0.0)",
  org.sonatype.aether,
  org.sonatype.aether.artifact,
  org.sonatype.aether.collection,
- org.sonatype.aether.connector.file,
  org.sonatype.aether.connector.wagon,
  org.sonatype.aether.graph,
  org.sonatype.aether.impl.internal,

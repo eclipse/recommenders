@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.models.rcp;
 
 import java.io.File;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -47,6 +48,11 @@ public class EclipseModelRepository implements IModelRepository {
     @Override
     public Optional<ModelArchiveCoordinate> findBestModelArchive(ProjectCoordinate coordinate, String modelType) {
         return delegate.findBestModelArchive(coordinate, modelType);
+    }
+
+    @Override
+    public Collection<ModelArchiveCoordinate> listModels(String classifier) {
+        return delegate.listModels(classifier);
     }
 
 }

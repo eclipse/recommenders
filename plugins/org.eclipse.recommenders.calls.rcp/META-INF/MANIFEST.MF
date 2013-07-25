@@ -22,8 +22,11 @@ Require-Bundle: org.eclipse.e4.core.di.extensions,
  org.eclipse.jdt.core,
  org.eclipse.equinox.common,
  org.eclipse.equinox.preferences,
- org.eclipse.jface.text;bundle-version="3.8.0",
+ org.eclipse.jface.text,
  org.eclipse.jface,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources
 Export-Package: org.eclipse.recommenders.calls.rcp;x-internal:=true
-Import-Package: org.osgi.framework;version="1.7.0"
+Import-Package: org.eclipse.recommenders.rcp,
+ org.osgi.framework;version="1.7.0"

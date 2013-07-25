@@ -26,12 +26,6 @@
             id="org.eclipse.recommenders.rcp.category.views"
             name="Recommenders">
       </category>
-      <view
-            category="org.eclipse.recommenders.rcp.category.views"
-            class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.rcp.ui.ModelIndexView"
-            id="org.eclipse.recommenders.internal.rcp.ui.ModelIndexView"
-            name="Model Index ">
-      </view>
    </extension>
      <extension
            point="org.eclipse.ui.preferencePages">
@@ -40,17 +34,5 @@
               id="org.eclipse.recommenders.rcp.category.preferences"
               name="%page.name">
         </page>
-        <page
-              category="org.eclipse.recommenders.rcp.category.preferences"
-              class="org.eclipse.recommenders.internal.rcp.ui.ModelsPreferencePage"
-              id="org.eclipse.recommenders.rcp.modelpreferences"
-              name="%page.name.models">
-        </page>
-     </extension>
-     <extension
-           point="org.eclipse.core.runtime.preferences">
-        <initializer
-              class="org.eclipse.recommenders.internal.rcp.ui.PreferenceInitializer">
-        </initializer>
      </extension>
 </plugin>
