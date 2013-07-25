@@ -10,9 +10,7 @@
  */
 package org.eclipse.recommenders.utils.rcp;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.*;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 import static org.eclipse.recommenders.utils.Throws.throwUnhandledException;
 import static org.eclipse.recommenders.utils.rcp.JdtUtils.resolveUnqualifiedTypeNamesAndStripOffGenericsAndArrayDimension;
@@ -39,13 +37,14 @@ import org.eclipse.jdt.internal.codeassist.impl.AssistSourceType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+import org.eclipse.recommenders.internal.utils.rcp.RecommendersUtilsPlugin;
 import org.eclipse.recommenders.utils.Names;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.IName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
-import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;
@@ -229,7 +228,7 @@ public class JavaElementResolver {
      * 
      */
     // This method should return IMethodNames in all cases but yet it does not work completey as we want it to work
-    public Optional<IMethodName> toRecMethod(final IMethod jdtMethod) {
+    public Optional<IMethodName> toRecMethod(@Nullable IMethod jdtMethod) {
         if (jdtMethod == null) {
             return absent();
         }

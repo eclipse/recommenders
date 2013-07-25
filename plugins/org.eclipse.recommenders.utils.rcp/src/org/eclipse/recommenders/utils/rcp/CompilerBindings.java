@@ -10,9 +10,7 @@
  */
 package org.eclipse.recommenders.utils.rcp;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -31,7 +29,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
-import org.eclipse.recommenders.utils.annotations.Nullable;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
@@ -48,8 +46,9 @@ public class CompilerBindings {
         } else if (b instanceof VariableBinding) {
             TypeBinding type = ((VariableBinding) b).type;
             return toTypeName(type);
-        } else
+        } else {
             return absent();
+        }
     }
 
     /**
@@ -116,8 +115,9 @@ public class CompilerBindings {
         try {
             final String uniqueKey = String.valueOf(binding.computeUniqueKey());
             String qualifiedMethodName = StringUtils.substringBefore(uniqueKey, "(").replace(";.", ".");
-            if (qualifiedMethodName.endsWith("."))
+            if (qualifiedMethodName.endsWith(".")) {
                 qualifiedMethodName += new String(TypeConstants.INIT);
+            }
             final String[] parameterTypes = Signature.getParameterTypes(uniqueKey);
             final String returnType = Signature.getReturnType(uniqueKey);
             final StringBuilder sb = new StringBuilder();
