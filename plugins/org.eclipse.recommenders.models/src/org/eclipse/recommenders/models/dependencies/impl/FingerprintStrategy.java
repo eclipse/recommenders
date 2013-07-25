@@ -44,9 +44,9 @@ public class FingerprintStrategy extends AbstractStrategy {
     }
 
     private Optional<ProjectCoordinate> extractProjectCoordinate(Optional<String> optionalCoordinateString) {
-        if (!optionalCoordinateString.isPresent()){
+        if (!optionalCoordinateString.isPresent()) {
             return absent();
-        }        
+        }
         try {
             DefaultArtifact artifact = new DefaultArtifact(optionalCoordinateString.get());
             return fromNullable(new ProjectCoordinate(artifact.getGroupId(), artifact.getArtifactId(),
@@ -55,6 +55,5 @@ public class FingerprintStrategy extends AbstractStrategy {
             return absent();
         }
     }
-
 
 }

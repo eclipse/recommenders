@@ -10,8 +10,7 @@
  */
 package org.eclipse.recommenders.models.dependencies.impl;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Optional.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +26,8 @@ import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.dependencies.DependencyInfo;
 import org.eclipse.recommenders.models.dependencies.DependencyType;
 import org.eclipse.recommenders.utils.IOUtils;
-import org.eclipse.recommenders.utils.annotations.Testing;
-import org.eclipse.recommenders.utils.archive.MavenPomJarIdExtractor;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
@@ -46,12 +44,12 @@ public class MavenPomPropertiesStrategy extends AbstractStrategy {
     private final IFileToJarFileConverter jarFileConverter;
 
     public MavenPomPropertiesStrategy() {
-        this.jarFileConverter = new DefaultJarFileConverter();
+        jarFileConverter = new DefaultJarFileConverter();
     }
 
-    @Testing
+    @VisibleForTesting
     public MavenPomPropertiesStrategy(IFileToJarFileConverter fileToJarFileConverter) {
-        this.jarFileConverter = fileToJarFileConverter;
+        jarFileConverter = fileToJarFileConverter;
     }
 
     @Override

@@ -25,10 +25,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnFieldType;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.recommenders.completion.rcp.IProcessableProposal;
-import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
-import org.eclipse.recommenders.completion.rcp.SessionProcessor;
-import org.eclipse.recommenders.internal.completion.rcp.SimpleProposalProcessor;
+import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
+import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
+import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
+import org.eclipse.recommenders.completion.rcp.utils.IRecommendersCompletionContext;
 import org.eclipse.recommenders.models.BasedTypeName;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.rcp.ProjectCoordinateProvider;
@@ -65,15 +65,15 @@ public class OverrideCompletionSessionProcessor extends SessionProcessor {
     private List<Recommendation<IMethodName>> recommendations;
 
     @Inject
-    public OverrideCompletionSessionProcessor(IOverrideModelProvider modelProvider,
-            ProjectCoordinateProvider coordsProvider, final JavaElementResolver cache) {
+    public OverrideCompletionSessionProcessor(ProjectCoordinateProvider coordsProvider,
+            IOverrideModelProvider modelProvider, final JavaElementResolver cache) {
         this.coordsProvider = coordsProvider;
         provider = modelProvider;
         jdtCache = cache;
     };
 
     @Override
-    public void startSession(IRecommendersCompletionContext context) {
+    public boolean startSession(IRecommendersCompletionContext context) {
         recommendations = null;
         ctx = context;
 
@@ -82,12 +82,14 @@ public class OverrideCompletionSessionProcessor extends SessionProcessor {
             try {
                 updatePreferences();
                 computeRecommendations();
+                return true;
             } catch (Exception e) {
                 log.error("An exception occured whilec omputing overrides recommendations.", e);
             } finally {
                 releaseModel();
             }
         }
+        return false;
     }
 
     private boolean isSupportedCompletionType() {

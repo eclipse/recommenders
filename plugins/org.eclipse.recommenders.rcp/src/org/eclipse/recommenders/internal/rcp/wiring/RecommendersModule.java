@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
-import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -43,18 +42,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.recommenders.internal.rcp.providers.CachingAstProvider;
-import org.eclipse.recommenders.internal.rcp.providers.ClasspathEntryInfoProvider;
 import org.eclipse.recommenders.internal.rcp.providers.JavaModelEventsProvider;
 import org.eclipse.recommenders.internal.rcp.providers.JavaSelectionProvider;
-import org.eclipse.recommenders.internal.rcp.repo.ModelRepository;
-import org.eclipse.recommenders.internal.rcp.repo.ModelRepositoryIndex;
-import org.eclipse.recommenders.internal.rcp.repo.ServiceBasedProxySelector;
 import org.eclipse.recommenders.rcp.IAstProvider;
-import org.eclipse.recommenders.rcp.IClasspathEntryInfoProvider;
 import org.eclipse.recommenders.rcp.RecommendersPlugin;
-import org.eclipse.recommenders.rcp.repo.IModelRepository;
-import org.eclipse.recommenders.rcp.repo.IModelRepositoryIndex;
-import org.eclipse.recommenders.rcp.repo.ModelRepositoryService;
 import org.eclipse.recommenders.utils.rcp.JavaElementResolver;
 import org.eclipse.recommenders.utils.rcp.ast.ASTNodeUtils;
 import org.eclipse.recommenders.utils.rcp.ast.ASTStringUtils;
@@ -69,15 +60,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.util.tracker.ServiceTracker;
-import org.sonatype.aether.repository.ProxySelector;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
-import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -95,39 +83,8 @@ public class RecommendersModule extends AbstractModule implements Module {
         configureJavaElementResolver();
         configureAstProvider();
         bindRepository();
-        initalizeSingletonServices();
         bindShutdownListener();
         bindServiceListener();
-    }
-
-    @Singleton
-    @Provides
-    protected IClasspathEntryInfoProvider configurePackageFragmentRootInfoProvider(final EventBus bus,
-            IWorkspaceRoot workspace) {
-        Bundle bundle = FrameworkUtil.getBundle(getClass());
-        File stateLocation = new File(Platform.getStateLocation(bundle).toFile(), "v0.5-package-root-infos.json"); //$NON-NLS-1$
-        final IClasspathEntryInfoProvider cpeInfoProvider = new ClasspathEntryInfoProvider(stateLocation, workspace,
-                bus);
-
-        PlatformUI.getWorkbench().addWorkbenchListener(new IWorkbenchListener() {
-
-            @Override
-            public boolean preShutdown(IWorkbench workbench, boolean forced) {
-                try {
-                    ((Closeable) cpeInfoProvider).close();
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                return true;
-            }
-
-            @Override
-            public void postShutdown(IWorkbench workbench) {
-            }
-        });
-
-        bus.register(cpeInfoProvider);
-        return cpeInfoProvider;
     }
 
     private void configureJavaElementResolver() {
@@ -144,7 +101,6 @@ public class RecommendersModule extends AbstractModule implements Module {
     }
 
     private void bindRepository() {
-        bind(RepositoryUrlChangeListener.class).asEagerSingleton();
 
         Bundle bundle = FrameworkUtil.getBundle(getClass());
         File stateLocation = Platform.getStateLocation(bundle).toFile();
@@ -159,13 +115,10 @@ public class RecommendersModule extends AbstractModule implements Module {
         // "file:/Volumes/usb/juno/m2/"
         //
                 );
-        bind(IModelRepository.class).to(ModelRepository.class).in(Scopes.SINGLETON);
 
         File index = new File(stateLocation, "index"); //$NON-NLS-1$
         index.mkdirs();
         bind(File.class).annotatedWith(ModelRepositoryIndexLocation.class).toInstance(index);
-        bind(IModelRepositoryIndex.class).to(ModelRepositoryIndex.class).in(Scopes.SINGLETON);
-        bind(ModelRepositoryService.class).asEagerSingleton();
     }
 
     private void bindShutdownListener() {
@@ -257,10 +210,6 @@ public class RecommendersModule extends AbstractModule implements Module {
     public static @interface ModelRepositoryIndexLocation {
     }
 
-    private void initalizeSingletonServices() {
-        bind(ServicesInitializer.class).asEagerSingleton();
-    }
-
     @Singleton
     @Provides
     protected JavaModelEventsProvider provideJavaModelEventsProvider(final EventBus bus, final IWorkspaceRoot workspace) {
@@ -306,15 +255,15 @@ public class RecommendersModule extends AbstractModule implements Module {
         return ResourcesPlugin.getWorkspace().getRoot();
     }
 
-    @Provides
-    protected ProxySelector provideProxyService() {
-        Bundle bundle = FrameworkUtil.getBundle(getClass());
-        ServiceTracker tracker = new ServiceTracker(bundle.getBundleContext(), IProxyService.class.getName(), null);
-        tracker.open();
-        IProxyService service = (IProxyService) tracker.getService();
-        tracker.close();
-        return new ServiceBasedProxySelector(service);
-    }
+    // @Provides
+    // protected ProxySelector provideProxyService() {
+    // Bundle bundle = FrameworkUtil.getBundle(getClass());
+    // ServiceTracker tracker = new ServiceTracker(bundle.getBundleContext(), IProxyService.class.getName(), null);
+    // tracker.open();
+    // IProxyService service = (IProxyService) tracker.getService();
+    // tracker.close();
+    // return new ServiceBasedProxySelector(service);
+    // }
 
     @Provides
     protected IWorkspace provideWorkspace() {
@@ -393,21 +342,4 @@ public class RecommendersModule extends AbstractModule implements Module {
             return activePage;
         }
     }
-
-    /*
-     * this is a bit odd. Used to initialize complex wired elements such as JavaElementsProvider etc.
-     */
-    public static class ServicesInitializer {
-
-        public final IClasspathEntryInfoProvider pgkInfoProvider;
-
-        @Inject
-        private ServicesInitializer(IModelRepository repo, IModelRepositoryIndex index, final IAstProvider astProvider,
-                final JavaModelEventsProvider eventsProvider, final JavaSelectionProvider selectionProvider,
-                IClasspathEntryInfoProvider pgkInfoProvider) {
-            this.pgkInfoProvider = pgkInfoProvider;
-            index.open();
-        }
-    }
-
 }
