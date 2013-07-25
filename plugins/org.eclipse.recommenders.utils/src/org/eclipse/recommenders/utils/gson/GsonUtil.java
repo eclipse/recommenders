@@ -179,7 +179,7 @@ public class GsonUtil {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
-                    res.add(GsonUtil.<T>deserialize(zis, classOfT));
+                    res.add(GsonUtil.<T> deserialize(zis, classOfT));
                 }
             }
         } finally {

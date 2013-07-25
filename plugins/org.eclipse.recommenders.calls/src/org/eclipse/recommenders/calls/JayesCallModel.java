@@ -33,9 +33,9 @@ import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.inference.junctionTree.JunctionTreeAlgorithm;
 import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.recommenders.utils.IOUtils;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Zips;
-import org.eclipse.recommenders.utils.annotations.Nullable;
 import org.eclipse.recommenders.utils.names.IFieldName;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
@@ -77,7 +77,7 @@ import com.google.common.collect.Lists;
  * <li><b>definition kind node:</b>
  * <ul>
  * <li>node name: {@link Constants#N_NODEID_DEF_KIND}
- * <li>state names: one of {@link DefinitionType}, i.e., METHOD_RETURN, NEW, FIELD, PARAMETER, THIS, UNKNOWN, or ANY
+ * <li>state names: one of {@link DefinitionKind}, i.e., METHOD_RETURN, NEW, FIELD, PARAMETER, THIS, UNKNOWN, or ANY
  * </ul>
  * <li><b>method call node:</b>
  * <ul>
@@ -242,12 +242,12 @@ public class JayesCallModel implements ICallModel {
     }
 
     @Override
-    public Optional<DefinitionType> getObservedDefinitionType() {
+    public Optional<DefinitionKind> getObservedDefinitionKind() {
         String stateId = junctionTree.getEvidence().get(defTypeNode);
         if (stateId == null) {
             return absent();
         }
-        return of(DefinitionType.valueOf(stateId));
+        return of(DefinitionKind.valueOf(stateId));
     }
 
     @Override
@@ -359,7 +359,7 @@ public class JayesCallModel implements ICallModel {
     }
 
     @Override
-    public boolean setObservedDefinitionType(@Nullable final DefinitionType newDef) {
+    public boolean setObservedDefinitionKind(@Nullable final DefinitionKind newDef) {
         if (newDef == null) {
             junctionTree.removeEvidence(defTypeNode);
             return true;
