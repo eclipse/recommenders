@@ -52,7 +52,7 @@
 		<module>plugins</module>
 		<module>tests</module>
 		<module>features</module>
-		<module>dist</module>
+		<module>repositories</module>
 	</modules>
 	<pluginRepositories>
 		<pluginRepository>
@@ -329,7 +329,10 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>e43</id>
+			<id>kepler</id>
+		    <activation>
+		        <activeByDefault>true</activeByDefault>
+		    </activation>
 			<build>
 				<plugins>
 					<plugin>
@@ -339,7 +342,7 @@
 							<target>
 								<artifact>
 									<groupId>${project.groupId}</groupId>
-									<artifactId>e43</artifactId>
+									<artifactId>kepler</artifactId>
 									<version>${recommenders-version}</version>
 								</artifact>
 							</target>
