@@ -10,8 +10,7 @@
  */
 package org.eclipse.recommenders.models.dependencies.impl;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Optional.*;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +22,8 @@ import org.eclipse.recommenders.models.dependencies.DependencyInfo;
 import org.eclipse.recommenders.models.dependencies.DependencyType;
 import org.eclipse.recommenders.models.dependencies.IMappingProvider;
 import org.eclipse.recommenders.models.dependencies.IProjectCoordinateResolver;
-import org.eclipse.recommenders.utils.annotations.Testing;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -111,12 +110,12 @@ public class MappingProvider implements IMappingProvider {
         return ImmutableMap.copyOf(manualMappings);
     }
 
-    @Testing
+    @VisibleForTesting
     public long getMissCount() {
         return cache.stats().missCount();
     }
 
-    @Testing
+    @VisibleForTesting
     public long getHitCount() {
         return cache.stats().hitCount();
     }

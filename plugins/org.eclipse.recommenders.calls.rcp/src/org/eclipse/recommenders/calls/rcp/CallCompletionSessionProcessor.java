@@ -14,7 +14,7 @@ import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.Math.rint;
 import static org.eclipse.recommenders.calls.rcp.Constants.*;
-import static org.eclipse.recommenders.internal.completion.rcp.ProcessableCompletionProposalComputer.NULL_PROPOSAL;
+import static org.eclipse.recommenders.completion.rcp.processable.ProcessableCompletionProposalComputer.NULL_PROPOSAL;
 import static org.eclipse.recommenders.utils.Recommendations.top;
 
 import java.util.HashSet;
@@ -34,10 +34,10 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.recommenders.calls.ICallModel;
 import org.eclipse.recommenders.calls.ICallModelProvider;
 import org.eclipse.recommenders.calls.NullCallModel;
-import org.eclipse.recommenders.completion.rcp.IProcessableProposal;
-import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
-import org.eclipse.recommenders.completion.rcp.SessionProcessor;
-import org.eclipse.recommenders.internal.completion.rcp.SimpleProposalProcessor;
+import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
+import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
+import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
+import org.eclipse.recommenders.completion.rcp.utils.IRecommendersCompletionContext;
 import org.eclipse.recommenders.models.BasedTypeName;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.rcp.ProjectCoordinateProvider;
@@ -48,6 +48,7 @@ import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.rcp.JavaElementResolver;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 
 @SuppressWarnings({ "serial", "restriction" })
@@ -89,7 +90,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
     }
 
     @Override
-    public void startSession(final IRecommendersCompletionContext context) {
+    public boolean startSession(final IRecommendersCompletionContext context) {
         ctx = context;
         recommendations = Lists.newLinkedList();
         completionAnalyzer = new AstCallCompletionAnalyzer(context);
@@ -97,8 +98,9 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
             if (!isCompletionRequestSupported() || //
                     !findReceiverTypeAndModel() || //
                     !findRecommendations()) {
-                return;
+                return false;
             }
+            return true;
         } finally {
             releaseModel();
         }
@@ -154,7 +156,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
             recommendations = Recommendations.filterVoid(recommendations);
         }
         recommendations = top(recommendations, prefMaxNumberOfProposals, prefMinProposalProbability);
-        return isEmpty(recommendations);
+        return !isEmpty(recommendations);
     }
 
     private void updatePreferences() {
@@ -206,5 +208,10 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
                 break;
             }
         }
+    }
+
+    @VisibleForTesting
+    public ICallModel getModel() {
+        return model;
     }
 }

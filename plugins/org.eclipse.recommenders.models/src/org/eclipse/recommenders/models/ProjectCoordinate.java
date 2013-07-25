@@ -72,11 +72,7 @@ public class ProjectCoordinate {
 
     public static ProjectCoordinate valueOf(String coord) {
         String[] segments = coord.split(":");
-        Checks.ensureIsInRange(segments.length,
-                3,
-                3,
-                "Coordiante '%s' has invalid number of segments: %d",
-                coord,
+        Checks.ensureIsInRange(segments.length, 3, 3, "Coordiante '%s' has invalid number of segments: %d", coord,
                 segments.length);
         return new ProjectCoordinate(segments[0], segments[1], segments[2]);
     }
