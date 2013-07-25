@@ -13,9 +13,9 @@ package org.eclipse.recommenders.utils.rcp;
 import static com.google.common.base.Optional.*;
 import static org.eclipse.jdt.internal.corext.util.JdtFlags.*;
 import static org.eclipse.jdt.ui.SharedASTProvider.*;
+import static org.eclipse.recommenders.internal.utils.rcp.RecommendersUtilsPlugin.logError;
 import static org.eclipse.recommenders.utils.Checks.*;
 import static org.eclipse.recommenders.utils.Throws.*;
-import static org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin.logError;
 
 import java.io.File;
 import java.util.Collection;
@@ -59,10 +59,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Region;
-import org.eclipse.recommenders.utils.annotations.Nullable;
+import org.eclipse.recommenders.internal.utils.rcp.RecommendersUtilsPlugin;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
-import org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsPlugin;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 

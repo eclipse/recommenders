@@ -12,7 +12,7 @@ package org.eclipse.recommenders.models.rcp;
 
 import static com.google.common.base.Optional.absent;
 import static org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT_ROOT;
-import static org.eclipse.recommenders.models.dependencies.DependencyType.*;
+import static org.eclipse.recommenders.models.DependencyType.*;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.rcp.JdtUtils.getLocation;
 
@@ -28,10 +28,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.recommenders.models.DependencyInfo;
+import org.eclipse.recommenders.models.DependencyType;
+import org.eclipse.recommenders.models.IMappingProvider;
 import org.eclipse.recommenders.models.ProjectCoordinate;
-import org.eclipse.recommenders.models.dependencies.DependencyInfo;
-import org.eclipse.recommenders.models.dependencies.DependencyType;
-import org.eclipse.recommenders.models.dependencies.IMappingProvider;
 import org.eclipse.recommenders.utils.rcp.JdtUtils;
 
 import com.google.common.base.Optional;

@@ -13,8 +13,8 @@ package org.eclipse.recommenders.calls;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.Recommendation;
-import org.eclipse.recommenders.utils.annotations.Nullable;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 
