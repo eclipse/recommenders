@@ -57,7 +57,7 @@ public class DependencyIdentificationService {
          * Fast lookup, users should not cache the return value for longer than the current action! Project coordinates
          * may change over time.
          **/
-         Optional<ProjectCoordinate> get(final DependencyInfo info);
+        Optional<ProjectCoordinate> get(final DependencyInfo info);
     }
 
     Map<DependencyInfo, DependencyResolutionStatus> resolutionState = Maps.newConcurrentMap();

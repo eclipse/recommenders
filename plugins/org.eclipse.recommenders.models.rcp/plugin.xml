@@ -7,5 +7,22 @@
             class="org.eclipse.recommenders.models.rcp.wiring.ModelsRCPModule">
       </module>
    </extension>
-
+     <extension
+         point="org.eclipse.ui.views">
+      <view
+            id="org.eclipse.recommenders.models.rcp.views.ModelArchiveCoordinatesView"
+            icon="icons/depinsp.gif"
+            name="Model Coordinates"
+            category="org.eclipse.recommenders.rcp.category.views"
+            class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.models.rcp.ModelArchiveCoordinatesView">
+      </view>
+      <view
+            id="org.eclipse.recommenders.models.rcp.views.ProjectCoordinatesView"
+            name="Project Coordinates"
+            icon="icons/depinsp.gif"
+            category="org.eclipse.recommenders.rcp.category.views"
+            class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.models.rcp.ProjectCoordinatesView">
+      </view>
+      
+   </extension>
 </plugin>
