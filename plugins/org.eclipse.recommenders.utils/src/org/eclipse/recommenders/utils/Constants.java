@@ -10,7 +10,6 @@
  */
 package org.eclipse.recommenders.utils;
 
-import org.eclipse.recommenders.internal.utils.codestructs.DefinitionSite;
 import org.eclipse.recommenders.utils.names.IFieldName;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
@@ -100,8 +99,6 @@ public interface Constants {
     IMethodName NO_METHOD = VmMethodName.get("LNo.nothing()V");
     IMethodName ANY_METHOD = VmMethodName.get("LAny.any()V");
     IMethodName DUMMY_METHOD = VmMethodName.get("LDummy.dummy()V");
-
-    DefinitionSite.Kind UNKNOWN_KIND = DefinitionSite.Kind.UNKNOWN;
     IFieldName UNKNOWN_FIELD = VmFieldName.get("LNo.field;LNoType");
 
     /*
