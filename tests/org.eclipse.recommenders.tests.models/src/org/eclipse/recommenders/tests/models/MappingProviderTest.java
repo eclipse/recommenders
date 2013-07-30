@@ -136,34 +136,4 @@ public class MappingProviderTest {
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
     }
 
-    @Test
-    public void testManualMappingIsReturned() {
-        MappingProvider sut = new MappingProvider();
-        DependencyInfo dependencyInfo = new DependencyInfo(new File("example.jar"), DependencyType.JAR);
-
-        sut.setManualMapping(dependencyInfo, EXPECTED_PROJECT_COORDINATE);
-        Optional<ProjectCoordinate> actual = sut.searchForProjectCoordinate(dependencyInfo);
-
-        sut.searchForProjectCoordinate(dependencyInfo);
-
-        assertEquals(EXPECTED_PROJECT_COORDINATE, actual.get());
-    }
-
-    @Test
-    public void testManualMappingWinsOverStrategies() {
-        MappingProvider sut = new MappingProvider();
-        sut.addStrategy(createMockedStrategy(EXPECTED_PROJECT_COORDINATE));
-        DependencyInfo dependencyInfo = new DependencyInfo(new File("example.jar"), DependencyType.JAR);
-        Optional<ProjectCoordinate> actual = sut.searchForProjectCoordinate(dependencyInfo);
-
-        assertEquals(EXPECTED_PROJECT_COORDINATE, actual.get());
-
-        sut.setManualMapping(dependencyInfo, ANOTHER_EXPECTED_PROJECT_COORDINATE);
-        actual = sut.searchForProjectCoordinate(dependencyInfo);
-
-        sut.searchForProjectCoordinate(dependencyInfo);
-
-        assertEquals(ANOTHER_EXPECTED_PROJECT_COORDINATE, actual.get());
-    }
-
 }

@@ -11,11 +11,8 @@
 package org.eclipse.recommenders.models.dependencies.impl;
 
 import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.dependencies.DependencyInfo;
@@ -25,22 +22,11 @@ import org.eclipse.recommenders.models.dependencies.IProjectCoordinateResolver;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class MappingProvider implements IMappingProvider {
 
     private List<IProjectCoordinateResolver> strategies = Lists.newArrayList();
-    private final Map<DependencyInfo, ProjectCoordinate> manualMappings = Maps.newHashMap();
-
-    public MappingProvider() {
-        
-    }
-
-    public MappingProvider(Map<DependencyInfo, ProjectCoordinate> manualMappings) {
-        setManualMappings(manualMappings);
-    }
 
     @Override
     public List<IProjectCoordinateResolver> getStrategies() {
@@ -59,10 +45,6 @@ public class MappingProvider implements IMappingProvider {
 
     @Override
     public Optional<ProjectCoordinate> searchForProjectCoordinate(final DependencyInfo dependencyInfo) {
-        ProjectCoordinate projectCoordinate = manualMappings.get(dependencyInfo);
-        if (projectCoordinate != null){
-            return fromNullable(projectCoordinate);
-        }
         return extractProjectCoordinate(dependencyInfo);
     }
 
@@ -84,34 +66,6 @@ public class MappingProvider implements IMappingProvider {
             }
         }
         return false;
-    }
-
-    @Override
-    public void setManualMappings(Map<DependencyInfo, ProjectCoordinate> manualMappings) {
-        this.manualMappings.clear();
-        for (Entry<DependencyInfo, ProjectCoordinate> entry : manualMappings.entrySet()) {
-            setManualMapping(entry.getKey(), entry.getValue());
-        }
-    }
-
-    @Override
-    public Map<DependencyInfo, ProjectCoordinate> getManualMappings() {
-        return ImmutableMap.copyOf(manualMappings);
-    }
-
-    @Override
-    public void setManualMapping(DependencyInfo dependencyInfo, ProjectCoordinate projectCoordinate) {
-        manualMappings.put(dependencyInfo, projectCoordinate);
-    }
-
-    @Override
-    public void removeManualMapping(DependencyInfo dependencyInfo) {
-        manualMappings.remove(dependencyInfo);
-    }
-
-    @Override
-    public boolean isManualMapping(DependencyInfo dependencyInfo) {
-        return manualMappings.containsKey(dependencyInfo);
     }
 
 }

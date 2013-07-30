@@ -27,6 +27,7 @@ import org.eclipse.recommenders.models.dependencies.impl.MavenPomPropertiesStrat
 import org.eclipse.recommenders.models.dependencies.impl.OsgiManifestStrategy;
 import org.eclipse.recommenders.models.dependencies.impl.SimpleIndexSearcher;
 import org.eclipse.recommenders.models.dependencies.rcp.EclipseDependencyListener;
+import org.eclipse.recommenders.models.dependencies.rcp.ManualMappingStrategy;
 import org.eclipse.recommenders.models.rcp.EclipseModelRepository;
 import org.eclipse.recommenders.models.rcp.ProjectCoordinateProvider;
 import org.osgi.framework.Bundle;
@@ -43,21 +44,32 @@ import com.google.inject.name.Names;
 public class ModelsRCPModule extends AbstractModule implements Module {
 
     public static final String IDENTIFIED_PACKAGE_FRAGMENT_ROOTS = "IDENTIFIED_PACKAGE_FRAGMENT_ROOTS";
+    public static final String MANUAL_MAPPINGS = "MANUAL_MAPPINGS";
 
     @Override
     protected void configure() {
         Bundle bundle = FrameworkUtil.getBundle(getClass());
         File stateLocation = Platform.getStateLocation(bundle).toFile();
 
-        File cachePersistence = new File(stateLocation, "cache/identified-package-fragment-roots.json");
+        File identifiedPackageFragementRoots = new File(stateLocation, "cache/identified-package-fragment-roots.json");
         try {
-            Files.createParentDirs(cachePersistence);
+            Files.createParentDirs(identifiedPackageFragementRoots);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        bind(File.class).annotatedWith(Names.named(IDENTIFIED_PACKAGE_FRAGMENT_ROOTS)).toInstance(cachePersistence);
+        File manualMappings = new File(stateLocation, "cache/manual-mappings.json");
+        try {
+            Files.createParentDirs(manualMappings);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        bind(File.class).annotatedWith(Names.named(IDENTIFIED_PACKAGE_FRAGMENT_ROOTS)).toInstance(
+                identifiedPackageFragementRoots);
+        bind(File.class).annotatedWith(Names.named(MANUAL_MAPPINGS)).toInstance(manualMappings);
         bind(ProjectCoordinateProvider.class).in(Scopes.SINGLETON);
+        bind(ManualMappingStrategy.class).in(Scopes.SINGLETON);
         bind(IModelRepository.class).to(EclipseModelRepository.class).in(Scopes.SINGLETON);
     }
 
@@ -75,8 +87,10 @@ public class ModelsRCPModule extends AbstractModule implements Module {
 
     @Singleton
     @Provides
-    protected IMappingProvider provideMappingProvider(SimpleIndexSearcher searcher) {
+    protected IMappingProvider provideMappingProvider(SimpleIndexSearcher searcher,
+            ManualMappingStrategy manualMappingStrategy) {
         MappingProvider mappingProvider = new MappingProvider();
+        mappingProvider.addStrategy(manualMappingStrategy);
         mappingProvider.addStrategy(new MavenPomPropertiesStrategy());
         mappingProvider.addStrategy(new JREExecutionEnvironmentStrategy());
         mappingProvider.addStrategy(new JREReleaseFileStrategy());
