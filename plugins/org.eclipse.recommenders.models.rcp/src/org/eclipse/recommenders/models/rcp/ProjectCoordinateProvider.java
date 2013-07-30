@@ -16,6 +16,7 @@ import static org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT_ROOT;
 import static org.eclipse.recommenders.models.dependencies.DependencyType.JAR;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.rcp.JdtUtils.getLocation;
+import static org.eclipse.recommenders.utils.rcp.models.DependencyUtils.createJREDependencyInfo;
 
 import java.io.Closeable;
 import java.io.File;
@@ -38,7 +39,6 @@ import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.dependencies.DependencyInfo;
 import org.eclipse.recommenders.models.dependencies.DependencyType;
 import org.eclipse.recommenders.models.dependencies.IMappingProvider;
-import org.eclipse.recommenders.models.dependencies.rcp.EclipseDependencyListener;
 import org.eclipse.recommenders.models.rcp.json.OptionalJsonTypeAdapter;
 import org.eclipse.recommenders.models.rcp.json.PackageFragmentRootJsonTypeAdapter;
 import org.eclipse.recommenders.models.rcp.json.ProjectCoordinateJsonTypeAdapter;
@@ -159,6 +159,21 @@ public class ProjectCoordinateProvider implements Openable, Closeable {
         }
 
         IJavaProject javaProject = root.getJavaProject();
+
+        if (isPartOfJRE(root, javaProject)){
+            Optional<DependencyInfo> request = createJREDependencyInfo(javaProject);
+            if (request.isPresent()) {
+                return resolve(request.get());
+            } else {
+                return absent();
+            }
+        }else{
+            DependencyInfo request = new DependencyInfo(location, JAR);
+            return resolve(request);
+        }
+    }
+
+    private static boolean isPartOfJRE(IPackageFragmentRoot root, IJavaProject javaProject) {
         try {
             for (IClasspathEntry entry : javaProject.getRawClasspath()) {
                 if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
@@ -166,25 +181,17 @@ public class ProjectCoordinateProvider implements Openable, Closeable {
                         for (IPackageFragmentRoot packageFragmentRoot : javaProject.findPackageFragmentRoots(entry)) {
                             if (!packageFragmentRoot.getPath().toFile().getParentFile().getName().equals("ext")) {
                                 if (packageFragmentRoot.equals(root)) {
-                                    Optional<DependencyInfo> request = EclipseDependencyListener
-                                            .createJREDependencyInfo(javaProject);
-                                    if (request.isPresent()) {
-                                        return resolve(request.get());
-                                    } else {
-                                        return absent();
-                                    }
+                                    return true;
                                 }
                             }
                         }
                     }
                 }
             }
-            DependencyInfo request = new DependencyInfo(location, JAR);
-            return resolve(request);
         } catch (JavaModelException e) {
             e.printStackTrace();
         }
-        return absent();
+        return false;
     }
 
     public Optional<ProjectCoordinate> resolve(IJavaProject javaProject) {
