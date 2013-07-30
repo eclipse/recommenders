@@ -16,6 +16,7 @@ import static com.google.common.base.Optional.fromNullable;
 import java.io.File;
 import java.util.Map;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -59,7 +60,7 @@ public final class DependencyUtils {
     }
 
     public static DependencyInfo createDependencyInfoForProject(final IJavaProject project) {
-        File file = project.getPath().toFile();
+        File file = ResourcesPlugin.getWorkspace().getRoot().findMember(project.getPath()).getLocation().toFile();
         DependencyInfo dependencyInfo = new DependencyInfo(file, DependencyType.PROJECT);
         return dependencyInfo;
     }
