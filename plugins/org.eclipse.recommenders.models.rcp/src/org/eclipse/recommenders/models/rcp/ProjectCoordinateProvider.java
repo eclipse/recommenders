@@ -16,6 +16,7 @@ import static org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT_ROOT;
 import static org.eclipse.recommenders.models.dependencies.DependencyType.JAR;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.rcp.JdtUtils.getLocation;
+import static org.eclipse.recommenders.utils.rcp.models.DependencyUtils.createJREDependencyInfo;
 
 import java.io.Closeable;
 import java.io.File;
@@ -38,7 +39,6 @@ import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.dependencies.DependencyInfo;
 import org.eclipse.recommenders.models.dependencies.DependencyType;
 import org.eclipse.recommenders.models.dependencies.IMappingProvider;
-import org.eclipse.recommenders.models.dependencies.rcp.EclipseDependencyListener;
 import org.eclipse.recommenders.models.rcp.json.OptionalJsonTypeAdapter;
 import org.eclipse.recommenders.models.rcp.json.PackageFragmentRootJsonTypeAdapter;
 import org.eclipse.recommenders.models.rcp.json.ProjectCoordinateJsonTypeAdapter;
@@ -166,8 +166,7 @@ public class ProjectCoordinateProvider implements Openable, Closeable {
                         for (IPackageFragmentRoot packageFragmentRoot : javaProject.findPackageFragmentRoots(entry)) {
                             if (!packageFragmentRoot.getPath().toFile().getParentFile().getName().equals("ext")) {
                                 if (packageFragmentRoot.equals(root)) {
-                                    Optional<DependencyInfo> request = EclipseDependencyListener
-                                            .createJREDependencyInfo(javaProject);
+                                    Optional<DependencyInfo> request = createJREDependencyInfo(javaProject);
                                     if (request.isPresent()) {
                                         return resolve(request.get());
                                     } else {

@@ -7,7 +7,8 @@ Bundle-Activator: org.eclipse.recommenders.utils.rcp.internal.RecommendersUtilsP
 Bundle-Vendor: Eclipse Code Recommenders
 Export-Package: org.eclipse.recommenders.utils.rcp,
  org.eclipse.recommenders.utils.rcp.ast,
- org.eclipse.recommenders.utils.rcp.internal
+ org.eclipse.recommenders.utils.rcp.internal,
+ org.eclipse.recommenders.utils.rcp.models
 Require-Bundle: com.google.guava;bundle-version="[14.0.0,15.0.0)",
  org.eclipse.recommenders.utils,
  org.eclipse.jdt.core,
@@ -19,6 +20,8 @@ Require-Bundle: com.google.guava;bundle-version="[14.0.0,15.0.0)",
  org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.recommenders.injection,
- org.slf4j.api
+ org.slf4j.api,
+ org.eclipse.recommenders.models
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.jdt.launching
