@@ -202,7 +202,7 @@ public class ProjectCoordinatesView extends ViewPart {
                 case COLUMN_LOCATION:
                     if (dependencyInfo.getType() == DependencyType.JRE) {
                         Optional<String> executionEnvironment = dependencyInfo
-                                .getAttribute(DependencyInfo.EXECUTION_ENVIRONMENT);
+                                .getHint(DependencyInfo.EXECUTION_ENVIRONMENT);
                         if (executionEnvironment.isPresent()) {
                             return executionEnvironment.get();
                         }
@@ -326,7 +326,7 @@ public class ProjectCoordinatesView extends ViewPart {
             sb.append("Type: ");
             sb.append(dependencyInfo.getType().toString());
 
-            Map<String, String> attributeMap = dependencyInfo.getAttributeMap();
+            Map<String, String> attributeMap = dependencyInfo.getHintMap();
             if (attributeMap != null && !attributeMap.isEmpty()) {
                 sb.append(System.getProperty("line.separator"));
                 sb.append("Attributes: ");
