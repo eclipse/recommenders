@@ -17,6 +17,15 @@ xtend-gen/
 ## jrebel project config files
 rebel.xml
 
+## no settings (except xtend)
+.project
+.classpath
+org.eclipse.pde.core.prefs
+org.eclipse.m2e.core.prefs
+org.eclipse.jdt.ui.prefs
+org.eclipse.jdt.launching.prefs
+org.eclipse.jdt.core.prefs
+org.eclipse.core.resources.prefs
 
 ## various other file types we don't want to have in the repository:
 .DS_Store
