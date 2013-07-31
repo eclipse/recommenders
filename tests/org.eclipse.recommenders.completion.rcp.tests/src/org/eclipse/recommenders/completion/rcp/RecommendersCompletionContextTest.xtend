@@ -150,6 +150,14 @@ class RecommendersCompletionContextTest {
         assertTrue(expected.contains(VmTypeName::STRING))
     }
 
+    @Test
+    def void testArraysAsList() {
+        val code = method('java.util.Arrays.asList(get$)')
+        val sut = exercise(code)
+        // this should be java.util.List"
+        assertTrue(sut.expectedType.isPresent)
+    }
+
     def private assertCompletionNode(IRecommendersCompletionContext sut, Class<?> type) {
         val node = sut.completionNode.orNull;
         assertInstanceof(node, type)
