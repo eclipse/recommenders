@@ -46,6 +46,7 @@ import com.google.inject.name.Names;
 public class ModelsRcpModule extends AbstractModule implements Module {
 
     public static final String IDENTIFIED_PACKAGE_FRAGMENT_ROOTS = "IDENTIFIED_PACKAGE_FRAGMENT_ROOTS";
+    public static final String MANUAL_MAPPINGS = "MANUAL_MAPPINGS";
 
     @Override
     protected void configure() {
@@ -53,19 +54,20 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         bind(IProjectCoordinateProvider.class).to(ProjectCoordinateProvider.class).in(Scopes.SINGLETON);
         bind(IModelRepository.class).to(EclipseModelRepository.class).in(Scopes.SINGLETON);
         bindRepository();
-        bindPackageFragmentRootsPersistenceFile();
+        createAndBindNamedFile("cache/manual-mappings.json", IDENTIFIED_PACKAGE_FRAGMENT_ROOTS);
+        createAndBindNamedFile("cache/identified-package-fragment-roots.json", IDENTIFIED_PACKAGE_FRAGMENT_ROOTS);
     }
 
-    private void bindPackageFragmentRootsPersistenceFile() {
+    private void createAndBindNamedFile(String fileName, String name) {
         Bundle bundle = FrameworkUtil.getBundle(getClass());
         File stateLocation = Platform.getStateLocation(bundle).toFile();
-        File cachePersistence = new File(stateLocation, "cache/identified-package-fragment-roots.json");
+        File cachePersistence = new File(stateLocation, fileName);
         try {
             Files.createParentDirs(cachePersistence);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        bind(File.class).annotatedWith(Names.named(IDENTIFIED_PACKAGE_FRAGMENT_ROOTS)).toInstance(cachePersistence);
+        bind(File.class).annotatedWith(Names.named(name)).toInstance(cachePersistence);
     }
 
     private void bindRepository() {
