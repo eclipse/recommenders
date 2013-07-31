@@ -1,4 +1,4 @@
-package org.eclipse.recommenders.calls.rcp
+package org.eclipse.recommenders.calls.rcp.it
 
 import com.google.common.collect.Sets
 import java.util.HashSet
@@ -16,7 +16,7 @@ import org.junit.Test
 
 import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.*
 
-class QueryTest {
+class CallCompletionAstAnalyzerTest {
 
     static val fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test")
     CharSequence code

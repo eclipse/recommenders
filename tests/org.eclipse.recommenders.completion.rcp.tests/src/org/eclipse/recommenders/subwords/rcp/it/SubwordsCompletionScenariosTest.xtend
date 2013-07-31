@@ -1,4 +1,4 @@
-package org.eclipse.recommenders.subwords.rcp
+package org.eclipse.recommenders.subwords.rcp.it
 
 import com.google.common.base.Stopwatch
 import java.util.List
@@ -8,10 +8,10 @@ import org.eclipse.jdt.ui.JavaUI
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal
 import org.eclipse.jface.text.Document
-import org.eclipse.recommenders.completion.rcp.JavaContentAssistContextMock
 import org.eclipse.recommenders.completion.rcp.MockSubwordsSessionProcessor
+import org.eclipse.recommenders.completion.rcp.it.JavaContentAssistContextMock
+import org.eclipse.recommenders.internal.rcp.CachingAstProvider
 import org.eclipse.recommenders.internal.subwords.rcp.SubwordsCompletionProposalComputer
-import org.eclipse.recommenders.tests.SmokeTestScenarios
 import org.eclipse.recommenders.tests.jdt.JavaProjectFixture
 import org.eclipse.recommenders.utils.Checks
 import org.junit.Ignore
@@ -21,8 +21,6 @@ import static java.util.Arrays.*
 import static junit.framework.Assert.*
 import static org.eclipse.recommenders.internal.subwords.rcp.SubwordsUtils.*
 import static org.eclipse.recommenders.tests.CodeBuilder.*
-import org.eclipse.recommenders.internal.rcp.CachingAstProvider
-import org.eclipse.recommenders.internal.subwords.rcp.SubwordsUtils
 
 class SubwordsCompletionProposalComputerIntegrationTest {
 
@@ -203,8 +201,8 @@ class SubwordsCompletionProposalComputerIntegrationTest {
         val cu = struct.first;
         for (completionIndex : struct.second) {
             val ctx = new JavaContentAssistContextMock(cu, completionIndex)
-            val sut = new SubwordsCompletionProposalComputer(new MockSubwordsSessionProcessor(new CachingAstProvider),
-                new CachingAstProvider)
+            val sut = new SubwordsCompletionProposalComputer(new MockSubwordsSessionProcessor(new CachingAstProvider ( ) ),
+                new CachingAstProvider ( ) )
             sut.sessionStarted
             stopwatch = new Stopwatch()
             stopwatch.start
@@ -265,7 +263,7 @@ class SubwordsCompletionProposalComputerIntegrationTest {
             JavaUI.openInEditor(cu);
             val completionIndex = struct.second.head
             val ctx = new JavaContentAssistContextMock(cu, completionIndex)
-            val sut = new SubwordsCompletionProposalComputer(new CachingAstProvider)
+            val sut = new SubwordsCompletionProposalComputer(new CachingAstProvider ( ) )
             sut.sessionStarted
             stopwatch.start
             val actual = sut.computeCompletionProposals(ctx, new NullProgressMonitor())
