@@ -10,13 +10,15 @@
  */
 package org.eclipse.recommenders.models;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.eclipse.recommenders.utils.Checks;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -36,9 +38,10 @@ public class DependencyInfo {
     }
 
     public DependencyInfo(File file, DependencyType type, Map<String, String> attributes) {
-        this.file = file;
+        this.file = ensureIsNotNull(file);
+        checkArgument(file.isAbsolute());
         this.type = type;
-        this.attributes = Checks.ensureIsNotNull(attributes);
+        this.attributes = ensureIsNotNull(attributes);
     }
 
     public File getFile() {
