@@ -282,7 +282,7 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
             return absent();
         }
         // keys contain '/' instead of dots and may end with ';'
-        final char[][] keys = coreContext.getExpectedTypesKeys();
+        final char[][] keys = coreContext.getExpectedTypesSignatures();
         if (keys == null) {
             return absent();
         }
@@ -297,7 +297,7 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
     public Set<ITypeName> getExpectedTypeNames() {
         ASTNode completion = getCompletionNode().orNull();
         char[][] keys = isArgumentCompletion(completion) && getPrefix().isEmpty() ? simulateCompletionWithFakePrefix()
-                : coreContext.getExpectedTypesKeys();
+                : coreContext.getExpectedTypesSignatures();
         return createTypeNamesFromKeys(keys);
     }
 
