@@ -225,9 +225,11 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
         Map<IPackageFragmentRoot, Optional<ProjectCoordinate>> deserializedCache = cacheGson.fromJson(json, cacheType);
 
         for (Entry<IPackageFragmentRoot, Optional<ProjectCoordinate>> entry : deserializedCache.entrySet()) {
-            if (entry.getKey() == null) {
+            if (entry.getKey() == null || entry.getValue() == null) {
                 // a package fragment root may disappear (e.g., the project was closed),
                 // and thus can not be resolved anymore.
+                // value may be null for source folders which could not be properly resolved in the past
+                // TODO should this be fixed in serialization or deserialization code?
                 continue;
             }
             cache.put(entry.getKey(), entry.getValue());
