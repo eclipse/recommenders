@@ -13,7 +13,10 @@ package org.eclipse.recommenders.models;
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
 import static org.eclipse.recommenders.models.DependencyType.JAR;
+import static org.eclipse.recommenders.models.DependencyType.PROJECT;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -39,9 +42,38 @@ public class OsgiManifestStrategy extends AbstractStrategy {
     public OsgiManifestStrategy(IFileToJarFileConverter fileToJarFileConverter) {
         jarFileConverter = fileToJarFileConverter;
     }
-    
+
     @Override
     protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+        Optional<Manifest> optionalManifest = absent();
+        if (dependencyInfo.getType() == DependencyType.JAR) {
+            optionalManifest = extractManifestFromJar(dependencyInfo);
+        } else if (dependencyInfo.getType() == DependencyType.PROJECT) {
+            optionalManifest = extractManifestFromProject(dependencyInfo);
+        }
+        if (optionalManifest.isPresent()) {
+            return extractProjectCoordinateFromManifest(optionalManifest.get());
+        }
+        return absent();
+    }
+
+    private Optional<Manifest> extractManifestFromProject(DependencyInfo dependencyInfo) {
+        File projectFolder = dependencyInfo.getFile();
+        File manifestFile = new File(projectFolder, "META-INF" + File.separator + "MANIFEST.MF");
+        if (manifestFile.exists()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(manifestFile);
+                Manifest manifest = new Manifest(fileInputStream);
+                fileInputStream.close();
+                return of(manifest);
+            } catch (IOException e) {
+                return absent();
+            }
+        }
+        return absent();
+    }
+
+    private Optional<Manifest> extractManifestFromJar(DependencyInfo dependencyInfo) {
         Optional<JarFile> optionalJarFile = jarFileConverter.createJarFile(dependencyInfo.getFile());
         if (!optionalJarFile.isPresent()) {
             return absent();
@@ -52,7 +84,7 @@ public class OsgiManifestStrategy extends AbstractStrategy {
             if (manifest == null) {
                 return absent();
             }
-            return extractProjectCoordinateFromManifest(manifest);
+            return of(manifest);
         } catch (IOException e) {
             return absent();
         } finally {
@@ -63,7 +95,7 @@ public class OsgiManifestStrategy extends AbstractStrategy {
     private Optional<ProjectCoordinate> extractProjectCoordinateFromManifest(Manifest manifest) {
         Attributes attributes = manifest.getMainAttributes();
         String name = attributes.getValue(BUNDLE_NAME);
-        String version = attributes.getValue(BUNDLE_VERSION);
+        String version = extractVersion(attributes.getValue(BUNDLE_VERSION));
         if (name == null || version == null) {
             return absent();
         }
@@ -73,8 +105,17 @@ public class OsgiManifestStrategy extends AbstractStrategy {
         return of(new ProjectCoordinate(gid, aid, version));
     }
 
+    private String extractVersion(String value) {
+        if (value.matches("[0-9]+(\\.[0-9]+)*")){
+            return value;
+        }else{
+            int indexOfLastDot = value.lastIndexOf(".");
+            return value.substring(0, indexOfLastDot);
+        }
+    }
+
     @Override
     public boolean isApplicable(DependencyType type) {
-        return JAR == type;
+        return (JAR == type) || (PROJECT == type);
     }
 }
