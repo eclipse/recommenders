@@ -8,13 +8,13 @@
  * Contributors:
  *    Timur Achmetow - initial API and implementation
  */
-package org.eclipse.recommenders.sandbox.rcp;
+package org.eclipse.recommenders.stats.rcp;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.recommenders.sandbox.rcp.CompletionEvent.ProposalKind;
-import org.eclipse.recommenders.sandbox.rcp.StatisticsDialog.ProposalLabelProvider;
+import org.eclipse.recommenders.stats.rcp.CompletionEvent.ProposalKind;
+import org.eclipse.recommenders.stats.rcp.StatisticsDialog.ProposalLabelProvider;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.Names;
 

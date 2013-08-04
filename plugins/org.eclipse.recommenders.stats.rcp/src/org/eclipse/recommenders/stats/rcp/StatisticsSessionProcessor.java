@@ -8,11 +8,10 @@
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
  */
-package org.eclipse.recommenders.sandbox.rcp;
+package org.eclipse.recommenders.stats.rcp;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.SystemUtils.LINE_SEPARATOR;
-import static org.eclipse.recommenders.sandbox.rcp.CompletionEvent.ProposalKind.toKind;
+import static org.eclipse.recommenders.stats.rcp.CompletionEvent.ProposalKind.toKind;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +31,8 @@ import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
 import org.eclipse.recommenders.rcp.IRcpService;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
-import org.eclipse.recommenders.sandbox.rcp.CompletionEvent.ProposalKind;
+import org.eclipse.recommenders.stats.rcp.CompletionEvent.ProposalKind;
+import org.eclipse.recommenders.utils.IOUtils;
 import org.eclipse.recommenders.utils.gson.GsonFieldNameDeserializer;
 import org.eclipse.recommenders.utils.gson.GsonMethodNameDeserializer;
 import org.eclipse.recommenders.utils.gson.GsonNameSerializer;
@@ -121,7 +121,7 @@ public class StatisticsSessionProcessor extends SessionProcessor implements IRcp
         if (event != null) {
             try {
                 final Gson gson = getCompletionLogSerializer();
-                Files.append(gson.toJson(event) + LINE_SEPARATOR, dest, Charsets.UTF_8);
+                Files.append(gson.toJson(event) + IOUtils.LINE_SEPARATOR, dest, Charsets.UTF_8);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

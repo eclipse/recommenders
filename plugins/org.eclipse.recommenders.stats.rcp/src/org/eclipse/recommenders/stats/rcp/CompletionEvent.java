@@ -8,7 +8,7 @@
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
  */
-package org.eclipse.recommenders.sandbox.rcp;
+package org.eclipse.recommenders.stats.rcp;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.recommenders.utils.names.ITypeName;

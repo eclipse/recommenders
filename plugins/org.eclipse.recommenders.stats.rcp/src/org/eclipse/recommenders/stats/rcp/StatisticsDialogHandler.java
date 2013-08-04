@@ -8,7 +8,7 @@
  * Contributors:
  *    Timur Achmetow - Initial API and implementation
  */
-package org.eclipse.recommenders.sandbox.rcp;
+package org.eclipse.recommenders.stats.rcp;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;

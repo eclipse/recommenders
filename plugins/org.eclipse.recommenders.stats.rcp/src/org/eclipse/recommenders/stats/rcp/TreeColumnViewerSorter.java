@@ -1,24 +1,14 @@
-/**
- * Copyright (c) 2006, 2007 Tom Schindl and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Tom Schindl - initial API and implementation.
- */
-package org.eclipse.recommenders.sandbox.rcp;
+package org.eclipse.recommenders.stats.rcp;
 
 import org.eclipse.jface.viewers.ColumnViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
-public abstract class ColumnViewerSorter extends ViewerComparator {
+public abstract class TreeColumnViewerSorter extends ViewerComparator {
     public static final int ASC = 1;
 
     public static final int NONE = 0;
@@ -27,37 +17,37 @@ public abstract class ColumnViewerSorter extends ViewerComparator {
 
     private int direction = 0;
 
-    private final TableViewerColumn column;
+    private final TreeViewerColumn column;
 
     private final ColumnViewer viewer;
 
-    public ColumnViewerSorter(ColumnViewer viewer, TableViewerColumn column) {
+    public TreeColumnViewerSorter(ColumnViewer viewer, TreeViewerColumn column) {
         this.column = column;
         this.viewer = viewer;
         this.column.getColumn().addSelectionListener(new SelectionAdapter() {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (ColumnViewerSorter.this.viewer.getComparator() != null) {
-                    if (ColumnViewerSorter.this.viewer.getComparator() == ColumnViewerSorter.this) {
-                        int tdirection = ColumnViewerSorter.this.direction;
+                if (TreeColumnViewerSorter.this.viewer.getComparator() != null) {
+                    if (TreeColumnViewerSorter.this.viewer.getComparator() == TreeColumnViewerSorter.this) {
+                        int tdirection = direction;
 
                         if (tdirection == ASC) {
-                            setSorter(ColumnViewerSorter.this, DESC);
+                            setSorter(TreeColumnViewerSorter.this, DESC);
                         } else if (tdirection == DESC) {
-                            setSorter(ColumnViewerSorter.this, ASC);
+                            setSorter(TreeColumnViewerSorter.this, ASC);
                         }
                     } else {
-                        setSorter(ColumnViewerSorter.this, ASC);
+                        setSorter(TreeColumnViewerSorter.this, ASC);
                     }
                 } else {
-                    setSorter(ColumnViewerSorter.this, ASC);
+                    setSorter(TreeColumnViewerSorter.this, ASC);
                 }
             }
         });
     }
 
-    public void setSorter(ColumnViewerSorter sorter, int direction) {
+    public void setSorter(TreeColumnViewerSorter sorter, int direction) {
         if (direction == NONE) {
             column.getColumn().getParent().setSortColumn(null);
             column.getColumn().getParent().setSortDirection(SWT.NONE);

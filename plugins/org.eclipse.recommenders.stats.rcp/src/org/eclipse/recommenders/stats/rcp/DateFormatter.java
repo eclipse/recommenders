@@ -8,7 +8,7 @@
  * Contributors:
  *    Timur Achmetow - initial API and implementation
  */
-package org.eclipse.recommenders.sandbox.rcp;
+package org.eclipse.recommenders.stats.rcp;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
