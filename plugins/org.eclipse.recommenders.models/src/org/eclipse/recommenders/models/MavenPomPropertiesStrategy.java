@@ -10,7 +10,9 @@
  */
 package org.eclipse.recommenders.models;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.fromNullable;
+import static org.eclipse.recommenders.utils.Zips.closeQuietly;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,15 +63,7 @@ public class MavenPomPropertiesStrategy extends AbstractStrategy {
         } catch (IOException e) {
             return absent();
         } finally {
-            close(jarFile);
-        }
-    }
-
-    private void close(JarFile jarFile) {
-        try {
-            jarFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            closeQuietly(jarFile);
         }
     }
 
@@ -162,22 +156,6 @@ public class MavenPomPropertiesStrategy extends AbstractStrategy {
             return split[split.length - index];
         }
         return "";
-    }
-
-    public interface IFileToJarFileConverter {
-        Optional<JarFile> createJarFile(File file);
-    }
-
-    private class DefaultJarFileConverter implements IFileToJarFileConverter {
-        @Override
-        public Optional<JarFile> createJarFile(File file) {
-            try {
-                JarFile jarFile = new JarFile(file);
-                return fromNullable(jarFile);
-            } catch (IOException e) {
-                return absent();
-            }
-        }
     }
 
 }
