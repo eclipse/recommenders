@@ -61,15 +61,7 @@ public class MavenPomPropertiesStrategy extends AbstractStrategy {
         } catch (IOException e) {
             return absent();
         } finally {
-            close(jarFile);
-        }
-    }
-
-    private void close(JarFile jarFile) {
-        try {
-            jarFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            IOUtils.close(jarFile);
         }
     }
 
@@ -162,22 +154,6 @@ public class MavenPomPropertiesStrategy extends AbstractStrategy {
             return split[split.length - index];
         }
         return "";
-    }
-
-    public interface IFileToJarFileConverter {
-        Optional<JarFile> createJarFile(File file);
-    }
-
-    private class DefaultJarFileConverter implements IFileToJarFileConverter {
-        @Override
-        public Optional<JarFile> createJarFile(File file) {
-            try {
-                JarFile jarFile = new JarFile(file);
-                return fromNullable(jarFile);
-            } catch (IOException e) {
-                return absent();
-            }
-        }
     }
 
 }

@@ -12,6 +12,7 @@ package org.eclipse.recommenders.utils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.jar.JarFile;
 
 import org.apache.commons.lang3.SystemUtils;
 
@@ -30,6 +31,14 @@ public class IOUtils {
             System.err.printf("Failed to close resource '%s'. Caught exception printed below.\n", s);
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static void close(JarFile jarFile) {
+        try {
+            jarFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
