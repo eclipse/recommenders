@@ -133,6 +133,11 @@ public class Stubs {
         public List<Recommendation<IMethodName>> recommendCalls() {
             return ImmutableList.of();
         }
+
+        @Override
+        public ImmutableSet<String> getKnownDefinitionKinds() {
+            return ImmutableSet.of();
+        }
     }
 
     public static MockedIntelligentCompletionProposalComputer newCallComputer() {
