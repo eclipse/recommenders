@@ -133,6 +133,12 @@ public class Stubs {
         public List<Recommendation<IMethodName>> recommendCalls() {
             return ImmutableList.of();
         }
+
+        @Override
+        public ImmutableSet<String> getKnownDefinitionKinds() {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
     public static MockedIntelligentCompletionProposalComputer newCallComputer() {

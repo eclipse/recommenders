@@ -125,4 +125,10 @@ public final class NullCallModel implements ICallModel {
     public ITypeName getReceiverType() {
         return Constants.NULL_TYPE;
     }
+
+    @Override
+    public ImmutableSet<String> getKnownDefinitionKinds() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
