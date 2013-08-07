@@ -12,6 +12,7 @@
  */
 package org.eclipse.recommenders.models;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Optional.*;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.eclipse.recommenders.models.AetherModelRepository.DownloadCallback.NULL;
@@ -118,46 +119,47 @@ public class AetherModelRepository implements IModelRepository {
     private boolean doesNotExistOrIsAlmostEmptyFolder(File location) {
         return !location.exists() || location.listFiles().length < 2;
         // 2 = if this folder contains an index, there must be more than one file...
-        // on mac, we often have hidden files in the folder. This is just a simple heuristic.
+        // On mac, we often have hidden files in the folder. This is just simple heuristic.
     }
 
     public ListenableFuture<File> schedule(final ModelArchiveCoordinate model) {
         return schedule(model, NULL);
     }
 
-    public ListenableFuture<File> schedule(final ModelArchiveCoordinate model, final DownloadCallback callback) {
+    public ListenableFuture<File> schedule(final ModelArchiveCoordinate model, DownloadCallback callback) {
+        final DownloadCallback cb = firstNonNull(callback, DownloadCallback.NULL);
         final Artifact coord = new DefaultArtifact(model.getGroupId(), model.getArtifactId(), model.getClassifier(),
                 model.getExtension(), model.getVersion());
         return executor.submit(new DownloadArtifactTask(coord, new TransferListener() {
 
             @Override
             public void transferSucceeded(TransferEvent e) {
-                callback.downloadSucceeded();
+                cb.downloadSucceeded();
             }
 
             @Override
             public void transferStarted(TransferEvent e) throws TransferCancelledException {
-                callback.downloadStarted();
+                cb.downloadStarted();
             }
 
             @Override
             public void transferProgressed(TransferEvent e) throws TransferCancelledException {
-                callback.downloadProgressed();
+                cb.downloadProgressed();
             }
 
             @Override
             public void transferInitiated(TransferEvent e) throws TransferCancelledException {
-                callback.downloadInitiated();
+                cb.downloadInitiated();
             }
 
             @Override
             public void transferFailed(TransferEvent e) {
-                callback.downloadFailed();
+                cb.downloadFailed();
             }
 
             @Override
             public void transferCorrupted(TransferEvent e) throws TransferCancelledException {
-                callback.downloadCorrupted();
+                cb.downloadCorrupted();
             }
         }));
     }
@@ -175,8 +177,9 @@ public class AetherModelRepository implements IModelRepository {
     public Optional<File> getLocation(ModelArchiveCoordinate coord) {
         File result = new File(repodir, computePath(coord));
         if (!result.exists()) {
-            // TODO no logic implemented that prevents multiple resolutions of the same type
-            schedule(coord, null);
+            // TODO no logic implemented that prevents multiple resolutions of
+            // the same type
+            schedule(coord, new DownloadCallback());
             return absent();
         }
         return of(result);
@@ -323,7 +326,8 @@ public class AetherModelRepository implements IModelRepository {
 
         @Override
         public boolean selectDependency(Dependency d) {
-            // we don't want any dependencies to be returned. Just the artifact itself.
+            // we don't want any dependencies to be returned. Just the artifact
+            // itself.
             return false;
         }
 
@@ -398,7 +402,8 @@ public class AetherModelRepository implements IModelRepository {
         public Wagon lookup(String roleHint) throws Exception {
             if ("http".equals(roleHint) || "https".equals(roleHint)) { //$NON-NLS-1$ //$NON-NLS-2$
                 AhcWagon ahcWagon = new AhcWagon();
-                // TODO set timeout to 300s instead of 60s to solve timeouts. experimental.
+                // TODO set timeout to 300s instead of 60s to solve timeouts.
+                // experimental.
                 ahcWagon.setTimeout(300 * 1000);
                 return ahcWagon;
                 // return new WebDavWagon();
