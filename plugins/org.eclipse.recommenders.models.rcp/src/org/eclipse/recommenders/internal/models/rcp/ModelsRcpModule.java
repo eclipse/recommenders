@@ -33,6 +33,7 @@ import org.eclipse.recommenders.models.JREReleaseFileStrategy;
 import org.eclipse.recommenders.models.MappingProvider;
 import org.eclipse.recommenders.models.MavenPomPropertiesStrategy;
 import org.eclipse.recommenders.models.OsgiManifestStrategy;
+import org.eclipse.recommenders.models.PomStrategy;
 import org.eclipse.recommenders.models.SimpleIndexSearcher;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.ui.IWorkbench;
@@ -119,6 +120,7 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         mappingProvider.addStrategy(new MavenPomPropertiesStrategy());
         mappingProvider.addStrategy(new JREExecutionEnvironmentStrategy());
         mappingProvider.addStrategy(new JREReleaseFileStrategy());
+        mappingProvider.addStrategy(new PomStrategy());
         mappingProvider.addStrategy(new OsgiManifestStrategy());
         mappingProvider.addStrategy(new FingerprintStrategy(searcher));
         return mappingProvider;
