@@ -10,3 +10,5 @@ Require-Bundle: org.junit,
  org.hamcrest;bundle-version="1.1.0",
  org.eclipse.recommenders.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.apache.maven.model,
+ org.apache.maven.model.io.xpp3

@@ -104,6 +104,8 @@ public class OsgiManifestStrategy extends AbstractStrategy {
         }
         return absent();
     }
+    
+    
 
     @Override
     public boolean isApplicable(DependencyType type) {
