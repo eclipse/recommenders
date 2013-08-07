@@ -16,6 +16,8 @@ public interface IDependencyListener {
 
     Set<DependencyInfo> getDependenciesForProject(DependencyInfo project);
 
+    Set<DependencyInfo> getProjects();
+    
     Set<DependencyInfo> getDependencies();
 
 }

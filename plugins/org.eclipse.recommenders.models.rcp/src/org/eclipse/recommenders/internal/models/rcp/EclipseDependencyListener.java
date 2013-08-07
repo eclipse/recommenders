@@ -244,4 +244,9 @@ public class EclipseDependencyListener implements IDependencyListener {
         return ImmutableSet.copyOf(projectDependencies);
     }
 
+    @Override
+    public Set<DependencyInfo> getProjects() {
+        return workspaceDependenciesByProject.keySet();
+    }
+
 }
