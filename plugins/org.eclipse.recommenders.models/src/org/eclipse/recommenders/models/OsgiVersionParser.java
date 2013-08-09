@@ -11,8 +11,7 @@
  */
 package org.eclipse.recommenders.models;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.*;
 
 import java.util.StringTokenizer;
 

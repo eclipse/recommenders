@@ -134,18 +134,20 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
 
         // set override-context:
         IMethod overrides = completionAnalyzer.getOverridesContext().orNull();
+        boolean knownOverrideContext = false;
         if (overrides != null) {
             IMethodName crOverrides = pcProvider.toName(overrides).or(
                     org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD);
-            model.setObservedOverrideContext(crOverrides);
+            knownOverrideContext = model.setObservedOverrideContext(crOverrides);
         }
 
         // set definition-type and defined-by
-        model.setObservedDefinitionKind(completionAnalyzer.getReceiverDefinitionType());
-        model.setObservedDefiningMethod(completionAnalyzer.getDefinedBy().orNull());
+        boolean setObservedDefinitionKind = model.setObservedDefinitionKind(completionAnalyzer
+                .getReceiverDefinitionType());
+        boolean setObservedDefiningMethod = model.setObservedDefiningMethod(completionAnalyzer.getDefinedBy().orNull());
 
         // set calls:
-        model.setObservedCalls(newHashSet(completionAnalyzer.getCalls()));
+        boolean setObservedCalls = model.setObservedCalls(newHashSet(completionAnalyzer.getCalls()));
 
         // read
         recommendations = model.recommendCalls();

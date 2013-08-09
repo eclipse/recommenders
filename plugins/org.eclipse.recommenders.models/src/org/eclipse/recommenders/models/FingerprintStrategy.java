@@ -10,18 +10,15 @@
  */
 package org.eclipse.recommenders.models;
 
-import static com.google.common.base.Optional.*;
-
 import org.eclipse.recommenders.utils.Fingerprints;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import com.google.common.base.Optional;
 
 public class FingerprintStrategy extends AbstractStrategy {
 
-    private final SimpleIndexSearcher indexer;
+    private final IModelIndex indexer;
 
-    public FingerprintStrategy(SimpleIndexSearcher indexer) {
+    public FingerprintStrategy(IModelIndex indexer) {
         this.indexer = indexer;
     }
 
@@ -31,25 +28,8 @@ public class FingerprintStrategy extends AbstractStrategy {
     }
 
     @Override
-    protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+    protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
         String fingerprint = Fingerprints.sha1(dependencyInfo.getFile());
-        indexer.open();
-        Optional<String> optionalCoordinateString = indexer.searchByFingerprint(fingerprint);
-        indexer.close();
-        return extractProjectCoordinate(optionalCoordinateString);
+        return indexer.suggestProjectCoordinateByFingerprint(fingerprint);
     }
-
-    private Optional<ProjectCoordinate> extractProjectCoordinate(Optional<String> optionalCoordinateString) {
-        if (!optionalCoordinateString.isPresent()) {
-            return absent();
-        }
-        try {
-            DefaultArtifact artifact = new DefaultArtifact(optionalCoordinateString.get());
-            return fromNullable(new ProjectCoordinate(artifact.getGroupId(), artifact.getArtifactId(),
-                    artifact.getVersion()));
-        } catch (IllegalArgumentException e) {
-            return absent();
-        }
-    }
-
 }

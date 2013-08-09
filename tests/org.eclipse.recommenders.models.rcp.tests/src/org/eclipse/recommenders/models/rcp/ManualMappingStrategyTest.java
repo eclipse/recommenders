@@ -42,7 +42,7 @@ public class ManualMappingStrategyTest {
     public void returnAbsentWhenNoMappingExist() throws IOException {
         ManualMappingStrategy sut = new ManualMappingStrategy(persistenceFile);
 
-        Optional<ProjectCoordinate> projectCoordinate = sut.searchForProjectCoordinate(exampleDependencyInfo);
+        Optional<ProjectCoordinate> projectCoordinate = sut.suggest(exampleDependencyInfo);
 
         assertFalse(projectCoordinate.isPresent());
 
@@ -55,7 +55,7 @@ public class ManualMappingStrategyTest {
 
         sut.setManualMapping(exampleDependencyInfo, EXPECTED_PROJECT_COORDINATE);
 
-        Optional<ProjectCoordinate> projectCoordinate = sut.searchForProjectCoordinate(exampleDependencyInfo);
+        Optional<ProjectCoordinate> projectCoordinate = sut.suggest(exampleDependencyInfo);
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, projectCoordinate.get());
 
@@ -69,11 +69,11 @@ public class ManualMappingStrategyTest {
         sut.setManualMapping(exampleDependencyInfo, EXPECTED_PROJECT_COORDINATE);
         sut.setManualMapping(anotherExampleDependencyInfo, ANOTHER_EXPECTED_PROJECT_COORDINATE);
 
-        Optional<ProjectCoordinate> projectCoordinate = sut.searchForProjectCoordinate(exampleDependencyInfo);
+        Optional<ProjectCoordinate> projectCoordinate = sut.suggest(exampleDependencyInfo);
         assertEquals(EXPECTED_PROJECT_COORDINATE, projectCoordinate.get());
 
         Optional<ProjectCoordinate> anotherProjectCoordinate = sut
-                .searchForProjectCoordinate(anotherExampleDependencyInfo);
+                .suggest(anotherExampleDependencyInfo);
         assertEquals(ANOTHER_EXPECTED_PROJECT_COORDINATE, anotherProjectCoordinate.get());
 
         sut.close();
@@ -91,11 +91,11 @@ public class ManualMappingStrategyTest {
         sut = new ManualMappingStrategy(persistenceFile);
         sut.open();
 
-        Optional<ProjectCoordinate> projectCoordinate = sut.searchForProjectCoordinate(exampleDependencyInfo);
+        Optional<ProjectCoordinate> projectCoordinate = sut.suggest(exampleDependencyInfo);
         assertEquals(EXPECTED_PROJECT_COORDINATE, projectCoordinate.get());
 
         Optional<ProjectCoordinate> anotherProjectCoordinate = sut
-                .searchForProjectCoordinate(anotherExampleDependencyInfo);
+                .suggest(anotherExampleDependencyInfo);
         assertEquals(ANOTHER_EXPECTED_PROJECT_COORDINATE, anotherProjectCoordinate.get());
 
         sut.close();

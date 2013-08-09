@@ -26,7 +26,7 @@ import com.google.common.base.Optional;
 public class JREReleaseFileStrategy extends AbstractStrategy {
 
     @Override
-    protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+    protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
         Optional<FileInputStream> optionalReleaseFileInputStream = readReleaseFileIn(dependencyInfo.getFile());
         if (!optionalReleaseFileInputStream.isPresent()) {
             return absent();

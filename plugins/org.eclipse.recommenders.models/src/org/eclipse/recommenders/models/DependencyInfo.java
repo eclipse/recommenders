@@ -69,8 +69,8 @@ public class DependencyInfo {
     public boolean equals(Object obj) {
         if (obj instanceof DependencyInfo) {
             final DependencyInfo other = (DependencyInfo) obj;
-            return new EqualsBuilder().append(file, other.file).append(type, other.type)
-                    .append(hints, other.hints).isEquals();
+            return new EqualsBuilder().append(file, other.file).append(type, other.type).append(hints, other.hints)
+                    .isEquals();
         } else {
             return false;
         }
