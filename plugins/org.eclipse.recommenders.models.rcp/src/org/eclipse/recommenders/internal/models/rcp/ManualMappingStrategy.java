@@ -54,7 +54,7 @@ public class ManualMappingStrategy implements IProjectCoordinateResolver, IRcpSe
     }
 
     @Override
-    public Optional<ProjectCoordinate> searchForProjectCoordinate(DependencyInfo dependencyInfo) {
+    public Optional<ProjectCoordinate> suggest(DependencyInfo dependencyInfo) {
         ProjectCoordinate projectCoordinate = manualMappings.get(dependencyInfo);
         if (projectCoordinate != null) {
             return of(projectCoordinate);

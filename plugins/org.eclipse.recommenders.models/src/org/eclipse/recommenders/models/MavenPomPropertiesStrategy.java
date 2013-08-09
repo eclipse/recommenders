@@ -24,6 +24,8 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 import org.eclipse.recommenders.utils.IOUtils;
+import org.eclipse.recommenders.utils.Zips.DefaultJarFileConverter;
+import org.eclipse.recommenders.utils.Zips.IFileToJarFileConverter;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -51,7 +53,7 @@ public class MavenPomPropertiesStrategy extends AbstractStrategy {
     }
 
     @Override
-    protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+    protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
         JarFile jarFile = readJarFileIn(dependencyInfo.getFile()).orNull();
         if (jarFile == null) {
             return absent();

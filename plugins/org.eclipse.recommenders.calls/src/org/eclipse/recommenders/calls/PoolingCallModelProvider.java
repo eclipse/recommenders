@@ -15,6 +15,7 @@ import static org.eclipse.recommenders.utils.Constants.CLASS_CALL_MODELS;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.IModelArchiveCoordinateResolver;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
 
@@ -23,8 +24,8 @@ import com.google.common.base.Optional;
 public class PoolingCallModelProvider extends PoolingModelProvider<BasedTypeName, ICallModel> implements
         ICallModelProvider {
 
-    public PoolingCallModelProvider(IModelRepository repo) {
-        super(repo, CLASS_CALL_MODELS);
+    public PoolingCallModelProvider(IModelRepository repo, IModelArchiveCoordinateResolver index) {
+        super(repo, index, CLASS_CALL_MODELS);
     }
 
     @Override

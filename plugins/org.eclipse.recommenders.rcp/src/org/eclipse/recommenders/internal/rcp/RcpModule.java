@@ -89,7 +89,7 @@ public class RcpModule extends AbstractModule implements Module {
     }
 
     private void bindRcpServiceListener() {
-        bindListener(new ServiceMatcher(), new Listener());
+        bindListener(new RcpServiceMatcher(), new Listener());
     }
 
     @Singleton
@@ -135,16 +135,6 @@ public class RcpModule extends AbstractModule implements Module {
     protected IWorkspaceRoot provideWorkspaceRoot() {
         return ResourcesPlugin.getWorkspace().getRoot();
     }
-
-    // @Provides
-    // protected ProxySelector provideProxyService() {
-    // Bundle bundle = FrameworkUtil.getBundle(getClass());
-    // ServiceTracker tracker = new ServiceTracker(bundle.getBundleContext(), IProxyService.class.getName(), null);
-    // tracker.open();
-    // IProxyService service = (IProxyService) tracker.getService();
-    // tracker.close();
-    // return new ServiceBasedProxySelector(service);
-    // }
 
     @Provides
     protected IWorkspace provideWorkspace() {
@@ -210,7 +200,7 @@ public class RcpModule extends AbstractModule implements Module {
         return Platform.getExtensionRegistry();
     }
 
-    static class ServiceMatcher extends AbstractMatcher {
+    static class RcpServiceMatcher extends AbstractMatcher {
 
         @Override
         public boolean matches(Object t) {
@@ -251,6 +241,7 @@ public class RcpModule extends AbstractModule implements Module {
                                 @Override
                                 public boolean preShutdown(IWorkbench workbench, boolean forced) {
                                     try {
+                                        m.setAccessible(true);
                                         m.invoke(i);
                                     } catch (Exception e) {
                                         Throwables.propagate(e);
@@ -266,6 +257,7 @@ public class RcpModule extends AbstractModule implements Module {
                         }
                         if (hasPostConstruct) {
                             try {
+                                m.setAccessible(true);
                                 m.invoke(i);
                             } catch (Exception e) {
                                 Throwables.propagate(e);
