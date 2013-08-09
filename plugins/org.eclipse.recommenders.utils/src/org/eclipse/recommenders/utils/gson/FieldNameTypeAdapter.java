@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010 Darmstadt University of Technology.
+ * Copyright (c) 2010, 2013 Darmstadt University of Technology.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,21 +10,25 @@
  */
 package org.eclipse.recommenders.utils.gson;
 
-import java.lang.reflect.Type;
+import java.io.IOException;
 
 import org.eclipse.recommenders.utils.names.IFieldName;
 import org.eclipse.recommenders.utils.names.VmFieldName;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
-public class GsonFieldNameDeserializer implements JsonDeserializer<IFieldName> {
+public class FieldNameTypeAdapter extends TypeAdapter<IFieldName> {
+
     @Override
-    public IFieldName deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-            throws JsonParseException {
-        final String identifier = json.getAsString();
+    public void write(JsonWriter out, IFieldName value) throws IOException {
+        out.value(value.getIdentifier());
+    }
+
+    @Override
+    public IFieldName read(JsonReader in) throws IOException {
+        String identifier = in.nextString();
         return VmFieldName.get(identifier);
     }
 }
