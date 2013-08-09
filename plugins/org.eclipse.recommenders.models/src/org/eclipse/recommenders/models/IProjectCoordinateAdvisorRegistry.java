@@ -12,15 +12,26 @@ package org.eclipse.recommenders.models;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * The Mapping interface provide the functionality for the mapping between IDependencyInfo and ProjectCoordinate
  */
-public interface IMappingProvider extends IProjectCoordinateResolver {
+public interface IProjectCoordinateAdvisorRegistry {
 
-    List<IProjectCoordinateResolver> getStrategies();
+    /**
+     * Returns all advisors this registry is configured with.
+     */
+    ImmutableList<IProjectCoordinateAdvisor> getAdvisors();
 
-    void addStrategy(IProjectCoordinateResolver strategy);
+    /**
+     * adds an advisor to the list of currently configured advisors.
+     */
+    void addAdvisor(IProjectCoordinateAdvisor advisor);
 
-    void setStrategies(List<IProjectCoordinateResolver> strategies);
+    /**
+     * Sets a advisors for this registry. Overwrites any previously configured advisors.
+     */
+    void setAdvisors(List<IProjectCoordinateAdvisor> advisors);
 
 }
