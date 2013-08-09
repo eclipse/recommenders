@@ -8,12 +8,11 @@
  * Contributors:
  *     Olav Lenz - initial API and implementation
  */
-package org.eclipse.recommenders.models;
+package org.eclipse.recommenders.models.advisors;
 
 import static com.google.common.base.Optional.*;
-import static org.eclipse.recommenders.models.DependencyType.JAR;
+import static org.eclipse.recommenders.models.DependencyType.*;
 import static org.eclipse.recommenders.utils.Zips.closeQuietly;
-import static org.eclipse.recommenders.models.DependencyType.PROJECT;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,27 +22,32 @@ import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.eclipse.recommenders.models.DependencyInfo;
+import org.eclipse.recommenders.models.DependencyType;
+import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.Artifacts;
+import org.eclipse.recommenders.utils.Zips.DefaultJarFileConverter;
+import org.eclipse.recommenders.utils.Zips.IFileToJarFileConverter;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
-public class OsgiManifestStrategy extends AbstractStrategy {
+public class OsgiManifestAdvisor extends AbstractProjectCoordinateAdvisor {
     public static final Name BUNDLE_NAME = new Attributes.Name("Bundle-SymbolicName");
     public static final Name BUNDLE_VERSION = new Attributes.Name("Bundle-Version");
     private IFileToJarFileConverter jarFileConverter;
 
-    public OsgiManifestStrategy() {
+    public OsgiManifestAdvisor() {
         jarFileConverter = new DefaultJarFileConverter();
     }
 
     @VisibleForTesting
-    public OsgiManifestStrategy(IFileToJarFileConverter fileToJarFileConverter) {
+    public OsgiManifestAdvisor(IFileToJarFileConverter fileToJarFileConverter) {
         jarFileConverter = fileToJarFileConverter;
     }
 
     @Override
-    protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+    protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
         Optional<Manifest> optionalManifest = absent();
         if (dependencyInfo.getType() == DependencyType.JAR) {
             optionalManifest = extractManifestFromJar(dependencyInfo);
@@ -107,6 +111,6 @@ public class OsgiManifestStrategy extends AbstractStrategy {
 
     @Override
     public boolean isApplicable(DependencyType type) {
-        return (JAR == type) || (PROJECT == type);
+        return JAR == type || PROJECT == type;
     }
 }
