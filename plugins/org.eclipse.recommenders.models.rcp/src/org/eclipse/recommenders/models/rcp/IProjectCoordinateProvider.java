@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.names.IMethodName;
@@ -42,7 +42,7 @@ public interface IProjectCoordinateProvider {
 
     // XXX: convenience method to save a few lines of code to get from an IDE element to a based name
     // Comments welcome.
-    Optional<BasedTypeName> toBasedName(IType type);
+    Optional<QualifiedTypeName> toBasedName(IType type);
 
     ITypeName toName(IType type);
 

@@ -32,10 +32,10 @@ import com.google.common.cache.RemovalNotification;
 
 /**
  * A non-thread-safe implementation of {@link IModelProvider} that loads models from model zip files using a
- * {@link ModelRepository}. Note that {@link #acquireModel(IBasedName)} attempts to download matching model archives
+ * {@link ModelRepository}. Note that {@link #acquireModel(IQualifiedName)} attempts to download matching model archives
  * immediately and thus blocks until the download is completed.
  */
-public abstract class SimpleModelProvider<K extends IBasedName<?>, M> implements IModelProvider<K, M> {
+public abstract class SimpleModelProvider<K extends IQualifiedName<?>, M> implements IModelProvider<K, M> {
 
     private Logger log = LoggerFactory.getLogger(getClass());
     protected LoadingCache<ModelArchiveCoordinate, ZipFile> openZips = CacheBuilder.newBuilder().maximumSize(10)
@@ -43,9 +43,11 @@ public abstract class SimpleModelProvider<K extends IBasedName<?>, M> implements
 
     protected IModelRepository repository;
     protected String modelType;
+    private IModelArchiveCoordinateAdvisor index;
 
-    public SimpleModelProvider(IModelRepository cache, String modelType) {
+    public SimpleModelProvider(IModelRepository cache, IModelArchiveCoordinateAdvisor index, String modelType) {
         this.repository = cache;
+        this.index = index;
         this.modelType = modelType;
     }
 
@@ -53,7 +55,7 @@ public abstract class SimpleModelProvider<K extends IBasedName<?>, M> implements
     public Optional<M> acquireModel(K key) {
         try {
             // unknown model? return immediately
-            ModelArchiveCoordinate coord = repository.findBestModelArchive(key.getBase(), modelType).orNull();
+            ModelArchiveCoordinate coord = index.suggest(key.getQualifier(), modelType).orNull();
             if (coord == null) {
                 return absent();
             }
