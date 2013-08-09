@@ -50,7 +50,7 @@ import org.eclipse.recommenders.completion.rcp.DisableContentAssistCategoryJob;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.RecommendersCompletionContext;
 import org.eclipse.recommenders.internal.calls.rcp.AstCallCompletionAnalyzer;
-import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.rcp.IAstProvider;
@@ -173,7 +173,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
 
     private void addPatternsForType(final IType t, final ProposalBuilder proposalBuilder) {
         ProjectCoordinate coord = pcp.resolve(t).or(ProjectCoordinate.UNKNOWN);
-        BasedTypeName name = new BasedTypeName(coord, elementResolver.toRecType(t));
+        QualifiedTypeName name = new QualifiedTypeName(coord, elementResolver.toRecType(t));
         model = store.acquireModel(name).orNull();
         if (model == null) {
             return;

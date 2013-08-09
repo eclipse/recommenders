@@ -14,6 +14,9 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -25,8 +28,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.recommenders.models.IModelRepository;
+import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.ModelArchiveCoordinate;
+import org.eclipse.recommenders.models.rcp.ModelEvents.ModelIndexOpenedEvent;
 import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -34,10 +38,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.UIJob;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class ModelArchiveCoordinatesView extends ViewPart {
 
@@ -45,17 +52,17 @@ public class ModelArchiveCoordinatesView extends ViewPart {
     private Table table;
 
     @Inject
-    IModelRepository index;
+    IModelIndex index;
+
+    @Inject
+    EventBus bus;
+
     private TableViewer tableViewer;
     private Multimap<String, String> models;
 
-    /**
-     * Create contents of the view part.
-     * 
-     * @param parent
-     */
     @Override
     public void createPartControl(Composite parent) {
+        bus.register(this);
         Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(new FillLayout(SWT.HORIZONTAL));
 
@@ -131,29 +138,20 @@ public class ModelArchiveCoordinatesView extends ViewPart {
     }
 
     private void addClassifierToIndex(Multimap<String, String> models, String classifier) {
-        for (ModelArchiveCoordinate a : index.listModels(classifier)) {
+        for (ModelArchiveCoordinate a : index.getKnownModels(classifier)) {
             String key = Joiner.on(":").join(a.getGroupId(), a.getArtifactId(), a.getVersion());
             models.put(key, classifier);
         }
     }
 
-    /**
-     * Create the actions.
-     */
     private void createActions() {
         // Create the actions
     }
 
-    /**
-     * Initialize the toolbar.
-     */
     private void initializeToolBar() {
         IToolBarManager toolbarManager = getViewSite().getActionBars().getToolBarManager();
     }
 
-    /**
-     * Initialize the menu.
-     */
     private void initializeMenu() {
         IMenuManager menuManager = getViewSite().getActionBars().getMenuManager();
     }
@@ -161,5 +159,26 @@ public class ModelArchiveCoordinatesView extends ViewPart {
     @Override
     public void setFocus() {
         // Set the focus
+    }
+
+    @Subscribe
+    public void onModelIndexOpened(ModelIndexOpenedEvent e) {
+        new UIJob("Refreshing Model Index View...") {
+            {
+                schedule();
+            }
+
+            @Override
+            public IStatus runInUIThread(IProgressMonitor monitor) {
+                initializeContent();
+                return Status.OK_STATUS;
+            }
+        };
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        bus.unregister(this);
     }
 }

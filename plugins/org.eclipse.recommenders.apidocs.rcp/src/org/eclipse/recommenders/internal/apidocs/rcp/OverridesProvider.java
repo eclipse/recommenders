@@ -39,7 +39,8 @@ import org.eclipse.recommenders.apidocs.ClassOverridePatterns;
 import org.eclipse.recommenders.apidocs.MethodPattern;
 import org.eclipse.recommenders.apidocs.rcp.ApidocProvider;
 import org.eclipse.recommenders.apidocs.rcp.JavaSelectionSubscriber;
-import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
+import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
@@ -293,15 +294,15 @@ public final class OverridesProvider extends ApidocProvider {
     }
 
     public static class OverridePatternsModelProvider extends
-            PoolingModelProvider<BasedTypeName, ClassOverridePatterns> {
+            PoolingModelProvider<QualifiedTypeName, ClassOverridePatterns> {
 
         @Inject
-        public OverridePatternsModelProvider(IModelRepository repository) {
-            super(repository, Constants.CLASS_OVRP_MODEL);
+        public OverridePatternsModelProvider(IModelRepository repository, IModelArchiveCoordinateAdvisor index) {
+            super(repository, index, Constants.CLASS_OVRP_MODEL);
         }
 
         @Override
-        protected Optional<ClassOverridePatterns> loadModel(ZipFile zip, BasedTypeName key) throws Exception {
+        protected Optional<ClassOverridePatterns> loadModel(ZipFile zip, QualifiedTypeName key) throws Exception {
             String path = Zips.path(key.getName(), ".json");
             ZipEntry entry = zip.getEntry(path);
             if (entry == null) {
@@ -315,15 +316,15 @@ public final class OverridesProvider extends ApidocProvider {
     }
 
     public static class OverrideDirectivesModelProvider extends
-            PoolingModelProvider<BasedTypeName, ClassOverrideDirectives> {
+            PoolingModelProvider<QualifiedTypeName, ClassOverrideDirectives> {
 
         @Inject
-        public OverrideDirectivesModelProvider(IModelRepository repository) {
-            super(repository, Constants.CLASS_OVRD_MODEL);
+        public OverrideDirectivesModelProvider(IModelRepository repository, IModelArchiveCoordinateAdvisor index) {
+            super(repository, index, Constants.CLASS_OVRD_MODEL);
         }
 
         @Override
-        protected Optional<ClassOverrideDirectives> loadModel(ZipFile zip, BasedTypeName key) throws Exception {
+        protected Optional<ClassOverrideDirectives> loadModel(ZipFile zip, QualifiedTypeName key) throws Exception {
             String path = Zips.path(key.getName(), ".json");
             ZipEntry entry = zip.getEntry(path);
             if (entry == null) {

@@ -40,7 +40,7 @@ import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
 import org.eclipse.recommenders.completion.rcp.processable.ProposalProcessorManager;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
 import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
-import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Recommendations;
@@ -70,7 +70,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
     private IRecommendersCompletionContext ctx;
 
     private AstCallCompletionAnalyzer completionAnalyzer;
-    private BasedTypeName basedName;
+    private QualifiedTypeName basedName;
     private ICallModel model;
 
     private Iterable<Recommendation<IMethodName>> recommendations;
@@ -143,7 +143,6 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         // set definition-type and defined-by
         model.setObservedDefinitionKind(completionAnalyzer.getReceiverDefinitionType());
         model.setObservedDefiningMethod(completionAnalyzer.getDefinedBy().orNull());
-
         // set calls:
         model.setObservedCalls(newHashSet(completionAnalyzer.getCalls()));
 
