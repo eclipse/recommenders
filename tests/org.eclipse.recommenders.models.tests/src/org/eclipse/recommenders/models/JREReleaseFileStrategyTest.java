@@ -65,7 +65,7 @@ public class JREReleaseFileStrategyTest {
         DependencyInfo info = new DependencyInfo(createDummyFile(), DependencyType.JAR);
         IProjectCoordinateResolver sut = new JREReleaseFileStrategy();
 
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -80,7 +80,7 @@ public class JREReleaseFileStrategyTest {
         DependencyInfo info = new DependencyInfo(javaHomeDirectory, DependencyType.JRE);
         IProjectCoordinateResolver sut = new JREReleaseFileStrategy();
 
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
     }
@@ -94,7 +94,7 @@ public class JREReleaseFileStrategyTest {
         DependencyInfo info = new DependencyInfo(javaHomeDirectory, DependencyType.JRE);
         IProjectCoordinateResolver sut = new JREReleaseFileStrategy();
 
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -106,7 +106,7 @@ public class JREReleaseFileStrategyTest {
         DependencyInfo info = new DependencyInfo(javaHomeDirectory, DependencyType.JRE);
         IProjectCoordinateResolver sut = new JREReleaseFileStrategy();
 
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }

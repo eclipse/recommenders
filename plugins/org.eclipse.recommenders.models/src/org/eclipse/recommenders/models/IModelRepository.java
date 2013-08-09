@@ -11,7 +11,6 @@
 package org.eclipse.recommenders.models;
 
 import java.io.File;
-import java.util.Collection;
 
 import com.google.common.base.Optional;
 
@@ -25,13 +24,8 @@ public interface IModelRepository {
     Optional<File> getLocation(ModelArchiveCoordinate coordinate);
 
     /**
-     * Searches the model index for the best model archive matching the given {@link ProjectCoordinate} and model-type.
-     */
-    Optional<ModelArchiveCoordinate> findBestModelArchive(ProjectCoordinate coordinate, String modelType);
-
-    /**
      * Resolves the given model coordinate to a local file and downloads the corresponding file from the remote
-     * repository if not locally available.
+     * repository if not locally available. This call blocks the caller until the download finished.
      * 
      * @throws Exception
      *             if no model could be downloaded due to, e.g., the coordinate does not exist on the remote repository
@@ -39,28 +33,4 @@ public interface IModelRepository {
      */
     void resolve(ModelArchiveCoordinate model) throws Exception;
 
-    //
-    // /**
-    // * Deletes the artifact represented by the given coordinate from the local file system.
-    // */
-    // void delete(ModelArchiveCoordinate model) throws IOException;
-    //
-    // /**
-    // * Returns the file for the given coordinate - if it exists. Note that this call does <b>not</b> download any
-    // * resources from the remote repository. It only touches the local file system.
-    // */
-    // Optional<File> getLocation(ModelArchiveCoordinate coordinate);
-    //
-    // /**
-    // * Searches the model index for all model archives matching the given {@link ProjectCoordinate} and model-type.
-    // */
-    // ModelArchiveCoordinate[] findModelArchives(ProjectCoordinate coordinate, String modelType);
-    //
-    // /**
-    // * Searches the model index for the best model archive matching the given {@link ProjectCoordinate} and
-    // model-type.
-    // */
-    // Optional<ModelArchiveCoordinate> findBestModelArchive(ProjectCoordinate coordinate, String modelType);
-
-    Collection<ModelArchiveCoordinate> listModels(String classifier);
 }

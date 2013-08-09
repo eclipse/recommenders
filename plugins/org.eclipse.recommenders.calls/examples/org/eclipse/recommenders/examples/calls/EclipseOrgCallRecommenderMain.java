@@ -8,7 +8,9 @@ import org.eclipse.recommenders.calls.PoolingCallModelProvider;
 import org.eclipse.recommenders.examples.calls.EclipseOrgCallRecommender.ObjectUsage;
 import org.eclipse.recommenders.models.AetherModelRepository;
 import org.eclipse.recommenders.models.ModelArchiveCoordinate;
+import org.eclipse.recommenders.models.ModelIndex;
 import org.eclipse.recommenders.utils.Recommendation;
+import org.eclipse.recommenders.utils.Zips;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
@@ -21,12 +23,22 @@ public class EclipseOrgCallRecommenderMain {
     public static void main(String[] args) throws Exception {
 
         // setup:
+        System.out.println("Setting up recommender and model repository.");
+        AetherModelRepository repository = new AetherModelRepository(new File(local, "repository"), remote);
+        System.out.println("downloading model index from eclipse...");
+        repository.resolve(ModelIndex.INDEX);
 
-        System.out.println("Setting up recommender and model repository (downloads search index the first time).");
-        AetherModelRepository repository = new AetherModelRepository(local, remote);
-        repository.open();
-        PoolingCallModelProvider provider = new PoolingCallModelProvider(repository);
+        File location = repository.getLocation(ModelIndex.INDEX).orNull();
+        File indexdir = new File(local, "index");
+        Zips.unzip(location, indexdir);
+        ModelIndex index = new ModelIndex(indexdir);
+        index.open();
+
+        System.out.println("Creating pooling model provider...");
+        PoolingCallModelProvider provider = new PoolingCallModelProvider(repository, index);
         provider.open();
+
+        System.out.println("Creating demo(!) call recommender...");
         EclipseOrgCallRecommender recommender = new EclipseOrgCallRecommender(provider);
 
         // exercise:
@@ -47,7 +59,9 @@ public class EclipseOrgCallRecommenderMain {
 
     private static void waitUntilModelWasDownloaded(AetherModelRepository repository) throws InterruptedException,
             ExecutionException {
-        System.out.println("Waiting for model download to happen in background.");
+        System.out.println("Waiting for model download to finish...");
+        // there is a blocking API and a non-blocking API. The schedule call is a non-blockint method that returns a
+        // future. However, for demo purpose, we wait until the download finished by calling future.get()
         File file = repository.schedule(new ModelArchiveCoordinate("jre", "jre", "call", "zip", "1.0.0")).get();
         System.out.println("Model got downloaded to " + file + ".");
     }

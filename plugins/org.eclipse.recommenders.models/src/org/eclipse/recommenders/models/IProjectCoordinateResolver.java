@@ -17,8 +17,14 @@ import com.google.common.base.Optional;
  */
 public interface IProjectCoordinateResolver {
 
-    Optional<ProjectCoordinate> searchForProjectCoordinate(DependencyInfo dependencyInfo);
+    /**
+     * Returns a suggested project coordinate for the given dependency.
+     */
+    Optional<ProjectCoordinate> suggest(DependencyInfo dependencyInfo);
 
+    /**
+     * Returns true if the given dependency may be analyzed by this project coordinate resolver.
+     */
     boolean isApplicable(DependencyType dependencyType);
 
 }

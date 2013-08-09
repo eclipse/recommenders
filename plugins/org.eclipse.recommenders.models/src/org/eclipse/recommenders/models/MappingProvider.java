@@ -38,13 +38,13 @@ public class MappingProvider implements IMappingProvider {
     }
 
     @Override
-    public Optional<ProjectCoordinate> searchForProjectCoordinate(final DependencyInfo dependencyInfo) {
+    public Optional<ProjectCoordinate> suggest(final DependencyInfo dependencyInfo) {
         return extractProjectCoordinate(dependencyInfo);
     }
 
     private Optional<ProjectCoordinate> extractProjectCoordinate(DependencyInfo dependencyInfo) {
         for (IProjectCoordinateResolver strategy : strategies) {
-            Optional<ProjectCoordinate> optionalProjectCoordinate = strategy.searchForProjectCoordinate(dependencyInfo);
+            Optional<ProjectCoordinate> optionalProjectCoordinate = strategy.suggest(dependencyInfo);
             if (optionalProjectCoordinate.isPresent()) {
                 return optionalProjectCoordinate;
             }

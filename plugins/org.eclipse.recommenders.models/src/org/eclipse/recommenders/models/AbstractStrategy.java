@@ -17,13 +17,13 @@ import com.google.common.base.Optional;
 public abstract class AbstractStrategy implements IProjectCoordinateResolver {
 
     @Override
-    public Optional<ProjectCoordinate> searchForProjectCoordinate(DependencyInfo dependencyInfo) {
+    public Optional<ProjectCoordinate> suggest(DependencyInfo dependencyInfo) {
         if (!isApplicable(dependencyInfo.getType())) {
             return absent();
         }
-        return extractProjectCoordinateInternal(dependencyInfo);
+        return doSuggest(dependencyInfo);
     }
 
-    protected abstract Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo);
+    protected abstract Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo);
 
 }

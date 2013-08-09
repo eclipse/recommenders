@@ -10,7 +10,6 @@
  */
 package org.eclipse.recommenders.models;
 
-import static com.google.common.base.Optional.fromNullable;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
@@ -27,8 +26,8 @@ import com.google.common.base.Optional;
 
 public class FingerprintStrategyTest {
 
-    private static final ProjectCoordinate EXPECTED_PROJECT_COORDINATE = new ProjectCoordinate("example",
-            "example.project", "1.0.0");
+    private static final ProjectCoordinate COORDINATE = new ProjectCoordinate("example", "example.project", "1.0.0");
+    private static final ProjectCoordinate COORDINATE1 = new ProjectCoordinate("example", "", "1.0.0");
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -43,33 +42,19 @@ public class FingerprintStrategyTest {
     @Test
     public void testInvalidDependencyType() {
         FingerprintStrategy sut = new FingerprintStrategy(null);
-        sut.searchForProjectCoordinate(new DependencyInfo(exampleFile, DependencyType.PROJECT));
+        sut.suggest(new DependencyInfo(exampleFile, DependencyType.PROJECT));
     }
 
     @Test
     public void testValidJAR() throws IOException {
-        SimpleIndexSearcher mockedIndexer = mock(SimpleIndexSearcher.class);
-        when(mockedIndexer.searchByFingerprint(Fingerprints.sha1(exampleFile))).thenReturn(
-                Optional.fromNullable("example:example.project:jar:1.0.0"));
+        IModelIndex mockedIndexer = mock(ModelIndex.class);
+        when(mockedIndexer.suggestProjectCoordinateByFingerprint(Fingerprints.sha1(exampleFile))).thenReturn(
+                Optional.fromNullable(COORDINATE));
 
         FingerprintStrategy sut = new FingerprintStrategy(mockedIndexer);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(new DependencyInfo(
-                exampleFile, DependencyType.JAR));
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(exampleFile,
+                DependencyType.JAR));
 
-        Assert.assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
+        Assert.assertEquals(COORDINATE, optionalProjectCoordinate.get());
     }
-
-    @Test
-    public void testMissingInformation() throws IOException {
-        SimpleIndexSearcher mockedIndexer = mock(SimpleIndexSearcher.class);
-        when(mockedIndexer.searchByFingerprint(Fingerprints.sha1(exampleFile))).thenReturn(
-                fromNullable("example:1.0.0"));
-
-        FingerprintStrategy sut = new FingerprintStrategy(mockedIndexer);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(new DependencyInfo(
-                exampleFile, DependencyType.JAR));
-
-        Assert.assertFalse(optionalProjectCoordinate.isPresent());
-    }
-
 }

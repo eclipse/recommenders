@@ -207,7 +207,7 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     @Override
     public Optional<ProjectCoordinate> resolve(DependencyInfo info) {
-        return mappingProvider.searchForProjectCoordinate(info);
+        return mappingProvider.suggest(info);
     }
 
     @PreDestroy

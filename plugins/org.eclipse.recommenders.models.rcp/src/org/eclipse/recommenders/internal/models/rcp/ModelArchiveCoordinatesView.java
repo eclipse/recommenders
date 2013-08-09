@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.recommenders.models.IModelRepository;
+import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.ModelArchiveCoordinate;
 import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.swt.SWT;
@@ -45,7 +45,7 @@ public class ModelArchiveCoordinatesView extends ViewPart {
     private Table table;
 
     @Inject
-    IModelRepository index;
+    IModelIndex index;
     private TableViewer tableViewer;
     private Multimap<String, String> models;
 
@@ -131,7 +131,7 @@ public class ModelArchiveCoordinatesView extends ViewPart {
     }
 
     private void addClassifierToIndex(Multimap<String, String> models, String classifier) {
-        for (ModelArchiveCoordinate a : index.listModels(classifier)) {
+        for (ModelArchiveCoordinate a : index.getKnownModels(classifier)) {
             String key = Joiner.on(":").join(a.getGroupId(), a.getArtifactId(), a.getVersion());
             models.put(key, classifier);
         }

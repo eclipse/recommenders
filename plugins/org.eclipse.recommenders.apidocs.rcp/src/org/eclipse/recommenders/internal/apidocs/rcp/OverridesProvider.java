@@ -40,6 +40,7 @@ import org.eclipse.recommenders.apidocs.MethodPattern;
 import org.eclipse.recommenders.apidocs.rcp.ApidocProvider;
 import org.eclipse.recommenders.apidocs.rcp.JavaSelectionSubscriber;
 import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.IModelArchiveCoordinateResolver;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
@@ -296,8 +297,8 @@ public final class OverridesProvider extends ApidocProvider {
             PoolingModelProvider<BasedTypeName, ClassOverridePatterns> {
 
         @Inject
-        public OverridePatternsModelProvider(IModelRepository repository) {
-            super(repository, Constants.CLASS_OVRP_MODEL);
+        public OverridePatternsModelProvider(IModelRepository repository, IModelArchiveCoordinateResolver index) {
+            super(repository, index, Constants.CLASS_OVRP_MODEL);
         }
 
         @Override
@@ -318,8 +319,8 @@ public final class OverridesProvider extends ApidocProvider {
             PoolingModelProvider<BasedTypeName, ClassOverrideDirectives> {
 
         @Inject
-        public OverrideDirectivesModelProvider(IModelRepository repository) {
-            super(repository, Constants.CLASS_OVRD_MODEL);
+        public OverrideDirectivesModelProvider(IModelRepository repository, IModelArchiveCoordinateResolver index) {
+            super(repository, index, Constants.CLASS_OVRD_MODEL);
         }
 
         @Override
