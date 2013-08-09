@@ -50,9 +50,9 @@ import org.eclipse.recommenders.completion.rcp.DisableContentAssistCategoryJob;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.RecommendersCompletionContext;
 import org.eclipse.recommenders.internal.calls.rcp.AstCallCompletionAnalyzer;
-import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
 import org.eclipse.recommenders.models.ProjectCoordinate;
-import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
+import org.eclipse.recommenders.models.rcp.IProjectCoordinateResolver;
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
 import org.eclipse.recommenders.utils.Recommendation;
@@ -84,7 +84,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         TYPE_NAME, MEMBER_ACCESS, THIS
     }
 
-    private IProjectCoordinateProvider pcp;
+    private IProjectCoordinateResolver pcp;
     private IRecommendersCompletionContext rCtx;
     private IMethod enclosingMethod;
     private Set<IType> candidates;
@@ -100,7 +100,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
     private IAstProvider astProvider;
 
     @Inject
-    public TemplatesCompletionProposalComputer(final IProjectCoordinateProvider projectCoordinateProvider,
+    public TemplatesCompletionProposalComputer(final IProjectCoordinateResolver projectCoordinateProvider,
             final ICallModelProvider store, IAstProvider astProvider, final JavaElementResolver elementResolver) {
         pcp = projectCoordinateProvider;
         this.store = store;
@@ -173,7 +173,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
 
     private void addPatternsForType(final IType t, final ProposalBuilder proposalBuilder) {
         ProjectCoordinate coord = pcp.resolve(t).or(ProjectCoordinate.UNKNOWN);
-        BasedTypeName name = new BasedTypeName(coord, elementResolver.toRecType(t));
+        QualifiedTypeName name = new QualifiedTypeName(coord, elementResolver.toRecType(t));
         model = store.acquireModel(name).orNull();
         if (model == null) {
             return;

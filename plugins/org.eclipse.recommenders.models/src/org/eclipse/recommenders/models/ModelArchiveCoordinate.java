@@ -20,7 +20,7 @@ import com.google.common.base.Strings;
 /**
  * Represents a Maven-like artifact coordinate which consists of "group-id:artifact-id:classifier:extension:version".
  * This class is used instead of Aether's Artifact class (i) to hide the usage of the Aether from clients, and (ii) to
- * make clear that its only a resource identifier; it does not locate a (resolved) resource.
+ * make clear that it's only a resource identifier; it does not locate a (resolved) resource.
  */
 public final class ModelArchiveCoordinate {
 
