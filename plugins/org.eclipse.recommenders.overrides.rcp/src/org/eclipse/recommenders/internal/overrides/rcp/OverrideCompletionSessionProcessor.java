@@ -29,7 +29,7 @@ import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
 import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
-import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.overrides.IOverrideModel;
@@ -113,7 +113,7 @@ public class OverrideCompletionSessionProcessor extends SessionProcessor {
     }
 
     private boolean hasModel() {
-        BasedTypeName name = new BasedTypeName(projectCoord, jdtCache.toRecType(supertype));
+        QualifiedTypeName name = new QualifiedTypeName(projectCoord, jdtCache.toRecType(supertype));
         model = provider.acquireModel(name).orNull();
         return model != null;
     }

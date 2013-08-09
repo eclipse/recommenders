@@ -20,7 +20,6 @@ import org.eclipse.recommenders.internal.calls.rcp.CallCompletionSessionProcesso
 import org.eclipse.recommenders.internal.overrides.rcp.OverrideCompletionSessionProcessor
 import org.eclipse.recommenders.internal.rcp.CachingAstProvider
 import org.eclipse.recommenders.internal.subwords.rcp.SubwordsSessionProcessor
-import org.eclipse.recommenders.models.BasedTypeName
 import org.eclipse.recommenders.models.ProjectCoordinate
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider
 import org.eclipse.recommenders.overrides.IOverrideModel
@@ -44,6 +43,7 @@ import static org.mockito.Mockito.*
 
 import static extension com.google.common.collect.Iterables.*
 import org.eclipse.recommenders.internal.calls.rcp.CallsRcpPreferences
+import org.eclipse.recommenders.models.QualifiedTypeName
 
 @RunWith(Parameterized)
 class CompletionSmokeTest {
@@ -390,8 +390,8 @@ class CompletionSmokeTest {
         val pcp = mock(IProjectCoordinateProvider)
         when(pcp.resolve(anyObject() as IType)).thenReturn(Optional.of(ProjectCoordinate.UNKNOWN))
         when(pcp.toName(anyObject() as IMethod)).thenReturn(Optional.absent())
-        when(pcp.toBasedName(anyObject() as IType)).thenReturn(
-            Optional.of(new BasedTypeName(ProjectCoordinate.UNKNOWN, VmTypeName.NULL)))
+        when(pcp.toQualifiedName(anyObject() as IType)).thenReturn(
+            Optional.of(new QualifiedTypeName(ProjectCoordinate.UNKNOWN, VmTypeName.NULL)))
 
         val sut = createSut(pcp, jer)
 
