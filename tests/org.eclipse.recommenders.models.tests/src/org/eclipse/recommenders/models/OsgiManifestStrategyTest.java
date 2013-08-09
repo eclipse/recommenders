@@ -10,13 +10,10 @@
  */
 package org.eclipse.recommenders.models;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.*;
 import static org.eclipse.recommenders.models.DependencyType.JAR;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +23,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.eclipse.recommenders.utils.Zips.IFileToJarFileConverter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -79,7 +77,7 @@ public class OsgiManifestStrategyTest {
     public void testOnePartSymbolicNameBecomesGroupId() {
         IFileToJarFileConverter fileToJarFileConverter = createFileToJarFileConverter("example", "1.0.0");
         IProjectCoordinateResolver sut = new OsgiManifestStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         ProjectCoordinate expected = new ProjectCoordinate("example", "example", "1.0.0");
         assertEquals(expected, optionalProjectCoordinate.get());
@@ -89,7 +87,7 @@ public class OsgiManifestStrategyTest {
     public void testTwoPartSymbolicNameBecomesGroupId() {
         IFileToJarFileConverter fileToJarFileConverter = createFileToJarFileConverter("org.example", "1.0.0");
         IProjectCoordinateResolver sut = new OsgiManifestStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         ProjectCoordinate expected = new ProjectCoordinate("org.example", "org.example", "1.0.0");
         assertEquals(expected, optionalProjectCoordinate.get());
@@ -99,7 +97,7 @@ public class OsgiManifestStrategyTest {
     public void testThreePartSymbolicNameBecomesGroupId() {
         IFileToJarFileConverter fileToJarFileConverter = createFileToJarFileConverter("org.example.sample", "1.0.0");
         IProjectCoordinateResolver sut = new OsgiManifestStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         ProjectCoordinate expected = new ProjectCoordinate("org.example.sample", "org.example.sample", "1.0.0");
         assertEquals(expected, optionalProjectCoordinate.get());
@@ -110,7 +108,7 @@ public class OsgiManifestStrategyTest {
         IFileToJarFileConverter fileToJarFileConverter = createFileToJarFileConverter("org.example.sample.test",
                 "1.0.0");
         IProjectCoordinateResolver sut = new OsgiManifestStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         ProjectCoordinate expected = new ProjectCoordinate("org.example.sample", "org.example.sample.test", "1.0.0");
         assertEquals(expected, optionalProjectCoordinate.get());
@@ -124,7 +122,7 @@ public class OsgiManifestStrategyTest {
         ProjectCoordinate expected = new ProjectCoordinate("org.example.sample", "org.example.sample.test", "1.0.0");
 
         IProjectCoordinateResolver sut = new OsgiManifestStrategy();
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertEquals(expected, optionalProjectCoordinate.get());
     }
@@ -137,7 +135,7 @@ public class OsgiManifestStrategyTest {
         ProjectCoordinate expected = new ProjectCoordinate("org.example.sample", "org.example.sample.test", "1.0.0");
 
         IProjectCoordinateResolver sut = new OsgiManifestStrategy();
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertEquals(expected, optionalProjectCoordinate.get());
     }
@@ -151,7 +149,7 @@ public class OsgiManifestStrategyTest {
         ProjectCoordinate expected = new ProjectCoordinate("org.example.sample", "org.example.sample.test", "1.0.0");
 
         IProjectCoordinateResolver sut = new OsgiManifestStrategy();
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertEquals(expected, optionalProjectCoordinate.get());
     }
@@ -160,7 +158,7 @@ public class OsgiManifestStrategyTest {
     public void testInvalidVersionResultInAbsent() {
         IFileToJarFileConverter fileToJarFileConverter = createFileToJarFileConverter("org.example.sample", "1.0-Beta");
         IProjectCoordinateResolver sut = new OsgiManifestStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }

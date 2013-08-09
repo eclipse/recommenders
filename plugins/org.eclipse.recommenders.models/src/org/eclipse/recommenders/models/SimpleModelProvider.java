@@ -43,9 +43,11 @@ public abstract class SimpleModelProvider<K extends IBasedName<?>, M> implements
 
     protected IModelRepository repository;
     protected String modelType;
+    private IModelArchiveCoordinateResolver index;
 
-    public SimpleModelProvider(IModelRepository cache, String modelType) {
+    public SimpleModelProvider(IModelRepository cache, IModelArchiveCoordinateResolver index, String modelType) {
         this.repository = cache;
+        this.index = index;
         this.modelType = modelType;
     }
 
@@ -53,7 +55,7 @@ public abstract class SimpleModelProvider<K extends IBasedName<?>, M> implements
     public Optional<M> acquireModel(K key) {
         try {
             // unknown model? return immediately
-            ModelArchiveCoordinate coord = repository.findBestModelArchive(key.getBase(), modelType).orNull();
+            ModelArchiveCoordinate coord = index.suggest(key.getBase(), modelType).orNull();
             if (coord == null) {
                 return absent();
             }

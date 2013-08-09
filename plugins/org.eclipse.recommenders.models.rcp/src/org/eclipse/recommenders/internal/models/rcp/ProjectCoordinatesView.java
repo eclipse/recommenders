@@ -211,8 +211,7 @@ public class ProjectCoordinatesView extends ViewPart {
                     }
                     return dependencyInfo.getFile().getName();
                 case COLUMN_COORDINATE:
-                    Optional<ProjectCoordinate> optionalProjectCoordinate = mappingProvider
-                            .searchForProjectCoordinate(dependencyInfo);
+                    Optional<ProjectCoordinate> optionalProjectCoordinate = mappingProvider.suggest(dependencyInfo);
                     if (optionalProjectCoordinate.isPresent()) {
                         return optionalProjectCoordinate.get().toString();
                     }
@@ -362,8 +361,7 @@ public class ProjectCoordinatesView extends ViewPart {
                 if (!strategy.isApplicable(dependencyInfo.getType())) {
                     sb.append("n/a");
                 } else {
-                    Optional<ProjectCoordinate> optionalCoordinate = strategy
-                            .searchForProjectCoordinate(dependencyInfo);
+                    Optional<ProjectCoordinate> optionalCoordinate = strategy.suggest(dependencyInfo);
                     if (optionalCoordinate.isPresent()) {
                         sb.append(optionalCoordinate.get().toString());
                     } else {
@@ -433,10 +431,8 @@ public class ProjectCoordinatesView extends ViewPart {
         }
 
         private int compareCoordinate(final DependencyInfo firstElement, final DependencyInfo secondElement) {
-            Optional<ProjectCoordinate> optionalCoordinateFirstElement = mappingProvider
-                    .searchForProjectCoordinate(firstElement);
-            Optional<ProjectCoordinate> optionalCoordinateSecondElement = mappingProvider
-                    .searchForProjectCoordinate(secondElement);
+            Optional<ProjectCoordinate> optionalCoordinateFirstElement = mappingProvider.suggest(firstElement);
+            Optional<ProjectCoordinate> optionalCoordinateSecondElement = mappingProvider.suggest(secondElement);
 
             if (optionalCoordinateFirstElement.isPresent()) {
                 if (optionalCoordinateSecondElement.isPresent()) {

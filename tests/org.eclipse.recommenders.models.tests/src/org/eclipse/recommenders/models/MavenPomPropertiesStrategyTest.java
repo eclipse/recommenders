@@ -10,14 +10,14 @@
  */
 package org.eclipse.recommenders.models;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
 import org.eclipse.recommenders.tests.models.utils.IFileToJarFileConverterMockBuilder;
+import org.eclipse.recommenders.utils.Zips.IFileToJarFileConverter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
     }
@@ -79,7 +79,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -94,7 +94,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -109,7 +109,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -124,7 +124,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -139,7 +139,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -155,7 +155,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -170,7 +170,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -185,7 +185,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.PROJECT);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -198,7 +198,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(null, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertFalse(optionalProjectCoordinate.isPresent());
     }
@@ -214,7 +214,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
     }
@@ -230,7 +230,7 @@ public class MavenPomPropertiesStrategyTest {
         DependencyInfo info = new DependencyInfo(jarFileExample, DependencyType.JAR);
 
         IProjectCoordinateResolver sut = new MavenPomPropertiesStrategy(fileToJarFileConverter);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(info);
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
     }

@@ -43,7 +43,7 @@ public class MappingProviderTest {
     private IProjectCoordinateResolver createMockedStrategy(final ProjectCoordinate projectCoordinate,
             final DependencyType... dependencyTypes) {
         IProjectCoordinateResolver mockedStrategy = Mockito.mock(IProjectCoordinateResolver.class);
-        Mockito.when(mockedStrategy.searchForProjectCoordinate(Mockito.any(DependencyInfo.class))).thenReturn(
+        Mockito.when(mockedStrategy.suggest(Mockito.any(DependencyInfo.class))).thenReturn(
                 fromNullable(projectCoordinate));
         Mockito.when(mockedStrategy.isApplicable(Mockito.any(DependencyType.class))).thenReturn(false);
         for (DependencyType dependencyType : dependencyTypes) {
@@ -60,7 +60,7 @@ public class MappingProviderTest {
     @Test
     public void testMappingProviderWithNoStrategy() throws IOException {
         IMappingProvider sut = new MappingProvider();
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(new DependencyInfo(
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(
                 exampleFile, DependencyType.JAR));
 
         assertFalse(optionalProjectCoordinate.isPresent());
@@ -70,7 +70,7 @@ public class MappingProviderTest {
     public void testMappingProviderWithMockedStrategy() throws IOException {
         IMappingProvider sut = new MappingProvider();
         sut.addStrategy(createMockedStrategy(EXPECTED_PROJECT_COORDINATE));
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(new DependencyInfo(
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(
                 exampleFile, DependencyType.JAR));
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
@@ -82,7 +82,7 @@ public class MappingProviderTest {
         sut.addStrategy(createMockedStrategy(EXPECTED_PROJECT_COORDINATE));
         sut.addStrategy(createMockedStrategy(ANOTHER_EXPECTED_PROJECT_COORDINATE));
 
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(new DependencyInfo(
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(
                 exampleFile, DependencyType.JAR));
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
@@ -123,7 +123,7 @@ public class MappingProviderTest {
         strategies.add(createMockedStrategy(ANOTHER_EXPECTED_PROJECT_COORDINATE));
         sut.setStrategies(strategies);
 
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(new DependencyInfo(
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(
                 exampleFile, DependencyType.JAR));
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
@@ -138,7 +138,7 @@ public class MappingProviderTest {
         strategies.add(createMockedStrategy(EXPECTED_PROJECT_COORDINATE));
         sut.setStrategies(strategies);
 
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.searchForProjectCoordinate(new DependencyInfo(
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(
                 exampleFile, DependencyType.JAR));
         assertEquals(EXPECTED_PROJECT_COORDINATE, optionalProjectCoordinate.get());
     }

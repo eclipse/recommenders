@@ -15,6 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.models.IBasedName;
+import org.eclipse.recommenders.models.IModelArchiveCoordinateResolver;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
 import org.eclipse.recommenders.utils.Zips;
@@ -24,8 +25,8 @@ import com.google.common.base.Optional;
 
 public class CallsDemoModelProvider extends PoolingModelProvider<IBasedName<ITypeName>, Object> {
 
-    public CallsDemoModelProvider(IModelRepository repo) {
-        super(repo, "call");
+    public CallsDemoModelProvider(IModelRepository repo, IModelArchiveCoordinateResolver index) {
+        super(repo, index, "call");
     }
 
     @Override

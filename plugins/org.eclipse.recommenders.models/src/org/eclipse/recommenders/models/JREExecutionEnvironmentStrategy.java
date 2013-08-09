@@ -22,7 +22,7 @@ public class JREExecutionEnvironmentStrategy extends AbstractStrategy {
     private static Map<String, ProjectCoordinate> lookUpTable = createLookUpTable();
 
     @Override
-    protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+    protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
         String optionalExecutionEnvironment = dependencyInfo.getHint(DependencyInfo.EXECUTION_ENVIRONMENT).orNull();
         if (optionalExecutionEnvironment != null) {
             ProjectCoordinate projectCoordinate = lookUpTable.get(optionalExecutionEnvironment);

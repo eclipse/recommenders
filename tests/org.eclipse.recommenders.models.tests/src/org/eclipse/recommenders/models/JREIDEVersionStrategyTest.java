@@ -51,7 +51,7 @@ public class JREIDEVersionStrategyTest {
         DependencyInfo info = new DependencyInfo(javaHome, DependencyType.JAR);
         IProjectCoordinateResolver sut = new JREExecutionEnvironmentStrategy();
 
-        sut.searchForProjectCoordinate(info);
+        sut.suggest(info);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class JREIDEVersionStrategyTest {
         DependencyInfo info = new DependencyInfo(javaHome, DependencyType.JRE);
         IProjectCoordinateResolver sut = new JREExecutionEnvironmentStrategy();
 
-        Optional<ProjectCoordinate> extractProjectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> extractProjectCoordinate = sut.suggest(info);
 
         assertFalse(extractProjectCoordinate.isPresent());
     }
@@ -70,7 +70,7 @@ public class JREIDEVersionStrategyTest {
                 createAttributesMapForExecutionEnvironment("JavaSE-1.6"));
         IProjectCoordinateResolver sut = new JREExecutionEnvironmentStrategy();
 
-        Optional<ProjectCoordinate> projectCoordinate = sut.searchForProjectCoordinate(info);
+        Optional<ProjectCoordinate> projectCoordinate = sut.suggest(info);
 
         assertEquals(EXPECTED_PROJECT_COORDINATE, projectCoordinate.get());
     }
