@@ -17,52 +17,54 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.eclipse.recommenders.utils.NamesTest;
+import org.eclipse.recommenders.utils.names.IFieldName;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
+import org.eclipse.recommenders.utils.names.VmFieldName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
 import org.junit.Test;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 
 public class GsonUtilTest {
-    @Test
-    public void testMethodNameDeserialization() {
-        // setup
-        final IMethodName expected = NamesTest.STRING_HASHCODE;
-        // exercise
-        final JsonElement e = new JsonPrimitive(expected.getIdentifier());
-        final IMethodName actual1 = new GsonMethodNameDeserializer().deserialize(e, VmMethodName.class, null);
-        final IMethodName actual2 = new GsonMethodNameDeserializer().deserialize(e, IMethodName.class, null);
-        // verify
-        assertEquals(expected, actual1);
-        assertEquals(expected, actual2);
+
+    static class GsonTypeAdapterTestStruct {
+
+        File file;
+        IMethodName method;
+        ITypeName type;
+        VmMethodName vmMethod;
+        VmTypeName vmType;
+        VmFieldName vmField;
+        IFieldName field;
+
+        public GsonTypeAdapterTestStruct(File file, IMethodName method, ITypeName type, IFieldName field) {
+            this.file = file;
+            vmMethod = (VmMethodName) method;
+            this.method = method;
+            vmType = (VmTypeName) type;
+            this.type = type;
+            vmField = (VmFieldName) field;
+            this.field = field;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return EqualsBuilder.reflectionEquals(this, other);
+        }
     }
 
     @Test
-    public void testMethodNameSerialization() {
-        // setup
-        final IMethodName type = NamesTest.STRING_HASHCODE;
-        final JsonElement expected = new JsonPrimitive(type.getIdentifier());
-        // exercise
-        final JsonElement actual = new GsonNameSerializer().serialize(type, IMethodName.class, null);
-        // verify
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void testTypeNameSerialization() {
-        // setup
-        final ITypeName typeName = NamesTest.STRING;
-        final JsonElement expected = new JsonPrimitive(typeName.getIdentifier());
-        // exercise
-        final JsonElement actual = new GsonNameSerializer().serialize(typeName, ITypeName.class, null);
-        // verify
+    public void testGsonUtil() throws IOException {
+        GsonTypeAdapterTestStruct expected = new GsonTypeAdapterTestStruct(new File("C:/test/test.json"), NamesTest.STRING_NEW, NamesTest.STRING,
+                NamesTest.EVENT_FIELD);
+        String serialize = GsonUtil.serialize(expected);
+        GsonTypeAdapterTestStruct actual = GsonUtil.deserialize(serialize, GsonTypeAdapterTestStruct.class);
         assertEquals(expected, actual);
     }
 
@@ -78,19 +80,6 @@ public class GsonUtilTest {
 
         // it's actually null :)
         assertNull(res);
-    }
-
-    @Test
-    public void testTypeNameDeserialization() {
-        // setup
-        final ITypeName expected = NamesTest.STRING;
-        // exercise
-        final JsonElement e = new JsonPrimitive(expected.getIdentifier());
-        final ITypeName actual1 = new GsonTypeNameDeserializer().deserialize(e, VmTypeName.class, null);
-        final ITypeName actual2 = new GsonTypeNameDeserializer().deserialize(e, ITypeName.class, null);
-        // verify
-        assertEquals(expected, actual1);
-        assertEquals(expected, actual2);
     }
 
     @Test
@@ -147,4 +136,5 @@ public class GsonUtilTest {
         // verify
         assertEquals(map, output);
     }
+
 }
