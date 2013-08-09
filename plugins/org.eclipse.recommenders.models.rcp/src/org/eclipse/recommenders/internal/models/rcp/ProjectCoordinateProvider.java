@@ -40,9 +40,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.recommenders.models.BasedTypeName;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.DependencyType;
-import org.eclipse.recommenders.models.IMappingProvider;
 import org.eclipse.recommenders.models.ProjectCoordinate;
-import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
+import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.rcp.IRcpService;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
 import org.eclipse.recommenders.rcp.utils.JdtUtils;
@@ -61,10 +60,11 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IRcpService {
+public class ProjectCoordinateProvider implements org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider,
+        IRcpService {
 
     private final JavaElementResolver javaElementResolver;
-    private final IMappingProvider mappingProvider;
+    private final ProjectCoordinateAdvisorService coordinatesService;
     private final File persistenceFile;
     private final Gson cacheGson;
 
@@ -93,9 +93,9 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     @Inject
     public ProjectCoordinateProvider(@Named(IDENTIFIED_PACKAGE_FRAGMENT_ROOTS) File persistenceFile,
-            IMappingProvider mappingProvider, JavaElementResolver javaElementResolver) {
+            ProjectCoordinateAdvisorService mappingProvider, JavaElementResolver javaElementResolver) {
         this.persistenceFile = persistenceFile;
-        this.mappingProvider = mappingProvider;
+        coordinatesService = mappingProvider;
         this.javaElementResolver = javaElementResolver;
         cacheGson = new GsonBuilder()
                 .registerTypeAdapter(ProjectCoordinate.class, new ProjectCoordinateJsonTypeAdapter())
@@ -207,7 +207,7 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     @Override
     public Optional<ProjectCoordinate> resolve(DependencyInfo info) {
-        return mappingProvider.searchForProjectCoordinate(info);
+        return coordinatesService.suggest(info);
     }
 
     @PreDestroy

@@ -9,10 +9,9 @@
  *    Johannes Lerch - initial API and implementation.
  *    Olav Lenz - adapt for the use in the new api.
  */
-package org.eclipse.recommenders.models;
+package org.eclipse.recommenders.models.advisors;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.*;
 
 import java.util.StringTokenizer;
 

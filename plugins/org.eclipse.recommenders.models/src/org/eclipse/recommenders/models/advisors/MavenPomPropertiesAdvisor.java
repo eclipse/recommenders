@@ -8,7 +8,7 @@
  * Contributors:
  *     Olav Lenz - initial API and implementation
  */
-package org.eclipse.recommenders.models;
+package org.eclipse.recommenders.models.advisors;
 
 import static com.google.common.base.Optional.*;
 import static org.eclipse.recommenders.utils.Zips.closeQuietly;
@@ -23,7 +23,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.recommenders.models.DependencyInfo;
+import org.eclipse.recommenders.models.DependencyType;
+import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.IOUtils;
+import org.eclipse.recommenders.utils.Zips.DefaultJarFileConverter;
+import org.eclipse.recommenders.utils.Zips.IFileToJarFileConverter;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -32,7 +37,7 @@ import com.google.common.collect.Sets;
 /**
  * Implementation based on {@link MavenPomJarIdExtractor}.
  */
-public class MavenPomPropertiesStrategy extends AbstractStrategy {
+public class MavenPomPropertiesAdvisor extends AbstractProjectCoordinateAdvisor {
 
     private static final String POM_PROPERTIES_FILE_REGEX = "META-INF/maven/.*/.*/pom.properties";
     public static final String PROPERTY_KEY_VERSION = "version";
@@ -41,17 +46,17 @@ public class MavenPomPropertiesStrategy extends AbstractStrategy {
 
     private final IFileToJarFileConverter jarFileConverter;
 
-    public MavenPomPropertiesStrategy() {
+    public MavenPomPropertiesAdvisor() {
         jarFileConverter = new DefaultJarFileConverter();
     }
 
     @VisibleForTesting
-    public MavenPomPropertiesStrategy(IFileToJarFileConverter fileToJarFileConverter) {
+    public MavenPomPropertiesAdvisor(IFileToJarFileConverter fileToJarFileConverter) {
         jarFileConverter = fileToJarFileConverter;
     }
 
     @Override
-    protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+    protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
         JarFile jarFile = readJarFileIn(dependencyInfo.getFile()).orNull();
         if (jarFile == null) {
             return absent();
