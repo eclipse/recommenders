@@ -24,11 +24,16 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -40,9 +45,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.recommenders.models.BasedTypeName;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.DependencyType;
-import org.eclipse.recommenders.models.IMappingProvider;
 import org.eclipse.recommenders.models.ProjectCoordinate;
-import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
+import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
+import org.eclipse.recommenders.models.rcp.ModelEvents.ModelIndexOpenedEvent;
 import org.eclipse.recommenders.rcp.IRcpService;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
 import org.eclipse.recommenders.rcp.utils.JdtUtils;
@@ -54,6 +59,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -61,10 +67,11 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IRcpService {
+public class ProjectCoordinateProvider implements org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider,
+        IRcpService {
 
     private final JavaElementResolver javaElementResolver;
-    private final IMappingProvider mappingProvider;
+    private final ProjectCoordinateAdvisorService coordinatesService;
     private final File persistenceFile;
     private final Gson cacheGson;
 
@@ -93,9 +100,9 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     @Inject
     public ProjectCoordinateProvider(@Named(IDENTIFIED_PACKAGE_FRAGMENT_ROOTS) File persistenceFile,
-            IMappingProvider mappingProvider, JavaElementResolver javaElementResolver) {
+            ProjectCoordinateAdvisorService mappingProvider, JavaElementResolver javaElementResolver) {
         this.persistenceFile = persistenceFile;
-        this.mappingProvider = mappingProvider;
+        coordinatesService = mappingProvider;
         this.javaElementResolver = javaElementResolver;
         cacheGson = new GsonBuilder()
                 .registerTypeAdapter(ProjectCoordinate.class, new ProjectCoordinateJsonTypeAdapter())
@@ -207,7 +214,7 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     @Override
     public Optional<ProjectCoordinate> resolve(DependencyInfo info) {
-        return mappingProvider.searchForProjectCoordinate(info);
+        return coordinatesService.suggest(info);
     }
 
     @PreDestroy
@@ -248,4 +255,27 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
         return javaElementResolver.toRecMethod(method);
     }
 
+    @Subscribe
+    public void onEvent(ModelIndexOpenedEvent e) {
+        // the fingerprint strategy uses the model index to determine missing project coordinates. Thus we have to
+        // invalidate at least all absent values but to be honest, all values need to be refreshed!
+        new Job("Refreshing cached project coordinates") {
+            {
+                schedule();
+            }
+
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                Set<IPackageFragmentRoot> pfrs = cache.asMap().keySet();
+                monitor.beginTask("Refreshing", pfrs.size());
+                for (IPackageFragmentRoot pfr : pfrs) {
+                    monitor.subTask(pfr.getElementName());
+                    cache.refresh(pfr);
+                    monitor.worked(1);
+                }
+                monitor.done();
+                return Status.OK_STATUS;
+            }
+        };
+    }
 }

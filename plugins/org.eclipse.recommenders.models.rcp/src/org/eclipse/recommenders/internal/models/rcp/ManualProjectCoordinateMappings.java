@@ -21,8 +21,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.recommenders.models.DependencyInfo;
-import org.eclipse.recommenders.models.DependencyType;
-import org.eclipse.recommenders.models.IProjectCoordinateResolver;
+import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.rcp.IRcpService;
 
@@ -36,7 +35,7 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class ManualMappingStrategy implements IProjectCoordinateResolver, IRcpService {
+public class ManualProjectCoordinateMappings implements IProjectCoordinateAdvisor, IRcpService {
 
     private Map<DependencyInfo, ProjectCoordinate> manualMappings = Maps.newHashMap();
     private final File persistenceFile;
@@ -47,25 +46,20 @@ public class ManualMappingStrategy implements IProjectCoordinateResolver, IRcpSe
     }.getType();
 
     @Inject
-    public ManualMappingStrategy(@Named(ModelsRcpModule.MANUAL_MAPPINGS) File persistenceFile) {
+    public ManualProjectCoordinateMappings(@Named(ModelsRcpModule.MANUAL_MAPPINGS) File persistenceFile) {
         this.persistenceFile = persistenceFile;
         gson = new GsonBuilder().registerTypeAdapter(ProjectCoordinate.class, new ProjectCoordinateJsonTypeAdapter())
                 .enableComplexMapKeySerialization().serializeNulls().create();
     }
 
     @Override
-    public Optional<ProjectCoordinate> searchForProjectCoordinate(DependencyInfo dependencyInfo) {
+    public Optional<ProjectCoordinate> suggest(DependencyInfo dependencyInfo) {
         ProjectCoordinate projectCoordinate = manualMappings.get(dependencyInfo);
         if (projectCoordinate != null) {
             return of(projectCoordinate);
         } else {
             return absent();
         }
-    }
-
-    @Override
-    public boolean isApplicable(DependencyType dependencyType) {
-        return true;
     }
 
     public void setManualMapping(DependencyInfo dependencyInfo, ProjectCoordinate projectCoordinate) {

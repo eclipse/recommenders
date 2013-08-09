@@ -8,21 +8,25 @@
  * Contributors:
  *     Olav Lenz - initial API and implementation
  */
-package org.eclipse.recommenders.models;
+package org.eclipse.recommenders.models.advisors;
 
 import static com.google.common.base.Optional.*;
 
 import java.util.Map;
 
+import org.eclipse.recommenders.models.DependencyInfo;
+import org.eclipse.recommenders.models.DependencyType;
+import org.eclipse.recommenders.models.ProjectCoordinate;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
-public class JREExecutionEnvironmentStrategy extends AbstractStrategy {
+public class JREExecutionEnvironmentAdvisor extends AbstractProjectCoordinateAdvisor {
 
     private static Map<String, ProjectCoordinate> lookUpTable = createLookUpTable();
 
     @Override
-    protected Optional<ProjectCoordinate> extractProjectCoordinateInternal(DependencyInfo dependencyInfo) {
+    protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
         String optionalExecutionEnvironment = dependencyInfo.getHint(DependencyInfo.EXECUTION_ENVIRONMENT).orNull();
         if (optionalExecutionEnvironment != null) {
             ProjectCoordinate projectCoordinate = lookUpTable.get(optionalExecutionEnvironment);
