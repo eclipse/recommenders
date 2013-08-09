@@ -13,6 +13,7 @@ package org.eclipse.recommenders.overrides;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.models.IBasedName;
+import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
 import org.eclipse.recommenders.utils.Constants;
@@ -23,8 +24,8 @@ import com.google.common.base.Optional;
 public class PoolingOverrideModelProvider extends PoolingModelProvider<IBasedName<ITypeName>, IOverrideModel> implements
         IOverrideModelProvider {
 
-    public PoolingOverrideModelProvider(IModelRepository repository) {
-        super(repository, Constants.CLASS_OVRM_MODEL);
+    public PoolingOverrideModelProvider(IModelRepository repository, IModelArchiveCoordinateAdvisor index) {
+        super(repository, index, Constants.CLASS_OVRM_MODEL);
     }
 
     @Override

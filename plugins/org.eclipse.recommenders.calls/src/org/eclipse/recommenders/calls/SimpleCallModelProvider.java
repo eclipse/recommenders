@@ -15,6 +15,7 @@ import static org.eclipse.recommenders.utils.Constants.CLASS_CALL_MODELS;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelProvider;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.SimpleModelProvider;
@@ -32,8 +33,8 @@ import com.google.common.base.Optional;
 public class SimpleCallModelProvider extends SimpleModelProvider<BasedTypeName, ICallModel> implements
         ICallModelProvider {
 
-    public SimpleCallModelProvider(IModelRepository repo) {
-        super(repo, CLASS_CALL_MODELS);
+    public SimpleCallModelProvider(IModelRepository repo, IModelArchiveCoordinateAdvisor index) {
+        super(repo, index, CLASS_CALL_MODELS);
     }
 
     @Override

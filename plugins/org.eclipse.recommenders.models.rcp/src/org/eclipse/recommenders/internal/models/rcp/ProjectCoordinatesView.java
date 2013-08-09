@@ -34,9 +34,9 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.DependencyType;
-import org.eclipse.recommenders.models.IMappingProvider;
-import org.eclipse.recommenders.models.IProjectCoordinateResolver;
+import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
 import org.eclipse.recommenders.models.ProjectCoordinate;
+import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootAdded;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootRemoved;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectClosed;
@@ -71,7 +71,7 @@ public class ProjectCoordinatesView extends ViewPart {
     private ContentProvider contentProvider;
 
     private final EclipseDependencyListener eclipseDependencyListener;
-    private final IMappingProvider mappingProvider;
+    private final ProjectCoordinateAdvisorService pcProvider;
 
     private TableViewerColumn locationColumn;
     private TableViewerColumn coordinateColumn;
@@ -80,9 +80,10 @@ public class ProjectCoordinatesView extends ViewPart {
 
     @Inject
     public ProjectCoordinatesView(final EventBus workspaceBus,
-            final EclipseDependencyListener eclipseDependencyListener, final IMappingProvider mappingProvider) {
+            final EclipseDependencyListener eclipseDependencyListener,
+            final ProjectCoordinateAdvisorService coordinatesService) {
         this.eclipseDependencyListener = eclipseDependencyListener;
-        this.mappingProvider = mappingProvider;
+        pcProvider = coordinatesService;
         workspaceBus.register(this);
     }
 
@@ -211,8 +212,7 @@ public class ProjectCoordinatesView extends ViewPart {
                     }
                     return dependencyInfo.getFile().getName();
                 case COLUMN_COORDINATE:
-                    Optional<ProjectCoordinate> optionalProjectCoordinate = mappingProvider
-                            .searchForProjectCoordinate(dependencyInfo);
+                    Optional<ProjectCoordinate> optionalProjectCoordinate = pcProvider.suggest(dependencyInfo);
                     if (optionalProjectCoordinate.isPresent()) {
                         return optionalProjectCoordinate.get().toString();
                     }
@@ -351,26 +351,20 @@ public class ProjectCoordinatesView extends ViewPart {
         @Override
         protected String generateTooltip(final DependencyInfo dependencyInfo) {
             StringBuilder sb = new StringBuilder();
-            List<IProjectCoordinateResolver> strategies = mappingProvider.getStrategies();
+            List<IProjectCoordinateAdvisor> strategies = pcProvider.getAdvisors();
 
-            for (IProjectCoordinateResolver strategy : strategies) {
+            for (IProjectCoordinateAdvisor strategy : strategies) {
                 if (strategies.indexOf(strategy) != 0) {
                     sb.append(System.getProperty("line.separator"));
                 }
                 sb.append(strategy.getClass().getSimpleName());
                 sb.append(": ");
-                if (!strategy.isApplicable(dependencyInfo.getType())) {
-                    sb.append("n/a");
+                Optional<ProjectCoordinate> optionalCoordinate = strategy.suggest(dependencyInfo);
+                if (optionalCoordinate.isPresent()) {
+                    sb.append(optionalCoordinate.get().toString());
                 } else {
-                    Optional<ProjectCoordinate> optionalCoordinate = strategy
-                            .searchForProjectCoordinate(dependencyInfo);
-                    if (optionalCoordinate.isPresent()) {
-                        sb.append(optionalCoordinate.get().toString());
-                    } else {
-                        sb.append("unknown");
-                    }
+                    sb.append("n/a");
                 }
-
             }
             return sb.toString();
         }
@@ -433,10 +427,8 @@ public class ProjectCoordinatesView extends ViewPart {
         }
 
         private int compareCoordinate(final DependencyInfo firstElement, final DependencyInfo secondElement) {
-            Optional<ProjectCoordinate> optionalCoordinateFirstElement = mappingProvider
-                    .searchForProjectCoordinate(firstElement);
-            Optional<ProjectCoordinate> optionalCoordinateSecondElement = mappingProvider
-                    .searchForProjectCoordinate(secondElement);
+            Optional<ProjectCoordinate> optionalCoordinateFirstElement = pcProvider.suggest(firstElement);
+            Optional<ProjectCoordinate> optionalCoordinateSecondElement = pcProvider.suggest(secondElement);
 
             if (optionalCoordinateFirstElement.isPresent()) {
                 if (optionalCoordinateSecondElement.isPresent()) {
