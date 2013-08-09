@@ -11,7 +11,9 @@
 package org.eclipse.recommenders.models;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.concurrent.Future;
+
+import org.eclipse.recommenders.models.ModelRepository.DownloadCallback;
 
 import com.google.common.base.Optional;
 
@@ -22,45 +24,25 @@ public interface IModelRepository {
      * immediately returns but triggers a background process that attempts to download the model archive from the remote
      * repository.
      */
+    // TODO should this actually trigger a download request?
     Optional<File> getLocation(ModelArchiveCoordinate coordinate);
 
     /**
-     * Searches the model index for the best model archive matching the given {@link ProjectCoordinate} and model-type.
-     */
-    Optional<ModelArchiveCoordinate> findBestModelArchive(ProjectCoordinate coordinate, String modelType);
-
-    /**
-     * Resolves the given model coordinate to a local file and downloads the corresponding file from the remote
-     * repository if not locally available.
+     * Resolves the given model coordinate to a local file. If the model does not yet exist locally this method attempts
+     * to download the model from the remote repository. This call blocks the caller until the download finished.
+     * 
+     * @return the path to the locally cached model archive.
      * 
      * @throws Exception
-     *             if no model could be downloaded due to, e.g., the coordinate does not exist on the remote repository
+     *             if no model could be downloaded, e.g., because the coordinate does not exist on the remote repository
      *             or a network/io error occurred.
      */
-    void resolve(ModelArchiveCoordinate model) throws Exception;
+    Optional<File> resolve(ModelArchiveCoordinate model) throws Exception;
 
-    //
-    // /**
-    // * Deletes the artifact represented by the given coordinate from the local file system.
-    // */
-    // void delete(ModelArchiveCoordinate model) throws IOException;
-    //
-    // /**
-    // * Returns the file for the given coordinate - if it exists. Note that this call does <b>not</b> download any
-    // * resources from the remote repository. It only touches the local file system.
-    // */
-    // Optional<File> getLocation(ModelArchiveCoordinate coordinate);
-    //
-    // /**
-    // * Searches the model index for all model archives matching the given {@link ProjectCoordinate} and model-type.
-    // */
-    // ModelArchiveCoordinate[] findModelArchives(ProjectCoordinate coordinate, String modelType);
-    //
-    // /**
-    // * Searches the model index for the best model archive matching the given {@link ProjectCoordinate} and
-    // model-type.
-    // */
-    // Optional<ModelArchiveCoordinate> findBestModelArchive(ProjectCoordinate coordinate, String modelType);
+    /**
+     * Resolves the given model coordinate to a local file. If the model does not yet exist locally this method accesses
+     * the remote repository to download it. This call run's in a background process.
+     */
+    Future<File> resolve(ModelArchiveCoordinate model, DownloadCallback callback);
 
-    Collection<ModelArchiveCoordinate> listModels(String classifier);
 }

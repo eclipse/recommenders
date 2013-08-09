@@ -13,8 +13,8 @@ package org.eclipse.recommenders.examples.models;
 import static org.eclipse.recommenders.models.ProjectCoordinate.UNKNOWN;
 
 import org.eclipse.recommenders.examples.models.CompletionEngineExample.IJavaElement;
-import org.eclipse.recommenders.models.BasedTypeName;
-import org.eclipse.recommenders.models.IBasedName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
+import org.eclipse.recommenders.models.IQualifiedName;
 import org.eclipse.recommenders.models.IModelProvider;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.names.ITypeName;
@@ -25,11 +25,11 @@ public class UsingModelProvider {
     EclipseProjectCoordinateProvider provider;
 
     RecommendationModel DUMMY = new RecommendationModel();
-    IModelProvider<IBasedName<ITypeName>, RecommendationModel> service;
+    IModelProvider<IQualifiedName<ITypeName>, RecommendationModel> service;
 
     void getModelForIDEType(IJavaElement type) {
         ProjectCoordinate coord = provider.map(type).or(UNKNOWN);
-        BasedTypeName name = new BasedTypeName(coord, toTypeName(type));
+        QualifiedTypeName name = new QualifiedTypeName(coord, toTypeName(type));
         RecommendationModel model = service.acquireModel(name).or(DUMMY);
         model.compute();
         // ...

@@ -40,8 +40,8 @@ import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
 import org.eclipse.recommenders.completion.rcp.processable.ProposalProcessorManager;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
 import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
-import org.eclipse.recommenders.models.BasedTypeName;
-import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
+import org.eclipse.recommenders.models.QualifiedTypeName;
+import org.eclipse.recommenders.models.rcp.IProjectCoordinateResolver;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Recommendations;
 import org.eclipse.recommenders.utils.names.IMethodName;
@@ -65,12 +65,12 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         }
     };
     private final ICallModelProvider modelProvider;
-    private final IProjectCoordinateProvider pcProvider;
+    private final IProjectCoordinateResolver pcProvider;
 
     private IRecommendersCompletionContext ctx;
 
     private AstCallCompletionAnalyzer completionAnalyzer;
-    private BasedTypeName basedName;
+    private QualifiedTypeName basedName;
     private ICallModel model;
 
     private Iterable<Recommendation<IMethodName>> recommendations;
@@ -79,7 +79,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
     private CallsRcpPreferences prefs;
 
     @Inject
-    public CallCompletionSessionProcessor(final IProjectCoordinateProvider projectCoordinateProvider,
+    public CallCompletionSessionProcessor(final IProjectCoordinateResolver projectCoordinateProvider,
             final ICallModelProvider modelProvider, CallsRcpPreferences prefs) {
         pcProvider = projectCoordinateProvider;
         this.modelProvider = modelProvider;
@@ -114,7 +114,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         if (receiverType == null) {
             return false;
         }
-        basedName = pcProvider.toBasedName(receiverType).orNull();
+        basedName = pcProvider.toQualifiedName(receiverType).orNull();
         if (basedName == null) {
             return false;
         }
@@ -143,7 +143,6 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         // set definition-type and defined-by
         model.setObservedDefinitionKind(completionAnalyzer.getReceiverDefinitionType());
         model.setObservedDefiningMethod(completionAnalyzer.getDefinedBy().orNull());
-
         // set calls:
         model.setObservedCalls(newHashSet(completionAnalyzer.getCalls()));
 

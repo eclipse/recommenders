@@ -25,8 +25,8 @@ import org.eclipse.recommenders.calls.ICallModelProvider;
 import org.eclipse.recommenders.completion.rcp.it.MockedIntelligentCompletionProposalComputer;
 import org.eclipse.recommenders.internal.calls.rcp.CallCompletionSessionProcessor;
 import org.eclipse.recommenders.internal.calls.rcp.CallsRcpPreferences;
-import org.eclipse.recommenders.models.BasedTypeName;
-import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
+import org.eclipse.recommenders.models.QualifiedTypeName;
+import org.eclipse.recommenders.models.rcp.IProjectCoordinateResolver;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.names.IMethodName;
@@ -152,14 +152,14 @@ public class Stubs {
 
     public static MockedIntelligentCompletionProposalComputer newCallComputer() {
         JavaElementResolver jer = new JavaElementResolver();
-        IProjectCoordinateProvider pcp = mock(IProjectCoordinateProvider.class);
+        IProjectCoordinateResolver pcp = mock(IProjectCoordinateResolver.class);
 
-        when(pcp.toBasedName((IType) anyObject())).thenAnswer(new Answer<Optional<BasedTypeName>>() {
+        when(pcp.toQualifiedName((IType) anyObject())).thenAnswer(new Answer<Optional<QualifiedTypeName>>() {
 
             @Override
-            public Optional<BasedTypeName> answer(InvocationOnMock invocation) throws Throwable {
+            public Optional<QualifiedTypeName> answer(InvocationOnMock invocation) throws Throwable {
                 // wanna refine this later.
-                return of(new BasedTypeName(UNKNOWN, VmTypeName.OBJECT));
+                return of(new QualifiedTypeName(UNKNOWN, VmTypeName.OBJECT));
             }
         });
 
@@ -168,7 +168,7 @@ public class Stubs {
         when(pcp.toName((IMethod) anyObject())).thenReturn(Optional.of(VmMethodName.NULL));
 
         ICallModelProvider mp = mock(ICallModelProvider.class);
-        when(mp.acquireModel((BasedTypeName) anyObject())).thenReturn(Optional.<ICallModel>of(new CallModelSpy()));
+        when(mp.acquireModel((QualifiedTypeName) anyObject())).thenReturn(Optional.<ICallModel>of(new CallModelSpy()));
         CallCompletionSessionProcessor sut = new CallCompletionSessionProcessor(pcp, mp, new CallsRcpPreferences());
         return new MockedIntelligentCompletionProposalComputer(sut);
     }

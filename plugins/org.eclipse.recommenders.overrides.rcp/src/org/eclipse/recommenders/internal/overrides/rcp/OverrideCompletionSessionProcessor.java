@@ -29,9 +29,9 @@ import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
 import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
-import org.eclipse.recommenders.models.BasedTypeName;
+import org.eclipse.recommenders.models.QualifiedTypeName;
 import org.eclipse.recommenders.models.ProjectCoordinate;
-import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
+import org.eclipse.recommenders.models.rcp.IProjectCoordinateResolver;
 import org.eclipse.recommenders.overrides.IOverrideModel;
 import org.eclipse.recommenders.overrides.IOverrideModelProvider;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public class OverrideCompletionSessionProcessor extends SessionProcessor {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    private IProjectCoordinateProvider coordsProvider;
+    private IProjectCoordinateResolver coordsProvider;
     private IOverrideModelProvider provider;
     private JavaElementResolver jdtCache;
 
@@ -65,7 +65,7 @@ public class OverrideCompletionSessionProcessor extends SessionProcessor {
     private List<Recommendation<IMethodName>> recommendations;
 
     @Inject
-    public OverrideCompletionSessionProcessor(IProjectCoordinateProvider coordsProvider,
+    public OverrideCompletionSessionProcessor(IProjectCoordinateResolver coordsProvider,
             IOverrideModelProvider modelProvider, final JavaElementResolver cache) {
         this.coordsProvider = coordsProvider;
         provider = modelProvider;
@@ -113,7 +113,7 @@ public class OverrideCompletionSessionProcessor extends SessionProcessor {
     }
 
     private boolean hasModel() {
-        BasedTypeName name = new BasedTypeName(projectCoord, jdtCache.toRecType(supertype));
+        QualifiedTypeName name = new QualifiedTypeName(projectCoord, jdtCache.toRecType(supertype));
         model = provider.acquireModel(name).orNull();
         return model != null;
     }
