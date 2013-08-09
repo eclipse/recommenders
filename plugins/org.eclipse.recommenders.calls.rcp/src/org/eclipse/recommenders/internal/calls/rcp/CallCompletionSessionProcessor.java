@@ -143,7 +143,6 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         // set definition-type and defined-by
         model.setObservedDefinitionKind(completionAnalyzer.getReceiverDefinitionType());
         model.setObservedDefiningMethod(completionAnalyzer.getDefinedBy().orNull());
-
         // set calls:
         model.setObservedCalls(newHashSet(completionAnalyzer.getCalls()));
 

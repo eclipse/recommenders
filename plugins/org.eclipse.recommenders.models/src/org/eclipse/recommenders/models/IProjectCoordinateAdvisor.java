@@ -13,12 +13,13 @@ package org.eclipse.recommenders.models;
 import com.google.common.base.Optional;
 
 /**
- * Strategy for extract the ProjectCoordinate of a element.
+ * Resolver for extract the ProjectCoordinate of a classpath dependency element.
  */
-public interface IProjectCoordinateResolver {
+public interface IProjectCoordinateAdvisor {
 
-    Optional<ProjectCoordinate> searchForProjectCoordinate(DependencyInfo dependencyInfo);
-
-    boolean isApplicable(DependencyType dependencyType);
+    /**
+     * Returns a suggested project coordinate for the given dependency.
+     */
+    Optional<ProjectCoordinate> suggest(DependencyInfo dependencyInfo);
 
 }
