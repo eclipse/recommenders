@@ -10,7 +10,9 @@
  */
 package org.eclipse.recommenders.internal.chain.rcp;
 
-import static org.eclipse.recommenders.internal.chain.rcp.TypeBindingAnalyzer.*;
+import static org.eclipse.recommenders.internal.chain.rcp.Constants.CATEGORY_ID;
+import static org.eclipse.recommenders.internal.chain.rcp.TypeBindingAnalyzer.findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods;
+import static org.eclipse.recommenders.internal.chain.rcp.TypeBindingAnalyzer.findVisibleInstanceFieldsAndRelevantInstanceMethods;
 import static org.eclipse.recommenders.utils.Checks.castOrNull;
 
 import java.util.Arrays;
@@ -64,8 +66,6 @@ import com.google.inject.Inject;
 @SuppressWarnings("restriction")
 public class ChainCompletionProposalComputer implements IJavaCompletionProposalComputer {
     private Logger log = LoggerFactory.getLogger(getClass());
-
-    static final String CATEGORY_ID = "org.eclipse.recommenders.completion.rcp.chain.category"; //$NON-NLS-1$
 
     private IRecommendersCompletionContext ctx;
     private List<ChainElement> entrypoints;
