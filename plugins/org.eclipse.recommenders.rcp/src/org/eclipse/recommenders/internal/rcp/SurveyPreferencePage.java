@@ -1,11 +1,14 @@
 package org.eclipse.recommenders.internal.rcp;
 
-import java.net.URL;
+import static org.eclipse.recommenders.internal.rcp.Constants.BUNDLE_NAME;
+import static org.eclipse.recommenders.internal.rcp.Constants.SURVEY_DESCRIPTION;
+import static org.eclipse.recommenders.internal.rcp.Constants.SURVEY_URL;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.recommenders.utils.Urls;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -17,18 +20,16 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 public class SurveyPreferencePage extends org.eclipse.jface.preference.PreferencePage implements
         IWorkbenchPreferencePage {
 
-    private static final String PAGE_DESCRIPTION = "To help us develop Code Recommenders to your needs, we ask you for a few moments of your time to fill out our user survey.";
-    private static final URL SURVEY_URL = Urls
-            .toUrl("https://docs.google.com/a/codetrails.com/forms/d/1SqzZh1trpzS6UNEMjVWCvQTzGTBvjBFV-ZdwPuAwm5o/viewform");
     private static final String SURVEY_LINK_TEXT = "<a>Take the survey</a> (will open in a browser window).";
 
     @Override
     public void init(IWorkbench workbench) {
-        setDescription(PAGE_DESCRIPTION);
+        setDescription(SURVEY_DESCRIPTION);
     }
 
     @Override
@@ -47,8 +48,10 @@ public class SurveyPreferencePage extends org.eclipse.jface.preference.Preferenc
             @Override
             public void widgetSelected(SelectionEvent event) {
                 try {
+                    IPreferenceStore preferences = new ScopedPreferenceStore(InstanceScope.INSTANCE, BUNDLE_NAME);
                     IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
                     browser.openURL(SURVEY_URL);
+                    preferences.setValue(Constants.SURVEY_TAKEN, true);
                 } catch (PartInitException e) {
                     e.printStackTrace();
                 }
