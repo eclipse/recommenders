@@ -37,8 +37,14 @@
       <page
             category="org.eclipse.recommenders.rcp.category.preferences"
             class="org.eclipse.recommenders.internal.rcp.SurveyPreferencePage"
-            id="org.eclipse.recommenders.calls.rcp.preferencepage"
+            id="org.eclipse.recommenders.rcp.survey.preferencepage"
             name="Survey">
       </page>
+     </extension>
+     <extension
+           point="org.eclipse.core.runtime.preferences">
+        <initializer
+              class="org.eclipse.recommenders.internal.rcp.PreferenceInitializer">
+        </initializer>
      </extension>
 </plugin>
