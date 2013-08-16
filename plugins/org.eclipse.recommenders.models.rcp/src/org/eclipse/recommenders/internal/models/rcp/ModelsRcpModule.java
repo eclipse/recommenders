@@ -31,6 +31,7 @@ import org.eclipse.recommenders.models.advisors.JREExecutionEnvironmentAdvisor;
 import org.eclipse.recommenders.models.advisors.JREReleaseFileAdvisor;
 import org.eclipse.recommenders.models.advisors.MavenPomPropertiesAdvisor;
 import org.eclipse.recommenders.models.advisors.MavenPomXmlAdvisor;
+import org.eclipse.recommenders.models.advisors.ModelIndexBundleSymbolicNameAdvisor;
 import org.eclipse.recommenders.models.advisors.OsgiManifestAdvisor;
 import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
@@ -108,9 +109,10 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         mappingProvider.addAdvisor(new MavenPomPropertiesAdvisor());
         mappingProvider.addAdvisor(new JREExecutionEnvironmentAdvisor());
         mappingProvider.addAdvisor(new JREReleaseFileAdvisor());
-        mappingProvider.addAdvisor(new OsgiManifestAdvisor());
         mappingProvider.addAdvisor(new MavenPomXmlAdvisor());
+        mappingProvider.addAdvisor(new ModelIndexBundleSymbolicNameAdvisor(index));
         mappingProvider.addAdvisor(new FingerprintAdvisor(index));
+        mappingProvider.addAdvisor(new OsgiManifestAdvisor());
         mappingProvider.addAdvisor(new MavenCentralFingerprintSearchAdvisor());
         return mappingProvider;
     }
