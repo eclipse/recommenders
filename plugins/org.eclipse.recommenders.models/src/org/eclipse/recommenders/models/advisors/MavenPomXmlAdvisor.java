@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -61,11 +62,46 @@ public class MavenPomXmlAdvisor extends AbstractProjectCoordinateAdvisor {
         InputStreamReader pomInputStream = null;
         try {
             MavenXpp3Reader mavenReader = new MavenXpp3Reader();
-            pomInputStream = new InputStreamReader(new FileInputStream(pomfile), Charsets.UTF_8);
+            pomInputStream = new InputStreamReader(new FileInputStream(pomfile), detectFileEncoding(pomfile));
             return mavenReader.read(pomInputStream);
         } finally {
             IOUtils.closeQuietly(pomInputStream);
         }
+    }
+
+    private Charset detectFileEncoding(File file) throws IOException {
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(file);
+            byte[] bom = new byte[input.available()];
+            input.read(bom, 0, bom.length);
+
+            if (isUTF8(bom)) {
+                return Charsets.UTF_8;
+            } else if (isUTF16(bom)) {
+                return Charsets.UTF_16;
+            } else {
+                return Charset.forName(System.getProperty("file.encoding"));
+            }
+        } finally {
+            IOUtils.closeQuietly(input);
+        }
+    }
+
+    private boolean isUTF8(byte[] bom) {
+        if (bom.length < 3) {
+            return false;
+        }
+        // EF BB BF --> UTF8
+        return (bom[0] == (byte) 0xEF) && (bom[1] == (byte) 0xBB) && (bom[2] == (byte) 0xBF);
+    }
+
+    private boolean isUTF16(byte[] bom) {
+        if (bom.length < 2) {
+            return false;
+        }
+        // (FE FF) || (FF FE) --> UTF16
+        return (bom[0] == (byte) 0xFE) && ((bom[1] == (byte) 0xFF) || (bom[1] == (byte) 0xFE));
     }
 
     private Optional<ProjectCoordinate> extractProjectCoordinateFromModel(Model model) {
