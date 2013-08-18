@@ -11,20 +11,19 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static org.eclipse.recommenders.internal.models.rcp.Constants.*;
-import static org.eclipse.recommenders.internal.models.rcp.Messages.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
+import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_ENABLE_AUTO_DOWNLOAD;
+import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL;
+import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_CLEAR_CACHES;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_ENABLE_AUTO_DOWNLOAD;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_MODEL_REPOSITORY_HEADLINE;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_MODEL_REPOSITORY_INTRO;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_URI;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.StringButtonFieldEditor;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -76,41 +75,12 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         description.setText(PREFPAGE_MODEL_REPOSITORY_INTRO);
         description.setLayoutData(layoutData);
 
-        StringButtonFieldEditor modelRepoFieldEditor = new StringButtonFieldEditor(P_REPOSITORY_URL, PREFPAGE_URI,
-                getFieldEditorParent()) {
-            @Override
-            protected String changePressed() {
-                InputDialog inputDialog = new InputDialog(getShell(), PREFPAGE_URI_MODEL_REPOSITORY,
-                        PREFPAGE_URI_INSERT, oldValue, new IInputValidator() {
-
-                            @Override
-                            public String isValid(String newText) {
-                                if (isValidRepoURI(newText)) {
-                                    return null;
-                                } else {
-                                    return PREFPAGE_URI_INVALID;
-                                }
-                            }
-                        });
-                if (inputDialog.open() == Window.OK) {
-                    return inputDialog.getValue();
-                }
-                return oldValue;
-            }
-        };
-        modelRepoFieldEditor.getTextControl(getFieldEditorParent()).setEnabled(false);
-        addField(modelRepoFieldEditor);
+        ComboAddValueFieldEditor repositoryUrlEditor = new ComboAddValueFieldEditor(P_REPOSITORY_URL, P_REPOSITORY_URL_LIST,
+                PREFPAGE_URI, "<new url>", 5, getFieldEditorParent());
+        addField(repositoryUrlEditor);
 
         addField(new BooleanFieldEditor(P_REPOSITORY_ENABLE_AUTO_DOWNLOAD, PREFPAGE_ENABLE_AUTO_DOWNLOAD,
                 getFieldEditorParent()));
     }
 
-    private boolean isValidRepoURI(String uri) {
-        try {
-            new URI(uri);
-        } catch (URISyntaxException e) {
-            return false;
-        }
-        return true;
-    }
 }
