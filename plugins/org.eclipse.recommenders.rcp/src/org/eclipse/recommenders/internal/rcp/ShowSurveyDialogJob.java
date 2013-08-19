@@ -61,7 +61,6 @@ class ShowSurveyDialogJob extends UIJob {
     private boolean enoughTimeForActiviation() {
         long currentTime = System.currentTimeMillis();
         long firstActivationDate = prefs.firstActivationDate;
-        prefs.setFirstActivationDate(firstActivationDate);
         long timeSinceFirstActivation = currentTime - firstActivationDate;
         return timeSinceFirstActivation > SURVEY_MILLIS_BEFORE_SHOW_DIALOG;
     }
@@ -69,7 +68,7 @@ class ShowSurveyDialogJob extends UIJob {
     @Override
     public IStatus runInUIThread(IProgressMonitor monitor) {
         new PreferenceLinkDialog(getDisplay().getActiveShell(), RcpPlugin.DIALOG_TITLE, null, SURVEY_DESCRIPTION,
-                MessageDialog.QUESTION, new String[] { "Yes, Take the survey", "No, Thank you" }, 0,
+                MessageDialog.QUESTION, new String[] { "Yes, Take the survey", "No, thank you" }, 0,
                 SURVEY_PREFERENCES_HINT, SURVEY_PREFERENCE_PAGE_ID) {
 
             @Override
