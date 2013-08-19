@@ -61,7 +61,6 @@ class ShowSurveyDialogJob extends UIJob {
     private boolean enoughTimeForActiviation() {
         long currentTime = System.currentTimeMillis();
         long firstActivationDate = prefs.firstActivationDate;
-        prefs.setFirstActivationDate(firstActivationDate);
         long timeSinceFirstActivation = currentTime - firstActivationDate;
         return timeSinceFirstActivation > SURVEY_MILLIS_BEFORE_SHOW_DIALOG;
     }
