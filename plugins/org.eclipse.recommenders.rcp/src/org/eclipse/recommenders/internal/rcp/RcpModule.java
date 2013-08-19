@@ -246,7 +246,7 @@ public class RcpModule extends AbstractModule implements Module {
 
         @Inject
         public Helper(ShowSurveyDialogJob job) {
-            job.schedule(TimeUnit.MINUTES.toMillis(SURVEY_SHOW_DIALOG_JOB_DELAY_MINUTES));
+            job.schedule(SURVEY_SHOW_DIALOG_JOB_DELAY_MINUTES);
         }
     }
 
