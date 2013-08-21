@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
+import static org.eclipse.recommenders.rcp.SharedImages.ELCL_REFRESH;
+
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -17,6 +19,8 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -66,9 +70,12 @@ public class ModelCoordinatesView extends ViewPart {
     private TableViewer tableViewer;
     private Multimap<ProjectCoordinate, String> models;
 
+    private Composite parent;
+
     @Override
     public void createPartControl(Composite parent) {
         bus.register(this);
+        this.parent = parent;
         Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(new FillLayout(SWT.HORIZONTAL));
 
@@ -112,6 +119,32 @@ public class ModelCoordinatesView extends ViewPart {
         });
         tableViewer.setSorter(new ViewerSorter());
         initializeContent();
+        addRefreshButton();
+    }
+
+    private void addRefreshButton() {
+
+        IAction refreshAction = new Action() {
+
+            @Override
+            public void run() {
+                if (parent != null) {
+                    parent.getDisplay().syncExec(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            initializeContent();
+                            tableViewer.refresh();
+                        }
+
+                    });
+                }
+            }
+        };
+        refreshAction.setToolTipText("Refresh");
+        refreshAction.setImageDescriptor(images.getDescriptor(ELCL_REFRESH));
+
+        getViewSite().getActionBars().getToolBarManager().add(refreshAction);
     }
 
     private void newColumn(TableColumnLayout tableLayout, final String classifier) {
