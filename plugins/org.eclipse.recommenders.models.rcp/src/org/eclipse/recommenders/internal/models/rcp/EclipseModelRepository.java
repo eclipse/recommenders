@@ -14,6 +14,7 @@ import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.REPOS
 import static org.eclipse.recommenders.utils.Urls.mangle;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -22,8 +23,10 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.models.DownloadCallback;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.ModelCoordinate;
@@ -32,6 +35,7 @@ import org.eclipse.recommenders.models.rcp.ModelEvents.ModelRepositoryUrlChanged
 import org.eclipse.recommenders.rcp.IRcpService;
 
 import com.google.common.base.Optional;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -50,6 +54,8 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
 
     @Inject
     ModelsRcpPreferences prefs;
+
+    private EventBus bus = InjectionService.getInstance().requestInstance(EventBus.class);;
 
     ModelRepository delegate;
 
@@ -121,4 +127,13 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
         }
     }
 
+    public void deleteModels() throws IOException {
+        try {
+            // TODO Fire ModelRepositoryShutdown
+            FileUtils.cleanDirectory(basedir);
+            // TODO Fire ModelRepositoryStartup instead of doing a Changed *after* all the files have been deleted.
+        } finally {
+            bus.post(new ModelRepositoryUrlChangedEvent());
+        }
+    }
 }
