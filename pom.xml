@@ -418,7 +418,7 @@
 						<configuration>
 							<target>
 								<artifact>
-									<groupId>${project.groupId}</groupId>
+									<groupId>org.eclipse.recommenders</groupId>
 									<artifactId>kepler</artifactId>
 									<version>${recommenders-version}</version>
 								</artifact>
@@ -438,7 +438,7 @@
 						<configuration>
 							<target>
 								<artifact>
-									<groupId>${project.groupId}</groupId>
+									<groupId>org.eclipse.recommenders</groupId>
 									<artifactId>luna</artifactId>
 									<version>${recommenders-version}</version>
 								</artifact>
