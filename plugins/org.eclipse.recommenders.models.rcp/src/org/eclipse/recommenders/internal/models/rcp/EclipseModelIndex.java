@@ -159,7 +159,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
         private final File indexdir;
 
         private DownloadModelIndexJob(IModelRepository repository, ModelCoordinate mc, File indexdir) {
-            super(repository, mc);
+            super(repository, mc, false);
             this.indexdir = indexdir;
         }
 
@@ -178,7 +178,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
         }
 
         private void initalizeIndex(final File indexdir) throws IOException {
-            File location = repository.getLocation(INDEX).orNull();
+            File location = repository.getLocation(INDEX, false).orNull();
             indexdir.mkdirs();
             Zips.unzip(location, indexdir);
             delegate.open();
