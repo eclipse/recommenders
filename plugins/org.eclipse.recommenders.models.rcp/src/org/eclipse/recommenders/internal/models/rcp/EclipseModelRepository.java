@@ -89,8 +89,7 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
     @Override
     public Optional<File> getLocation(final ModelCoordinate mc) {
         Optional<File> location = delegate.getLocation(mc);
-        if (!location.isPresent() && prefs.autoDownloadEnabled) {
-            updateProxySettings();
+        if (prefs.autoDownloadEnabled) {
             new DownloadModelArchiveJob(delegate, mc).schedule();
         }
         return location;

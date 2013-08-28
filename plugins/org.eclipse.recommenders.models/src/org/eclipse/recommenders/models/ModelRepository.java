@@ -15,9 +15,11 @@ package org.eclipse.recommenders.models;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Optional.*;
-import static org.sonatype.aether.repository.RepositoryPolicy.UPDATE_POLICY_INTERVAL;
+import static java.util.Collections.singletonList;
+import static org.sonatype.aether.repository.RepositoryPolicy.CHECKSUM_POLICY_FAIL;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import org.apache.maven.repository.internal.DefaultArtifactDescriptorReader;
@@ -29,6 +31,7 @@ import org.apache.maven.repository.internal.VersionsMetadataGeneratorFactory;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.file.FileWagon;
 import org.eclipse.recommenders.utils.Executors;
+import org.slf4j.LoggerFactory;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
@@ -39,6 +42,7 @@ import org.sonatype.aether.impl.MetadataGeneratorFactory;
 import org.sonatype.aether.impl.VersionRangeResolver;
 import org.sonatype.aether.impl.VersionResolver;
 import org.sonatype.aether.impl.internal.DefaultServiceLocator;
+import org.sonatype.aether.impl.internal.Slf4jLogger;
 import org.sonatype.aether.repository.Authentication;
 import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.repository.Proxy;
@@ -48,10 +52,10 @@ import org.sonatype.aether.resolution.ArtifactRequest;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
+import org.sonatype.aether.spi.log.Logger;
 import org.sonatype.aether.transfer.TransferCancelledException;
 import org.sonatype.aether.transfer.TransferEvent;
 import org.sonatype.aether.transfer.TransferListener;
-import org.sonatype.aether.util.DefaultRepositorySystemSession;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.maven.wagon.AhcWagon;
 
@@ -69,44 +73,62 @@ public class ModelRepository implements IModelRepository {
     private final File basedir;
     private final RemoteRepository remoteRepo;
     private final RepositorySystem system;
-    private final RepositorySystemSession onlineSession;
     private final RepositorySystemSession offlineSession;
 
     public ModelRepository(File basedir, String remoteUrl) throws Exception {
         this.basedir = basedir;
         remoteRepo = newRemoteRepository(remoteUrl);
         system = createRepositorySystem();
-        onlineSession = createRepositorySystemSession(false);
-        offlineSession = createRepositorySystemSession(true);
+        offlineSession = createOfflineRepositorySystemSession();
     }
 
     private RepositorySystem createRepositorySystem() throws Exception {
         DefaultServiceLocator locator = new DefaultServiceLocator();
+
         locator.addService(VersionResolver.class, DefaultVersionResolver.class);
         locator.addService(VersionRangeResolver.class, DefaultVersionRangeResolver.class);
+
+        locator.addService(ArtifactDescriptorReader.class, DefaultArtifactDescriptorReader.class);
+
         locator.addService(MetadataGeneratorFactory.class, SnapshotMetadataGeneratorFactory.class);
         locator.addService(MetadataGeneratorFactory.class, VersionsMetadataGeneratorFactory.class);
-        locator.addService(ArtifactDescriptorReader.class, DefaultArtifactDescriptorReader.class);
-        locator.setServices(WagonProvider.class, new ManualWagonProvider());
+
         locator.addService(RepositoryConnectorFactory.class, WagonRepositoryConnectorFactory.class);
+        locator.setServices(WagonProvider.class, new ManualWagonProvider());
+
+        locator.setServices(Logger.class, new Slf4jLogger(LoggerFactory.getLogger(getClass())));
+
         return locator.getService(RepositorySystem.class);
     }
 
-    private RepositorySystemSession createRepositorySystemSession(boolean offline) {
+    private RepositorySystemSession createOfflineRepositorySystemSession() {
+        MavenRepositorySystemSession session = createDefaultSession();
+        session.setOffline(true);
+        return session;
+    }
+
+    private RepositorySystemSession createOnlineRepositorySystemSession(TransferListener listener) {
+        MavenRepositorySystemSession session = createDefaultSession();
+        session.setTransferListener(listener);
+        return session;
+    }
+
+    /**
+     * Provides a default session that can be further customized.
+     */
+    private MavenRepositorySystemSession createDefaultSession() {
         MavenRepositorySystemSession session = new MavenRepositorySystemSession();
 
         LocalRepository localRepo = new LocalRepository(basedir);
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepo));
-        session.setOffline(offline);
 
-        // Do not expect POMs in a model repository
+        // Do not expect POMs in a model repository.
         session.setIgnoreMissingArtifactDescriptor(true);
-        // TODO Do expect checksums. Should be switched to CHECKSUM_POLICY_FAIL as the new model repos provide
-        // checksums. :-)
-        session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_IGNORE);
+        // Do expect checksums.
+        session.setChecksumPolicy(CHECKSUM_POLICY_FAIL);
 
         // Try to update any models older than 60 minutes.
-        session.setUpdatePolicy(UPDATE_POLICY_INTERVAL + ":" + 60);
+        session.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_INTERVAL + ":" + 60);
         // Do not retry downloading missing models for 60 minutes.
         session.setNotFoundCachingEnabled(true);
         // Do retry downloading models after a failed download.
@@ -119,7 +141,7 @@ public class ModelRepository implements IModelRepository {
     }
 
     private RemoteRepository newRemoteRepository(String url) {
-        return new RemoteRepository("remote-models", "default", url);
+        return new RemoteRepository("models", "default", url);
     }
 
     @Override
@@ -129,14 +151,9 @@ public class ModelRepository implements IModelRepository {
 
     // Warning: Only thread-safe as long as offlineSession is not mutated.
     private Optional<File> resolveLocally(ModelCoordinate mc) {
-        final Artifact coord = new DefaultArtifact(mc.getGroupId(), mc.getArtifactId(), mc.getClassifier(),
-                mc.getExtension(), mc.getVersion());
-
-        ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact(coord);
-        request.addRepository(remoteRepo);
-
         try {
+            final Artifact coord = toSnapshotArtifact(mc);
+            ArtifactRequest request = new ArtifactRequest(coord, Collections.singletonList(remoteRepo), null);
             ArtifactResult result = system.resolveArtifact(offlineSession, request);
             return Optional.of(result.getArtifact().getFile());
         } catch (ArtifactResolutionException e) {
@@ -156,38 +173,38 @@ public class ModelRepository implements IModelRepository {
 
     private ListenableFuture<File> schedule(final ModelCoordinate mc, DownloadCallback callback) {
         final DownloadCallback cb = firstNonNull(callback, DownloadCallback.NULL);
-        final Artifact coord = new DefaultArtifact(mc.getGroupId(), mc.getArtifactId(), mc.getClassifier(),
-                mc.getExtension(), mc.getVersion());
+        final Artifact coord = toSnapshotArtifact(mc);
         return executor.submit(new DownloadArtifactTask(coord, new TransferListener() {
 
             @Override
-            public void transferSucceeded(TransferEvent e) {
-                cb.downloadSucceeded();
+            public void transferInitiated(TransferEvent e) throws TransferCancelledException {
+                cb.downloadInitiated(e.getResource().getResourceName());
             }
 
             @Override
             public void transferStarted(TransferEvent e) throws TransferCancelledException {
-                cb.downloadStarted();
+                cb.downloadStarted(e.getResource().getResourceName());
             }
 
             @Override
             public void transferProgressed(TransferEvent e) throws TransferCancelledException {
-                cb.downloadProgressed(e.getTransferredBytes(), e.getResource().getContentLength());
+                cb.downloadProgressed(e.getResource().getResourceName(), e.getTransferredBytes(), e.getResource()
+                        .getContentLength());
             }
 
             @Override
-            public void transferInitiated(TransferEvent e) throws TransferCancelledException {
-                cb.downloadInitiated();
+            public void transferSucceeded(TransferEvent e) {
+                cb.downloadSucceeded(e.getResource().getResourceName());
             }
 
             @Override
             public void transferFailed(TransferEvent e) {
-                cb.downloadFailed();
+                cb.downloadFailed(e.getResource().getResourceName());
             }
 
             @Override
             public void transferCorrupted(TransferEvent e) throws TransferCancelledException {
-                cb.downloadCorrupted();
+                cb.downloadCorrupted(e.getResource().getResourceName());
             }
         }));
     }
@@ -227,14 +244,10 @@ public class ModelRepository implements IModelRepository {
 
         @Override
         public File call() throws Exception {
-            DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(onlineSession);
-            session.setTransferListener(callback);
-
-            ArtifactRequest request = new ArtifactRequest();
-            request.setArtifact(coord);
-            request.addRepository(remoteRepo);
-
+            final RepositorySystemSession onlineSession = createOnlineRepositorySystemSession(callback);
+            ArtifactRequest request = new ArtifactRequest(coord, singletonList(remoteRepo), null);
             ArtifactResult result = system.resolveArtifact(onlineSession, request);
+
             return result.getArtifact().getFile();
         }
     }
@@ -263,5 +276,10 @@ public class ModelRepository implements IModelRepository {
         @Override
         public void release(Wagon wagon) {
         }
+    }
+
+    private Artifact toSnapshotArtifact(ModelCoordinate mc) {
+        return new DefaultArtifact(mc.getGroupId(), mc.getArtifactId(), mc.getClassifier(), mc.getExtension(),
+                mc.getVersion() + "-SNAPSHOT");
     }
 }
