@@ -13,32 +13,33 @@ package org.eclipse.recommenders.models;
 import java.io.File;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
 
 public interface IModelRepository {
 
     /**
-     * Returns the file for the given coordinate - if it exists locally. Note that calling this method <b>may</b>
-     * trigger a background download of the requested resource depending on the actual implementation.
+     * Returns the file for the given model coordinate if it exists locally.
+     * 
+     * Depending on the implementation, calling this method <b>may</b> also trigger a background download of the
+     * requested file.
+     * 
+     * This method can be assumed to return quickly.
      */
     Optional<File> getLocation(ModelCoordinate mc);
 
     /**
      * Resolves the given model coordinate to a local file. If the model does not yet exist locally this method attempts
-     * to download the model from the remote repository. This call blocks the caller until the download finished.
+     * to download the model from the remote repository.
+     * 
+     * This method blocks the caller until the download (if necessary) is finished; callers must not asusme that this
+     * method returns quickly.
      * 
      * @return the path to the locally cached model archive.
      * 
      * @throws Exception
-     *             if no model could be downloaded, e.g., because the coordinate does not exist on the remote repository
-     *             or a network/io error occurred.
+     *             if no file could be downloaded, e.g., because the model coordinate does not exist in the remote
+     *             repository or an I/O error has occurred.
      */
     Optional<File> resolve(ModelCoordinate mc) throws Exception;
 
-    /**
-     * Resolves the given model coordinate to a local file. If the model does not yet exist locally this method accesses
-     * the remote repository to download it. This call run's in a background process.
-     */
-    ListenableFuture<File> resolve(ModelCoordinate mc, DownloadCallback callback);
-
+    Optional<File> resolve(ModelCoordinate mc, DownloadCallback callback) throws Exception;
 }

@@ -36,7 +36,6 @@ import org.eclipse.recommenders.rcp.IRcpService;
 import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * The Eclipse RCP wrapper around an {@link IModelRepository} that responds to (@link ModelRepositoryChangedEvent)s by
@@ -76,12 +75,6 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
         open();
     }
 
-    @Override
-    public Optional<File> resolve(ModelCoordinate mc) throws Exception {
-        updateProxySettings();
-        return delegate.resolve(mc);
-    }
-
     public boolean isDownloaded(final ModelCoordinate mc) {
         return delegate.getLocation(mc).isPresent();
     }
@@ -89,16 +82,22 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
     @Override
     public Optional<File> getLocation(final ModelCoordinate mc) {
         Optional<File> location = delegate.getLocation(mc);
-        if (!location.isPresent() && prefs.autoDownloadEnabled) {
-            updateProxySettings();
+        if (prefs.autoDownloadEnabled) {
             new DownloadModelArchiveJob(delegate, mc).schedule();
         }
         return location;
     }
 
     @Override
-    public ListenableFuture<File> resolve(ModelCoordinate mc, DownloadCallback callback) {
+    public Optional<File> resolve(ModelCoordinate mc) throws Exception {
         updateProxySettings();
+        return delegate.resolve(mc);
+    }
+
+    @Override
+    public Optional<File> resolve(ModelCoordinate mc, DownloadCallback callback) throws Exception {
+        updateProxySettings();
+        // Immediately resolves, but as this does not use a Job you do not end up in the Progress view.
         return delegate.resolve(mc, callback);
     }
 

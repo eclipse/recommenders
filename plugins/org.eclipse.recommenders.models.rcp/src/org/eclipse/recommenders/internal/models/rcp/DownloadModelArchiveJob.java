@@ -15,18 +15,25 @@ import static org.eclipse.recommenders.internal.models.rcp.Constants.BUNDLE_ID;
 import static org.eclipse.recommenders.internal.models.rcp.Messages.*;
 import static org.eclipse.ui.internal.misc.StatusUtil.newStatus;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.recommenders.models.DownloadCallback;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.ModelCoordinate;
+
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public class DownloadModelArchiveJob extends Job {
 
     private IModelRepository repository;
     private ModelCoordinate mc;
+
+    private Map<String, IProgressMonitor> downloads = Maps.newHashMap();
 
     public DownloadModelArchiveJob(IModelRepository repository, ModelCoordinate mc) {
         super(String.format(JOB_RESOLVING_MODEL, mc));
@@ -37,21 +44,34 @@ public class DownloadModelArchiveJob extends Job {
     @Override
     protected IStatus run(final IProgressMonitor monitor) {
         try {
+            monitor.beginTask(TASK_RESOLVING, IProgressMonitor.UNKNOWN);
             repository.resolve(mc, new DownloadCallback() {
+
                 @Override
-                public void downloadStarted() {
-                    monitor.beginTask(TASK_RESOLVING, IProgressMonitor.UNKNOWN);
+                public void downloadInitiated(String path) {
+                    downloads.put(path, new SubProgressMonitor(monitor, 1));
                 }
 
                 @Override
-                public void downloadProgressed(long transferred, long total) {
+                public void downloadProgressed(String path, long transferred, long total) {
+                    IProgressMonitor submonitor = downloads.get(path);
                     String message = bytesToString(transferred) + "/" + bytesToString(total);
-                    monitor.subTask(message);
-                    monitor.worked(1);
+                    submonitor.subTask(message);
+                    submonitor.worked(1);
+                }
+
+                @Override
+                public void downloadSucceeded(String path) {
+                    downloads.get(path).done();
+                }
+
+                @Override
+                public void downloadFailed(String path) {
+                    downloads.get(path).done();
                 }
             }).get();
         } catch (Exception e) {
-            return newStatus(BUNDLE_ID, "failed to download " + mc, e);
+            return newStatus(BUNDLE_ID, "Failed to download " + mc, e);
         } finally {
             monitor.done();
         }
