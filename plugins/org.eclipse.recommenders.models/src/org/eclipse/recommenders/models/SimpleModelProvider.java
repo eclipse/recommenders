@@ -60,7 +60,7 @@ public abstract class SimpleModelProvider<K extends IUniqueName<?>, M> implement
                 return absent();
             }
             // since the guava cache does not support null values, we have to check this before.
-            if (!repository.getLocation(mc).isPresent()) {
+            if (!repository.getLocation(mc, false).isPresent()) {
                 return absent();
             }
             ZipFile zip = openZips.get(mc);
@@ -93,7 +93,7 @@ public abstract class SimpleModelProvider<K extends IUniqueName<?>, M> implement
     private final class ZipCacheLoader extends CacheLoader<ModelCoordinate, ZipFile> {
         @Override
         public ZipFile load(ModelCoordinate key) throws Exception {
-            File location = repository.getLocation(key).get();
+            File location = repository.getLocation(key, true).get();
             // read file in memory to speed up access
             toByteArray(newInputStreamSupplier(location));
             return new ZipFile(location);

@@ -36,7 +36,6 @@ import org.eclipse.recommenders.rcp.IRcpService;
 import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * The Eclipse RCP wrapper around an {@link IModelRepository} that responds to (@link ModelRepositoryChangedEvent)s by
@@ -77,29 +76,24 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
     }
 
     @Override
-    public Optional<File> resolve(ModelCoordinate mc) throws Exception {
-        updateProxySettings();
-        return delegate.resolve(mc);
-    }
-
-    public boolean isDownloaded(final ModelCoordinate mc) {
-        return delegate.getLocation(mc).isPresent();
-    }
-
-    @Override
-    public Optional<File> getLocation(final ModelCoordinate mc) {
-        Optional<File> location = delegate.getLocation(mc);
-        if (!location.isPresent() && prefs.autoDownloadEnabled) {
-            updateProxySettings();
-            new DownloadModelArchiveJob(delegate, mc).schedule();
+    public Optional<File> getLocation(final ModelCoordinate mc, boolean prefetch) {
+        Optional<File> location = delegate.getLocation(mc, false);
+        if (prefetch && prefs.autoDownloadEnabled) {
+            new DownloadModelArchiveJob(delegate, mc, false).schedule();
         }
         return location;
     }
 
     @Override
-    public ListenableFuture<File> resolve(ModelCoordinate mc, DownloadCallback callback) {
+    public Optional<File> resolve(ModelCoordinate mc, boolean force) {
         updateProxySettings();
-        return delegate.resolve(mc, callback);
+        return delegate.resolve(mc, force);
+    }
+
+    @Override
+    public Optional<File> resolve(ModelCoordinate mc, boolean force, DownloadCallback callback) {
+        updateProxySettings();
+        return delegate.resolve(mc, force, callback);
     }
 
     void updateProxySettings() {
