@@ -89,9 +89,12 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
     @Override
     public Optional<File> getLocation(final ModelCoordinate mc) {
         Optional<File> location = delegate.getLocation(mc);
-        if (!location.isPresent() && prefs.autoDownloadEnabled) {
-            updateProxySettings();
-            new DownloadModelArchiveJob(delegate, mc).schedule();
+        if (prefs.autoDownloadEnabled) {
+            // TODO We need a way to report progress without scheduling a Job. (The download is scheduled by Aether if
+            // the SNAPSHOT update interval has elapsed.)
+            // Also, the callback might be executed multiple times, as maven-metadata.xml and/or the model artifact
+            // might be downloaded.
+            resolve(mc, new DownloadCallback());
         }
         return location;
     }
