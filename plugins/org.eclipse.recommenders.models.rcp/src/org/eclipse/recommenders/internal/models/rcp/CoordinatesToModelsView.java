@@ -326,7 +326,7 @@ public class CoordinatesToModelsView extends ViewPart {
                     }
                 }
             }
-            new DownloadMultipleModelArchivesJob(eclipseModelRepository, mcs).schedule();
+            new DownloadMultipleModelArchivesJob(eclipseModelRepository, mcs, true).schedule();
         }
     }
 }
