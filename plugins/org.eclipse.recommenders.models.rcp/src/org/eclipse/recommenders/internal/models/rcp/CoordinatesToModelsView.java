@@ -55,17 +55,19 @@ public class CoordinatesToModelsView extends ViewPart {
     private IModelIndex modelIndex;
     private EclipseModelRepository eclipseModelRepository;
     private SharedImages images;
+    private EventBus bus;
 
     @Inject
     public CoordinatesToModelsView(final EventBus workspaceBus,
             final EclipseDependencyListener eclipseDependencyListener, final IProjectCoordinateProvider pcProvider,
             final IModelIndex modelIndex, final EclipseModelRepository eclipseModelRepository, SharedImages images) {
+        bus = workspaceBus;
         dependencyListener = eclipseDependencyListener;
         this.pcProvider = pcProvider;
         this.modelIndex = modelIndex;
         this.eclipseModelRepository = eclipseModelRepository;
         this.images = images;
-        workspaceBus.register(this);
+        bus.register(this);
     }
 
     @Override
@@ -326,7 +328,7 @@ public class CoordinatesToModelsView extends ViewPart {
                     }
                 }
             }
-            new DownloadMultipleModelArchivesJob(eclipseModelRepository, mcs).schedule();
+            new DownloadMultipleModelArchivesJob(eclipseModelRepository, mcs, true, bus).schedule();
         }
     }
 }

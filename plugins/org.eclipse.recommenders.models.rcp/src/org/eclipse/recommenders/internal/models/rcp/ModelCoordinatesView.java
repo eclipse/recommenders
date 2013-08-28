@@ -173,7 +173,7 @@ public class ModelCoordinatesView extends ViewPart {
                 ModelCoordinate mc = Coordinates.toModelCoordinate(pc, classifier, "zip");
                 if (!containsModel(classifier, element)) {
                     return "No model registered";
-                } else if (repo.isDownloaded(mc)) {
+                } else if (isDownloaded(mc)) {
                     return "Locally available";
                 } else {
                     return "Remotely available";
@@ -192,11 +192,15 @@ public class ModelCoordinatesView extends ViewPart {
                 ModelCoordinate mc = Coordinates.toModelCoordinate(pc, classifier, "zip");
                 if (!containsModel(classifier, element)) {
                     return images.getImage(SharedImages.OBJ_CROSS_RED);
-                } else if (!repo.isDownloaded(mc)) {
+                } else if (!isDownloaded(mc)) {
                     return images.getImage(SharedImages.OBJ_BULLET_BLUE);
                 } else {
                     return images.getImage(SharedImages.OBJ_CHECK_GREEN);
                 }
+            }
+
+            private boolean isDownloaded(final ModelCoordinate mc) {
+                return repo.getLocation(mc, false).isPresent();
             }
         });
     }
