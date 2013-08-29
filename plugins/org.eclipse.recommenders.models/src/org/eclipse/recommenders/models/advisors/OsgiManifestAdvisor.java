@@ -12,6 +12,7 @@ package org.eclipse.recommenders.models.advisors;
 
 import static com.google.common.base.Optional.*;
 import static org.eclipse.recommenders.models.DependencyType.*;
+import static org.eclipse.recommenders.utils.Versions.canonicalizeVersion;
 import static org.eclipse.recommenders.utils.Zips.closeQuietly;
 
 import java.io.File;
@@ -103,8 +104,9 @@ public class OsgiManifestAdvisor extends AbstractProjectCoordinateAdvisor {
         String artifactId = bundleName.substring(0, indexOf == -1 ? bundleName.length() : indexOf);
         String groupId = Artifacts.guessGroupId(artifactId);
         Optional<String> version = OsgiVersionParser.parse(bundleVersion);
+
         if (version.isPresent()) {
-            return of(new ProjectCoordinate(groupId, artifactId, version.get()));
+            return ProjectCoordinate.create(groupId, artifactId, canonicalizeVersion(version.get()));
         }
         return absent();
     }
