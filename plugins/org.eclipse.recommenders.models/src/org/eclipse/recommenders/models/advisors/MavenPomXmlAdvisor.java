@@ -10,9 +10,10 @@
  */
 package org.eclipse.recommenders.models.advisors;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.absent;
 import static org.eclipse.recommenders.models.DependencyType.PROJECT;
 import static org.eclipse.recommenders.utils.IOUtils.closeQuietly;
+import static org.eclipse.recommenders.utils.Versions.canonicalizeVersion;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -118,7 +119,7 @@ public class MavenPomXmlAdvisor extends AbstractProjectCoordinateAdvisor {
 
         int indexOf = version.indexOf("-");
         version = version.substring(0, indexOf == -1 ? version.length() : indexOf);
-        return of(new ProjectCoordinate(groupId, artifactId, version));
+        return ProjectCoordinate.create(groupId, artifactId, canonicalizeVersion(version));
     }
 
     private boolean containsPropertyReference(String string) {
