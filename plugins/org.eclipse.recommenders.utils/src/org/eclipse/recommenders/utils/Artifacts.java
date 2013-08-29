@@ -10,15 +10,10 @@
  */
 package org.eclipse.recommenders.utils;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
-import static org.apache.commons.lang3.ArrayUtils.reverse;
-import static org.apache.commons.lang3.ArrayUtils.subarray;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.apache.commons.lang3.StringUtils.replace;
-import static org.apache.commons.lang3.StringUtils.split;
-import static org.eclipse.recommenders.utils.Checks.ensureIsInRange;
+import static com.google.common.base.Optional.*;
+import static org.apache.commons.lang3.ArrayUtils.*;
+import static org.apache.commons.lang3.StringUtils.*;
+import static org.eclipse.recommenders.utils.Checks.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -183,6 +178,17 @@ public class Artifacts {
      */
     public static Artifact newExtension(Artifact a, String extension) {
         return new SubArtifact(a, a.getClassifier(), extension);
+    }
+
+    /**
+     * Creates a snapshot artifact from a release artifact by appending "-SNAPSHOT" to the version segment. Note that
+     * the passed artifact must not be a snapshot artifact already.
+     */
+    public static Artifact asSnapshot(Artifact releaseArtifact) {
+        ensureIsFalse(releaseArtifact.isSnapshot(), "'%s' is already a snapshot artifact!");
+        return new DefaultArtifact(releaseArtifact.getGroupId(), releaseArtifact.getArtifactId(),
+                releaseArtifact.getClassifier(), releaseArtifact.getExtension(), releaseArtifact.getVersion()
+                        + "-SNAPSHOT", releaseArtifact.getProperties(), releaseArtifact.getFile());
     }
 
     /**
