@@ -11,7 +11,7 @@
 package org.eclipse.recommenders.utils;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
@@ -108,5 +108,65 @@ public class VersionsTest {
         Version closest = Versions.findClosest(V_1_0_0, Arrays.asList(V_2_0_0, V_2_1_0));
 
         assertThat(closest, is(equalTo(V_2_0_0)));
+    }
+
+    @Test
+    public void testValidVersion() {
+        assertTrue(Versions.isValidVersionString("0.100.1"));
+    }
+
+    @Test
+    public void testEmptyVersionIsInvalid() {
+        assertFalse(Versions.isValidVersionString(""));
+    }
+
+    @Test
+    public void testVersionWithLeadingZeroInMajorIsInvalid() {
+        assertFalse(Versions.isValidVersionString("01.1.1"));
+    }
+
+    @Test
+    public void testVersionWithLeadingZeroInMinorIsInvalid() {
+        assertFalse(Versions.isValidVersionString("1.01.1"));
+    }
+
+    @Test
+    public void testVersionWithLeadingZeroInMicroIsInvalid() {
+        assertFalse(Versions.isValidVersionString("1.1.01"));
+    }
+
+    @Test
+    public void testVersionWithToManyPartsIsInvalid() {
+        assertFalse(Versions.isValidVersionString("0.1.2.3"));
+    }
+
+    @Test
+    public void testNothingIsAddedIfItIsNotNecessary() {
+        assertEquals("2.3.0", Versions.addMissingVersionPartsIfMissing("2.3.0"));
+    }
+
+    @Test
+    public void testMicroVersionIsAddedCorrect() {
+        assertEquals("2.3.0", Versions.addMissingVersionPartsIfMissing("2.3"));
+    }
+
+    @Test
+    public void testAddMicroVersionFailed() {
+        assertNotEquals("2.3.0", Versions.addMissingVersionPartsIfMissing("2.3-SNAPSHOT"));
+    }
+
+    @Test
+    public void testAddMinorAndMicroVersionCorrect() {
+        assertEquals("2.0.0", Versions.addMissingVersionPartsIfMissing("2"));
+    }
+
+    @Test
+    public void testMavenCoordinateIsCanonicalizeCorrect() {
+        assertEquals("2.3.0", Versions.canonicalizeMavenVersion("2.3-SNAPSHOT"));
+    }
+
+    @Test
+    public void testOsgiCoordinateIsCanonicalizeCorrect() {
+        assertEquals("2.3.0", Versions.canonicalizeOSGIVersion("2.3.Beta"));
     }
 }

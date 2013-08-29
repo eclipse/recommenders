@@ -10,6 +10,10 @@
  */
 package org.eclipse.recommenders.models;
 
+import static org.eclipse.recommenders.utils.Checks.ensureIsTrue;
+import static org.eclipse.recommenders.utils.Coordinates.isCoordinateFieldValid;
+import static org.eclipse.recommenders.utils.Versions.isValidVersionString;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.recommenders.utils.Throws;
@@ -33,12 +37,25 @@ public final class ModelCoordinate {
     private final String classifier;
     private final String extension;
 
+    /**
+     * Creates a new coordinate.
+     * 
+     * @throws IllegalArgumentException
+     *             If the version string has an invalid format.
+     * 
+     * @see VersionStrings#isValidVersionString(String)
+     */
     public ModelCoordinate(String groupId, String artifactId, String classifier, String extension, String version) {
         this.groupId = Strings.nullToEmpty(groupId);
         this.artifactId = Strings.nullToEmpty(artifactId);
         this.classifier = Strings.nullToEmpty(classifier);
         this.extension = Strings.nullToEmpty(extension);
         this.version = Strings.nullToEmpty(version);
+        ensureIsTrue(isCoordinateFieldValid(this.groupId));
+        ensureIsTrue(isCoordinateFieldValid(this.artifactId));
+        ensureIsTrue(isCoordinateFieldValid(this.classifier));
+        ensureIsTrue(isCoordinateFieldValid(this.extension));
+        ensureIsTrue(isValidVersionString(this.version));
     }
 
     public String getGroupId() {

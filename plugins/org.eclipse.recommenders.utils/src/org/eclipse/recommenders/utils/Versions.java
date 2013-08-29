@@ -7,17 +7,25 @@
  *
  * Contributors:
  *    Andreas Sewe - initial API and implementation.
+ *    Olav Lenz - Add methods for version strings.
  */
 package org.eclipse.recommenders.utils;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 public final class Versions {
+
+    private static final Pattern versionPattern = Pattern
+            .compile("([0-9]|([1-9][0-9]*))\\.([0-9]|([1-9][0-9]*))\\.([0-9]|([1-9][0-9]*))");
+
+    private static final Pattern osgiVersionSuffixPattern = Pattern.compile("\\.[a-zA-Z]+");
 
     private Versions() {
     }
@@ -101,5 +109,57 @@ public final class Versions {
                 return 2 * (referencePoint.getPatch() - version.getPatch());
             }
         }
+    }
+
+    /**
+     * Checks if the version has the correct format.
+     * 
+     * The version must have the following structure: <code>major.minor.micro</code> where major, minor and micro are
+     * any number (but w\o leading 0).
+     */
+    public static boolean isValidVersionString(String version) {
+        return versionPattern.matcher(version).matches();
+    }
+
+    /**
+     * Canonicalize a given OSGI version string. Suffixes like ".Beta" are removed. Also missing version parts will be
+     * added if necessary.
+     */
+    public static String canonicalizeOSGIVersion(String version) {
+        String temp;
+        Matcher matcher = osgiVersionSuffixPattern.matcher(version);
+        if (matcher.find()) {
+            temp = version.substring(0, matcher.start());
+        } else {
+            temp = version;
+        }
+        return addMissingVersionPartsIfMissing(temp);
+    }
+
+    /**
+     * Canonicalize a given version string. Therefore suffixes beginning with "-" will be removed (e.g. "-SNAPSHOT").
+     * Also missing version parts will be added if necessary.
+     */
+    public static String canonicalizeMavenVersion(String version) {
+        String temp = version;
+        int indexOf = version.indexOf("-");
+        if (indexOf != -1) {
+            temp = version.substring(0, indexOf);
+        }
+        return addMissingVersionPartsIfMissing(temp);
+    }
+
+    /**
+     * Add '.0' as minor and micro version if they are missing in the string. The method counts the '.' contained in the
+     * string and add a '.0' if the number of '.' is smaller than 2 or ".0.0" if the number of '.' is 0.
+     */
+    public static String addMissingVersionPartsIfMissing(String version) {
+        String temp = version;
+        String[] parts = version.split("\\.");
+        int missingVersionParts = 3 - parts.length;
+        for (int i = 0; i < missingVersionParts; i++) {
+            temp += ".0";
+        }
+        return temp;
     }
 }

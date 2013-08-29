@@ -10,6 +10,11 @@
  */
 package org.eclipse.recommenders.models;
 
+import static com.google.common.base.Optional.*;
+import static org.eclipse.recommenders.utils.Checks.ensureIsTrue;
+import static org.eclipse.recommenders.utils.Coordinates.isCoordinateFieldValid;
+import static org.eclipse.recommenders.utils.Versions.isValidVersionString;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.recommenders.utils.Checks;
@@ -35,12 +40,35 @@ public class ProjectCoordinate {
     private final String version;
 
     /**
+     * Creates a new coordinate. Note that <code>null</code> values are replaced with an empty string. If the version
+     * string has a invalid format <code>absent()</code> is returned.
+     * 
+     * @see VersionStrings#isValidVersionString(String)
+     */
+    public static Optional<ProjectCoordinate> create(@Nullable String groupId, @Nullable String artifactId,
+            @Nullable String version) {
+        try {
+            return of(new ProjectCoordinate(groupId, artifactId, version));
+        } catch (IllegalArgumentException e) {
+            return absent();
+        }
+    }
+
+    /**
      * Creates a new coordinate. Note that <code>null</code> values are replaced with an empty string.
+     * 
+     * @throws IllegalArgumentException
+     *             If the coordinate parts have an invalid format.
+     * 
+     * @see VersionStrings#isValidVersionString(String)
      */
     public ProjectCoordinate(@Nullable String groupId, @Nullable String artifactId, @Nullable String version) {
         this.groupId = Strings.nullToEmpty(groupId);
         this.artifactId = Strings.nullToEmpty(artifactId);
         this.version = Strings.nullToEmpty(version);
+        ensureIsTrue(isCoordinateFieldValid(this.groupId));
+        ensureIsTrue(isCoordinateFieldValid(this.artifactId));
+        ensureIsTrue(isValidVersionString(this.version));
     }
 
     public String getGroupId() {
