@@ -10,7 +10,9 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Optional.*;
+import static org.eclipse.jdt.launching.JavaRuntime.*;
 import static org.eclipse.recommenders.models.DependencyInfo.PROJECT_NAME;
 
 import java.io.File;
@@ -37,31 +39,33 @@ public final class Dependencies {
     static IWorkspaceRoot workspace;
 
     public static Optional<DependencyInfo> createJREDependencyInfo(final IJavaProject javaProject) {
-        String executionEnvironmentId = getExecutionEnvironmentId(javaProject);
+        Optional<String> executionEnvironmentId = getExecutionEnvironmentId(javaProject);
 
         try {
-            IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+            // Note, this throws an NPE when even the default vm is null.
+            IVMInstall vmInstall = firstNonNull(getVMInstall(javaProject), getDefaultVMInstall());
             File javaHome = vmInstall.getInstallLocation();
-
             Map<String, String> attributes = Maps.newHashMap();
-            attributes.put(DependencyInfo.EXECUTION_ENVIRONMENT, executionEnvironmentId);
+            if (executionEnvironmentId.isPresent()) {
+                attributes.put(DependencyInfo.EXECUTION_ENVIRONMENT, executionEnvironmentId.get());
+            }
             return fromNullable(new DependencyInfo(javaHome, DependencyType.JRE, attributes));
         } catch (CoreException e) {
             return absent();
         }
     }
 
-    private static String getExecutionEnvironmentId(final IJavaProject javaProject) {
+    private static Optional<String> getExecutionEnvironmentId(final IJavaProject javaProject) {
         try {
             for (IClasspathEntry entry : javaProject.getRawClasspath()) {
                 if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-                    return JavaRuntime.getExecutionEnvironmentId(entry.getPath());
+                    return fromNullable(JavaRuntime.getExecutionEnvironmentId(entry.getPath()));
                 }
             }
+            return absent();
         } catch (JavaModelException e) {
-            e.printStackTrace();
+            return absent();
         }
-        return "";
     }
 
     public static DependencyInfo createDependencyInfoForProject(final IJavaProject project) {
