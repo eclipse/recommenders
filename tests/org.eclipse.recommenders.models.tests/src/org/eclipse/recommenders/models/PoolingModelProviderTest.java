@@ -11,10 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipFile;
 
-import org.eclipse.recommenders.models.UniqueTypeName;
-import org.eclipse.recommenders.models.IModelRepository;
-import org.eclipse.recommenders.models.ModelCoordinate;
-import org.eclipse.recommenders.models.PoolingModelProvider;
 import org.eclipse.recommenders.utils.Zips;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -87,6 +83,11 @@ public class PoolingModelProviderTest {
         protected Optional<String> loadModel(ZipFile zip, UniqueTypeName key) throws Exception {
             // return a "simple" model
             return of(new String(""));
+        }
+
+        @Override
+        protected boolean hasModel(ZipFile zip, UniqueTypeName key) {
+            return true;
         }
     }
 }

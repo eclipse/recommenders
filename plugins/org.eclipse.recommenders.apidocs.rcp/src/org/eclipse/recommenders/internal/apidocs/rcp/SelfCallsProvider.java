@@ -200,6 +200,12 @@ public final class SelfCallsProvider extends ApidocProvider {
             IOUtils.closeQuietly(is);
             return of(res);
         }
+
+        @Override
+        protected boolean hasModel(ZipFile zip, UniqueTypeName key) {
+            String path = Zips.path(key.getName(), ".json");
+            return zip.getEntry(path) != null;
+        }
     }
 
     public static class MethodSelfCallsDirectivesModelProvider extends
@@ -221,6 +227,12 @@ public final class SelfCallsProvider extends ApidocProvider {
             MethodSelfcallDirectives res = GsonUtil.deserialize(is, MethodSelfcallDirectives.class);
             IOUtils.closeQuietly(is);
             return of(res);
+        }
+
+        @Override
+        protected boolean hasModel(ZipFile zip, UniqueMethodName key) {
+            String path = Zips.path(key.getName(), ".json");
+            return zip.getEntry(path) != null;
         }
     }
 }

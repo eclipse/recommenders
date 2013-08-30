@@ -37,4 +37,9 @@ public class PoolingOverrideModelProvider extends PoolingModelProvider<IUniqueNa
     protected void passivateModel(IOverrideModel model) {
         model.reset();
     }
+
+    @Override
+    protected boolean hasModel(ZipFile zip, IUniqueName<ITypeName> key) {
+        return JayesOverrideModel.hasModel(zip, key.getName());
+    }
 }

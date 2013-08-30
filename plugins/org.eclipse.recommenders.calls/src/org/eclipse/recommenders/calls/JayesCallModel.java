@@ -411,4 +411,8 @@ public class JayesCallModel implements ICallModel {
         return true;
     }
 
+    public static boolean hasModel(ZipFile zip, ITypeName name) {
+        String path = Zips.path(name, ".data");
+        return zip.getEntry(path) != null;
+    }
 }

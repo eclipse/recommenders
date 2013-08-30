@@ -63,6 +63,11 @@ public class JayesOverrideModel implements IOverrideModel {
         return Optional.of(network);
     }
 
+    public static boolean hasModel(ZipFile zip, ITypeName name) {
+        String path = Zips.path(name, ".json");
+        return zip.getEntry(path) != null;
+    }
+
     private JunctionTreeAlgorithm junctionTreeAlgorithm;
     private ITypeName typeName;
     private BayesNode patternNode;
@@ -130,4 +135,5 @@ public class JayesOverrideModel implements IOverrideModel {
     public String toString() {
         return format("Model for '%s'", typeName);
     }
+
 }
