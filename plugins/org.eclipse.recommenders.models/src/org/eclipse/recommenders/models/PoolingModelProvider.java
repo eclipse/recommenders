@@ -15,6 +15,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 import java.io.IOException;
 import java.util.IdentityHashMap;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -67,6 +68,9 @@ public abstract class PoolingModelProvider<K extends IUniqueName<?>, M> extends 
         }
         try {
             M model = pool.borrowObject(key);
+            if (model == null) {
+                log.error("Pooling Model provider must not return absent/null." + getClass());
+            }
             if (model != null) {
                 borrowedModels.put(model, key);
             }
@@ -79,6 +83,9 @@ public abstract class PoolingModelProvider<K extends IUniqueName<?>, M> extends 
 
     @Override
     public void releaseModel(M model) {
+        if (model == null) {
+            return;
+        }
         try {
             K key = borrowedModels.remove(model);
             pool.returnObject(key, model);
@@ -122,6 +129,12 @@ public abstract class PoolingModelProvider<K extends IUniqueName<?>, M> extends 
             throw new IOException(e);
         }
     }
+
+    /**
+     * Is called before {@link #loadModel(ZipFile, IUniqueName)} is called. If this method returns false, the attempt to
+     * load the model for the given key is canceled.
+     */
+    abstract protected boolean hasModel(ZipFile zip, K key);
 
     /**
      * Invoked before the model is returned from the pool.

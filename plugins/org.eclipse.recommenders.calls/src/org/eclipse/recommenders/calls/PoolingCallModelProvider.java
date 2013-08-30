@@ -37,4 +37,9 @@ public class PoolingCallModelProvider extends PoolingModelProvider<UniqueTypeNam
     protected void passivateModel(ICallModel model) {
         model.reset();
     }
+
+    @Override
+    protected boolean hasModel(ZipFile zip, UniqueTypeName key) {
+        return JayesCallModel.hasModel(zip, key.getName());
+    }
 }

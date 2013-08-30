@@ -322,6 +322,12 @@ public final class OverridesProvider extends ApidocProvider {
             IOUtils.closeQuietly(is);
             return of(res);
         }
+
+        @Override
+        protected boolean hasModel(ZipFile zip, UniqueTypeName key) {
+            String path = Zips.path(key.getName(), ".json");
+            return zip.getEntry(path) != null;
+        }
     }
 
     public static class OverrideDirectivesModelProvider extends
@@ -344,6 +350,11 @@ public final class OverridesProvider extends ApidocProvider {
             IOUtils.closeQuietly(is);
             return of(res);
         }
-    }
 
+        @Override
+        protected boolean hasModel(ZipFile zip, UniqueTypeName key) {
+            String path = Zips.path(key.getName(), ".json");
+            return zip.getEntry(path) != null;
+        }
+    }
 }
