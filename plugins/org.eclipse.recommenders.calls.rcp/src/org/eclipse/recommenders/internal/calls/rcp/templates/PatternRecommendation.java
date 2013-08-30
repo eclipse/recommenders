@@ -16,6 +16,7 @@ import org.eclipse.recommenders.utils.Checks;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -87,5 +88,11 @@ public final class PatternRecommendation implements Comparable<PatternRecommenda
     @Override
     public boolean equals(final Object object) {
         return object instanceof PatternRecommendation && methods.equals(((PatternRecommendation) object).methods);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this).add("calls", methods).add("prob", probability).add("type", type)
+                .add("name", name).toString();
     }
 }
