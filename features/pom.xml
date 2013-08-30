@@ -83,6 +83,7 @@
 								<plugin id="com.ning.async-http-client" />
 								<plugin id="org.eclipse.m2e.maven.runtime" />
 								<plugin id="org.jboss.netty" />
+								<plugin id="org.hamcrest" />
 							</excludes>
 							<!-- Non-breakable space, as normal spaces are trimmed. -->
 							<labelSuffix>&#xA0;(Sources)</labelSuffix>

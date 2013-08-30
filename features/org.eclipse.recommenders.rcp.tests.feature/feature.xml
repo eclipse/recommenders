@@ -32,6 +32,10 @@
       %license
    </license>
 
+   <requires>
+      <import feature="org.eclipse.recommenders.rcp.feature" version="1.100.0.qualifier"/>
+   </requires>
+
    <plugin
          id="org.eclipse.recommenders.apidocs.rcp.tests"
          download-size="0"
@@ -109,6 +113,47 @@
 
    <plugin
          id="org.eclipse.recommenders.utils.tests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objenesis"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.mockito"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.junit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.hamcrest"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.recommenders.jayes.transformation"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.hamcrest.library"
          download-size="0"
          install-size="0"
          version="0.0.0"
