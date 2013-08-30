@@ -41,8 +41,10 @@ public final class Dependencies {
 
         try {
             IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+            if (vmInstall == null) {
+                vmInstall = JavaRuntime.getDefaultVMInstall();
+            }
             File javaHome = vmInstall.getInstallLocation();
-
             Map<String, String> attributes = Maps.newHashMap();
             attributes.put(DependencyInfo.EXECUTION_ENVIRONMENT, executionEnvironmentId);
             return fromNullable(new DependencyInfo(javaHome, DependencyType.JRE, attributes));
