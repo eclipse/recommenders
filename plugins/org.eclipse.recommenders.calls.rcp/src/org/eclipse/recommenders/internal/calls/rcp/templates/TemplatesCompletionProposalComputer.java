@@ -12,6 +12,7 @@ package org.eclipse.recommenders.internal.calls.rcp.templates;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static org.eclipse.recommenders.internal.calls.rcp.Constants.TEMPLATES_CATEGORY_ID;
+import static org.eclipse.recommenders.utils.Recommendations.top;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -177,16 +178,19 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         ProjectCoordinate pc = pcProvider.resolve(t).or(ProjectCoordinate.UNKNOWN);
         UniqueTypeName name = new UniqueTypeName(pc, elementResolver.toRecType(t));
         model = store.acquireModel(name).orNull();
-        if (model == null) {
-            return;
+        try {
+            if (model == null) {
+                return;
+            }
+            model.setObservedCalls(Sets.<IMethodName>newHashSet());
+            completionAnalyzer = new AstCallCompletionAnalyzer(rCtx);
+            if (mode == CompletionMode.TYPE_NAME) {
+                handleTypeNameCompletionRequest(proposalBuilder);
+            }
+            handleVariableCompletionRequest(proposalBuilder);
+        } finally {
+            store.releaseModel(model);
         }
-
-        completionAnalyzer = new AstCallCompletionAnalyzer(rCtx);
-        if (mode == CompletionMode.TYPE_NAME) {
-            handleTypeNameCompletionRequest(proposalBuilder);
-        }
-        handleVariableCompletionRequest(proposalBuilder);
-        store.releaseModel(model);
     }
 
     private void handleVariableCompletionRequest(final ProposalBuilder proposalBuilder) {
@@ -210,18 +214,19 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         for (final Recommendation<String> p : callgroups) {
             final String patternId = p.getProposal();
             model.setObservedPattern(patternId);
-            for (final Recommendation<IMethodName> def : model.recommendDefinitions()) {
-                final Collection<IMethodName> calls = getCallsForDefinition(model, def.getProposal());
-                calls.removeAll(completionAnalyzer.getCalls());
-                // patterns with less than two calls are no patterns :)
-                if (calls.size() < 2) {
-                    continue;
-                }
-
-                final PatternRecommendation pattern = new PatternRecommendation(patternId, model.getReceiverType(),
-                        calls, p.getRelevance());
-                proposalBuilder.addPattern(pattern);
+            final Collection<IMethodName> calls = Sets.newTreeSet();
+            for (Recommendation<IMethodName> r : top(model.recommendCalls(), 100, 0.1d)) {
+                calls.add(r.getProposal());
             }
+            // patterns with less than two calls are no patterns :)
+            if (calls.size() < 2) {
+                continue;
+            }
+
+            final PatternRecommendation pattern = new PatternRecommendation(patternId, model.getReceiverType(), calls,
+                    p.getRelevance());
+            proposalBuilder.addPattern(pattern);
+            // }
         }
     }
 
@@ -238,9 +243,11 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         for (final Recommendation<String> p : callgroups) {
             final String patternId = p.getProposal();
             model.setObservedPattern(patternId);
-            for (final Recommendation<IMethodName> def : model.recommendDefinitions()) {
+            for (final Recommendation<IMethodName> def : Recommendations.top(model.recommendDefinitions(), 100, 0.01d)) {
                 IMethodName constructor = def.getProposal();
-                if (!constructor.isInit()) {
+                // TODO XXX this looks like a bug in some mining code: we have wring receiver methods here: new
+                // Label(Composite) for instance occurred in Composite model. Why?
+                if (!constructor.isInit() || constructor.getDeclaringType() != model.getReceiverType()) {
                     continue;
                 }
                 final Collection<IMethodName> calls = getCallsForDefinition(model, constructor);
