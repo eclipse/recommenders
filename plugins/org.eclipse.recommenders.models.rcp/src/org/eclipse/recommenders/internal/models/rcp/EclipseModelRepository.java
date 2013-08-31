@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
+import static com.google.common.base.Optional.absent;
 import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.REPOSITORY_BASEDIR;
 import static org.eclipse.recommenders.utils.Urls.mangle;
 
@@ -30,12 +31,17 @@ import org.eclipse.recommenders.models.DownloadCallback;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.ModelCoordinate;
 import org.eclipse.recommenders.models.ModelRepository;
+import org.eclipse.recommenders.models.rcp.ModelEvents.ModelRepositoryClosedEvent;
+import org.eclipse.recommenders.models.rcp.ModelEvents.ModelRepositoryOpenedEvent;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ModelRepositoryUrlChangedEvent;
 import org.eclipse.recommenders.rcp.IRcpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -43,6 +49,8 @@ import com.google.common.util.concurrent.ListenableFuture;
  * reconfiguring the underlying repository. It also manages proxy settings and handling of auto download properties.
  */
 public class EclipseModelRepository implements IModelRepository, IRcpService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EclipseModelRepository.class);
 
     @Inject
     @Named(REPOSITORY_BASEDIR)
@@ -59,15 +67,21 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
 
     ModelRepository delegate;
 
+    private boolean isOpen = false;
+
     @PostConstruct
     void open() throws Exception {
         File cache = new File(basedir, mangle(prefs.remote));
         cache.mkdirs();
         delegate = new ModelRepository(cache, prefs.remote);
+        isOpen = true;
+        bus.post(new ModelRepositoryOpenedEvent());
     }
 
     @PreDestroy
-    void close() throws Exception {
+    void close() {
+        isOpen = false;
+        bus.post(new ModelRepositoryClosedEvent());
     }
 
     @Subscribe
@@ -78,16 +92,25 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
 
     @Override
     public Optional<File> resolve(ModelCoordinate mc) throws Exception {
+        if (!isOpen) {
+            return absent();
+        }
         updateProxySettings();
         return delegate.resolve(mc);
     }
 
     public boolean isDownloaded(final ModelCoordinate mc) {
+        if (!isOpen) {
+            return false;
+        }
         return delegate.getLocation(mc).isPresent();
     }
 
     @Override
     public Optional<File> getLocation(final ModelCoordinate mc) {
+        if (!isOpen) {
+            return absent();
+        }
         Optional<File> location = delegate.getLocation(mc);
         if (!location.isPresent() && prefs.autoDownloadEnabled) {
             updateProxySettings();
@@ -98,6 +121,9 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
 
     @Override
     public ListenableFuture<File> resolve(ModelCoordinate mc, DownloadCallback callback) {
+        if (!isOpen) {
+            return Futures.immediateFuture(null);
+        }
         updateProxySettings();
         return delegate.resolve(mc, callback);
     }
@@ -129,11 +155,14 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
 
     public void deleteModels() throws IOException {
         try {
-            // TODO Fire ModelRepositoryShutdown
+            close();
             FileUtils.cleanDirectory(basedir);
-            // TODO Fire ModelRepositoryStartup instead of doing a Changed *after* all the files have been deleted.
         } finally {
-            bus.post(new ModelRepositoryUrlChangedEvent());
+            try {
+                open();
+            } catch (Exception e) {
+                LOG.error("A error occurred while opening EclipseModelRepository after deleting models.", e);
+            }
         }
     }
 }
