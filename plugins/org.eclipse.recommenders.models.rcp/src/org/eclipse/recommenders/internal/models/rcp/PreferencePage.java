@@ -25,6 +25,8 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.ListEditor;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -78,6 +80,18 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 
         private ModelRepositoryListEditor(String name, String labelText, Composite parent) {
             super(name, labelText, parent);
+            getList().addSelectionListener(new SelectionAdapter() {
+
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    if (getList().getItems().length > 1) {
+                        getRemoveButton().setEnabled(true);
+                    } else {
+                        getRemoveButton().setEnabled(false);
+                    }
+                }
+
+            });
         }
 
         @Override
