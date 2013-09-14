@@ -18,6 +18,9 @@ import org.eclipse.e4.core.di.extensions.Preference;
 import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ModelRepositoryUrlChangedEvent;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("restriction")
@@ -27,16 +30,28 @@ public class ModelsRcpPreferences {
     @Preference(P_REPOSITORY_ENABLE_AUTO_DOWNLOAD)
     public boolean autoDownloadEnabled;
 
-    public String remote;
+    public String[] remotes;
 
-    private EventBus bus = InjectionService.getInstance().requestInstance(EventBus.class);;
+    private EventBus bus = InjectionService.getInstance().requestInstance(EventBus.class);
+
+    static final String URL_SEPARATOR = "\t";;
 
     @Inject
-    void setRemote(@Preference(Constants.P_REPOSITORY_URL) String newRemote) throws Exception {
-        String old = remote;
-        remote = newRemote;
-        if (old != null && !remote.equals(old)) {
+    void setRemote(@Preference(Constants.P_REPOSITORY_URL_LIST_ACTIV) String newRemote) throws Exception {
+        String[] old = remotes;
+        remotes = split(newRemote);
+        if (old != null && !remotes.equals(old)) {
             bus.post(new ModelRepositoryUrlChangedEvent());
         }
     }
+
+    public static String[] split(String stringList) {
+        Iterable<String> split = Splitter.on(ModelsRcpPreferences.URL_SEPARATOR).omitEmptyStrings().split(stringList);
+        return Iterables.toArray(split, String.class);
+    }
+
+    public static String join(String[] items) {
+        return Joiner.on(ModelsRcpPreferences.URL_SEPARATOR).join(items);
+    }
+
 }

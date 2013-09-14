@@ -7,14 +7,19 @@
  *
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
+ *    Olav Lenz - multi index support.
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
 import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
 import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.INDEX_BASEDIR;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -44,6 +49,8 @@ import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -68,12 +75,12 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @Inject
     EventBus bus;
 
-    private ModelIndex delegate;
+    private Map<String, ModelIndex> delegates = Maps.newHashMap();
+
+    private Map<String, File> activedirs = Maps.newHashMap();
 
     private Cache<Pair<ProjectCoordinate, String>, Optional<ModelCoordinate>> cache = CacheBuilder.newBuilder()
             .maximumSize(10).concurrencyLevel(1).build();
-
-    private File activedir;
 
     @PostConstruct
     @Override
@@ -82,17 +89,39 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     private void doOpen(boolean scheduleIndexUpdate) throws IOException {
-        activedir = new File(basedir, Urls.mangle(prefs.remote));
-        delegate = new ModelIndex(activedir);
-        if (!indexAlreadyDownloaded(activedir)) {
-            new DownloadModelArchiveJob(repository, INDEX, true, bus).schedule(300);
+        String[] remoteUrls = prefs.remotes;
+        delegates.clear();
+        activedirs.clear();
+        basedir.mkdir();
+
+        for (String url : remoteUrls) {
+            doOpen(url, scheduleIndexUpdate);
+        }
+
+    }
+
+    private void doOpen(String remoteUrl, boolean scheduleIndexUpdate) throws IOException {
+        File indexLocation = new File(basedir, Urls.mangle(remoteUrl));
+        ModelIndex modelIndex = new ModelIndex(indexLocation);
+        activedirs.put(remoteUrl, indexLocation);
+        delegates.put(remoteUrl, modelIndex);
+        if (!indexAlreadyDownloaded(indexLocation) || scheduleIndexUpdate) {
+            triggerIndexDownload(remoteUrl);
             return;
         }
-        delegate.open();
+        modelIndex.open();
         bus.post(new ModelIndexOpenedEvent());
-        if (scheduleIndexUpdate) {
-            new DownloadModelArchiveJob(repository, INDEX, true, bus).schedule(300);
-        }
+    }
+
+    private void triggerIndexDownload(String remoteUrl) {
+        ModelCoordinate mc = createIndexCoordinateWithRemoteUrlHint(remoteUrl);
+        new DownloadModelArchiveJob(repository, mc, true, bus).schedule(300);
+    }
+
+    private ModelCoordinate createIndexCoordinateWithRemoteUrlHint(String remoteUrl) {
+        ModelCoordinate mc = new ModelCoordinate(INDEX.getGroupId(), INDEX.getArtifactId(), INDEX.getClassifier(),
+                INDEX.getExtension(), INDEX.getVersion());
+        return addRepositoryUrlHint(mc, remoteUrl);
     }
 
     private boolean indexAlreadyDownloaded(File location) {
@@ -105,7 +134,16 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @Override
     public void close() throws IOException {
         cache.invalidateAll();
-        delegate.close();
+        for (String remoteUrl : delegates.keySet()) {
+            close(remoteUrl);
+        }
+    }
+
+    private void close(String remoteUrl) throws IOException {
+        ModelIndex index = delegates.get(remoteUrl);
+        if (index != null) {
+            index.close();
+        }
     }
 
     /**
@@ -119,7 +157,16 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
                 @Override
                 public Optional<ModelCoordinate> call() {
-                    return delegate.suggest(pc, modelType);
+                    for (Entry<String, ModelIndex> entry : delegates.entrySet()) {
+                        Optional<ModelCoordinate> suggest = entry.getValue().suggest(pc, modelType);
+                        if (suggest.isPresent()) {
+                            ModelCoordinate mc = suggest.get();
+                            mc.addHint(ModelCoordinate.REPOSITORY_URL, entry.getKey());
+                            return of(mc);
+                        }
+                    }
+
+                    return absent();
                 }
             });
         } catch (ExecutionException e) {
@@ -130,22 +177,58 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
     @Override
     public ImmutableSet<ModelCoordinate> suggestCandidates(ProjectCoordinate pc, String modelType) {
-        return delegate.suggestCandidates(pc, modelType);
+        Set<ModelCoordinate> candidates = Sets.newHashSet();
+        for (Entry<String, ModelIndex> entry : delegates.entrySet()) {
+            candidates.addAll(addRepositoryUrlHint(entry.getValue().suggestCandidates(pc, modelType), entry.getKey()));
+        }
+
+        return ImmutableSet.copyOf(candidates);
+    }
+
+    public Set<ModelCoordinate> addRepositoryUrlHint(Set<ModelCoordinate> modelCoordinates, String url) {
+        for (ModelCoordinate modelCoordinate : modelCoordinates) {
+            addRepositoryUrlHint(modelCoordinate, url);
+        }
+        return modelCoordinates;
+    }
+
+    private ModelCoordinate addRepositoryUrlHint(ModelCoordinate modelCoordinate, String url) {
+        modelCoordinate.addHint(ModelCoordinate.REPOSITORY_URL, url);
+        return modelCoordinate;
     }
 
     @Override
     public ImmutableSet<ModelCoordinate> getKnownModels(String modelType) {
-        return delegate.getKnownModels(modelType);
+        Set<ModelCoordinate> models = Sets.newHashSet();
+        for (Entry<String, ModelIndex> entry : delegates.entrySet()) {
+            models.addAll(addRepositoryUrlHint(entry.getValue().getKnownModels(modelType), entry.getKey()));
+        }
+
+        return ImmutableSet.copyOf(models);
     }
 
     @Override
     public Optional<ProjectCoordinate> suggestProjectCoordinateByArtifactId(String artifactId) {
-        return delegate.suggestProjectCoordinateByArtifactId(artifactId);
+        for (ModelIndex index : delegates.values()) {
+            Optional<ProjectCoordinate> suggest = index.suggestProjectCoordinateByArtifactId(artifactId);
+            if (suggest.isPresent()) {
+                return suggest;
+            }
+        }
+
+        return absent();
     }
 
     @Override
     public Optional<ProjectCoordinate> suggestProjectCoordinateByFingerprint(String fingerprint) {
-        return delegate.suggestProjectCoordinateByFingerprint(fingerprint);
+        for (ModelIndex index : delegates.values()) {
+            Optional<ProjectCoordinate> suggest = index.suggestProjectCoordinateByFingerprint(fingerprint);
+            if (suggest.isPresent()) {
+                return suggest;
+            }
+        }
+
+        return absent();
     }
 
     @Subscribe
@@ -161,12 +244,17 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @Subscribe
     public void onEvent(ModelArchiveDownloadedEvent e) throws IOException {
         if (INDEX.equals(e.model)) {
-            close();
-            File location = repository.getLocation(INDEX, false).orNull();
-            activedir.mkdirs();
-            FileUtils.cleanDirectory(activedir);
-            Zips.unzip(location, activedir);
-            doOpen(false);
+            File location = repository.getLocation(e.model, false).orNull();
+            Optional<String> hint = e.model.getHint(ModelCoordinate.REPOSITORY_URL);
+            if (hint.isPresent()) {
+                String remoteUrl = hint.get();
+                close(remoteUrl);
+                File file = activedirs.get(remoteUrl);
+                file.mkdir();
+                FileUtils.cleanDirectory(file);
+                Zips.unzip(location, file);
+                doOpen(remoteUrl, false);
+            }
         }
     }
 }
