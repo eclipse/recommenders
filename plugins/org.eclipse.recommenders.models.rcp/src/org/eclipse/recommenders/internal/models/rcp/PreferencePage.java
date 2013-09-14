@@ -32,12 +32,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-
 public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-    private static final String URL_SEPARATOR = "\t";
     private ModelRepositoryListEditor repoEditor;
 
     public PreferencePage() {
@@ -62,7 +57,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
     @Override
     public boolean performOk() {
         IPreferenceStore store = getPreferenceStore();
-        store.setValue(P_REPOSITORY_URL, repoEditor.getItem(0));
+        store.setValue(P_REPOSITORY_URL_LIST_ACTIV, ModelsRcpPreferences.join(repoEditor.getItems()));
         return super.performOk();
     }
 
@@ -80,14 +75,14 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
             });
         }
 
-        public String getItem(int index) {
-            return super.getList().getItems()[index];
+        public String[] getItems() {
+            return super.getList().getItems();
 
         }
 
         @Override
         protected String[] parseString(String stringList) {
-            return split(stringList);
+            return ModelsRcpPreferences.split(stringList);
         }
 
         @Override
@@ -119,17 +114,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 
         @Override
         protected String createList(String[] items) {
-            return join(items);
+            return ModelsRcpPreferences.join(items);
         }
 
-    }
-
-    private static String[] split(String stringList) {
-        Iterable<String> split = Splitter.on(URL_SEPARATOR).omitEmptyStrings().split(stringList);
-        return Iterables.toArray(split, String.class);
-    }
-
-    private static String join(String[] items) {
-        return Joiner.on(URL_SEPARATOR).join(items);
     }
 }
