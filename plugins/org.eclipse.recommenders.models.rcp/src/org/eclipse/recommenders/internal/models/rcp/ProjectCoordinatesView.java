@@ -169,8 +169,8 @@ public class ProjectCoordinatesView extends ViewPart {
         protected CellEditor getCellEditor(Object element) {
             if (element instanceof Entry) {
                 Set<String> values = Sets.newHashSet();
-                Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
-                for (ProjectCoordinate pc : presentInstances(entry.getValue())) {
+                Collection<Optional<ProjectCoordinate>> value = extractProjectCoordinates(element);
+                for (ProjectCoordinate pc : presentInstances(value)) {
                     values.add(pc.toString());
                 }
                 editor.setInput(values);
@@ -186,8 +186,8 @@ public class ProjectCoordinatesView extends ViewPart {
         @Override
         protected Object getValue(Object element) {
             if (element instanceof Entry) {
-                Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
-                Optional<ProjectCoordinate> optionalFirstMatchingCoordinate = findFirstMatchingCoordinate(entry);
+                Collection<Optional<ProjectCoordinate>> pcs = extractProjectCoordinates(element);
+                Optional<ProjectCoordinate> optionalFirstMatchingCoordinate = findFirstMatchingCoordinate(pcs);
                 if (optionalFirstMatchingCoordinate.isPresent()) {
                     formerValue = optionalFirstMatchingCoordinate.get().toString();
                 } else {
@@ -209,20 +209,21 @@ public class ProjectCoordinatesView extends ViewPart {
                 return;
             }
             if (element instanceof Entry) {
-                Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
+                DependencyInfo dependencyInfo = extractDependencyInfo(element);
                 if ("".equals(value)) {
-                    manualPcAdvisor.removeManualMapping(entry.getKey());
+                    manualPcAdvisor.removeManualMapping(dependencyInfo);
+                    bus.post(new ProjectCoordinateChangeEvent(dependencyInfo));
                 } else {
                     try {
                         ProjectCoordinate valueOf = ProjectCoordinate.valueOf((String) value);
-                        manualPcAdvisor.setManualMapping(entry.getKey(), valueOf);
+                        manualPcAdvisor.setManualMapping(dependencyInfo, valueOf);
+                        bus.post(new ProjectCoordinateChangeEvent(dependencyInfo));
                     } catch (Exception e) {
                         MessageDialog.openError(table.getShell(), "Input value has wrong format!",
                                 String.format("The value '%s' did not have the right format.", value));
                         return;
                     }
                 }
-                bus.post(new ProjectCoordinateChangeEvent());
             }
             /*
              * It is needed to make a total refresh (resolve all dependencies again) because the modification of the
@@ -348,7 +349,7 @@ public class ProjectCoordinatesView extends ViewPart {
                     result = compareLocation(firstElement.getKey(), secondElement.getKey());
                     break;
                 case COLUMN_COORDINATE:
-                    result = compareCoordinate(firstElement, secondElement);
+                    result = compareCoordinate(firstElement.getValue(), secondElement.getValue());
                     break;
                 default:
                     result = 0;
@@ -361,9 +362,8 @@ public class ProjectCoordinatesView extends ViewPart {
             return result;
         }
 
-        private int compareCoordinate(
-                final Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> firstElement,
-                final Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> secondElement) {
+        private int compareCoordinate(final Collection<Optional<ProjectCoordinate>> firstElement,
+                final Collection<Optional<ProjectCoordinate>> secondElement) {
             Optional<ProjectCoordinate> optionalCoordinateFirstElement = findFirstMatchingCoordinate(firstElement);
             Optional<ProjectCoordinate> optionalCoordinateSecondElement = findFirstMatchingCoordinate(secondElement);
 
@@ -419,15 +419,15 @@ public class ProjectCoordinatesView extends ViewPart {
             @Override
             public boolean select(Viewer viewer, Object parentElement, Object element) {
                 if (element instanceof Entry) {
-                    Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
-                    return isManualMapping(entry);
+                    Collection<Optional<ProjectCoordinate>> value = extractProjectCoordinates(element);
+                    return isManualMapping(value);
                 }
                 return false;
             }
 
-            private boolean isManualMapping(Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry) {
+            private boolean isManualMapping(Collection<Optional<ProjectCoordinate>> pcs) {
                 int indexOfManualMapping = pcAdvisors.getAdvisors().indexOf(manualPcAdvisor);
-                Optional<ProjectCoordinate> opc = get(entry.getValue(), indexOfManualMapping);
+                Optional<ProjectCoordinate> opc = get(pcs, indexOfManualMapping);
                 return opc.isPresent();
             }
         };
@@ -437,8 +437,8 @@ public class ProjectCoordinatesView extends ViewPart {
             @Override
             public boolean select(Viewer viewer, Object parentElement, Object element) {
                 if (element instanceof Entry) {
-                    Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
-                    return newHashSet(presentInstances(entry.getValue())).size() > 1;
+                    Collection<Optional<ProjectCoordinate>> value = extractProjectCoordinates(element);
+                    return newHashSet(presentInstances(value)).size() > 1;
                 }
                 return false;
             }
@@ -449,8 +449,8 @@ public class ProjectCoordinatesView extends ViewPart {
             @Override
             public boolean select(Viewer viewer, Object parentElement, Object element) {
                 if (element instanceof Entry) {
-                    Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
-                    return isEmpty(presentInstances(entry.getValue()));
+                    Collection<Optional<ProjectCoordinate>> value = extractProjectCoordinates(element);
+                    return isEmpty(presentInstances(value));
                 }
                 return true;
             }
@@ -566,7 +566,7 @@ public class ProjectCoordinatesView extends ViewPart {
                         return name;
                     }
                 case COLUMN_COORDINATE:
-                    Optional<ProjectCoordinate> pc = findFirstMatchingCoordinate(entry);
+                    Optional<ProjectCoordinate> pc = findFirstMatchingCoordinate(entry.getValue());
                     if (pc.isPresent()) {
                         return pc.get().toString();
                     }
@@ -581,8 +581,7 @@ public class ProjectCoordinatesView extends ViewPart {
         @Override
         public Image getColumnImage(final Object obj, final int index) {
             if (obj instanceof Entry) {
-                Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(obj);
-                DependencyInfo dependencyInfo = entry.getKey();
+                DependencyInfo dependencyInfo = extractDependencyInfo(obj);
                 switch (index) {
                 case COLUMN_LOCATION:
                     return getImageForDependencyTyp(dependencyInfo);
@@ -715,8 +714,17 @@ public class ProjectCoordinatesView extends ViewPart {
         tableViewer.getControl().setFocus();
     }
 
-    private Optional<ProjectCoordinate> findFirstMatchingCoordinate(
-            Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry) {
-        return fromNullable(getFirst(presentInstances(entry.getValue()), null));
+    private Optional<ProjectCoordinate> findFirstMatchingCoordinate(Collection<Optional<ProjectCoordinate>> pcs) {
+        return fromNullable(getFirst(presentInstances(pcs), null));
+    }
+
+    private DependencyInfo extractDependencyInfo(final Object obj) {
+        Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(obj);
+        return entry.getKey();
+    }
+
+    private Collection<Optional<ProjectCoordinate>> extractProjectCoordinates(final Object obj) {
+        Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(obj);
+        return entry.getValue();
     }
 }
