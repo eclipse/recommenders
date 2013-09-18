@@ -212,17 +212,18 @@ public class ProjectCoordinatesView extends ViewPart {
                 Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
                 if ("".equals(value)) {
                     manualPcAdvisor.removeManualMapping(entry.getKey());
+                    bus.post(new ProjectCoordinateChangeEvent(entry.getKey()));
                 } else {
                     try {
                         ProjectCoordinate valueOf = ProjectCoordinate.valueOf((String) value);
                         manualPcAdvisor.setManualMapping(entry.getKey(), valueOf);
+                        bus.post(new ProjectCoordinateChangeEvent(entry.getKey()));
                     } catch (Exception e) {
                         MessageDialog.openError(table.getShell(), "Input value has wrong format!",
                                 String.format("The value '%s' did not have the right format.", value));
                         return;
                     }
                 }
-                bus.post(new ProjectCoordinateChangeEvent());
             }
             /*
              * It is needed to make a total refresh (resolve all dependencies again) because the modification of the
