@@ -12,8 +12,10 @@ package org.eclipse.recommenders.models.rcp;
 
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.ModelCoordinate;
+import org.eclipse.recommenders.models.ProjectCoordinate;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Optional;
 
 public class ModelEvents {
 
@@ -73,8 +75,12 @@ public class ModelEvents {
 
     @Beta
     public static class ProjectCoordinateChangeEvent {
-        // TODO this event needs to publish the affected IPackageFragmentRoot so that project coordinate providers can
-        // clear their cache entry accordingly
+
+        public Optional<ProjectCoordinate> oldProjectCoordinate;
+
+        public ProjectCoordinateChangeEvent(Optional<ProjectCoordinate> oldProjectCoordinate){
+            this.oldProjectCoordinate = oldProjectCoordinate;
+        }
     }
 
     private ModelEvents() {

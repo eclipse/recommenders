@@ -11,7 +11,8 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
 import static org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT_ROOT;
 import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createJREDependencyInfo;
 import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.IDENTIFIED_PACKAGE_FRAGMENT_ROOTS;
@@ -270,9 +271,8 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     @Subscribe
     public void onEvent(ProjectCoordinateChangeEvent e) {
-        // TODO there is yet no way to get the affected IPackageFragmentRoot from the editor. So, we are a bit
-        // over-cautious and refresh all cached entries.
-        new RefreshProjectCoordinatesJob("Refreshing cached project coordinates").schedule();
+        Optional<ProjectCoordinate> pc = e.oldProjectCoordinate;
+        new RefreshProjectCoordinatesJob("Refreshing cached project coordinates", pc).schedule();
     }
 
     @Subscribe
@@ -284,22 +284,35 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     private final class RefreshProjectCoordinatesJob extends Job {
 
+        private Optional<ProjectCoordinate> opc = null;
+
         private RefreshProjectCoordinatesJob(String name) {
             super(name);
+        }
+        
+        private RefreshProjectCoordinatesJob(String name, Optional<ProjectCoordinate> opc) {
+            super(name);
+            this.opc = opc;
         }
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-            Set<IPackageFragmentRoot> pfrs = cache.asMap().keySet();
-            monitor.beginTask("Refreshing", pfrs.size());
-            for (IPackageFragmentRoot pfr : pfrs) {
+            /*
+             * This is not really an efficiently way but since this use case occurs only rarely it should be ok so far.
+             */
+            Set<Entry<IPackageFragmentRoot, Optional<ProjectCoordinate>>> entrySet = cache.asMap().entrySet();
+            monitor.beginTask("Refresh invalid cache entries", entrySet.size());
+            for (Entry<IPackageFragmentRoot, Optional<ProjectCoordinate>> entry : entrySet) {
+                IPackageFragmentRoot pfr = entry.getKey();
                 monitor.subTask(pfr.getElementName());
-                cache.refresh(pfr);
+                if (opc == null || entry.getValue().equals(opc)) {
+                    monitor.subTask("Refreshing cache entry for " + pfr.getElementName());
+                    cache.refresh(pfr);
+                }
                 monitor.worked(1);
             }
             monitor.done();
             return Status.OK_STATUS;
         }
     }
-
 }

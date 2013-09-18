@@ -212,23 +212,32 @@ public class ProjectCoordinatesView extends ViewPart {
                 Entry<DependencyInfo, Collection<Optional<ProjectCoordinate>>> entry = cast(element);
                 if ("".equals(value)) {
                     manualPcAdvisor.removeManualMapping(entry.getKey());
+                    postProjectCoordinateChangeEvent();
                 } else {
                     try {
                         ProjectCoordinate valueOf = ProjectCoordinate.valueOf((String) value);
                         manualPcAdvisor.setManualMapping(entry.getKey(), valueOf);
+                        postProjectCoordinateChangeEvent();
                     } catch (Exception e) {
                         MessageDialog.openError(table.getShell(), "Input value has wrong format!",
                                 String.format("The value '%s' did not have the right format.", value));
                         return;
                     }
                 }
-                bus.post(new ProjectCoordinateChangeEvent());
             }
             /*
              * It is needed to make a total refresh (resolve all dependencies again) because the modification of the
              * data model isn't possible here (Entry is Immutable)
              */
             refreshData();
+        }
+
+        private void postProjectCoordinateChangeEvent() {
+            Optional<ProjectCoordinate> oldPc = absent();
+            if (!"".equals(formerValue)) {
+                oldPc = of(ProjectCoordinate.valueOf(formerValue));
+            }
+            bus.post(new ProjectCoordinateChangeEvent(oldPc));
         }
     }
 
