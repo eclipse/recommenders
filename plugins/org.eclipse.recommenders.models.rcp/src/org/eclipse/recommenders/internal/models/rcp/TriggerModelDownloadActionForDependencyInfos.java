@@ -13,7 +13,6 @@ package org.eclipse.recommenders.internal.models.rcp;
 
 import java.util.Set;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.ProjectCoordinate;
@@ -23,26 +22,17 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 
-final class TriggerModelDownloadActionForDependencyInfos extends Action {
+final class TriggerModelDownloadActionForDependencyInfos extends TriggerModelDownloadActionForProjectCoordinates {
 
     private IProjectCoordinateProvider pcProvider;
 
-    private IModelIndex modelIndex;
-
-    private EclipseModelRepository repo;
-
     private final Set<DependencyInfo> deps;
-
-    private EventBus bus;
 
     public TriggerModelDownloadActionForDependencyInfos(String text, Set<DependencyInfo> deps,
             IProjectCoordinateProvider pcProvider, IModelIndex modelIndex, EclipseModelRepository repo, EventBus bus) {
-        super(text);
+        super(text, modelIndex, repo, bus);
         this.pcProvider = pcProvider;
-        this.modelIndex = modelIndex;
-        this.repo = repo;
         this.deps = deps;
-        this.bus = bus;
     }
 
     @Override
@@ -54,6 +44,6 @@ final class TriggerModelDownloadActionForDependencyInfos extends Action {
                 pcs.add(opc.get());
             }
         }
-        new TriggerModelDownloadActionForProjectCoordinates(getText(), pcs, modelIndex, repo, bus).run();
+        triggerDownloadForProjectCoordinates(pcs);
     }
 }
