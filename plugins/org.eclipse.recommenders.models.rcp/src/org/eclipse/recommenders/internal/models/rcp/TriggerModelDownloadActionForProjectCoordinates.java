@@ -11,54 +11,53 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static java.lang.String.format;
-
 import java.util.Set;
 
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.ModelCoordinate;
 import org.eclipse.recommenders.models.ProjectCoordinate;
-import org.eclipse.recommenders.rcp.utils.Jobs;
 import org.eclipse.recommenders.utils.Constants;
 
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 
-final class TriggerModelDownloadActionForProjectCoordinates extends Action {
+class TriggerModelDownloadActionForProjectCoordinates extends TriggerModelDownloadActionForModelCoordinates {
 
-    private IModelIndex modelIndex;
-
-    private EclipseModelRepository repo;
-
-    private Set<ProjectCoordinate> pcs = Sets.newHashSet();
     private final String[] modelTypes = { Constants.CLASS_CALL_MODELS, Constants.CLASS_OVRM_MODEL,
             Constants.CLASS_OVRP_MODEL, Constants.CLASS_OVRD_MODEL, Constants.CLASS_SELFC_MODEL,
             Constants.CLASS_SELFM_MODEL };
 
-    private EventBus bus;
+    private IModelIndex modelIndex;
+
+    private Set<ProjectCoordinate> pcs = Sets.newHashSet();
+
+    TriggerModelDownloadActionForProjectCoordinates(String text, IModelIndex modelIndex, EclipseModelRepository repo,
+            EventBus bus) {
+        super(text, repo, bus);
+        this.modelIndex = modelIndex;
+    }
 
     TriggerModelDownloadActionForProjectCoordinates(String text, Set<ProjectCoordinate> pcs, IModelIndex modelIndex,
             EclipseModelRepository repo, EventBus bus) {
-        super(text);
+        this(text, modelIndex, repo, bus);
         this.pcs = pcs;
-        this.modelIndex = modelIndex;
-        this.repo = repo;
-        this.bus = bus;
     }
 
     @Override
     public void run() {
-        Set<Job> jobs = Sets.newHashSet();
+        triggerDownloadForProjectCoordinates(pcs);
+    }
+
+    public void triggerDownloadForProjectCoordinates(Set<ProjectCoordinate> pcs) {
+        Set<ModelCoordinate> mcs = Sets.newHashSet();
         for (ProjectCoordinate pc : pcs) {
             for (String modelType : modelTypes) {
                 ModelCoordinate mc = modelIndex.suggest(pc, modelType).orNull();
                 if (mc != null) {
-                    jobs.add(new DownloadModelArchiveJob(repo, mc, false, bus));
+                    mcs.add(mc);
                 }
             }
         }
-        Jobs.sequential(format("Downloading %d model archives", jobs.size()), jobs);
+        triggerDownloadForModelCoordinates(mcs);
     }
 }
