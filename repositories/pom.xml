@@ -17,6 +17,7 @@
 		<module>milestones</module>
 		<!-- Contains features that had a release review. -->
 		<module>stable</module>
+		<module>incubators</module>
 	</modules>
 	<properties>
 		<p2MirrorsURL>http://www.eclipse.org/downloads/download.php?file=/recommenders/updates/${project.artifactId}&amp;format=xml</p2MirrorsURL>
@@ -25,6 +26,7 @@
 		<statsTrackedArtifacts>org.eclipse.recommenders.jayes.feature,org.eclipse.recommenders.simrel.feature,org.eclipse.recommenders.rcp.feature,org.eclipse.recommenders.rcp.tests.feature</statsTrackedArtifacts>
 	</properties>
 	<build>
+		<outputDirectory>${project.build.directory}/repository</outputDirectory>
 		<pluginManagement>
 			<plugins>
 				<plugin>
