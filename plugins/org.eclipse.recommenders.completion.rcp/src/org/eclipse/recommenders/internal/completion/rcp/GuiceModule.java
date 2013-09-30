@@ -10,9 +10,15 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
+
 import javax.inject.Singleton;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.recommenders.completion.rcp.CompletionRcpPreferences;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor;
+import org.eclipse.ui.IWorkbench;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -25,7 +31,17 @@ public class GuiceModule extends AbstractModule {
 
     @Provides
     @Singleton
-    SessionProcessorDescriptor[] provideSessionProcessorDescriptors() {
-        return SessionProcessorDescriptor.parseExtensions();
+    SessionProcessorDescriptor[] provideSessionProcessorDescriptors(CompletionRcpPreferences prefs) {
+        SessionProcessorDescriptor[] processors = SessionProcessorDescriptor.parseExtensions();
+        prefs.setProcessors(copyOf(processors));
+        return processors;
+    }
+
+    @Provides
+    @Singleton
+    public CompletionRcpPreferences provide(IWorkbench wb) {
+        IEclipseContext context = (IEclipseContext) wb.getService(IEclipseContext.class);
+        CompletionRcpPreferences prefs = ContextInjectionFactory.make(CompletionRcpPreferences.class, context);
+        return prefs;
     }
 }

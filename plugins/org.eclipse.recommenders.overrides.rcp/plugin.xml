@@ -5,7 +5,7 @@
          point="org.eclipse.recommenders.completion.rcp.sessionprocessors">
       <processor
             class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.overrides.rcp.OverrideCompletionSessionProcessor"
-            icon="icons/view16/slice.gif"
+            icon="icons/view16/bullet_orange.png"
             id="override"
             name="Override Completion">
       </processor>
@@ -19,7 +19,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.eclipse.recommenders.rcp.category.preferences"
+            category="org.eclipse.recommenders.completion.rcp.preferences"
             class="org.eclipse.recommenders.internal.overrides.rcp.PreferencePage"
             id="org.eclipse.recommenders.overrides.rcp.preferencepage"
             name="Overrides">
