@@ -135,6 +135,11 @@ public class SessionProcessorDescriptor implements Comparable<SessionProcessorDe
     }
 
     @Override
+    public String toString() {
+        return getId();
+    }
+
+    @Override
     public int compareTo(SessionProcessorDescriptor o) {
         String other = o.priority + o.id;
         String self = priority + id;

@@ -20,7 +20,7 @@
  <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          category="org.eclipse.recommenders.rcp.category.preferences"
+          category="org.eclipse.recommenders.completion.rcp.preferences"
           class="org.eclipse.recommenders.internal.subwords.rcp.PreferencePage"
           id="org.eclipse.recommenders.internal.subwords.rcp.PreferencePage"
           name="%page.name">
