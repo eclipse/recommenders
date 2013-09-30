@@ -5,7 +5,7 @@
          point="org.eclipse.recommenders.completion.rcp.sessionprocessors">
       <processor
             class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.calls.rcp.CallCompletionSessionProcessor"
-            icon="icons/view16/braces.gif"
+            icon="icons/view16/bullet_green.png"
             id="org.eclipse.recommenders.calls.rcp.processor1"
             name="Call Recommender">
       </processor>
@@ -25,7 +25,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.eclipse.recommenders.rcp.category.preferences"
+            category="org.eclipse.recommenders.completion.rcp.preferences"
             class="org.eclipse.recommenders.internal.calls.rcp.PreferencePage"
             id="org.eclipse.recommenders.calls.rcp.preferencepage"
             name="Calls">
