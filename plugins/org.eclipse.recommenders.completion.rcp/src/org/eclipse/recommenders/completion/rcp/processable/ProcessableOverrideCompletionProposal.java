@@ -12,6 +12,8 @@ package org.eclipse.recommenders.completion.rcp.processable;
 
 import static com.google.common.base.Optional.fromNullable;
 
+import java.util.Map;
+
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
@@ -19,6 +21,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.swt.graphics.Image;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public class ProcessableOverrideCompletionProposal extends
@@ -77,6 +80,18 @@ public class ProcessableOverrideCompletionProposal extends
     @Override
     public void setProposalProcessorManager(ProposalProcessorManager mgr) {
         this.mgr = mgr;
+    }
+
+    private Map<String, Object> tags = Maps.newHashMap();
+
+    @Override
+    public void setTag(String key, Object value) {
+        tags.put(key, value);
+    }
+
+    @Override
+    public <T> T getTag(String key) {
+        return (T) tags.get(key);
     }
 
 }

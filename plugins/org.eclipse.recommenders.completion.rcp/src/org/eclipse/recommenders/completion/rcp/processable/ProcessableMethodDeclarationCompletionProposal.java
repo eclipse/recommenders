@@ -12,6 +12,8 @@ package org.eclipse.recommenders.completion.rcp.processable;
 
 import static com.google.common.base.Optional.fromNullable;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.CompletionProposal;
@@ -22,6 +24,7 @@ import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public class ProcessableMethodDeclarationCompletionProposal extends MethodDeclarationCompletionProposal implements
@@ -101,6 +104,18 @@ public class ProcessableMethodDeclarationCompletionProposal extends MethodDeclar
     @Override
     public void setProposalProcessorManager(ProposalProcessorManager mgr) {
         this.mgr = mgr;
+    }
+
+    private Map<String, Object> tags = Maps.newHashMap();
+
+    @Override
+    public void setTag(String key, Object value) {
+        tags.put(key, value);
+    }
+
+    @Override
+    public <T> T getTag(String key) {
+        return (T) tags.get(key);
     }
 
 }
