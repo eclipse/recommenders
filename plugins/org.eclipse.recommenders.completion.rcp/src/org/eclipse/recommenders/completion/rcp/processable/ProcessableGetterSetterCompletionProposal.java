@@ -12,12 +12,15 @@ package org.eclipse.recommenders.completion.rcp.processable;
 
 import static com.google.common.base.Optional.fromNullable;
 
+import java.util.Map;
+
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public class ProcessableGetterSetterCompletionProposal extends GetterSetterCompletionProposal implements
@@ -62,6 +65,18 @@ public class ProcessableGetterSetterCompletionProposal extends GetterSetterCompl
     @Override
     public void setProposalProcessorManager(ProposalProcessorManager mgr) {
         this.mgr = mgr;
+    }
+
+    private Map<String, Object> tags = Maps.newHashMap();
+
+    @Override
+    public void setTag(String key, Object value) {
+        tags.put(key, value);
+    }
+
+    @Override
+    public <T> T getTag(String key) {
+        return (T) tags.get(key);
     }
 
 }

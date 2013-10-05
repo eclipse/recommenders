@@ -59,6 +59,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public final class ProcessableLazyGenericTypeProposal extends LazyJavaTypeCompletionProposal implements
@@ -932,6 +933,18 @@ public final class ProcessableLazyGenericTypeProposal extends LazyJavaTypeComple
     @Override
     public void setProposalProcessorManager(ProposalProcessorManager mgr) {
         this.mgr = mgr;
+    }
+
+    private Map<String, Object> tags = Maps.newHashMap();
+
+    @Override
+    public void setTag(String key, Object value) {
+        tags.put(key, value);
+    }
+
+    @Override
+    public <T> T getTag(String key) {
+        return (T) tags.get(key);
     }
 
 }
