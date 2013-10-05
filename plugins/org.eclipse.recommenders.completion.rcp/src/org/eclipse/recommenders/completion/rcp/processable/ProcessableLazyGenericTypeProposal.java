@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.completion.rcp.processable;
 
 import static com.google.common.base.Optional.fromNullable;
+import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -59,6 +60,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public final class ProcessableLazyGenericTypeProposal extends LazyJavaTypeCompletionProposal implements
@@ -932,6 +934,29 @@ public final class ProcessableLazyGenericTypeProposal extends LazyJavaTypeComple
     @Override
     public void setProposalProcessorManager(ProposalProcessorManager mgr) {
         this.mgr = mgr;
+    }
+
+    private Map<String, Object> tags = Maps.newHashMap();
+
+    @Override
+    public void setTag(String key, Object value) {
+        ensureIsNotNull(key);
+        if (value == null) {
+            tags.remove(key);
+        } else {
+            tags.put(key, value);
+        }
+    }
+
+    @Override
+    public <T> Optional<T> getTag(String key) {
+        return Optional.fromNullable((T) tags.get(key));
+    }
+
+    @Override
+    public <T> T getTag(String key, T defaultValue) {
+        T res = (T) tags.get(key);
+        return res != null ? res : defaultValue;
     }
 
 }
