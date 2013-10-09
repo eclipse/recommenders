@@ -44,6 +44,7 @@ public class VersionCanonicalizationTest {
         scenarios.add(new Object[] { "Beta", "Beta" });
         scenarios.add(new Object[] { "2.3.0", "2.3.0" });
         scenarios.add(new Object[] { "1.2.3", "1.2.3.4" });
+        scenarios.add(new Object[] { "15.0.0", "15.0"});
         return scenarios;
     }
 
