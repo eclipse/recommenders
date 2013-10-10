@@ -12,7 +12,10 @@ package org.eclipse.recommenders.tests.jayes.io;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.xml.HasXPath.hasXPath;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,4 +134,5 @@ public class IOTest {
         assertArrayEquals(new double[] { 0.7271, 0.2729 }, jta.getBeliefs(net.getNode("sprinkler_on")), 0.0001);
         assertArrayEquals(new double[] { 0.4596, 0.5404 }, jta.getBeliefs(net.getNode("rain")), 0.0001);
     }
+
 }
