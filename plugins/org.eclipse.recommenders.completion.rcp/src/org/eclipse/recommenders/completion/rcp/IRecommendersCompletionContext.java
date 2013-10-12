@@ -34,6 +34,7 @@ import org.eclipse.recommenders.utils.names.ITypeName;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("restriction")
 public interface IRecommendersCompletionContext {
@@ -123,4 +124,19 @@ public interface IRecommendersCompletionContext {
 
     @Beta
     Optional<Scope> getAssistScope();
+
+    void set(String key, Object value);
+
+    <T> Optional<T> get(String key);
+
+    /**
+     * Shortcut for #get(String)
+     */
+    <T> Optional<T> get(Class<T> key);
+
+    <T> T get(String key, T defaultValue);
+
+    <T> T get(Class<T> key, T defaultValue);
+
+    ImmutableMap<String, Object> values();
 }
