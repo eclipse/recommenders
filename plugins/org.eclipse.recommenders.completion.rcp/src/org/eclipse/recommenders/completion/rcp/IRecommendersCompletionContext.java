@@ -123,4 +123,10 @@ public interface IRecommendersCompletionContext {
 
     @Beta
     Optional<Scope> getAssistScope();
+
+    void set(String key, Object value);
+
+    <T> Optional<T> get(String key);
+
+    <T> T get(String key, T defaultValue);
 }
