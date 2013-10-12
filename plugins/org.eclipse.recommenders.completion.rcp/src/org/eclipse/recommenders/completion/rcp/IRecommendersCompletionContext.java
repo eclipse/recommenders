@@ -24,16 +24,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.Region;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("restriction")
 public interface IRecommendersCompletionContext {
@@ -118,9 +116,18 @@ public interface IRecommendersCompletionContext {
      */
     Set<ITypeName> getExpectedTypeNames();
 
-    @Beta
-    Optional<CompilationUnitDeclaration> getCompliationUnitDeclaration();
+    <T> void set(Class<T> key, Object value);
 
-    @Beta
-    Optional<Scope> getAssistScope();
+    void set(String key, Object value);
+
+    <T> Optional<T> get(String key);
+
+    <T> Optional<T> get(Class<T> key);
+
+    <T> T get(String key, T defaultValue);
+
+    <T> T get(Class<T> key, T defaultValue);
+
+    ImmutableMap<String, Object> values();
+
 }
