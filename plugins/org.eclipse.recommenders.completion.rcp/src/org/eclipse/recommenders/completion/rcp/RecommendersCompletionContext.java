@@ -12,7 +12,7 @@ package org.eclipse.recommenders.completion.rcp;
 
 import static com.google.common.base.Optional.*;
 import static org.apache.commons.lang3.StringUtils.*;
-import static org.eclipse.recommenders.utils.Checks.cast;
+import static org.eclipse.recommenders.utils.Checks.*;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -74,7 +74,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
@@ -116,11 +118,15 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
     private Scope assistScope;
     private CompilationUnitDeclaration compilationUnitDeclaration;
 
+    private Map<String, Object> data = Maps.newHashMap();
+    private Map<String, ICompletionContextFunction<?>> functions;
+
     @Inject
     public RecommendersCompletionContext(final JavaContentAssistInvocationContext jdtContext,
-            final IAstProvider astProvider) {
+            final IAstProvider astProvider, Map<String, ICompletionContextFunction<?>> functions) {
         javaContext = jdtContext;
         this.astProvider = astProvider;
+        this.functions = functions;
         coreContext = cast(jdtContext.getCoreContext());
         requestExtendedContext();
         initializeReflectiveFields();
@@ -617,4 +623,35 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
         }
     }
 
+    @Override
+    public <T> Optional<T> get(String key) {
+        Object res = data.get(key);
+        if (res == null) {
+            ICompletionContextFunction<?> function = functions.get(key);
+            if (function != null) {
+                res = function.compute(this, key);
+            }
+        }
+        return fromNullable((T) res);
+    }
+
+    @Override
+    public <T> T get(String key, T defaultValue) {
+        return (T) get(key).or(defaultValue);
+    }
+
+    @Override
+    public void set(String key, Object value) {
+        ensureIsNotNull(key);
+        if (value instanceof ICompletionContextFunction) {
+            functions.put(key, (ICompletionContextFunction<?>) value);
+        } else {
+            data.put(key, value);
+        }
+    }
+
+    @Override
+    public ImmutableMap<String, Object> values() {
+        return ImmutableMap.copyOf(data);
+    }
 }
