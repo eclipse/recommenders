@@ -12,7 +12,8 @@ package org.eclipse.recommenders.completion.rcp;
 
 import static com.google.common.base.Optional.*;
 import static org.apache.commons.lang3.StringUtils.*;
-import static org.eclipse.recommenders.utils.Checks.cast;
+import static org.eclipse.recommenders.internal.completion.rcp.CompletionContextFunctions.*;
+import static org.eclipse.recommenders.utils.Checks.*;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -49,15 +50,11 @@ import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
-import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
-import org.eclipse.jdt.internal.compiler.util.ObjectVector;
-import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.Region;
@@ -66,6 +63,7 @@ import org.eclipse.recommenders.internal.rcp.RcpPlugin;
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.utils.CompilerBindings;
 import org.eclipse.recommenders.rcp.utils.JdtUtils;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
@@ -74,10 +72,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
 
-@SuppressWarnings("restriction")
+@SuppressWarnings({ "restriction", "rawtypes", "unchecked" })
 public class RecommendersCompletionContext implements IRecommendersCompletionContext {
 
     private static Logger log = LoggerFactory.getLogger(RecommendersCompletionContext.class);
@@ -116,11 +116,20 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
     private Scope assistScope;
     private CompilationUnitDeclaration compilationUnitDeclaration;
 
-    @Inject
+    private Map<String, Object> data = Maps.newHashMap();
+    private Map<String, ICompletionContextFunction> functions;
+
     public RecommendersCompletionContext(final JavaContentAssistInvocationContext jdtContext,
             final IAstProvider astProvider) {
+        this(jdtContext, astProvider, Maps.<String, ICompletionContextFunction>newHashMap());
+    }
+
+    @Inject
+    public RecommendersCompletionContext(final JavaContentAssistInvocationContext jdtContext,
+            final IAstProvider astProvider, Map<String, ICompletionContextFunction> functions) {
         javaContext = jdtContext;
         this.astProvider = astProvider;
+        this.functions = functions;
         coreContext = cast(jdtContext.getCoreContext());
         requestExtendedContext();
         initializeReflectiveFields();
@@ -545,55 +554,17 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
 
     @Override
     public List<IField> getVisibleFields() {
-        final InternalCompletionContext ctx = getCoreContext().orNull();
-        if (ctx == null || !ctx.isExtended()) {
-            return Collections.emptyList();
-        }
-        final ObjectVector v = ctx.getVisibleFields();
-        final List<IField> res = Lists.newArrayListWithCapacity(v.size);
-        for (int i = v.size(); i-- > 0;) {
-            final FieldBinding b = cast(v.elementAt(i));
-            final Optional<IField> f = JdtUtils.createUnresolvedField(b);
-            if (f.isPresent()) {
-                res.add(f.get());
-            }
-        }
-        return res;
+        return get(CCTX_VISIBLE_FIELDS, Collections.<IField>emptyList());
     }
 
     @Override
     public List<ILocalVariable> getVisibleLocals() {
-        final InternalCompletionContext ctx = getCoreContext().orNull();
-        if (ctx == null || !ctx.isExtended()) {
-            return Collections.emptyList();
-        }
-        final ObjectVector v = ctx.getVisibleLocalVariables();
-        final List<ILocalVariable> res = Lists.newArrayListWithCapacity(v.size);
-        for (int i = v.size(); i-- > 0;) {
-            final LocalVariableBinding b = cast(v.elementAt(i));
-            final JavaElement parent = (JavaElement) getEnclosingElement().get();
-            final ILocalVariable f = JdtUtils.createUnresolvedLocaVariable(b, parent);
-            res.add(f);
-        }
-        return res;
+        return get(CCTX_VISIBLE_LOCALS, Collections.<ILocalVariable>emptyList());
     }
 
     @Override
     public List<IMethod> getVisibleMethods() {
-        final InternalCompletionContext ctx = getCoreContext().orNull();
-        if (ctx == null || !ctx.isExtended()) {
-            return Collections.emptyList();
-        }
-        final ObjectVector v = ctx.getVisibleMethods();
-        final List<IMethod> res = Lists.newArrayListWithCapacity(v.size);
-        for (int i = v.size(); i-- > 0;) {
-            final MethodBinding b = cast(v.elementAt(i));
-            final Optional<IMethod> f = JdtUtils.createUnresolvedMethod(b);
-            if (f.isPresent()) {
-                res.add(f.get());
-            }
-        }
-        return res;
+        return get(CCTX_VISIBLE_METHODS, Collections.<IMethod>emptyList());
     }
 
     static {
@@ -617,4 +588,52 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
         }
     }
 
+    @Override
+    public <T> Optional<T> get(String key) {
+        Object res = data.get(key);
+        if (res == null) {
+            ICompletionContextFunction<?> function = functions.get(key);
+            if (function != null) {
+                res = function.compute(this, key);
+            }
+        }
+        return fromNullable((T) res);
+    }
+
+    @Override
+    public <T> T get(String key, @Nullable T defaultValue) {
+        T res = (T) get(key).orNull();
+        return res != null ? res : defaultValue;
+    }
+
+    @Override
+    public void set(String key, Object value) {
+        ensureIsNotNull(key);
+        if (value instanceof ICompletionContextFunction) {
+            functions.put(key, (ICompletionContextFunction<?>) value);
+        } else {
+            data.put(key, value);
+        }
+    }
+
+    @Override
+    public ImmutableMap<String, Object> values() {
+        return ImmutableMap.copyOf(data);
+    }
+
+    @Override
+    public <T> Optional<T> get(Class<T> key) {
+        return get(key.getName());
+    }
+
+    @Override
+    public <T> Optional<T> get(TypeToken<T> key) {
+        // TODO needs testing!
+        return get(key.getType().toString());
+    }
+
+    @Override
+    public <T> T get(Class<T> key, T defaultValue) {
+        return get(key.getName(), defaultValue);
+    }
 }
