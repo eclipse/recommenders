@@ -46,6 +46,8 @@ import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider
 import org.eclipse.recommenders.models.UniqueTypeName
 import org.eclipse.recommenders.rcp.SharedImages
 import org.eclipse.recommenders.internal.overrides.rcp.OverridesRcpPreferences
+import com.google.common.collect.Maps
+import org.eclipse.recommenders.internal.completion.rcp.CompletionContextFunctions
 
 @RunWith(Parameterized)
 class CompletionSmokeTest {
@@ -454,7 +456,7 @@ class MockedIntelligentCompletionProposalComputer<T extends SessionProcessor> ex
     new(T processor) {
         super(
             #{new SessionProcessorDescriptor("", "", "", null, 0, true, "", processor)}.toArray(
-                SessionProcessorDescriptor), new ProcessableProposalFactory(), new CachingAstProvider());
+                SessionProcessorDescriptor), new ProcessableProposalFactory(), new CachingAstProvider(), CompletionContextFunctions.defaultFunctions);
         this.processor = processor
     }
 
