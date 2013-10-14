@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.completion.rcp.processable;
 
 import static org.eclipse.recommenders.utils.Checks.cast;
+import static org.eclipse.recommenders.utils.Constants.TAGS_CONTEXT;
 
 import java.util.Iterator;
 import java.util.List;
@@ -109,7 +110,9 @@ public abstract class ProcessableCompletionProposalComputer extends JavaAllCompl
                     jdtContext, proposalFactory);
             res.add(proposal);
             if (proposal instanceof IProcessableProposal) {
-                fireProcessProposal((IProcessableProposal) proposal);
+                IProcessableProposal pProposal = (IProcessableProposal) proposal;
+                pProposal.setTag(TAGS_CONTEXT, crContext);
+                fireProcessProposal(pProposal);
             }
         }
         fireEndComputation(res);
