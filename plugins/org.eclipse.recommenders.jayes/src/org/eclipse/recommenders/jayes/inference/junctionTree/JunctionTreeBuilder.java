@@ -106,9 +106,21 @@ public class JunctionTreeBuilder {
     }
 
     private List<Pair<Edge, List<Integer>>> computeSepsets(JunctionTree junctionTree, BayesNet net) {
+
         final List<Pair<Edge, List<Integer>>> candidates = enumerateCandidateSepSets(junctionTree.getClusters());
         Collections.sort(candidates, new SepsetComparator(net));
         return computeMaxSpanningTree(junctionTree.getGraph(), candidates);
+
+        /*
+         * List<Pair<Edge, List<Integer>>> spanningTree = new SetSpanningTreeComputer().computeSpanningTree(junctionTree
+         * .getClusters()); fillEdges(junctionTree.getGraph(), spanningTree); return spanningTree;
+         */
+    }
+
+    private void fillEdges(Graph graph, List<Pair<Edge, List<Integer>>> spanningTree) {
+        for (Pair<Edge, List<Integer>> edge : spanningTree) {
+            graph.addEdge(edge.getFirst().getFirst(), edge.getFirst().getSecond());
+        }
 
     }
 
