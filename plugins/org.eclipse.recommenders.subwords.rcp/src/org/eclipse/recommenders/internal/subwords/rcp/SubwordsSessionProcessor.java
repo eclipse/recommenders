@@ -11,9 +11,10 @@
 package org.eclipse.recommenders.internal.subwords.rcp;
 
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+import static org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal.ProposalTag.TAGS_IS_PREFIX_MATCH;
+import static org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal.ProposalTag.TAGS_SUBWORD_SCORE;
 import static org.eclipse.recommenders.internal.subwords.rcp.LCSS.containsSubsequence;
 import static org.eclipse.recommenders.internal.subwords.rcp.SubwordsUtils.getTokensBetweenLastWhitespaceAndFirstOpeningBracket;
-import static org.eclipse.recommenders.utils.Constants.*;
 
 import java.util.Map;
 import java.util.Set;

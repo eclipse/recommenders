@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.internal.overrides.rcp;
 
 import static java.lang.String.valueOf;
+import static org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal.ProposalTag.BY_RECOMMENDERS;
 import static org.eclipse.recommenders.rcp.SharedImages.OVR_STAR;
 import static org.eclipse.recommenders.utils.Recommendations.asPercentage;
 
@@ -168,7 +169,7 @@ public class OverrideCompletionSessionProcessor extends SessionProcessor {
                 int increment = 0;
                 if (prefs.changeProposalRelevance) {
                     increment = 1000 + asPercentage(r);
-                    proposal.setTag("by-recommenders", asPercentage(r));
+                    proposal.setTag(BY_RECOMMENDERS, asPercentage(r));
                 }
                 String label = null;
                 if (prefs.decorateProposalText) {

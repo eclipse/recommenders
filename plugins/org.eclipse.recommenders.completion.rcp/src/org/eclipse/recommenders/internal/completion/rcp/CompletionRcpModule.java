@@ -10,7 +10,21 @@
  */
 package org.eclipse.recommenders.internal.completion.rcp;
 
-import static org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.*;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_COMPLETION_ON_TYPE;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_COMPLETION_PREFIX;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_ENCLOSING_ELEMENT;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_ENCLOSING_METHOD;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_ENCLOSING_TYPE;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_EXPECTED_TYPE;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_EXPECTED_TYPENAMES;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_INTERNAL_COMPLETION_CONTEXT;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_JAVA_CONTENTASSIST_CONTEXT;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_JAVA_PROPOSALS;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_RECEIVER_NAME;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_RECEIVER_TYPEBINDING;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_VISIBLE_FIELDS;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_VISIBLE_LOCALS;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_VISIBLE_METHODS;
 
 import javax.inject.Singleton;
 
@@ -28,6 +42,7 @@ import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.Receiv
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.VisibleFieldsContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.VisibleLocalsContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.VisibleMethodsContextFunction;
+import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor;
 
@@ -39,7 +54,7 @@ public class CompletionRcpModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        MapBinder<String, ICompletionContextFunction> functions = MapBinder.newMapBinder(binder(), String.class,
+        MapBinder<CompletionContextKey, ICompletionContextFunction> functions = MapBinder.newMapBinder(binder(), CompletionContextKey.class,
                 ICompletionContextFunction.class);
 
         functions.addBinding(CCTX_COMPLETION_ON_TYPE).to(CompletionOnTypeContextFunction.class);

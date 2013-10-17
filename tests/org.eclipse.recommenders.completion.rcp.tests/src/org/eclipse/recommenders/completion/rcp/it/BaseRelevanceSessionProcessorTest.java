@@ -120,19 +120,19 @@ public class BaseRelevanceSessionProcessorTest {
         }
 
         @Override
-        public void setTag(String key, Object value) {
+        public void setTag(IProposalTag key, Object value) {
             // TODO Auto-generated method stub
 
         }
 
         @Override
-        public <T> Optional<T> getTag(String key) {
+        public <T> Optional<T> getTag(IProposalTag key) {
             // TODO Auto-generated method stub
             return null;
         }
 
         @Override
-        public <T> T getTag(String key, T defaultValue) {
+        public <T> T getTag(IProposalTag key, T defaultValue) {
             // TODO Auto-generated method stub
             return null;
         }

@@ -37,10 +37,23 @@ public interface IProcessableProposal extends IJavaCompletionProposal {
 
     String getPrefix();
 
-    void setTag(String key, Object value);
+    void setTag(IProposalTag key, Object value);
 
-    <T> Optional<T> getTag(String key);
+    <T> Optional<T> getTag(IProposalTag key);
 
-    <T> T getTag(String key, T defaultValue);
+    <T> T getTag(IProposalTag key, T defaultValue);
+
+    /**
+     * Marker interface for tags that may be used with {@link IProcessableProposal}s.
+     * 
+     * @see ProposalTag standard tags
+     */
+    public interface IProposalTag {
+    }
+
+    public static enum ProposalTag implements IProposalTag {
+        CONTEXT, BY_RECOMMENDERS, TAGS_SUBWORD_SCORE, TAGS_IS_PREFIX_MATCH
+
+    }
 
 }
