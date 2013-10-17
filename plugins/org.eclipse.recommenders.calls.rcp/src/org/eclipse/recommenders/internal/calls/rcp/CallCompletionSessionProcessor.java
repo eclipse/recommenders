@@ -12,10 +12,12 @@ package org.eclipse.recommenders.internal.calls.rcp;
 
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Sets.newHashSet;
+import static org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal.ProposalTag.RECOMMENDERS_SCORE;
 import static org.eclipse.recommenders.completion.rcp.processable.ProcessableCompletionProposalComputer.NULL_PROPOSAL;
 import static org.eclipse.recommenders.completion.rcp.processable.Proposals.overlay;
 import static org.eclipse.recommenders.rcp.SharedImages.OVR_STAR;
-import static org.eclipse.recommenders.utils.Recommendations.*;
+import static org.eclipse.recommenders.utils.Recommendations.asPercentage;
+import static org.eclipse.recommenders.utils.Recommendations.top;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -171,7 +173,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
                 int relevance = 0;
                 if (prefs.changeProposalRelevance) {
                     relevance = 200 + asPercentage(call);
-                    proposal.setTag("by-recommenders", asPercentage(call));
+                    proposal.setTag(RECOMMENDERS_SCORE, asPercentage(call));
                 }
                 String label = "";
                 if (prefs.decorateProposalText) {
