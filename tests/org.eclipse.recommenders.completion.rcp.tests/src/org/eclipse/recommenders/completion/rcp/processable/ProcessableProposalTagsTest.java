@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
+import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal.IProposalTag;
 import org.eclipse.recommenders.completion.rcp.processable.ProcessableAnonymousTypeCompletionProposal;
 import org.eclipse.recommenders.completion.rcp.processable.ProcessableFilledArgumentNamesMethodProposal;
 import org.eclipse.recommenders.completion.rcp.processable.ProcessableGetterSetterCompletionProposal;
@@ -64,37 +65,41 @@ public class ProcessableProposalTagsTest {
         Field f = clazz.getDeclaredField("tags");
         f.setAccessible(true);
         f.set(sut, Maps.newHashMap());
-        Mockito.doCallRealMethod().when(sut).setTag(Mockito.anyString(), Mockito.anyObject());
-        Mockito.doCallRealMethod().when(sut).getTag(Mockito.anyString(), Mockito.anyObject());
-        Mockito.doCallRealMethod().when(sut).getTag(Mockito.anyString());
+        Mockito.doCallRealMethod().when(sut).setTag(Mockito.any(IProposalTag.class), Mockito.anyObject());
+        Mockito.doCallRealMethod().when(sut).getTag(Mockito.any(IProposalTag.class), Mockito.anyObject());
+        Mockito.doCallRealMethod().when(sut).getTag(Mockito.any(IProposalTag.class));
     }
 
     @Test
     public void testSetTagOptional() throws Exception {
         String expected = "value";
-        sut.setTag("key", expected);
-        Object actual = sut.getTag("key").get();
+        sut.setTag(TestTag.KEY, expected);
+        Object actual = sut.getTag(TestTag.KEY).get();
         assertSame(expected, actual);
     }
 
     @Test
     public void testRemoveTag() throws Exception {
         String expected = "value";
-        sut.setTag("remove", expected);
-        sut.setTag("remove", null);
-        assertFalse(sut.getTag("remove").isPresent());
+        sut.setTag(TestTag.REMOVE, expected);
+        sut.setTag(TestTag.REMOVE, null);
+        assertFalse(sut.getTag(TestTag.REMOVE).isPresent());
     }
 
     @Test
     public void testgetTagDefault01() throws Exception {
         String expected = "value";
-        sut.setTag("default", expected);
-        assertEquals(expected, sut.getTag("default", expected));
+        sut.setTag(TestTag.DEFAULT, expected);
+        assertEquals(expected, sut.getTag(TestTag.DEFAULT, expected));
     }
 
     @Test
     public void testgetTagDefault02() throws Exception {
-        assertEquals("default", sut.getTag("default-unset", "default"));
+        assertEquals("default", sut.getTag(TestTag.DEFAULT_UNSET, "default"));
+    }
+
+    private static enum TestTag implements IProposalTag {
+        KEY, REMOVE, DEFAULT, DEFAULT_UNSET
     }
 
 }
