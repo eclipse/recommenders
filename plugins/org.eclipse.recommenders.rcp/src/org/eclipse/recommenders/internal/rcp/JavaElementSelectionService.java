@@ -73,6 +73,7 @@ public class JavaElementSelectionService implements ISelectionListener {
             public void run() {
                 if (activeSelection != nextSelection) {
                     // don't do anything
+                    System.out.println("skipping due to same selection!");
                     return;
                 } else if (nextSelection instanceof IStructuredSelection) {
                     handleSelectionFromViewer(nextSelection);
@@ -88,7 +89,9 @@ public class JavaElementSelectionService implements ISelectionListener {
         if (element.isPresent()) {
             final JavaElementSelectionLocation location = resolveSelectionLocationFromJavaElement(element.get());
             fireEventIfNew(element.get(), location, null);
-        }
+        }else
+            System.out.println("could not find selection location for " + element);
+        
     }
 
     private void fireEventIfNew(final IJavaElement element, final JavaElementSelectionLocation location,
