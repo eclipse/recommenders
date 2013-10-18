@@ -10,66 +10,93 @@
  */
 package org.eclipse.recommenders.rcp;
 
-import static org.eclipse.jdt.core.dom.Modifier.isStatic;
-import static org.eclipse.recommenders.internal.rcp.Constants.BUNDLE_NAME;
-import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
-import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
-
-import java.lang.reflect.Field;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.recommenders.internal.rcp.RcpPlugin;
 import org.eclipse.swt.graphics.Image;
 
 public final class SharedImages {
 
-    public static final String ELCL_COLLAPSE_ALL = "/icons/elcl16/collapseall.gif";
-    public static final String ELCL_DELETE = "/icons/elcl16/delete.gif";
-    public static final String ELCL_EXPAND_ALL = "/icons/elcl16/expandall.gif";
-    public static final String ELCL_REFRESH = "/icons/elcl16/refresh_tab.gif";
-    public static final String ELCL_SYNCED = "/icons/elcl16/synced.gif";
-    public static final String OBJ_CHECK_GREEN = "/icons/obj16/tick_small.png";
-    public static final String OBJ_CROSS_RED = "/icons/obj16/cross_small.png";
-    public static final String OBJ_BULLET_BLUE = "/icons/obj16/bullet_blue.png";
-    public static final String OBJ_BULLET_GREEN = "/icons/obj16/bullet_green.png";
-    public static final String OBJ_BULLET_ORANGE = "/icons/obj16/bullet_orange.png";
-    public static final String OBJ_BULLET_RED = "/icons/obj16/bullet_red.png";
-    public static final String OBJ_BULLET_STAR = "/icons/obj16/bullet_star.png";
-    public static final String OBJ_BULLET_YELLOW = "/icons/obj16/bullet_yellow.png";
-    public static final String OBJ_JAR = "/icons/obj16/jar.gif";
-    public static final String OBJ_JAVA_PROJECT = "/icons/obj16/project.gif";
-    public static final String OBJ_JRE = "/icons/obj16/jre.gif";
-    public static final String OBJ_REPOSITORY = "/icons/obj16/repository.gif";
-    public static final String OVR_STAR = "/icons/ovr16/star.png";
-    public static final String VIEW_SLICE = "/icons/view16/slice.gif";
+    public interface ImageKey {
+        String path();
+    }
+
+    public static String obj16(String image) {
+        return "/icons/obj16/" + image;
+    }
+
+    public static String ovr16(String image) {
+        return "/icons/ovr16/" + image;
+    }
+
+    public static String elcl16(String image) {
+        return "/icons/elcl16/" + image;
+    }
+
+    public static String view16(String image) {
+        return "/icons/view16/" + image;
+    }
+
+    public static String wizban(String image) {
+        return "/icons/wizban/" + image;
+    }
+
+    public static enum Images implements ImageKey {
+        // @formatter:off
+        ELCL_COLLAPSE_ALL(elcl16("collapseall.gif")),
+        ELCL_DELETE(elcl16("delete.gif")),
+        ELCL_EXPAND_ALL(elcl16("expandall.gif")),
+        ELCL_REFRESH(elcl16("refresh_tab.gif")),
+        ELCL_SYNCED(elcl16("synced.gif")),
+        OBJ_CHECK_GREEN(obj16("tick_small.png")),
+        OBJ_CROSS_RED(obj16("cross_small.png")),
+        OBJ_BULLET_BLUE(obj16("bullet_blue.png")),
+        OBJ_BULLET_GREEN(obj16("bullet_green.png")),
+        OBJ_BULLET_ORANGE(obj16("bullet_orange.png")),
+        OBJ_BULLET_RED(obj16("bullet_red.png")),
+        OBJ_BULLET_STAR(obj16("bullet_star.png")),
+        OBJ_BULLET_YELLOW(obj16("bullet_yellow.png")),
+        OBJ_JAR(obj16("jar.gif")),
+        OBJ_JAVA_PROJECT(obj16("project.gif")),
+        OBJ_JRE(obj16("jre.gif")),
+        OBJ_REPOSITORY(obj16("repository.gif")),
+        OVR_STAR(ovr16("star.png")),
+        VIEW_SLICE(view16("slice.gif"));
+        // @formatter:on
+
+        private String path;
+
+        private Images(String path) {
+            this.path = path;
+        }
+
+        @Override
+        public String path() {
+            return path;
+        }
+    }
 
     private ImageRegistry registry = new ImageRegistry();
 
-    public SharedImages() {
-        initializeImages();
-    }
-
-    public ImageDescriptor getDescriptor(String key) {
-        return registry.getDescriptor(key);
-    }
-
-    public Image getImage(String key) {
-        return registry.get(key);
-    }
-
-    private void initializeImages() {
-        try {
-            for (Field f : getClass().getDeclaredFields()) {
-                if (isStatic(f.getModifiers()) && f.getType() == String.class) {
-                    String path = (String) f.get(null);
-                    ImageDescriptor image = imageDescriptorFromPlugin(BUNDLE_NAME, path);
-                    ensureIsNotNull(image, "Could not find '%s'", path);
-                    registry.put(path, image);
-                }
-            }
-        } catch (Exception e) {
-            RcpPlugin.logError(e, "Failed to load a shared image.");
+    public synchronized ImageDescriptor getDescriptor(ImageKey key) {
+        ImageDescriptor desc = registry.getDescriptor(key.path());
+        if (desc == null) {
+            desc = register(key);
         }
+        return desc;
+    }
+
+    public synchronized Image getImage(ImageKey key) {
+        Image img = registry.get(key.path());
+        if (img == null) {
+            register(key);
+            img = registry.get(key.path());
+        }
+        return img;
+    }
+
+    private ImageDescriptor register(ImageKey key) {
+        ImageDescriptor desc = ImageDescriptor.createFromFile(key.getClass(), key.path());
+        registry.put(key.path(), desc);
+        return desc;
     }
 }
