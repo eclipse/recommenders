@@ -12,6 +12,7 @@ package org.eclipse.recommenders.completion.rcp;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static org.apache.commons.lang3.StringUtils.substring;
+import static org.eclipse.recommenders.rcp.utils.JdtUtils.findFirstDeclaration;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.lang.reflect.Field;
@@ -77,6 +78,7 @@ public class CompletionContextFunctions {
         res.put(CCTX_ENCLOSING_ELEMENT, new EnclosingElementContextFunction());
         res.put(CCTX_ENCLOSING_TYPE, new EnclosingTypeContextFunction());
         res.put(CCTX_ENCLOSING_METHOD, new EnclosingMethodContextFunction());
+        res.put(CCTX_ENCLOSING_METHOD_FIRST_DECLARATION, new EnclosingMethodFirstDeclarationContextFunction());
         res.put(CCTX_EXPECTED_TYPE, new ExpectedTypeContextFunction());
         res.put(CCTX_EXPECTED_TYPENAMES, new ExpectedTypeNamesContextFunction());
         res.put(CCTX_INTERNAL_COMPLETION_CONTEXT, new InternalCompletionContextFunction());
@@ -100,12 +102,14 @@ public class CompletionContextFunctions {
     public static final String CCTX_ASSIST_SCOPE = "assist-scope";
     @Deprecated
     public static final String CCTX_COMPILATION_UNIT_DECLARATION = "compilation-unit-declaration";
+
     public static final String CCTX_COMPLETION_ON_TYPE = "completion-on-type";
     public static final String CCTX_COMPLETION_PREFIX = "completion-prefix";
     public static final String CCTX_EXPECTED_TYPE = "expected-type";
     public static final String CCTX_EXPECTED_TYPENAMES = "expected-type-names";
     public static final String CCTX_ENCLOSING_ELEMENT = "enclosing-element";
     public static final String CCTX_ENCLOSING_METHOD = "enclosing-method";
+    public static final String CCTX_ENCLOSING_METHOD_FIRST_DECLARATION = "enclosing-method-first-declaration";
     public static final String CCTX_ENCLOSING_TYPE = "enclosing-type";
     public static final String CCTX_INTERNAL_COMPLETION_CONTEXT = InternalCompletionContext.class.getName();
     public static final String CCTX_JAVA_CONTENTASSIST_CONTEXT = JavaContentAssistInvocationContext.class.getName();
@@ -160,6 +164,20 @@ public class CompletionContextFunctions {
             IMethod res = (IMethod) (enclosing instanceof IMethod ? enclosing : null);
             context.set(key, res);
             return res;
+        }
+    }
+
+    public static class EnclosingMethodFirstDeclarationContextFunction implements ICompletionContextFunction<IMethod> {
+
+        @Override
+        public IMethod compute(IRecommendersCompletionContext context, String key) {
+            IMethod root = null;
+            IMethod enclosing = context.get(CCTX_ENCLOSING_METHOD, null);
+            if (enclosing != null) {
+                root = findFirstDeclaration(enclosing);
+            }
+            context.set(key, root);
+            return root;
         }
     }
 
