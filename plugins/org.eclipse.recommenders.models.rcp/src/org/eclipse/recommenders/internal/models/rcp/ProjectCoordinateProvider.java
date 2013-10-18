@@ -55,6 +55,7 @@ import org.eclipse.recommenders.models.rcp.ModelEvents.ModelIndexOpenedEvent;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ProjectCoordinateChangeEvent;
 import org.eclipse.recommenders.rcp.IRcpService;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
+import org.eclipse.recommenders.rcp.utils.AstBindings;
 import org.eclipse.recommenders.rcp.utils.JdtUtils;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
@@ -266,6 +267,19 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
     }
 
     @Override
+    public Optional<UniqueTypeName> toUniqueName(ITypeBinding type) {
+        ProjectCoordinate base = resolve(type).orNull();
+        if (null == base) {
+            return absent();
+        }
+        ITypeName name = toName(type).orNull();
+        if (null == name) {
+            return absent();
+        }
+        return of(new UniqueTypeName(base, name));
+    }
+
+    @Override
     public Optional<UniqueMethodName> toUniqueName(IMethod method) {
         ProjectCoordinate base = resolve(method).orNull();
         if (null == base) {
@@ -281,6 +295,11 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
     @Override
     public ITypeName toName(IType type) {
         return javaElementResolver.toRecType(type);
+    }
+
+    @Override
+    public Optional<ITypeName> toName(ITypeBinding type) {
+        return AstBindings.toTypeName(type);
     }
 
     @Override

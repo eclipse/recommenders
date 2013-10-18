@@ -1,6 +1,7 @@
 package org.eclipse.recommenders.completion.rcp.it
 
 import com.google.common.base.Optional
+import java.util.Map
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.jdt.core.ICompilationUnit
@@ -12,12 +13,15 @@ import org.eclipse.recommenders.calls.ICallModel
 import org.eclipse.recommenders.calls.ICallModelProvider
 import org.eclipse.recommenders.calls.NullCallModel
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions
+import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ReceiverNameContextFunction
+import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction
 import org.eclipse.recommenders.completion.rcp.processable.IntelligentCompletionProposalComputer
 import org.eclipse.recommenders.completion.rcp.processable.ProcessableProposalFactory
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor
 import org.eclipse.recommenders.internal.calls.rcp.CallCompletionSessionProcessor
 import org.eclipse.recommenders.internal.calls.rcp.CallsRcpPreferences
+import org.eclipse.recommenders.internal.calls.rcp.ReceiverUsageContextFunction
 import org.eclipse.recommenders.internal.overrides.rcp.OverrideCompletionSessionProcessor
 import org.eclipse.recommenders.internal.overrides.rcp.OverridesRcpPreferences
 import org.eclipse.recommenders.internal.rcp.CachingAstProvider
@@ -454,8 +458,19 @@ class MockedIntelligentCompletionProposalComputer<T extends SessionProcessor> ex
     new(T processor) {
         super(
             #{new SessionProcessorDescriptor("", "", "", null, 0, true, "", processor)}.toArray(
-                SessionProcessorDescriptor), new ProcessableProposalFactory(), new CachingAstProvider(), CompletionContextFunctions.defaultFunctions);
+                SessionProcessorDescriptor), new ProcessableProposalFactory(), new CachingAstProvider(),
+            newCompletionContextFunctions());
         this.processor = processor
+    }
+
+    static def Map<String, ICompletionContextFunction> newCompletionContextFunctions() {
+        val functions = CompletionContextFunctions.defaultFunctions
+        val f = new ReceiverUsageContextFunction()
+        functions.put(ReceiverUsageContextFunction.CCTX_RECEIVER_CALLS, f)
+        functions.put(ReceiverUsageContextFunction.CCTX_RECEIVER_DEF_BY, f)
+        functions.put(ReceiverUsageContextFunction.CCTX_RECEIVER_DEF_TYPE, f)
+        functions.put(ReceiverUsageContextFunction.CCTX_RECEIVER_TYPE2, f)
+        functions;
     }
 
     def getProcessor() {

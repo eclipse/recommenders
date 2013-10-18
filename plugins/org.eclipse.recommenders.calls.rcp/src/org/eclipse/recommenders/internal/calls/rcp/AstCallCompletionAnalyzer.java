@@ -10,10 +10,9 @@
  */
 package org.eclipse.recommenders.internal.calls.rcp;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.fromNullable;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.*;
-import static org.eclipse.recommenders.rcp.utils.JdtUtils.findFirstDeclaration;
 
 import java.util.List;
 
@@ -91,21 +90,6 @@ public class AstCallCompletionAnalyzer {
             receiverType = fromNullable(hierarchy.getSuperclass(type));
         } catch (final Exception e) {
             // RecommendersPlugin.logError(e, "Failed to resolve super type of %s", ctx.getEnclosingElement());
-        }
-    }
-
-    public Optional<IMethod> getOverridesContext() {
-        if (overrides == null) {
-            findOverridesContext();
-        }
-        return overrides;
-    }
-
-    private void findOverridesContext() {
-        overrides = ctx.getEnclosingMethod();
-        if (overrides.isPresent()) {
-            IMethod root = findFirstDeclaration(overrides.get());
-            overrides = of(root);
         }
     }
 
