@@ -18,6 +18,7 @@ import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.Comple
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.CompletionPrefixContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.EnclosingElementContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.EnclosingMethodContextFunction;
+import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.EnclosingMethodFirstDeclarationContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.EnclosingTypeContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ExpectedTypeContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ExpectedTypeNamesContextFunction;
@@ -47,6 +48,8 @@ public class CompletionRcpModule extends AbstractModule {
         functions.addBinding(CCTX_ENCLOSING_ELEMENT).to(EnclosingElementContextFunction.class);
         functions.addBinding(CCTX_ENCLOSING_TYPE).to(EnclosingTypeContextFunction.class);
         functions.addBinding(CCTX_ENCLOSING_METHOD).to(EnclosingMethodContextFunction.class);
+        functions.addBinding(CCTX_ENCLOSING_METHOD_FIRST_DECLARATION).to(
+                EnclosingMethodFirstDeclarationContextFunction.class);
         functions.addBinding(CCTX_EXPECTED_TYPE).to(ExpectedTypeContextFunction.class);
         functions.addBinding(CCTX_EXPECTED_TYPENAMES).to(ExpectedTypeNamesContextFunction.class);
         functions.addBinding(CCTX_INTERNAL_COMPLETION_CONTEXT).to(InternalCompletionContextFunction.class);
@@ -57,6 +60,7 @@ public class CompletionRcpModule extends AbstractModule {
         functions.addBinding(CCTX_VISIBLE_METHODS).to(VisibleMethodsContextFunction.class);
         functions.addBinding(CCTX_VISIBLE_FIELDS).to(VisibleFieldsContextFunction.class);
         functions.addBinding(CCTX_VISIBLE_LOCALS).to(VisibleLocalsContextFunction.class);
+
     }
 
     @Provides
