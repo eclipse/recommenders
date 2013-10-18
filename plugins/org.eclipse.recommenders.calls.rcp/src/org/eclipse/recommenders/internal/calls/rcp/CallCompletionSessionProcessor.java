@@ -17,7 +17,7 @@ import static org.eclipse.recommenders.completion.rcp.CompletionContextFunctions
 import static org.eclipse.recommenders.completion.rcp.processable.ProcessableCompletionProposalComputer.NULL_PROPOSAL;
 import static org.eclipse.recommenders.completion.rcp.processable.Proposals.overlay;
 import static org.eclipse.recommenders.internal.calls.rcp.ReceiverUsageContextFunction.*;
-import static org.eclipse.recommenders.rcp.SharedImages.OVR_STAR;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.OVR_STAR;
 import static org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD;
 import static org.eclipse.recommenders.utils.Recommendations.*;
 
