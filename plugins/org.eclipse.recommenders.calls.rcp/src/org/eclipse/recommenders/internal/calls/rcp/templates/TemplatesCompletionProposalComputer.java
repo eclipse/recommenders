@@ -11,7 +11,10 @@
 package org.eclipse.recommenders.internal.calls.rcp.templates;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.UNKNOWN;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.CCTX_ENCLOSING_METHOD_FIRST_DECLARATION;
 import static org.eclipse.recommenders.internal.calls.rcp.Constants.TEMPLATES_CATEGORY_ID;
+import static org.eclipse.recommenders.internal.calls.rcp.ReceiverUsageContextFunction.*;
 import static org.eclipse.recommenders.utils.Recommendations.top;
 
 import java.util.Collection;
@@ -53,7 +56,6 @@ import org.eclipse.recommenders.calls.ICallModelProvider;
 import org.eclipse.recommenders.completion.rcp.DisableContentAssistCategoryJob;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.RecommendersCompletionContext;
-import org.eclipse.recommenders.internal.calls.rcp.AstCallCompletionAnalyzer;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.UniqueTypeName;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
@@ -99,7 +101,6 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
     private JavaElementResolver elementResolver;
     private Image icon;
     private ICallModel model;
-    private AstCallCompletionAnalyzer completionAnalyzer;
     private IAstProvider astProvider;
 
     @Inject
@@ -184,7 +185,6 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
                 return;
             }
             model.setObservedCalls(Sets.<IMethodName>newHashSet());
-            completionAnalyzer = new AstCallCompletionAnalyzer(rCtx);
             if (mode == CompletionMode.TYPE_NAME) {
                 handleTypeNameCompletionRequest(proposalBuilder);
             } else {
@@ -196,9 +196,8 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
     }
 
     private void handleVariableCompletionRequest(ProposalBuilder proposalBuilder) {
-        completionAnalyzer.getReceiverType();
         // set override-context:
-        IMethod overrides = completionAnalyzer.getOverridesContext().orNull();
+        IMethod overrides = rCtx.get(CCTX_ENCLOSING_METHOD_FIRST_DECLARATION, null);
         if (overrides != null) {
             IMethodName crOverrides = elementResolver.toRecMethod(overrides).or(
                     org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD);
@@ -206,11 +205,11 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         }
 
         // set definition-type and defined-by
-        model.setObservedDefinitionKind(completionAnalyzer.getReceiverDefinitionType());
-        model.setObservedDefiningMethod(completionAnalyzer.getDefinedBy().orNull());
+        model.setObservedDefinitionKind(rCtx.get(CCTX_RECEIVER_DEF_TYPE, UNKNOWN));
+        model.setObservedDefiningMethod((IMethodName) rCtx.get(CCTX_RECEIVER_DEF_BY, null));
 
         // set calls:
-        model.setObservedCalls(newHashSet(completionAnalyzer.getCalls()));
+        model.setObservedCalls(newHashSet(rCtx.get(CCTX_RECEIVER_CALLS, Collections.<IMethodName>emptySet())));
 
         List<Recommendation<String>> callgroups = getMostLikelyPatternsSortedByProbability(model);
         for (Recommendation<String> p : callgroups) {
@@ -232,7 +231,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
     }
 
     private void handleTypeNameCompletionRequest(ProposalBuilder proposalBuilder) {
-        IMethod overrides = completionAnalyzer.getOverridesContext().orNull();
+        IMethod overrides = rCtx.get(CCTX_ENCLOSING_METHOD_FIRST_DECLARATION, null);
         model.setObservedDefinitionKind(DefinitionKind.NEW);
         if (overrides != null) {
             IMethodName crOverrides = elementResolver.toRecMethod(overrides).or(
