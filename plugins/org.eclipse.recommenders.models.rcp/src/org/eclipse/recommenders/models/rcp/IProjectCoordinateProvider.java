@@ -47,7 +47,11 @@ public interface IProjectCoordinateProvider {
     // TODO: convenience method to save a few lines of code to get from an IDE element to a qualified name
     ITypeName toName(IType type);
 
+    Optional<ITypeName> toName(ITypeBinding type);
+
     Optional<UniqueTypeName> toUniqueName(IType type);
+
+    Optional<UniqueTypeName> toUniqueName(ITypeBinding type);
 
     Optional<IMethodName> toName(IMethod method);
 
