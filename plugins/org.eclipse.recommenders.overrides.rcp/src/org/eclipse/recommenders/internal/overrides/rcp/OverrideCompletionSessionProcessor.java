@@ -11,7 +11,7 @@
 package org.eclipse.recommenders.internal.overrides.rcp;
 
 import static java.lang.String.valueOf;
-import static org.eclipse.recommenders.rcp.SharedImages.OVR_STAR;
+import static org.eclipse.recommenders.rcp.utils.SharedImages.Images.OVR_STAR;
 import static org.eclipse.recommenders.utils.Recommendations.asPercentage;
 
 import java.util.List;
@@ -36,8 +36,8 @@ import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.overrides.IOverrideModel;
 import org.eclipse.recommenders.overrides.IOverrideModelProvider;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
-import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.utils.JdtUtils;
+import org.eclipse.recommenders.rcp.utils.SharedImages;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Recommendations;
 import org.eclipse.recommenders.utils.names.IMethodName;

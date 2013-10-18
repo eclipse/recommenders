@@ -10,9 +10,7 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static org.eclipse.recommenders.rcp.SharedImages.OBJ_JAR;
-import static org.eclipse.recommenders.rcp.SharedImages.OBJ_JAVA_PROJECT;
-import static org.eclipse.recommenders.rcp.SharedImages.OBJ_JRE;
+import static org.eclipse.recommenders.rcp.utils.SharedImages.Images.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +33,7 @@ import org.eclipse.recommenders.models.ModelCoordinate;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.models.rcp.actions.TriggerModelDownloadForDependencyInfosAction;
-import org.eclipse.recommenders.rcp.SharedImages;
+import org.eclipse.recommenders.rcp.utils.SharedImages;
 import org.eclipse.recommenders.utils.Checks;
 import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.swt.SWT;

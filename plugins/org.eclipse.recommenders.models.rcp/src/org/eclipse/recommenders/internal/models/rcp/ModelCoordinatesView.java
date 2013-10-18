@@ -11,9 +11,7 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static org.eclipse.recommenders.rcp.SharedImages.ELCL_COLLAPSE_ALL;
-import static org.eclipse.recommenders.rcp.SharedImages.ELCL_EXPAND_ALL;
-import static org.eclipse.recommenders.rcp.SharedImages.ELCL_REFRESH;
+import static org.eclipse.recommenders.rcp.utils.SharedImages.Images.*;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -61,8 +59,8 @@ import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ModelArchiveDownloadedEvent;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ModelIndexOpenedEvent;
 import org.eclipse.recommenders.models.rcp.actions.TriggerModelDownloadForModelCoordinatesAction;
-import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.utils.Selections;
+import org.eclipse.recommenders.rcp.utils.SharedImages;
 import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -177,7 +175,7 @@ public class ModelCoordinatesView extends ViewPart {
                     String url = (String) element;
                     text.append(url);
                     text.append(" (" + fetchNumberOfModels(url) + " known coordiantes) ", StyledString.COUNTER_STYLER);
-                    cell.setImage(images.getImage(SharedImages.OBJ_REPOSITORY));
+                    cell.setImage(images.getImage(OBJ_REPOSITORY));
                 }
                 if (element instanceof KnownCoordinate) {
                     KnownCoordinate v = (KnownCoordinate) element;
@@ -373,7 +371,7 @@ public class ModelCoordinatesView extends ViewPart {
             }
         };
         deleteAction.setText("Delete models");
-        deleteAction.setImageDescriptor(images.getDescriptor(SharedImages.ELCL_DELETE));
+        deleteAction.setImageDescriptor(images.getDescriptor(ELCL_DELETE));
         getViewSite().getActionBars().getMenuManager().add(deleteAction);
     }
 
@@ -436,11 +434,11 @@ public class ModelCoordinatesView extends ViewPart {
                 if (element instanceof KnownCoordinate) {
                     KnownCoordinate v = (KnownCoordinate) element;
                     if (!v.hasModelCoordinate(classifier)) {
-                        return images.getImage(SharedImages.OBJ_CROSS_RED);
+                        return images.getImage(OBJ_CROSS_RED);
                     } else if (v.isDownloaded(classifier)) {
-                        return images.getImage(SharedImages.OBJ_CHECK_GREEN);
+                        return images.getImage(OBJ_CHECK_GREEN);
                     } else {
-                        return images.getImage(SharedImages.OBJ_BULLET_BLUE);
+                        return images.getImage(OBJ_BULLET_BLUE);
                     }
                 }
                 return null;

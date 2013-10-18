@@ -17,7 +17,7 @@ import static org.eclipse.recommenders.completion.rcp.CompletionContextFunctions
 import static org.eclipse.recommenders.completion.rcp.processable.ProcessableCompletionProposalComputer.NULL_PROPOSAL;
 import static org.eclipse.recommenders.completion.rcp.processable.Proposals.overlay;
 import static org.eclipse.recommenders.internal.calls.rcp.ReceiverUsageContextFunction.*;
-import static org.eclipse.recommenders.rcp.SharedImages.OVR_STAR;
+import static org.eclipse.recommenders.rcp.utils.SharedImages.Images.OVR_STAR;
 import static org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD;
 import static org.eclipse.recommenders.utils.Recommendations.*;
 
@@ -46,7 +46,7 @@ import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
 import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
 import org.eclipse.recommenders.models.UniqueTypeName;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
-import org.eclipse.recommenders.rcp.SharedImages;
+import org.eclipse.recommenders.rcp.utils.SharedImages;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Recommendations;
 import org.eclipse.recommenders.utils.names.IMethodName;
