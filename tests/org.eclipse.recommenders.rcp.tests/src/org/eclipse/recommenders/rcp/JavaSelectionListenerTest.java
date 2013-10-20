@@ -31,6 +31,8 @@ import com.google.common.eventbus.EventBus;
 
 public class JavaSelectionListenerTest {
 
+    private static final int DELAY = 110;
+
     volatile List<IJavaElement> elements = Collections.synchronizedList(new ArrayList<IJavaElement>());
 
     JavaElementSelectionService sut = new JavaElementSelectionService(new EventBus() {
@@ -46,7 +48,7 @@ public class JavaSelectionListenerTest {
                 someJavaModel());
         for (final Object e : expected) {
             sut.selectionChanged(null, new StructuredSelection(e));
-            Thread.sleep(200);
+            Thread.sleep(DELAY);
         }
         assertEquals(expected, elements);
     }
@@ -57,7 +59,7 @@ public class JavaSelectionListenerTest {
         final IType someType = someType();
         sut.selectionChanged(null, new StructuredSelection(someType));
         sut.selectionChanged(null, new StructuredSelection(someType));
-        Thread.sleep(200);
+        Thread.sleep(DELAY);
 
         assertEquals(1, elements.size());
     }
