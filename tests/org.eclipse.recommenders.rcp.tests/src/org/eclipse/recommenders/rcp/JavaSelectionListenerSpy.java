@@ -11,13 +11,28 @@
 package org.eclipse.recommenders.rcp;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.swt.widgets.Composite;
+
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.Subscribe;
 
 public class JavaSelectionListenerSpy {
 
     private final List<JavaElementSelectionEvent> events = newArrayList();
+
+    @Subscribe
+    @AllowConcurrentEvents
+    public void onJavaSelection(final JavaElementSelectionEvent selection) {
+        System.out.println(selection);
+        recordEvent(selection);
+    }
 
     public List<JavaElementSelectionEvent> get() {
         return events;
