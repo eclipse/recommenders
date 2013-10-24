@@ -204,11 +204,11 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         }
 
         // set definition-type and defined-by
-        model.setObservedDefinitionKind(rCtx.<DefinitionKind>get(CCTX_RECEIVER_DEF_TYPE, null));
-        model.setObservedDefiningMethod(rCtx.<IMethodName>get(CCTX_RECEIVER_DEF_BY, null));
+        model.setObservedDefinitionKind(rCtx.<DefinitionKind>get(RECEIVER_DEF_TYPE, null));
+        model.setObservedDefiningMethod(rCtx.<IMethodName>get(RECEIVER_DEF_BY, null));
 
         // set calls:
-        model.setObservedCalls(newHashSet(rCtx.get(CCTX_RECEIVER_CALLS, Collections.<IMethodName>emptySet())));
+        model.setObservedCalls(newHashSet(rCtx.get(RECEIVER_CALLS, Collections.<IMethodName>emptySet())));
 
         List<Recommendation<String>> callgroups = getMostLikelyPatternsSortedByProbability(model);
         for (Recommendation<String> p : callgroups) {
