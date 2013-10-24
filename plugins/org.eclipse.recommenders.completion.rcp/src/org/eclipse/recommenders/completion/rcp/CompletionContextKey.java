@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
@@ -41,7 +42,7 @@ public class CompletionContextKey<T> {
     public static final CompletionContextKey<Scope> ASSIST_SCOPE = make();
     @Deprecated
     public static final CompletionContextKey<CompilationUnitDeclaration> CCTX_COMPILATION_UNIT_DECLARATION = make();
-    
+
     public static final CompletionContextKey<IAstProvider> AST_PROVIDER = make();
     public static final CompletionContextKey<String> COMPLETION_PREFIX = make();
     public static final CompletionContextKey<IJavaElement> ENCLOSING_ELEMENT = make();
@@ -51,6 +52,9 @@ public class CompletionContextKey<T> {
     public static final CompletionContextKey<Set<ITypeName>> EXPECTED_TYPENAMES = make();
     public static final CompletionContextKey<InternalCompletionContext> INTERNAL_COMPLETIONCONTEXT = make();
     public static final CompletionContextKey<Boolean> IS_COMPLETION_ON_TYPE = make();
+    public static final CompletionContextKey<MethodDeclaration> ENCLOSING_AST_METHOD = make();
+    public static final CompletionContextKey<IMethod> ENCLOSING_METHOD_FIRST_DECLARATION = make();
+
     public static final CompletionContextKey<JavaContentAssistInvocationContext> JAVA_CONTENT_ASSIST_INVOCATION_CONTECT = make();
     public static final CompletionContextKey<JavaContentAssistInvocationContext> JAVA_CONTENTASSIST_CONTEXT = make();
     public static final CompletionContextKey<Map<IJavaCompletionProposal, CompletionProposal>> JAVA_PROPOSALS = make();

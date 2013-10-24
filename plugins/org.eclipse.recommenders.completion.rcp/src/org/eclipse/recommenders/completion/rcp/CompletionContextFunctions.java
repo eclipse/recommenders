@@ -82,6 +82,8 @@ public class CompletionContextFunctions {
         res.put(ENCLOSING_ELEMENT, new EnclosingElementContextFunction());
         res.put(ENCLOSING_TYPE, new EnclosingTypeContextFunction());
         res.put(ENCLOSING_METHOD, new EnclosingMethodContextFunction());
+        res.put(ENCLOSING_AST_METHOD, new EnclosingAstMethodContextFunction());
+        res.put(ENCLOSING_METHOD_FIRST_DECLARATION, new EnclosingMethodFirstDeclarationContextFunction());
         res.put(EXPECTED_TYPE, new ExpectedTypeContextFunction());
         res.put(EXPECTED_TYPENAMES, new ExpectedTypeNamesContextFunction());
         res.put(INTERNAL_COMPLETIONCONTEXT, new InternalCompletionContextFunction());
