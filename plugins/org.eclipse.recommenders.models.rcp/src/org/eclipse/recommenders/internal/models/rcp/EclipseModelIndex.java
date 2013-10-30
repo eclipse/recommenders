@@ -17,6 +17,8 @@ import static org.eclipse.recommenders.models.ModelCoordinate.HINT_REPOSITORY_UR
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -49,7 +51,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -76,6 +80,8 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @Inject
     EventBus bus;
 
+    private String[] remoteUrls;
+
     private Map<String, Pair<File, IModelIndex>> delegates = Maps.newHashMap();
 
     private Cache<Pair<ProjectCoordinate, String>, Optional<ModelCoordinate>> cache = CacheBuilder.newBuilder()
@@ -89,7 +95,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
     private void doOpen(boolean scheduleIndexUpdate) throws IOException {
         Checks.ensureNoDuplicates(prefs.remotes);
-        String[] remoteUrls = prefs.remotes;
+        remoteUrls = prefs.remotes;
         delegates.clear();
         basedir.mkdir();
         for (String url : remoteUrls) {
@@ -146,12 +152,13 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
                 @Override
                 public Optional<ModelCoordinate> call() {
-                    for (Entry<String, Pair<File, IModelIndex>> entry : delegates.entrySet()) {
-                        IModelIndex index = entry.getValue().getSecond();
+                    for (String repositoryUrl : remoteUrls) {
+                        Pair<File, IModelIndex> entry = delegates.get(repositoryUrl);
+                        IModelIndex index = entry.getSecond();
                         Optional<ModelCoordinate> suggest = index.suggest(pc, modelType);
                         if (suggest.isPresent()) {
                             ModelCoordinate mc = suggest.get();
-                            mc.setHint(ModelCoordinate.HINT_REPOSITORY_URL, entry.getKey());
+                            mc.setHint(ModelCoordinate.HINT_REPOSITORY_URL, repositoryUrl);
                             return of(mc);
                         }
                     }
@@ -176,7 +183,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
         return ImmutableSet.copyOf(candidates);
     }
 
-    public Set<ModelCoordinate> addRepositoryUrlHint(Set<ModelCoordinate> modelCoordinates, String url) {
+    public Collection<ModelCoordinate> addRepositoryUrlHint(Collection<ModelCoordinate> modelCoordinates, String url) {
         for (ModelCoordinate modelCoordinate : modelCoordinates) {
             addRepositoryUrlHint(modelCoordinate, url);
         }
@@ -189,14 +196,14 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     @Override
-    public ImmutableSet<ModelCoordinate> getKnownModels(String modelType) {
-        Set<ModelCoordinate> models = Sets.newHashSet();
+    public ImmutableList<ModelCoordinate> getKnownModels(String modelType) {
+        List<ModelCoordinate> models = Lists.newArrayList();
         for (Entry<String, Pair<File, IModelIndex>> entry : delegates.entrySet()) {
             IModelIndex index = entry.getValue().getSecond();
             models.addAll(addRepositoryUrlHint(index.getKnownModels(modelType), entry.getKey()));
         }
 
-        return ImmutableSet.copyOf(models);
+        return ImmutableList.copyOf(models);
     }
 
     @Override

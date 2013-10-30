@@ -13,7 +13,7 @@ package org.eclipse.recommenders.models;
 import java.io.IOException;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 
 public interface IModelIndex extends IModelArchiveCoordinateAdvisor {
 
@@ -25,7 +25,7 @@ public interface IModelIndex extends IModelArchiveCoordinateAdvisor {
     @Override
     void close() throws IOException;
 
-    ImmutableSet<ModelCoordinate> getKnownModels(String modelType);
+    ImmutableList<ModelCoordinate> getKnownModels(String modelType);
 
     // TODO review whether this should take a version or return a set of pcs (vaadin example 7.1.1 vs 7.0.0-SNAPSHOT)
     Optional<ProjectCoordinate> suggestProjectCoordinateByArtifactId(String artifactId);

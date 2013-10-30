@@ -53,6 +53,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Lists;
@@ -162,11 +163,11 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
     }
 
     @Override
-    public ImmutableSet<ModelCoordinate> getKnownModels(String modelType) {
+    public ImmutableList<ModelCoordinate> getKnownModels(String modelType) {
         List<Artifact> artifacts = findModelArchiveCoordinatesByClassifier(modelType);
         Collection<ModelCoordinate> transform = Collections2.transform(artifacts,
                 new Artifact2ModelArchiveTransformer());
-        return ImmutableSet.copyOf(transform);
+        return ImmutableList.copyOf(transform);
     }
 
     private List<Artifact> findModelArchiveCoordinatesByClassifier(String classifier) {
