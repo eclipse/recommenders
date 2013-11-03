@@ -119,12 +119,12 @@ public final class ModelCoordinate {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, "hints");
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj, "hints");
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
