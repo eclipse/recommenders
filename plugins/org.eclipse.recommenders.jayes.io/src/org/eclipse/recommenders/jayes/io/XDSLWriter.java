@@ -90,7 +90,7 @@ public class XDSLWriter implements IBayesNetWriter {
                     + " has an empty conditional probability table");
         }
         int offset = bldr.length();
-        for (Number d : node.getFactor().getValues()) {
+        for (Number d : node.getProbabilities()) {
             bldr.append(d);
             bldr.append(' ');
         }

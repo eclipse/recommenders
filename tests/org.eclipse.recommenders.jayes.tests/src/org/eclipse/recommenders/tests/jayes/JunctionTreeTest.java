@@ -10,7 +10,8 @@
  */
 package org.eclipse.recommenders.tests.jayes;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,8 +28,8 @@ import org.junit.Test;
 
 public class JunctionTreeTest {
 
-    private static final double TOLERANCE = 0.01;
-    private static final double SMALL_TOLERANCE = 0.00001;
+    private static final double TOLERANCE = 1e-2;
+    private static final double SMALL_TOLERANCE = 1e-5;
 
     @Test
     public void testInference1() {
@@ -47,7 +48,7 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "lu");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), 0.01);
+            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), TOLERANCE);
         }
     }
 
@@ -98,7 +99,7 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "lu");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(compare.getBeliefs(n), inferer.getBeliefs(n), 0.01);
+            assertArrayEquals(compare.getBeliefs(n), inferer.getBeliefs(n), TOLERANCE);
         }
     }
 
@@ -117,7 +118,7 @@ public class JunctionTreeTest {
         evidence.put(a, "false");
         evidence.put(c, "true");
         inferer.setEvidence(evidence);
-        assertEquals(0.22, inferer.getBeliefs(b)[0], 0.01);
+        assertEquals(0.22, inferer.getBeliefs(b)[0], TOLERANCE);
     }
 
     @Test
@@ -137,7 +138,7 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "true");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(inference.getBeliefs(n), compare.getBeliefs(n), 0.01);
+            assertArrayEquals(inference.getBeliefs(n), compare.getBeliefs(n), TOLERANCE);
         }
     }
 
@@ -159,7 +160,7 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "lu");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), 0.01);
+            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), TOLERANCE);
         }
     }
 
