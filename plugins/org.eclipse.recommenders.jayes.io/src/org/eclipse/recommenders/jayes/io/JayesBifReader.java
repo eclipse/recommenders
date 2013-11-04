@@ -13,12 +13,15 @@ package org.eclipse.recommenders.jayes.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
+import org.eclipse.recommenders.jayes.factor.arraywrapper.IntArrayWrapper;
+import org.eclipse.recommenders.jayes.util.MathUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.primitives.Doubles;
@@ -104,7 +107,48 @@ public class JayesBifReader implements IBayesNetReader {
     private void readNodeDefinition(BayesNet bayesNet, BayesNode node, ByteBuffer buffer) throws IOException {
         node.setParents(readParents(bayesNet, buffer));
 
-        node.setProbabilities(readCpt(buffer));
+        JBifNodeHeader header = JBifNodeHeader.valueOf(buffer.get());
+
+        switch (header) {
+        case DEFAULT:
+            node.setProbabilities(readCpt(buffer));
+            break;
+        case FREQUENCIES:
+            node.setValues(new IntArrayWrapper(readFrequencies(buffer)), false);
+            break;
+        case REDUCED:
+            node.setProbabilities(readReducedCpt(buffer, node.getOutcomeCount()));
+            break;
+
+        }
+
+    }
+
+    private double[] readReducedCpt(ByteBuffer buffer, int outcomeCount) {
+        int entryCount = buffer.getInt();
+
+        int degreesOfFreedom = outcomeCount - 1;
+        double[] probabilities = new double[outcomeCount * entryCount / degreesOfFreedom];
+        DoubleBuffer asDoubleBuffer = buffer.asDoubleBuffer();
+        for (int i = 0; i < entryCount / degreesOfFreedom; i++) {
+            int start = i * outcomeCount;
+            asDoubleBuffer.get(probabilities, start, degreesOfFreedom);
+            probabilities[start + degreesOfFreedom] = 1 - MathUtils.sumRange(probabilities, start, start
+                    + degreesOfFreedom);
+        }
+        buffer.position(buffer.position() + entryCount * Doubles.BYTES);
+
+        return probabilities;
+    }
+
+    private int[] readFrequencies(ByteBuffer buffer) {
+        int entryCount = buffer.getInt();
+
+        int[] frequencies = new int[entryCount];
+        buffer.asIntBuffer().get(frequencies);
+        buffer.position(buffer.position() + frequencies.length * Ints.BYTES);
+
+        return frequencies;
     }
 
     private List<BayesNode> readParents(BayesNet bayesNet, ByteBuffer buffer) throws IOException {

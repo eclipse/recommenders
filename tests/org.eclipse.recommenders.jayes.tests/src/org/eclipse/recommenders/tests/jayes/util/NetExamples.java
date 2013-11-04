@@ -14,6 +14,7 @@ import java.util.Arrays;
 
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
+import org.eclipse.recommenders.jayes.factor.arraywrapper.IntArrayWrapper;
 import org.eclipse.recommenders.jayes.transformation.util.ArrayFlatten;
 
 public class NetExamples {
@@ -32,8 +33,8 @@ public class NetExamples {
      * 
      * </pre>
      * 
-     * so while this is an easy network, LBP should show some expected trouble with this. JunctionTree will merge a, b
-     * and c together to form a Clique
+     * so although this is an easy network, LBP should show some expected trouble with this. JunctionTree will merge a,
+     * b and c together to form a Clique
      * 
      * @return
      */
@@ -160,6 +161,32 @@ public class NetExamples {
         b.setProbabilities(0.55, 0.45, 0.45, 0.55);
         c.setProbabilities(0.55, 0.45, 0.45, 0.55);
         d.setProbabilities(0.55, 0.45, 0.45, 0.55);
+
+        return net;
+    }
+
+    public static BayesNet frequencyNet() {
+        BayesNet net = new BayesNet();
+
+        BayesNode a = net.createNode("a");
+        a.addOutcomes("true", "false");
+
+        BayesNode b = net.createNode("b");
+        b.addOutcomes("true", "false");
+        b.setParents(Arrays.asList(a));
+
+        BayesNode c = net.createNode("c");
+        c.addOutcomes("true", "false");
+        c.setParents(Arrays.asList(a));
+
+        BayesNode d = net.createNode("d");
+        d.addOutcomes("true", "false");
+        d.setParents(Arrays.asList(a));
+
+        a.setValues(new IntArrayWrapper(4, 6), false);
+        b.setValues(new IntArrayWrapper(1, 3, 4, 2), false);
+        c.setValues(new IntArrayWrapper(2, 2, 1, 5), false);
+        d.setValues(new IntArrayWrapper(3, 1, 3, 3), false);
 
         return net;
     }

@@ -10,7 +10,9 @@
  */
 package org.eclipse.recommenders.tests.jayes;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,14 +23,15 @@ import org.eclipse.recommenders.jayes.factor.AbstractFactor;
 import org.eclipse.recommenders.jayes.factor.FactorFactory;
 import org.eclipse.recommenders.jayes.inference.IBayesInferer;
 import org.eclipse.recommenders.jayes.inference.junctionTree.JunctionTreeAlgorithm;
+import org.eclipse.recommenders.jayes.util.BayesNodeUtil;
 import org.eclipse.recommenders.tests.jayes.lbp.LoopyBeliefPropagation;
 import org.eclipse.recommenders.tests.jayes.util.NetExamples;
 import org.junit.Test;
 
 public class JunctionTreeTest {
 
-    private static final double TOLERANCE = 0.01;
-    private static final double SMALL_TOLERANCE = 0.00001;
+    private static final double TOLERANCE = 1e-2;
+    private static final double SMALL_TOLERANCE = 1e-5;
 
     @Test
     public void testInference1() {
@@ -47,7 +50,7 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "lu");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), 0.01);
+            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), TOLERANCE);
         }
     }
 
@@ -98,7 +101,7 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "lu");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(compare.getBeliefs(n), inferer.getBeliefs(n), 0.01);
+            assertArrayEquals(compare.getBeliefs(n), inferer.getBeliefs(n), TOLERANCE);
         }
     }
 
@@ -117,7 +120,7 @@ public class JunctionTreeTest {
         evidence.put(a, "false");
         evidence.put(c, "true");
         inferer.setEvidence(evidence);
-        assertEquals(0.22, inferer.getBeliefs(b)[0], 0.01);
+        assertEquals(0.22, inferer.getBeliefs(b)[0], TOLERANCE);
     }
 
     @Test
@@ -137,7 +140,7 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "true");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(inference.getBeliefs(n), compare.getBeliefs(n), 0.01);
+            assertArrayEquals(inference.getBeliefs(n), compare.getBeliefs(n), TOLERANCE);
         }
     }
 
@@ -159,8 +162,31 @@ public class JunctionTreeTest {
         compare.addEvidence(b, "lu");
 
         for (BayesNode n : net.getNodes()) {
-            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), 0.01);
+            assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), TOLERANCE);
         }
+    }
+
+    @Test
+    public void testFrequencyNet() {
+        BayesNet net = NetExamples.frequencyNet();
+
+        BayesNode a = net.getNode("a");
+        BayesNode b = net.getNode("b");
+        BayesNode c = net.getNode("c");
+        BayesNode d = net.getNode("d");
+
+        IBayesInferer inference = new JunctionTreeAlgorithm();
+        inference.addEvidence(a, "false");
+        inference.setNetwork(net);
+
+        assumeFalse(BayesNodeUtil.isNormalized(a));
+        assumeFalse(BayesNodeUtil.isNormalized(b));
+        assumeFalse(BayesNodeUtil.isNormalized(c));
+        assumeFalse(BayesNodeUtil.isNormalized(d));
+
+        assertArrayEquals(new double[] { 4.0 / 6.0, 2.0 / 6.0 }, inference.getBeliefs(b), SMALL_TOLERANCE);
+        assertArrayEquals(new double[] { 1.0 / 6.0, 5.0 / 6.0 }, inference.getBeliefs(c), SMALL_TOLERANCE);
+        assertArrayEquals(new double[] { 3.0 / 6.0, 3.0 / 6.0 }, inference.getBeliefs(d), SMALL_TOLERANCE);
     }
 
 }

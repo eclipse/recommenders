@@ -73,6 +73,38 @@ public final class ArrayUtils {
         return result;
     }
 
+    public static float[] toFloatArray(int[] array) {
+        float[] result = new float[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = (float) array[i];
+        }
+        return result;
+    }
+
+    public static double[] toDoubleArray(int[] array) {
+        double[] result = new double[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = array[i];
+        }
+        return result;
+    }
+
+    public static int[] toIntArray(double[] array) {
+        int[] result = new int[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = (int) array[i];
+        }
+        return result;
+    }
+
+    public static int[] toIntArray(float[] array) {
+        int[] result = new int[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = (int) array[i];
+        }
+        return result;
+    }
+
     public static int[] toIntArray(List<? extends Number> ints) {
         int[] result = new int[ints.size()];
         int i = 0;
