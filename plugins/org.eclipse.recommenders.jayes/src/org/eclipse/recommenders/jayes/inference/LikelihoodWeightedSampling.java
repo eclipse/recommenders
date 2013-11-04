@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.jayes.inference;
 
+import static org.eclipse.recommenders.jayes.util.BayesNodeUtil.marginalize;
+
 import java.util.Map;
 
 import org.eclipse.recommenders.jayes.BayesNet;
@@ -52,7 +54,7 @@ public class LikelihoodWeightedSampling extends AbstractInferer {
     private double computeEvidenceProbability(Map<BayesNode, String> sample) {
         double factor = 1.0;
         for (BayesNode n : evidence.keySet()) {
-            factor *= n.marginalize(sample)[n.getOutcomeIndex(evidence.get(n))];
+            factor *= marginalize(n, sample)[n.getOutcomeIndex(evidence.get(n))];
         }
         return factor;
     }

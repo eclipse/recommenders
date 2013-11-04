@@ -39,20 +39,38 @@ public class MathUtils {
     }
 
     public static double[] normalize(double[] vector) {
-        double normFactor = MathUtils.sum(vector);
+        return normalizeRange(vector, 0, vector.length);
+    }
+
+    public static double[] normalizeRange(double[] vector, int start, int end) {
+        double normFactor = MathUtils.sumRange(vector, start, end);
         if (normFactor == 0) {
             throw new IllegalArgumentException("Cannot normalize a zero-Vector!");
         }
-        for (int i = 0; i < vector.length; i++) {
+        for (int i = start; i < end; i++) {
             vector[i] /= normFactor;
         }
         return vector;
     }
 
+    public static double[] normalizeCpt(double[] vector, int outcomes) {
+        if (vector.length % outcomes != 0) {
+            throw new IllegalArgumentException("CPT lengt % outcomes != 0");
+        }
+        for (int i = 0; i < vector.length / outcomes; i++) {
+            normalizeRange(vector, i * outcomes, (i + 1) * outcomes);
+        }
+        return vector;
+    }
+
     public static double sum(double[] vector) {
+        return sumRange(vector, 0, vector.length);
+    }
+
+    public static double sumRange(double[] vector, int start, int end) {
         double result = 0;
-        for (double d : vector) {
-            result += d;
+        for (int i = start; i < end; i++) {
+            result += vector[i];
         }
         return result;
     }

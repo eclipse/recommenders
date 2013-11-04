@@ -492,10 +492,17 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
     private void multiplyCPTsIntoPotentials(BayesNet net, int[] homeClusters) {
         for (final BayesNode node : net.getNodes()) {
             final AbstractFactor nodeHome = nodePotentials[homeClusters[node.getId()]];
+            AbstractFactor nodeFactor = node.getFactor();
+            if (!node.isNormalized()) {
+                nodeFactor = nodeFactor.clone();
+                double[] normalizedCpt = MathUtils
+                        .normalizeCpt(nodeFactor.getValues().toDoubleArray(), node.getOutcomeCount());
+                nodeFactor.setValues(new DoubleArrayWrapper(normalizedCpt));
+            }
             if (nodeHome.isLogScale()) {
-                nodeHome.multiplyCompatibleToLog(node.getFactor());
+                nodeHome.multiplyCompatibleToLog(nodeFactor);
             } else {
-                nodeHome.multiplyCompatible(node.getFactor());
+                nodeHome.multiplyCompatible(nodeFactor);
             }
         }
     }

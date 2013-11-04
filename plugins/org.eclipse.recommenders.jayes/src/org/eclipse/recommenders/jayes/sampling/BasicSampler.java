@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.jayes.sampling;
 
+import static org.eclipse.recommenders.jayes.util.BayesNodeUtil.marginalize;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +44,7 @@ public class BasicSampler implements ISampler {
     }
 
     private int sampleOutcome(BayesNode node, Map<BayesNode, String> currentSample) {
-        double[] probs = node.marginalize(currentSample);
+        double[] probs = marginalize(node, currentSample);
         double currentProb = 0;
         int newEvidence = 0;
         double rand = random.nextDouble();
