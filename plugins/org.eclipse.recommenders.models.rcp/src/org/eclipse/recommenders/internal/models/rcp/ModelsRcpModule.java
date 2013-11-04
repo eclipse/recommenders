@@ -112,6 +112,7 @@ public class ModelsRcpModule extends AbstractModule implements Module {
             ManualProjectCoordinateAdvisor manualMappingStrategy) {
         ProjectCoordinateAdvisorService mappingProvider = new ProjectCoordinateAdvisorService();
         mappingProvider.addAdvisor(manualMappingStrategy);
+        mappingProvider.addAdvisor(new OsgiManifestAdvisor());
         mappingProvider.addAdvisor(new MavenPomPropertiesAdvisor());
         mappingProvider.addAdvisor(new JREExecutionEnvironmentAdvisor());
         mappingProvider.addAdvisor(new JREReleaseFileAdvisor());
@@ -119,8 +120,8 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         mappingProvider.addAdvisor(new MavenPomXmlAdvisor());
         mappingProvider.addAdvisor(new ModelIndexBundleSymbolicNameAdvisor(index));
         mappingProvider.addAdvisor(new ModelIndexFingerprintAdvisor(index));
-        mappingProvider.addAdvisor(new OsgiManifestAdvisor());
         mappingProvider.addAdvisor(new MavenCentralFingerprintSearchAdvisor());
+        mappingProvider.addAdvisor(new NestedJarProjectCoordinateAdvisor());
         return mappingProvider;
     }
 

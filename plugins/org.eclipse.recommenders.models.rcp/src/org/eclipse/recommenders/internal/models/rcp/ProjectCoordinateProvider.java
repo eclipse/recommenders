@@ -66,6 +66,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.google.common.reflect.TypeToken;
@@ -190,7 +191,8 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
         if (isPartOfJRE(root, javaProject)) {
             return createJREDependencyInfo(javaProject);
         } else {
-            DependencyInfo request = new DependencyInfo(location, JAR);
+            DependencyInfo request = new DependencyInfo(location, JAR, ImmutableMap.of(DependencyInfo.PACKAGE_FRAGMENT_ROOT,
+                    root.getHandleIdentifier()));
             return of(request);
         }
     }
