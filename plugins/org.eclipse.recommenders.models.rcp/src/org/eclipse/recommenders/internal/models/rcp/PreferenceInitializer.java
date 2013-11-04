@@ -47,5 +47,4 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
                 Advisors.createPreferenceStringFromAdvisors(availableAdvisors, Sets.newHashSet(availableAdvisors)));
         s.putBoolean(P_REPOSITORY_ENABLE_AUTO_DOWNLOAD, true);
     }
-
 }

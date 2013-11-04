@@ -14,23 +14,28 @@ import static com.google.inject.Scopes.SINGLETON;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import org.eclipse.core.internal.net.ProxyManager;
 import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.recommenders.internal.rcp.RcpPlugin;
 import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
-import org.eclipse.recommenders.models.MavenCentralFingerprintSearchAdvisor;
 import org.eclipse.recommenders.models.advisors.JREDirectoryNameAdvisor;
 import org.eclipse.recommenders.models.advisors.JREExecutionEnvironmentAdvisor;
 import org.eclipse.recommenders.models.advisors.JREReleaseFileAdvisor;
+import org.eclipse.recommenders.models.advisors.MavenCentralFingerprintSearchAdvisor;
 import org.eclipse.recommenders.models.advisors.MavenPomPropertiesAdvisor;
 import org.eclipse.recommenders.models.advisors.MavenPomXmlAdvisor;
 import org.eclipse.recommenders.models.advisors.ModelIndexBundleSymbolicNameAdvisor;
@@ -44,6 +49,9 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
@@ -56,12 +64,14 @@ import com.google.inject.name.Names;
 @SuppressWarnings("restriction")
 public class ModelsRcpModule extends AbstractModule implements Module {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ModelsRcpModule.class);
-
     public static final String IDENTIFIED_PACKAGE_FRAGMENT_ROOTS = "IDENTIFIED_PACKAGE_FRAGMENT_ROOTS";
     public static final String REPOSITORY_BASEDIR = "REPOSITORY_BASEDIR";
     public static final String INDEX_BASEDIR = "INDEX_BASEDIR";
     public static final String MANUAL_MAPPINGS = "MANUAL_MAPPINGS";
+
+    private static final Logger LOG = LoggerFactory.getLogger(ModelsRcpModule.class);
+
+    private static final String EXT_ID_PROVIDER = "org.eclipse.recommenders.models.rcp.advisors";
 
     @Override
     protected void configure() {
@@ -116,16 +126,85 @@ public class ModelsRcpModule extends AbstractModule implements Module {
             ManualProjectCoordinateAdvisor manualMappingStrategy) {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList();
         availableAdvisors.add(manualMappingStrategy);
-        availableAdvisors.add(new MavenPomPropertiesAdvisor());
-        availableAdvisors.add(new JREExecutionEnvironmentAdvisor());
-        availableAdvisors.add(new JREReleaseFileAdvisor());
-        availableAdvisors.add(new JREDirectoryNameAdvisor());
-        availableAdvisors.add(new MavenPomXmlAdvisor());
-        availableAdvisors.add(new ModelIndexBundleSymbolicNameAdvisor(index));
-        availableAdvisors.add(new ModelIndexFingerprintAdvisor(index));
-        availableAdvisors.add(new OsgiManifestAdvisor());
-        availableAdvisors.add(new MavenCentralFingerprintSearchAdvisor());
+        availableAdvisors.addAll(instantiateAdvisorsFromRegistry());
+        // availableAdvisors.add(new MavenPomPropertiesAdvisor());
+        // availableAdvisors.add(new JREExecutionEnvironmentAdvisor());
+        // availableAdvisors.add(new JREReleaseFileAdvisor());
+        // availableAdvisors.add(new JREDirectoryNameAdvisor());
+        // availableAdvisors.add(new MavenPomXmlAdvisor());
+        // availableAdvisors.add(new ModelIndexBundleSymbolicNameAdvisor(index));
+        // availableAdvisors.add(new ModelIndexFingerprintAdvisor(index));
+        // availableAdvisors.add(new OsgiManifestAdvisor());
+        // availableAdvisors.add(new MavenCentralFingerprintSearchAdvisor());
         return ImmutableList.copyOf(availableAdvisors);
+    }
+
+    @Provides
+    public ModelIndexBundleSymbolicNameAdvisor provideModelIndexBundleSymbolicNameAdvisor(IModelIndex index) {
+        return new ModelIndexBundleSymbolicNameAdvisor(index);
+    }
+
+    @Provides
+    public ModelIndexFingerprintAdvisor provideModelIndexFingerprintAdvisor(IModelIndex index) {
+        return new ModelIndexFingerprintAdvisor(index);
+    }
+
+    private static List<IProjectCoordinateAdvisor> instantiateAdvisorsFromRegistry() {
+        final IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
+                EXT_ID_PROVIDER);
+        final List<AdvisorDescriptor> descriptors = Lists.newLinkedList();
+
+        for (final IConfigurationElement element : elements) {
+            final Optional<AdvisorDescriptor> opt = createProvider(element);
+            if (opt.isPresent()) {
+                descriptors.add(opt.get());
+            }
+        }
+
+        Collections.sort(descriptors, new Comparator<AdvisorDescriptor>() {
+
+            @Override
+            public int compare(AdvisorDescriptor lhs, AdvisorDescriptor rhs) {
+                return Integer.valueOf(lhs.defaultPriority).compareTo(rhs.defaultPriority);
+            }
+        });
+        return Lists.transform(descriptors, new Function<AdvisorDescriptor, IProjectCoordinateAdvisor>() {
+
+            @Override
+            public IProjectCoordinateAdvisor apply(AdvisorDescriptor descriptor) {
+                return descriptor.advisor;
+            }
+        });
+    }
+
+    private static Optional<AdvisorDescriptor> createProvider(final IConfigurationElement element) {
+        final String pluginId = element.getContributor().getName();
+        try {
+            final int defaultPriority = Integer.valueOf(element.getAttribute("defaultPriority")); //$NON-NLS-1$
+            final boolean enabledByDefault = Boolean.valueOf(Objects.firstNonNull(
+                    element.getAttribute("enabledByDefault"), "true"));
+            final IProjectCoordinateAdvisor provider = (IProjectCoordinateAdvisor) element
+                    .createExecutableExtension("class"); //$NON-NLS-1$
+            AdvisorDescriptor descriptor = new AdvisorDescriptor(provider, defaultPriority, enabledByDefault);
+            return Optional.of(descriptor);
+        } catch (final Exception e) {
+            RcpPlugin.logError(e, "failed to instantiate advisor %s:%s", //$NON-NLS-1$
+                    pluginId, element.getAttribute("class")); //$NON-NLS-1$
+            return Optional.absent();
+        }
+    }
+
+    private static class AdvisorDescriptor {
+
+        private final IProjectCoordinateAdvisor advisor;
+        private final int defaultPriority;
+        private final boolean enabledByDefault;
+
+        public AdvisorDescriptor(IProjectCoordinateAdvisor advisor, int defaultPriority, boolean enabledByDefault) {
+            this.advisor = advisor;
+            this.defaultPriority = defaultPriority;
+            this.enabledByDefault = enabledByDefault;
+        }
     }
 
     @Singleton
