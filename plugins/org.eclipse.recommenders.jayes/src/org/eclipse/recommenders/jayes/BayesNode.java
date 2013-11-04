@@ -21,6 +21,7 @@ import org.eclipse.recommenders.internal.jayes.util.BidirectionalMap;
 import org.eclipse.recommenders.jayes.factor.AbstractFactor;
 import org.eclipse.recommenders.jayes.factor.DenseFactor;
 import org.eclipse.recommenders.jayes.factor.arraywrapper.DoubleArrayWrapper;
+import org.eclipse.recommenders.jayes.factor.arraywrapper.IArrayWrapper;
 import org.eclipse.recommenders.jayes.util.MathUtils;
 
 public class BayesNode {
@@ -33,6 +34,7 @@ public class BayesNode {
     private final AbstractFactor factor = new DenseFactor();
     private int id = -1;
     private final List<String> outcomesList = new ArrayList<String>();
+    private boolean isNormalized = false;
 
     /**
      * @deprecated use {@link BayesNet#createNode(String) BayesNet.createNode} instead
@@ -43,19 +45,34 @@ public class BayesNode {
     }
 
     /**
-     * Must be called after the parents and outcomes, and the outcome of the parents are set.
+     * Must be called after the parents and outcomes, and the outcome of the parents are set. probabilities is assumed
+     * to be correctly normalized
      */
     public void setProbabilities(final double... probabilities) {
+        setValues(new DoubleArrayWrapper(probabilities), true);
+    }
+
+    public void setValues(final IArrayWrapper values, boolean isNormalized) {
+        this.setNormalized(isNormalized);
         adjustFactordimensions();
-        if (probabilities.length != MathUtils.product(factor.getDimensions())) {
+        if (values.length() != MathUtils.product(factor.getDimensions())) {
             throw new IllegalArgumentException("Probability table does not have expected size. Expected: "
-                    + MathUtils.product(factor.getDimensions()) + "but got: " + probabilities.length);
+                    + MathUtils.product(factor.getDimensions()) + "but got: " + values.length());
         }
-        factor.setValues(new DoubleArrayWrapper(probabilities));
+        factor.setValues(values);
     }
 
     public double[] getProbabilities() {
-        return factor.getValues().toDoubleArray();
+        // FIXME probably should be deprecated in the old version, and have a second version for the normalized thing
+        if (isNormalized) {
+            return factor.getValues().toDoubleArray();
+        } else {
+            return MathUtils.normalizeCpt(factor.getValues().toDoubleArray(), outcomes);
+        }
+    }
+
+    public IArrayWrapper getValues() {
+        return factor.getValues();
     }
 
     public List<BayesNode> getChildren() {
@@ -180,5 +197,17 @@ public class BayesNode {
     @Override
     public String toString() {
         return name;
+    }
+
+    public boolean isNormalized() {
+        return isNormalized;
+    }
+
+    /**
+     * to be used if the standard assumptions are incorrect (setProbabilities was called with an unnormalized
+     * distribution)
+     */
+    public void setNormalized(boolean isNormalized) {
+        this.isNormalized = isNormalized;
     }
 }

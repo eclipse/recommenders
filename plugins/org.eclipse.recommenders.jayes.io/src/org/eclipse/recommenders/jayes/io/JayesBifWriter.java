@@ -14,10 +14,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
+import java.util.Iterator;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
+import org.eclipse.recommenders.jayes.factor.arraywrapper.IntArrayWrapper;
+import org.eclipse.recommenders.jayes.util.MathUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -44,11 +47,25 @@ import com.google.common.primitives.Shorts;
  * <dt><var>Outcome</var></dt>
  * <dd><var>Name</var></dd>
  * <dt><var>NodeDefinition</var></dt>
- * <dd><var>Parents</var> <var>CPT</var></dd>
+ * <dd><var>Parents</var> <var>CPT header</var> <var>CPT</var></dd>
  * <dt><var>Parents</var></dt>
- * <dd>(parentCount: <code>byte</code>) parentIds: (<code>int</code>...)</dd>
+ * <dd>(parentCount: <code>byte</code>) (parentIds: <code>int</code>...)</dd>
+ * <dt><var>CPT header</var></dt>
+ * <dd>(flags: <code>int</code>)</dd>
  * <dt><var>CPT</var></dt>
- * <dd>(entryCount: <code>int</code>) (probabilities: <code>double</code>...)</dd>
+ * <dd>unspecified, see further description</dd>
+ * </dl>
+ * 
+ * The CPT format depends on the set flags, which are automatically determined. The following list describes the current
+ * possibilities:
+ * 
+ * <dl>
+ * <dt><var>flags=0x00</var></dt>
+ * <dd>(entryCount: int) (probabilities: double...)</dd>
+ * <dt><var>flags=0x01</var></dt>
+ * <dd>(entryCount: int) (frequencies: int...)</dd>
+ * <dt><var>flags=0x02</var></dt>
+ * <dd>(entryCount: int) (reduced probabilities: double...)</dd>
  * </dl>
  * 
  * Multi-byte primitive types are serialized in network byte-order.
@@ -158,7 +175,56 @@ public class JayesBifWriter implements IBayesNetWriter {
     private void putNodeDefinition(BayesNode node, ByteBuffer buffer) {
         putParents(node, buffer);
 
-        putCpt(node, buffer);
+        JBifNodeHeader nodeHeader = determineHeader(node);
+
+        buffer.putInt(nodeHeader.getFlag());
+
+        switch (nodeHeader) {
+        case DEFAULT:
+            putCpt(node, buffer);
+            break;
+        case FREQUENCIES:
+            putFrequencies(node, buffer);
+            break;
+        case REDUCED:
+            putReducedCpt(node, buffer);
+        }
+
+    }
+
+    private void putReducedCpt(BayesNode node, ByteBuffer buffer) {
+        int[] dimensions = node.getFactor().getDimensions();
+        int numCpds = MathUtils.productOfRange(dimensions, 0, dimensions.length - 1);
+        int reducedLength = numCpds * (node.getOutcomeCount() - 1);
+        buffer.putInt(reducedLength);
+        // this assumes the dimensions are properly ordered
+
+        DoubleBuffer asDoubleBuffer = buffer.asDoubleBuffer();
+        for (int i = 0; i < numCpds; i++) {
+            asDoubleBuffer.put(node.getProbabilities(), i * node.getOutcomeCount(), node.getOutcomeCount() - 1);
+        }
+        buffer.position(buffer.position() + asDoubleBuffer.position() * Doubles.BYTES);
+    }
+
+    private void putFrequencies(BayesNode node, ByteBuffer buffer) {
+        buffer.putInt(node.getValues().length());
+
+        Iterator<Number> it = node.getValues().iterator();
+
+        while (it.hasNext()) {
+            buffer.putInt(it.next().intValue());
+        }
+
+    }
+
+    private JBifNodeHeader determineHeader(BayesNode node) {
+        if (node.getValues() instanceof IntArrayWrapper) {
+            return JBifNodeHeader.FREQUENCIES;
+        }
+        if (node.getOutcomeCount() == 2) {// TODO this is just random...
+            return JBifNodeHeader.REDUCED;
+        }
+        return JBifNodeHeader.DEFAULT;
     }
 
     private void putParents(BayesNode node, ByteBuffer buffer) {

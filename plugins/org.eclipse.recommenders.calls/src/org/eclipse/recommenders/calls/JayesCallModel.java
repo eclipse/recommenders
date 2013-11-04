@@ -10,10 +10,17 @@
  */
 package org.eclipse.recommenders.calls;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static org.eclipse.recommenders.utils.Constants.*;
+import static org.eclipse.recommenders.utils.Constants.N_NODEID_CALL_GROUPS;
+import static org.eclipse.recommenders.utils.Constants.N_NODEID_CONTEXT;
+import static org.eclipse.recommenders.utils.Constants.N_NODEID_DEF;
+import static org.eclipse.recommenders.utils.Constants.N_NODEID_DEF_KIND;
+import static org.eclipse.recommenders.utils.Constants.N_STATE_FALSE;
+import static org.eclipse.recommenders.utils.Constants.N_STATE_TRUE;
+import static org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD;
 import static org.eclipse.recommenders.utils.Recommendation.newRecommendation;
 
 import java.io.InputStream;
@@ -146,10 +153,7 @@ public class JayesCallModel implements ICallModel {
         Collection<Node> nodes = network.getNodes();
         for (Node node : nodes) {
             BayesNode bayesNode = net.createNode(node.getIdentifier());
-            String[] states = node.getStates();
-            for (int i = 0; i < states.length; i++) {
-                bayesNode.addOutcome(states[i]);
-            }
+            bayesNode.addOutcomes(node.getStates());
 
             if (node.getIdentifier().equals(N_NODEID_CONTEXT)) {
                 overridesNode = bayesNode;
@@ -234,8 +238,8 @@ public class JayesCallModel implements ICallModel {
             BayesNode node = pair.getValue();
             IMethodName method = pair.getKey();
             if (evidence.containsKey(node) && evidence.get(node).equals(Constants.N_STATE_TRUE)
-            // remove the NULL that may have been introduced by
-            // res.add(compute...)
+                    // remove the NULL that may have been introduced by
+                    // res.add(compute...)
                     && !VmMethodName.NULL.equals(method)) {
                 builder.add(method);
             }
