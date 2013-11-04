@@ -10,17 +10,20 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static java.lang.Math.*;
-import static org.eclipse.recommenders.internal.models.rcp.Advisors.Filter.*;
-import static org.eclipse.recommenders.internal.models.rcp.Messages.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_ADVISOR_ADVISORS;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_ADVISOR_BUTTON_DOWN;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_ADVISOR_BUTTON_UP;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_ADVISOR_DESCRIPTION;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.PREFPAGE_ADVISOR_TITLE;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -29,14 +32,13 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
 import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.models.rcp.ModelEvents.AdvisorConfigurationChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -44,7 +46,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
 public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
@@ -54,15 +56,12 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
 
     private final EventBus bus;
     private final ProjectCoordinateAdvisorService advisorService;
-    private final List<IProjectCoordinateAdvisor> availableAdvisors;
 
     @Inject
-    public AdvisorsPreferencePage(EventBus bus, ProjectCoordinateAdvisorService advisorService,
-            List<IProjectCoordinateAdvisor> availableAdvisors) {
+    public AdvisorsPreferencePage(EventBus bus, ProjectCoordinateAdvisorService advisorService) {
         super(GRID);
         this.bus = bus;
         this.advisorService = advisorService;
-        this.availableAdvisors = availableAdvisors;
     }
 
     @Override
@@ -127,9 +126,9 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                List<String> input = cast(tableViewer.getInput());
+                List<AdvisorDescriptor> input = cast(tableViewer.getInput());
                 int index = tableViewer.getTable().getSelectionIndex();
-                String movedElement = input.remove(index);
+                AdvisorDescriptor movedElement = input.remove(index);
                 int newIndex = min(max(0, index + direction), input.size());
                 input.add(newIndex, movedElement);
                 tableViewer.setInput(input);
@@ -162,10 +161,17 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
 
                 @Override
                 public String getText(Object element) {
-                    return StringUtils.substringAfterLast((String) element, "."); //$NON-NLS-1$
+                    AdvisorDescriptor descriptor = cast(element);
+                    return descriptor.getName();
+                }
+                
+                @Override
+                public String getToolTipText(Object element) {
+                    AdvisorDescriptor descriptor = cast(element);
+                    return descriptor.getDescription();
                 }
             });
-
+            ColumnViewerToolTipSupport.enableFor(tableViewer); 
             tableViewer.setContentProvider(new ArrayContentProvider());
             return tableViewer;
         }
@@ -177,8 +183,13 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
         }
 
         private void load(String value) {
-            List<String> input = Advisors.extractAdvisors(value, ALL);
-            List<String> checkedElements = Advisors.extractAdvisors(value, ENABLED);
+            List<AdvisorDescriptor> input = AdvisorDescriptors.load(value, AdvisorDescriptors.getRegisteredAdvisors());
+            List<AdvisorDescriptor> checkedElements = Lists.newArrayList();
+            for (AdvisorDescriptor descriptor :input) {
+                if (descriptor.isEnabled()) {
+                    checkedElements.add(descriptor);
+                }
+            }
 
             tableViewer.setInput(input);
             tableViewer.setCheckedElements(checkedElements.toArray());
@@ -192,16 +203,25 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
 
         @Override
         protected void doStore() {
-            Set<String> enabledElements = cast(Sets.newHashSet(tableViewer.getCheckedElements()));
-            List<String> advisors = cast(tableViewer.getInput());
-
-            String newValue = Advisors.createPreferenceStringFromClassNames(advisors, enabledElements);
+            List<AdvisorDescriptor> descriptors = cast(tableViewer.getInput());
+            for (AdvisorDescriptor descriptor : descriptors) {
+                descriptor.setEnabled(tableViewer.getChecked(descriptor));
+            }
+            String newValue = AdvisorDescriptors.store(descriptors);
             getPreferenceStore().setValue(getPreferenceName(), newValue);
-            reconfigureAdvisorService(newValue);
+            reconfigureAdvisorService(tableViewer.getCheckedElements());
         }
 
-        private void reconfigureAdvisorService(String newValue) {
-            advisorService.setAdvisors(Advisors.createAdvisorList(availableAdvisors, newValue));
+        private void reconfigureAdvisorService(Object... newValues) {
+            List<IProjectCoordinateAdvisor> advisors = Lists.newArrayListWithCapacity(newValues.length);
+            for (Object descriptor : newValues) {
+                try {
+                    advisors.add(((AdvisorDescriptor) descriptor).createAdvisor());
+                } catch (CoreException e) {
+                    continue; // skip
+                }
+            }
+            advisorService.setAdvisors(advisors);
             bus.post(new AdvisorConfigurationChangedEvent());
         }
 

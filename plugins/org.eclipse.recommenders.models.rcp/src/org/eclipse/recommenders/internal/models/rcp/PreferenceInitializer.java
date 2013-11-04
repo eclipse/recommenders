@@ -16,25 +16,11 @@ import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITOR
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST;
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST_ACTIV;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
-
-import com.google.common.collect.Sets;
 
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
-
-    private List<IProjectCoordinateAdvisor> availableAdvisors;
-
-    @Inject
-    public PreferenceInitializer(List<IProjectCoordinateAdvisor> availableAdvisors) {
-        this.availableAdvisors = availableAdvisors;
-    }
 
     public static final String SERVER_URL = "http://download.eclipse.org/recommenders/models/luna-m3/"; //$NON-NLS-1$
 
@@ -43,9 +29,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         IEclipsePreferences s = DefaultScope.INSTANCE.getNode(BUNDLE_ID);
         s.put(P_REPOSITORY_URL_LIST_ACTIV, SERVER_URL);
         s.put(P_REPOSITORY_URL_LIST, SERVER_URL);
-        s.put(P_ADVISOR_LIST_SORTED,
-                Advisors.createPreferenceStringFromAdvisors(availableAdvisors, Sets.newHashSet(availableAdvisors)));
+        s.put(P_ADVISOR_LIST_SORTED, AdvisorDescriptors.store(AdvisorDescriptors.getRegisteredAdvisors()));
         s.putBoolean(P_REPOSITORY_ENABLE_AUTO_DOWNLOAD, true);
     }
-
 }
