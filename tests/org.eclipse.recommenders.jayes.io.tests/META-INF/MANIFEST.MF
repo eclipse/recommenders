@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Fragment-Host: org.eclipse.recommenders.jayes.io
 Require-Bundle: org.junit;bundle-version="4.10.0",
  org.hamcrest.library;bundle-version="1.1.0"
+Import-Package: org.eclipse.recommenders.tests.jayes.util
