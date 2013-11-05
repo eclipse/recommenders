@@ -30,6 +30,7 @@ import org.eclipse.recommenders.models.ModelCoordinate;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.Pair;
 import org.eclipse.recommenders.utils.Urls;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -51,23 +52,37 @@ public class MultiRepositorySupportTest {
     public static final ProjectCoordinate PC3 = new ProjectCoordinate("org.example", "three", "3.0.0");
     public static final ProjectCoordinate PC4 = new ProjectCoordinate("org.example", "four", "4.0.0");
 
-    public static final ModelCoordinate MC1 = new ModelCoordinate("org.example", "one", "call", EXT_ZIP, "1.0.0");
-    public static final ModelCoordinate MC2 = new ModelCoordinate("org.example", "two", "call", EXT_ZIP, "2.0.0");
-    public static final ModelCoordinate MC3 = new ModelCoordinate("org.example", "three", "call", EXT_ZIP, "3.0.0");
-    public static final ModelCoordinate MC4 = new ModelCoordinate("org.example", "four", "call", EXT_ZIP, "4.0.0");
+    public ModelCoordinate MC1;
+    public ModelCoordinate MC2;
+    public ModelCoordinate MC3;
+    public ModelCoordinate MC4;
 
-    public static final Map<ModelCoordinate, ProjectCoordinate> MC_TO_PC_MAPPING = ImmutableMap.of(MC1, PC1, MC2, PC2,
-            MC3, PC3, MC4, PC4);
+    public Map<ModelCoordinate, ProjectCoordinate> MC_TO_PC_MAPPING;
 
-    public static final Pair<String, ModelCoordinate[]> REPO_1 = Pair.newPair("http://www.example.com/repo1",
-            new ModelCoordinate[] { MC1 });
-    public static final Pair<String, ModelCoordinate[]> REPO_2 = Pair.newPair("http://www.example.org/repo2",
-            new ModelCoordinate[] { MC2 });
-    public static final Pair<String, ModelCoordinate[]> REPO_3 = Pair.newPair("http://www.example.com/repo3",
-            new ModelCoordinate[] { MC1, MC3 });
+    public Pair<String, ModelCoordinate[]> REPO_1;
+    public Pair<String, ModelCoordinate[]> REPO_2;
+    public Pair<String, ModelCoordinate[]> REPO_3;
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Before
+    public void init() {
+        MC1 = new ModelCoordinate("org.example", "one", "call", EXT_ZIP, "1.0.0");
+        MC2 = new ModelCoordinate("org.example", "two", "call", EXT_ZIP, "2.0.0");
+        MC3 = new ModelCoordinate("org.example", "three", "call", EXT_ZIP, "3.0.0");
+        MC4 = new ModelCoordinate("org.example", "four", "call", EXT_ZIP, "4.0.0");
+        
+        MC_TO_PC_MAPPING = ImmutableMap.of(MC1, PC1, MC2, PC2,
+                MC3, PC3, MC4, PC4);
+        
+        REPO_1 = Pair.newPair("http://www.example.com/repo1",
+                new ModelCoordinate[] { MC1 });
+        REPO_2 = Pair.newPair("http://www.example.org/repo2",
+                new ModelCoordinate[] { MC2 });
+        REPO_3 = Pair.newPair("http://www.example.com/repo3",
+                new ModelCoordinate[] { MC1, MC3 });
+    }
 
     private IModelIndex createMockedModelIndex(final ModelCoordinate... models) {
         IModelIndex mock = mock(IModelIndex.class);

@@ -78,7 +78,8 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
             .maximumSize(10).concurrencyLevel(1).build();
 
     @Inject
-    public EclipseModelIndex(@Named(INDEX_BASEDIR) File basedir, ModelsRcpPreferences prefs, IModelRepository repository, EventBus bus){
+    public EclipseModelIndex(@Named(INDEX_BASEDIR) File basedir, ModelsRcpPreferences prefs,
+            IModelRepository repository, EventBus bus) {
         this.basedir = basedir;
         this.prefs = prefs;
         this.repository = repository;
@@ -114,7 +115,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     @VisibleForTesting
-    public IModelIndex createModelIndex(File indexLocation){
+    public IModelIndex createModelIndex(File indexLocation) {
         return new ModelIndex(indexLocation);
     }
 
@@ -157,7 +158,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
                 public Optional<ModelCoordinate> call() {
                     for (String remote : prefs.remotes) {
                         Pair<File, IModelIndex> pair = delegates.get(remote);
-                        if (pair == null){
+                        if (pair == null) {
                             return absent();
                         }
                         IModelIndex index = pair.getSecond();
@@ -249,7 +250,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
     @Subscribe
     public void onEvent(ModelArchiveDownloadedEvent e) throws IOException {
-        if (INDEX.equals(e.model)) {
+        if (isIndex(e.model)) {
             File location = repository.getLocation(e.model, false).orNull();
             String remoteUrl = e.model.getHint(HINT_REPOSITORY_URL).orNull();
             if (remoteUrl != null) {
@@ -262,5 +263,12 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
                 doOpen(remoteUrl, false);
             }
         }
+    }
+
+    private boolean isIndex(ModelCoordinate model) {
+        return model.getGroupId().equals(INDEX.getGroupId()) 
+                && model.getArtifactId().equals(INDEX.getArtifactId())
+                && model.getExtension().equals(INDEX.getExtension()) 
+                && model.getVersion().equals(INDEX.getVersion());
     }
 }
