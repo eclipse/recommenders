@@ -41,6 +41,12 @@
               id="org.eclipse.recommenders.models.rcp.preferencepage"
               name="Models">
         </page>
+        <page
+              category="org.eclipse.recommenders.rcp.category.preferences"
+              class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.models.rcp.AdvisorPreferencePage"
+              id="org.eclipse.recommenders.models.rcp.AdvisorPreferencePage"
+              name="Advisors">
+        </page>
      </extension>
      <extension
            point="org.eclipse.core.runtime.preferences">
