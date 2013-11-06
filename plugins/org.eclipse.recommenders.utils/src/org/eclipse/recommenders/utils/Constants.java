@@ -62,6 +62,8 @@ public abstract class Constants {
     /** {@value} */
     public static final String CLASS_CALL_MODELS = "call";
     /** {@value} */
+    public static final String CLASS_CALL2_MODELS = "call2";
+    /** {@value} */
     public static final String CLASS_DECLARES = "declares";
     /** {@value} */
     public static final String CLASS_OVERRIDES_DIRECTIVES = "ovrd";
