@@ -11,11 +11,17 @@
 package org.eclipse.recommenders.models.rcp;
 
 import static com.google.common.base.Optional.absent;
+import static org.eclipse.recommenders.internal.models.rcp.Advisors.Filter.ALL;
+import static org.eclipse.recommenders.internal.models.rcp.Advisors.Filter.DISABLED;
+import static org.eclipse.recommenders.internal.models.rcp.Advisors.Filter.ENABLED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.recommenders.internal.models.rcp.Advisors;
 import org.eclipse.recommenders.models.DependencyInfo;
@@ -38,15 +44,16 @@ public class AdvisorsTest {
     @Test
     public void testPrefStringCreationWithEmptyAdvisorList() {
 
-        String prefString = Advisors.createPreferenceString(Collections.<IProjectCoordinateAdvisor>emptyList(),
-                Collections.<IProjectCoordinateAdvisor>emptySet());
+        String prefString = Advisors.createPreferenceStringFromAdvisors(
+                Collections.<IProjectCoordinateAdvisor>emptyList(), Collections.<IProjectCoordinateAdvisor>emptySet());
         assertEquals("", prefString);
     }
 
     @Test
     public void testPrefStringCreationAllAdvisorDisabled() {
-        String actual = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2, A3));
+        String actual = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Collections.<IProjectCoordinateAdvisor>emptySet());
         String expected = "!" + A1.getClass().getName() + ";!" + A2.getClass().getName() + ";!"
                 + A3.getClass().getName() + ";";
         assertEquals(expected, actual);
@@ -54,16 +61,18 @@ public class AdvisorsTest {
 
     @Test
     public void testPrefStringCreationAllAdvisorEnabled() {
-        String actual = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Collections.<IProjectCoordinateAdvisor>emptySet());
+        String actual = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2, A3));
         String expected = A1.getClass().getName() + ";" + A2.getClass().getName() + ";" + A3.getClass().getName() + ";";
         assertEquals(expected, actual);
     }
 
     @Test
     public void testPrefStringCreationOneAdvisorEnabled() {
-        String actual = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A3));
+        String actual = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A2));
         String expected = "!" + A1.getClass().getName() + ";" + A2.getClass().getName() + ";!"
                 + A3.getClass().getName() + ";";
         assertEquals(expected, actual);
@@ -71,16 +80,18 @@ public class AdvisorsTest {
 
     @Test
     public void testPrefStringCreationOrderOfAdvisorsMatters() {
-        String actual = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A3, A1, A2),
-                Collections.<IProjectCoordinateAdvisor>emptySet());
+        String actual = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A3, A1, A2),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2, A3));
         String expected = A3.getClass().getName() + ";" + A1.getClass().getName() + ";" + A2.getClass().getName() + ";";
         assertEquals(expected, actual);
     }
 
     @Test
     public void testPrefStringCreationTwoAdvisorEnabled() {
-        String actual = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Sets.<IProjectCoordinateAdvisor>newHashSet(A1));
+        String actual = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A2, A3));
         String expected = "!" + A1.getClass().getName() + ";" + A2.getClass().getName() + ";" + A3.getClass().getName()
                 + ";";
         assertEquals(expected, actual);
@@ -97,8 +108,9 @@ public class AdvisorsTest {
     public void testAdvisorListCreationWithAllAdvisorsEnabled() {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList(A1, A2, A3);
 
-        String prefString = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Collections.<IProjectCoordinateAdvisor>emptySet());
+        String prefString = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2, A3));
 
         List<IProjectCoordinateAdvisor> actual = Advisors.createAdvisorList(availableAdvisors, prefString);
         assertEquals(availableAdvisors, actual);
@@ -108,8 +120,9 @@ public class AdvisorsTest {
     public void testAdvisorListCreationWithAllAdvisorsDisabled() {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList(A1, A2, A3);
 
-        String prefString = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2, A3));
+        String prefString = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Collections.<IProjectCoordinateAdvisor>emptySet());
 
         List<IProjectCoordinateAdvisor> actual = Advisors.createAdvisorList(availableAdvisors, prefString);
         assertTrue(actual.isEmpty());
@@ -119,8 +132,9 @@ public class AdvisorsTest {
     public void testAdvisorListCreationWithOneAdvisorsDisabled() {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList(A1, A2, A3);
 
-        String prefString = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Sets.<IProjectCoordinateAdvisor>newHashSet(A2, A3));
+        String prefString = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A1));
 
         List<IProjectCoordinateAdvisor> actual = Advisors.createAdvisorList(availableAdvisors, prefString);
         assertEquals(Lists.newArrayList(A1), actual);
@@ -130,8 +144,9 @@ public class AdvisorsTest {
     public void testAdvisorListCreationWithTwoAdvisorsDisabled() {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList(A1, A2, A3);
 
-        String prefString = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
-                Sets.<IProjectCoordinateAdvisor>newHashSet(A3));
+        String prefString = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A1, A2, A3),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2));
 
         List<IProjectCoordinateAdvisor> actual = Advisors.createAdvisorList(availableAdvisors, prefString);
         assertEquals(Lists.newArrayList(A1, A2), actual);
@@ -141,8 +156,9 @@ public class AdvisorsTest {
     public void testAdvisorListCreationWithAdvisorOrderMatters() {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList(A1, A2, A3);
 
-        String prefString = Advisors.createPreferenceString(Lists.<IProjectCoordinateAdvisor>newArrayList(A3, A1, A2),
-                Collections.<IProjectCoordinateAdvisor>emptySet());
+        String prefString = Advisors.createPreferenceStringFromAdvisors(
+                Lists.<IProjectCoordinateAdvisor>newArrayList(A3, A1, A2),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2, A3));
 
         List<IProjectCoordinateAdvisor> actual = Advisors.createAdvisorList(availableAdvisors, prefString);
         assertEquals(Lists.newArrayList(A3, A1, A2), actual);
@@ -155,6 +171,86 @@ public class AdvisorsTest {
         List<IProjectCoordinateAdvisor> actual = Advisors.createAdvisorList(availableAdvisors, "");
         assertEquals(Lists.newArrayList(), actual);
     }
+
+    @Test
+    public void testAdvisorStringExtractionOfAll() {
+        String prefString = Advisors.createPreferenceStringFromAdvisors(Lists.newArrayList(A1, A2, A3),
+                Sets.<IProjectCoordinateAdvisor>newHashSet(A1, A2, A3));
+        List<String> actual = Advisors.extractAdvisors(prefString, ALL);
+
+        ArrayList<String> expected = Lists.newArrayList(A1.getClass().getName(), A2.getClass().getName(), A3.getClass()
+                .getName());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAdvisorStringExtractionOfEnabled() {
+        String prefString = Advisors.createPreferenceStringFromAdvisors(Lists.newArrayList(A1, A2, A3),
+                Sets.newHashSet(A1, A3));
+        List<String> actual = Advisors.extractAdvisors(prefString, ENABLED);
+
+        ArrayList<String> expected = Lists.newArrayList(A1.getClass().getName(), A3.getClass().getName());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAdvisorStringExtractionOfDisabled() {
+        String prefString = Advisors.createPreferenceStringFromAdvisors(Lists.newArrayList(A1, A2, A3),
+                Sets.newHashSet(A1));
+        List<String> actual = Advisors.extractAdvisors(prefString, DISABLED);
+
+        ArrayList<String> expected = Lists.newArrayList(A2.getClass().getName(), A3.getClass().getName());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPrefStringCreationWithAllEnabledAdvisors() {
+        List<String> orderedAdvisors = Lists.newArrayList(A1.getClass().getName(), A2.getClass().getName(), A3
+                .getClass().getName());
+        HashSet<String> enabledAdvisors = Sets.newHashSet(A1.getClass().getName(), A2.getClass().getName(), A3
+                .getClass().getName());
+        String actual = Advisors.createPreferenceStringFromClassNames(orderedAdvisors, enabledAdvisors);
+
+        String expected = Advisors.createPreferenceStringFromAdvisors(Lists.newArrayList(A1, A2, A3),
+                Sets.newHashSet(A1, A2, A3));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPrefStringCreationWithAllDisabledAdvisors() {
+        List<String> orderedAdvisors = Lists.newArrayList(A1.getClass().getName(), A2.getClass().getName(), A3
+                .getClass().getName());
+        String actual = Advisors.createPreferenceStringFromClassNames(orderedAdvisors, Collections.<String>emptySet());
+
+        String expected = Advisors.createPreferenceStringFromAdvisors(Lists.newArrayList(A1, A2, A3),
+                Collections.<IProjectCoordinateAdvisor>emptySet());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPrefStringCreationWithDisAnEnabledAdvisors() {
+        List<String> orderedAdvisors = Lists.newArrayList(A1.getClass().getName(), A2.getClass().getName(), A3
+                .getClass().getName());
+        Set<String> enabledAdvisors = Sets.newHashSet(A2.getClass().getName());
+        String actual = Advisors.createPreferenceStringFromClassNames(orderedAdvisors, enabledAdvisors);
+
+        String expected = Advisors.createPreferenceStringFromAdvisors(Lists.newArrayList(A1, A2, A3),
+                Sets.newHashSet(A2));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPrefStringCreationOrderMatters() {
+        List<String> orderedAdvisors = Lists.newArrayList(A3.getClass().getName(), A1.getClass().getName(), A2
+                .getClass().getName());
+        Set<String> enabledAdvisors = Sets.newHashSet(A2.getClass().getName());
+        String actual = Advisors.createPreferenceStringFromClassNames(orderedAdvisors, enabledAdvisors);
+
+        String expected = Advisors.createPreferenceStringFromAdvisors(Lists.newArrayList(A3, A1, A2),
+                Sets.newHashSet(A2));
+        assertEquals(expected, actual);
+    }
+
 }
 
 class Advisor1 extends DefaultAdvisor {
