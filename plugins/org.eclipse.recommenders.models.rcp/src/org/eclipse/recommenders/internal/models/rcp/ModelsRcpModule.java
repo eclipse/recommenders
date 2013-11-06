@@ -85,6 +85,7 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         bind(ManualProjectCoordinateAdvisor.class).in(SINGLETON);
         createAndBindNamedFile("caches/manual-mappings.json", MANUAL_MAPPINGS);
         createAndBindNamedFile("caches/identified-project-coordinates.json", IDENTIFIED_PACKAGE_FRAGMENT_ROOTS);
+
     }
 
     private void createAndBindNamedFile(String fileName, String name) {
@@ -110,7 +111,6 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         return ProxyManager.getProxyManager();
     }
 
-    @Singleton
     @Provides
     public List<IProjectCoordinateAdvisor> provideAdvisors(IModelIndex index,
             ManualProjectCoordinateAdvisor manualMappingStrategy) {
