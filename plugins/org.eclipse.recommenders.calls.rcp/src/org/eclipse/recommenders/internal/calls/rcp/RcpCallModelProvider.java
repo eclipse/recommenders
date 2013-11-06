@@ -18,7 +18,7 @@ import javax.inject.Inject;
 
 import org.eclipse.recommenders.calls.ICallModel;
 import org.eclipse.recommenders.calls.ICallModelProvider;
-import org.eclipse.recommenders.calls.PoolingCallModelProvider;
+import org.eclipse.recommenders.calls.PoolingFallbackCallModelProvider;
 import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.UniqueTypeName;
@@ -36,12 +36,13 @@ public class RcpCallModelProvider implements ICallModelProvider, IRcpService {
     @Inject
     IModelArchiveCoordinateAdvisor index;
 
-    PoolingCallModelProvider delegate;
+    ICallModelProvider delegate;
 
     @Override
     @PostConstruct
     public void open() throws IOException {
-        delegate = new PoolingCallModelProvider(repository, index);
+        delegate = new PoolingFallbackCallModelProvider(repository, index);
+        // delegate = new PoolingCallModelProvider(repository, index);
         delegate.open();
     }
 
