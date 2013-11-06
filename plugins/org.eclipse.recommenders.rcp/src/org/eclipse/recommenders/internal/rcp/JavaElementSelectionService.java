@@ -10,7 +10,9 @@
  */
 package org.eclipse.recommenders.internal.rcp;
 
-import static org.eclipse.recommenders.internal.rcp.JavaElementSelections.*;
+import static org.eclipse.recommenders.internal.rcp.JavaElementSelections.resolveJavaElementFromEditor;
+import static org.eclipse.recommenders.internal.rcp.JavaElementSelections.resolveSelectionLocationFromAstNode;
+import static org.eclipse.recommenders.internal.rcp.JavaElementSelections.resolveSelectionLocationFromJavaElement;
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.findAstNodeFromEditorSelection;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
@@ -31,6 +33,7 @@ import org.eclipse.recommenders.rcp.utils.Selections;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -43,8 +46,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @SuppressWarnings("restriction")
 public class JavaElementSelectionService implements ISelectionListener {
 
-    ScheduledThreadPoolExecutor d = new ScheduledThreadPoolExecutor(1, new ThreadFactoryBuilder().setNameFormat(
-            "Recommenders-Timeout-Manager").build()); //$NON-NLS-1$
+    @VisibleForTesting
+    protected ScheduledThreadPoolExecutor d = new ScheduledThreadPoolExecutor(1, new ThreadFactoryBuilder()
+            .setNameFormat("Recommenders-Timeout-Manager").build()); //$NON-NLS-1$
     private final EventBus bus;
     private JavaElementSelectionEvent lastEvent = new JavaElementSelectionEvent(null, null);
 

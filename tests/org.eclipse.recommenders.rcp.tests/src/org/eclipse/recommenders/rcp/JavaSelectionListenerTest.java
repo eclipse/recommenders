@@ -12,13 +12,22 @@ package org.eclipse.recommenders.rcp;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.jface.viewers.StructuredSelection.EMPTY;
-import static org.eclipse.recommenders.tests.jdt.JdtMockUtils.*;
-import static org.junit.Assert.*;
+import static org.eclipse.recommenders.tests.jdt.JdtMockUtils.someField;
+import static org.eclipse.recommenders.tests.jdt.JdtMockUtils.someJavaModel;
+import static org.eclipse.recommenders.tests.jdt.JdtMockUtils.someLocalVariable;
+import static org.eclipse.recommenders.tests.jdt.JdtMockUtils.someMethod;
+import static org.eclipse.recommenders.tests.jdt.JdtMockUtils.someType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
@@ -26,6 +35,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.recommenders.internal.rcp.JavaElementSelectionService;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.google.common.eventbus.EventBus;
 
@@ -38,7 +50,22 @@ public class JavaSelectionListenerTest {
         public void post(final Object event) {
             elements.add(((JavaElementSelectionEvent) event).getElement());
         };
-    });
+    }) {
+        {
+            d = Mockito.mock(ScheduledThreadPoolExecutor.class);
+            Mockito.when(d.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class))).thenAnswer(
+                    new Answer<Void>() {
+
+                        @Override
+                        public Void answer(InvocationOnMock invocation) throws Throwable {
+                            Runnable runnable = (Runnable) invocation.getArguments()[0];
+                            runnable.run();
+
+                            return null;
+                        }
+                    });
+        }
+    };
 
     @Test
     public void testStructuredSelectionWithType() throws InterruptedException {
@@ -46,7 +73,6 @@ public class JavaSelectionListenerTest {
                 someJavaModel());
         for (final Object e : expected) {
             sut.selectionChanged(null, new StructuredSelection(e));
-            Thread.sleep(200);
         }
         assertEquals(expected, elements);
     }
@@ -57,7 +83,6 @@ public class JavaSelectionListenerTest {
         final IType someType = someType();
         sut.selectionChanged(null, new StructuredSelection(someType));
         sut.selectionChanged(null, new StructuredSelection(someType));
-        Thread.sleep(200);
 
         assertEquals(1, elements.size());
     }
