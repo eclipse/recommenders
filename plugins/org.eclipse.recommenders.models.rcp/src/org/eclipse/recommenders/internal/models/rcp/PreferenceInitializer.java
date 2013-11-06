@@ -16,7 +16,6 @@ import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITOR
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST;
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST_ACTIV;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -25,6 +24,8 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
+
+import com.google.common.collect.Sets;
 
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
@@ -43,7 +44,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         s.put(P_REPOSITORY_URL_LIST_ACTIV, SERVER_URL);
         s.put(P_REPOSITORY_URL_LIST, SERVER_URL);
         s.put(P_ADVISOR_LIST_SORTED,
-                Advisors.createPreferenceString(availableAdvisors, Collections.<IProjectCoordinateAdvisor>emptySet()));
+                Advisors.createPreferenceStringFromAdvisors(availableAdvisors, Sets.newHashSet(availableAdvisors)));
         s.putBoolean(P_REPOSITORY_ENABLE_AUTO_DOWNLOAD, true);
     }
 

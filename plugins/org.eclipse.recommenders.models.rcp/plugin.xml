@@ -37,9 +37,15 @@
            point="org.eclipse.ui.preferencePages">
         <page
               category="org.eclipse.recommenders.rcp.category.preferences"
-              class="org.eclipse.recommenders.internal.models.rcp.PreferencePage"
-              id="org.eclipse.recommenders.models.rcp.preferencepage"
+              class="org.eclipse.recommenders.internal.models.rcp.ModelsPreferencePage"
+              id="org.eclipse.recommenders.models.rcp.preferencePages.models"
               name="Models">
+        </page>
+        <page
+              category="org.eclipse.recommenders.rcp.category.preferences"
+              class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.models.rcp.AdvisorsPreferencePage"
+              id="org.eclipse.recommenders.models.rcp.preferencePages.advisors"
+              name="Advisors">
         </page>
      </extension>
      <extension

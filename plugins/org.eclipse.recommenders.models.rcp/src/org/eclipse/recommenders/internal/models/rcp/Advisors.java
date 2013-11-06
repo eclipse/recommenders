@@ -19,14 +19,17 @@ import com.google.common.collect.Lists;
 
 public class Advisors {
 
-    private static final String DISABLED_FLAG = "!";
-    private static final String SEPARATOR = ";";
+    public static final String DISABLED_FLAG = "!";
+    public static final String SEPARATOR = ";";
+
+    public enum Filter {
+        ALL, ENABLED, DISABLED
+    }
 
     public static List<IProjectCoordinateAdvisor> createAdvisorList(List<IProjectCoordinateAdvisor> arrayList,
             String advisors) {
-        String[] split = advisors.split(SEPARATOR);
         List<IProjectCoordinateAdvisor> advisorList = Lists.newArrayList();
-        for (String name : split) {
+        for (String name : advisors.split(SEPARATOR)) {
             if (name.startsWith(DISABLED_FLAG)) {
                 continue;
             }
@@ -40,12 +43,12 @@ public class Advisors {
         return advisorList;
     }
 
-    public static String createPreferenceString(List<IProjectCoordinateAdvisor> orderedAdvisors,
-            Set<IProjectCoordinateAdvisor> disabledAdvisors) {
+    public static String createPreferenceStringFromAdvisors(List<IProjectCoordinateAdvisor> orderedAdvisors,
+            Set<IProjectCoordinateAdvisor> enabledAdvisors) {
         StringBuilder sb = new StringBuilder();
 
         for (IProjectCoordinateAdvisor advisor : orderedAdvisors) {
-            if (disabledAdvisors.contains(advisor)) {
+            if (!enabledAdvisors.contains(advisor)) {
                 sb.append(DISABLED_FLAG);
             }
             sb.append(advisor.getClass().getName());
@@ -55,4 +58,41 @@ public class Advisors {
         return sb.toString();
     }
 
+    public static String createPreferenceStringFromClassNames(List<String> orderedAdvisors, Set<String> enabledAdvisors) {
+        StringBuilder sb = new StringBuilder();
+
+        for (String advisor : orderedAdvisors) {
+            if (!enabledAdvisors.contains(advisor)) {
+                sb.append(DISABLED_FLAG);
+            }
+            sb.append(advisor);
+            sb.append(SEPARATOR);
+        }
+
+        return sb.toString();
+    }
+
+    public static List<String> extractAdvisors(String prefString, Filter filter) {
+        List<String> result = Lists.newArrayList();
+
+        for (String string : prefString.split(SEPARATOR)) {
+            if (filter.equals(Filter.ALL)) {
+                if (string.startsWith(DISABLED_FLAG)) {
+                    string = string.substring(1);
+                }
+                result.add(string);
+            } else if (filter.equals(Filter.ENABLED)) {
+                if (!string.startsWith(DISABLED_FLAG)) {
+                    result.add(string);
+                }
+            } else if (filter.equals(Filter.DISABLED)) {
+                if (string.startsWith(DISABLED_FLAG)) {
+                    string = string.substring(1);
+                    result.add(string);
+                }
+            }
+        }
+
+        return result;
+    }
 }
