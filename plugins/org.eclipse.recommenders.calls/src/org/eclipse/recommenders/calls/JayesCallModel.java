@@ -27,11 +27,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.commons.bayesnet.BayesianNetwork;
-import org.eclipse.recommenders.commons.bayesnet.Node;
+import org.eclipse.recommenders.commons.bayesnet.CommonsReader;
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.inference.junctionTree.JunctionTreeAlgorithm;
 import org.eclipse.recommenders.jayes.inference.junctionTree.JunctionTreeBuilder;
+import org.eclipse.recommenders.jayes.io.IBayesNetReader;
+import org.eclipse.recommenders.jayes.io.JayesBifReader;
 import org.eclipse.recommenders.jayes.util.triangulation.MinDegree;
 import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.recommenders.utils.IOUtils;
@@ -92,14 +94,25 @@ import com.google.common.collect.Lists;
 public class JayesCallModel implements ICallModel {
 
     public static Optional<ICallModel> load(ZipFile zip, ITypeName type) throws Exception {
-        String path = Zips.path(type, ".data");
+        IBayesNetReader rdr;
+        String path = Zips.path(type, ".jbif");
         ZipEntry entry = zip.getEntry(path);
         if (entry == null) {
-            return absent();
+            path = Zips.path(type, ".data");
+            entry = zip.getEntry(path);
+            if (entry == null) {
+                return absent();
+            } else {
+                InputStream s = zip.getInputStream(entry);
+                rdr = new CommonsReader(s);
+
+            }
+        } else {
+            InputStream s = zip.getInputStream(entry);
+            rdr = new JayesBifReader(s);
         }
-        InputStream s = zip.getInputStream(entry);
-        BayesianNetwork net = BayesianNetwork.read(s);
-        IOUtils.closeQuietly(s);
+        BayesNet net = rdr.read();
+        IOUtils.closeQuietly(rdr);
         ICallModel m = new JayesCallModel(type, net);
         return Optional.fromNullable(m);
     }
@@ -121,9 +134,10 @@ public class JayesCallModel implements ICallModel {
     private ITypeName typeName;
     private HashMap<IMethodName, BayesNode> callNodes;
 
-    public JayesCallModel(final ITypeName name, final BayesianNetwork network) {
-        initalizeIndexes(name);
-        initializeNetwork(network);
+    public JayesCallModel(final ITypeName name, final BayesNet net) {
+        this.net = net;
+        initalizeIndexes(typeName);
+        initializeNetwork(net);
     }
 
     private void initalizeIndexes(final ITypeName name) {
@@ -131,59 +145,27 @@ public class JayesCallModel implements ICallModel {
         callNodes = new HashMap<IMethodName, BayesNode>();
     }
 
-    private void initializeNetwork(final BayesianNetwork network) {
-        net = new BayesNet();
-        initializeNodes(network);
-        initializeArcs(network);
-        initializeProbabilities(network);
-
+    private void initializeNetwork(BayesNet net) {
+        setSpecialNodes(net);
         junctionTree = new JunctionTreeAlgorithm();
         junctionTree.setJunctionTreeBuilder(JunctionTreeBuilder.forHeuristic(new MinDegree()));
         junctionTree.setNetwork(net);
     }
 
-    private void initializeNodes(final BayesianNetwork network) {
-        Collection<Node> nodes = network.getNodes();
-        for (Node node : nodes) {
-            BayesNode bayesNode = net.createNode(node.getIdentifier());
-            String[] states = node.getStates();
-            for (int i = 0; i < states.length; i++) {
-                bayesNode.addOutcome(states[i]);
-            }
-
-            if (node.getIdentifier().equals(N_NODEID_CONTEXT)) {
+    private void setSpecialNodes(BayesNet net) {
+        for (BayesNode bayesNode : net.getNodes()) {
+            if (bayesNode.getName().equals(N_NODEID_CONTEXT)) {
                 overridesNode = bayesNode;
-            } else if (node.getIdentifier().equals(N_NODEID_CALL_GROUPS)) {
+            } else if (bayesNode.getName().equals(N_NODEID_CALL_GROUPS)) {
                 callgroupNode = bayesNode;
-            } else if (node.getIdentifier().equals(N_NODEID_DEF_KIND)) {
+            } else if (bayesNode.getName().equals(N_NODEID_DEF_KIND)) {
                 defKindNode = bayesNode;
-            } else if (node.getIdentifier().equals(N_NODEID_DEF)) {
+            } else if (bayesNode.getName().equals(N_NODEID_DEF)) {
                 definedByNode = bayesNode;
             } else {
-                VmMethodName vmMethodName = VmMethodName.get(node.getIdentifier());
+                VmMethodName vmMethodName = VmMethodName.get(bayesNode.getName());
                 callNodes.put(vmMethodName, bayesNode);
             }
-        }
-    }
-
-    private void initializeArcs(final BayesianNetwork network) {
-        Collection<Node> nodes = network.getNodes();
-        for (Node node : nodes) {
-            Node[] parents = node.getParents();
-            BayesNode children = net.getNode(node.getIdentifier());
-            List<BayesNode> bnParents = Lists.newLinkedList();
-            for (int i = 0; i < parents.length; i++) {
-                bnParents.add(net.getNode(parents[i].getIdentifier()));
-            }
-            children.setParents(bnParents);
-        }
-    }
-
-    private void initializeProbabilities(final BayesianNetwork network) {
-        Collection<Node> nodes = network.getNodes();
-        for (Node node : nodes) {
-            BayesNode bayesNode = net.getNode(node.getIdentifier());
-            bayesNode.setProbabilities(node.getProbabilities());
         }
     }
 
@@ -234,8 +216,8 @@ public class JayesCallModel implements ICallModel {
             BayesNode node = pair.getValue();
             IMethodName method = pair.getKey();
             if (evidence.containsKey(node) && evidence.get(node).equals(Constants.N_STATE_TRUE)
-            // remove the NULL that may have been introduced by
-            // res.add(compute...)
+                    // remove the NULL that may have been introduced by
+                    // res.add(compute...)
                     && !VmMethodName.NULL.equals(method)) {
                 builder.add(method);
             }
