@@ -10,8 +10,10 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
+import static java.lang.Math.*;
 import static org.eclipse.recommenders.internal.models.rcp.Advisors.Filter.ALL;
 import static org.eclipse.recommenders.internal.models.rcp.Advisors.Filter.ENABLED;
+import static org.eclipse.recommenders.internal.models.rcp.Messages.*;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.List;
@@ -19,7 +21,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -29,7 +33,11 @@ import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
 import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.models.rcp.ModelEvents.AdvisorConfigurationChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
@@ -47,6 +55,9 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
 
     private List<IProjectCoordinateAdvisor> availableAdvisors;
 
+    private static final int UP = -1;
+    private static final int DOWN = +1;
+
     @Inject
     public AdvisorsPreferencePage(EventBus bus, ProjectCoordinateAdvisorService advisorService,
             List<IProjectCoordinateAdvisor> availableAdvisors) {
@@ -59,18 +70,21 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
     @Override
     public void init(IWorkbench workbench) {
         setPreferenceStore(new ScopedPreferenceStore(InstanceScope.INSTANCE, Constants.BUNDLE_ID));
-        setMessage("Advisor Configuration");
-        setDescription("Code Recommenders uses so-called advisors to assign project coordinates to your dependencies.");
+        setMessage(PREFPAGE_ADVISOR_TITLE);
+        setDescription(PREFPAGE_ADVISOR_DESCRIPTION);
     }
 
     @Override
     protected void createFieldEditors() {
-        addField(new AdvisorEditor(Constants.P_ADVISOR_LIST_SORTED, "Advisors:", getFieldEditorParent()));
+        addField(new AdvisorEditor(Constants.P_ADVISOR_LIST_SORTED, PREFPAGE_ADVISOR_ADVISORS, getFieldEditorParent()));
     }
 
     private final class AdvisorEditor extends FieldEditor {
 
         private CheckboxTableViewer tableViewer;
+        private Composite buttonBox;
+        private Button upButton;
+        private Button downButton;
 
         private AdvisorEditor(String name, String labelText, Composite parent) {
             super(name, labelText, parent);
@@ -89,18 +103,105 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
 
             tableViewer = getTableControl(parent);
             gd = new GridData(GridData.FILL_HORIZONTAL);
-            gd.horizontalSpan = numColumns;
+            gd.horizontalSpan = numColumns - 1;
             gd.verticalAlignment = GridData.FILL;
             tableViewer.getTable().setLayoutData(gd);
+
+            buttonBox = getButtonControl(parent);
+            gd = new GridData(GridData.FILL_HORIZONTAL);
+            gd.horizontalSpan = 1;
+            gd.verticalAlignment = GridData.BEGINNING;
+            buttonBox.setLayoutData(gd);
+
+            tableViewer.getTable().addSelectionListener(new SelectionAdapter() {
+
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    updateButtonStatus();
+                }
+
+            });
+        }
+
+        private void updateButtonStatus() {
+            int selectionIndex = tableViewer.getTable().getSelectionIndex();
+            if (selectionIndex == -1) {
+                upButton.setEnabled(false);
+                downButton.setEnabled(false);
+            } else if (selectionIndex == 0) {
+                upButton.setEnabled(false);
+                downButton.setEnabled(true);
+            } else if (selectionIndex == tableViewer.getTable().getItemCount() - 1) {
+                upButton.setEnabled(true);
+                downButton.setEnabled(false);
+            } else {
+                upButton.setEnabled(true);
+                downButton.setEnabled(true);
+            }
+        }
+
+        private void addSelectionListener() {
+            upButton.addSelectionListener(new MoveSelectionListener(UP));
+            downButton.addSelectionListener(new MoveSelectionListener(DOWN));
+
+        }
+
+        private final class MoveSelectionListener extends SelectionAdapter {
+
+            private final int direction;
+
+            public MoveSelectionListener(int direction) {
+                this.direction = direction;
+            }
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                int index = tableViewer.getTable().getSelectionIndex();
+                swap(index);
+                updateButtonStatus();
+            }
+
+            private void swap(int index) {
+                List<String> input = cast(tableViewer.getInput());
+                String temp = input.remove(index);
+                int newIndex = min(max(0, index + direction), input.size());
+                input.add(newIndex, temp);
+                tableViewer.setInput(input);
+            }
+        }
+
+        private Composite getButtonControl(Composite parent) {
+            Composite box = new Composite(parent, SWT.NONE);
+            GridLayout layout = new GridLayout();
+            layout.marginHeight = 0;
+            layout.marginWidth = 0;
+            box.setLayout(layout);
+
+            upButton = new Button(box, SWT.PUSH);
+            upButton.setText(PREFPAGE_ADVISOR_BUTTON_UP);
+            upButton.setEnabled(false);
+            GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+            gd.verticalAlignment = SWT.BEGINNING;
+            upButton.setLayoutData(gd);
+
+            downButton = new Button(box, SWT.PUSH);
+            downButton.setText(PREFPAGE_ADVISOR_BUTTON_DOWN);
+            downButton.setEnabled(false);
+            gd = new GridData(GridData.FILL_HORIZONTAL);
+            gd.verticalAlignment = SWT.BEGINNING;
+            downButton.setLayoutData(gd);
+
+            addSelectionListener();
+            return box;
         }
 
         private CheckboxTableViewer getTableControl(Composite parent) {
-            CheckboxTableViewer tableViewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
+            CheckboxTableViewer tableViewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.FULL_SELECTION);
             tableViewer.setLabelProvider(new ColumnLabelProvider() {
+
                 @Override
                 public String getText(Object element) {
-                    String value = cast(element);
-                    return value.substring(value.lastIndexOf(".") + 1);
+                    return StringUtils.substringAfterLast((String) element, "."); //$NON-NLS-1$
                 }
             });
 
@@ -145,7 +246,7 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
 
         @Override
         public int getNumberOfControls() {
-            return 1;
+            return 2;
         }
 
     }
