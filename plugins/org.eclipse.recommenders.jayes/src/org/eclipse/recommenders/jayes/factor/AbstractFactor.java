@@ -12,6 +12,8 @@ package org.eclipse.recommenders.jayes.factor;
 
 import java.util.Arrays;
 
+import javax.management.RuntimeErrorException;
+
 import org.eclipse.recommenders.jayes.factor.arraywrapper.DoubleArrayWrapper;
 import org.eclipse.recommenders.jayes.factor.arraywrapper.IArrayWrapper;
 import org.eclipse.recommenders.jayes.factor.opcache.DivisionCache;
@@ -278,9 +280,9 @@ public abstract class AbstractFactor implements Cloneable {
         AbstractFactor f = null;
         try {
             f = (AbstractFactor) super.clone();
-        } catch (CloneNotSupportedException exception) {
+        } catch (CloneNotSupportedException x) {
             // should not be possible to happen
-            exception.printStackTrace();
+            throw new RuntimeException(x);
         }
         f.values = values.clone();
         f.selections = selections.clone();
