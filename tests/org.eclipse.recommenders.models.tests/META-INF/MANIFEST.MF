@@ -11,5 +11,4 @@ Require-Bundle: org.junit,
  org.eclipse.recommenders.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.maven.model,
- org.apache.maven.model.io.xpp3,
  org.eclipse.recommenders.utils
