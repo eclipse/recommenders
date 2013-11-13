@@ -152,7 +152,7 @@ public class JayesCallModel implements ICallModel {
 
     public JayesCallModel(final ITypeName name, final BayesNet net) {
         this.net = net;
-        initalizeIndexes(typeName);
+        initalizeIndexes(name);
         initializeNetwork(net);
     }
 
