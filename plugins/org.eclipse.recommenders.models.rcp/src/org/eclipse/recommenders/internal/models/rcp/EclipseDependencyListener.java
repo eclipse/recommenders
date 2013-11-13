@@ -12,7 +12,9 @@ package org.eclipse.recommenders.internal.models.rcp;
 
 import static com.google.common.base.Optional.fromNullable;
 import static org.eclipse.jdt.core.IJavaElement.JAVA_PROJECT;
-import static org.eclipse.recommenders.internal.models.rcp.Dependencies.*;
+import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createDependencyInfoForProject;
+import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createJREDependencyInfo;
+import static org.eclipse.recommenders.models.DependencyInfo.PACKAGE_FRAGMENT_ROOT;
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.getLocation;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
@@ -193,7 +196,8 @@ public class EclipseDependencyListener implements IDependencyListener {
 
     private DependencyInfo createDependencyInfoForJAR(final JarPackageFragmentRoot pfr) {
         File file = ensureIsNotNull(getLocation(pfr).orNull(), "Could not determine absolute location of %s.", pfr);
-        DependencyInfo dependencyInfo = new DependencyInfo(file, DependencyType.JAR);
+        DependencyInfo dependencyInfo = new DependencyInfo(file, DependencyType.JAR, ImmutableMap.of(
+                PACKAGE_FRAGMENT_ROOT, pfr.getHandleIdentifier()));
         return dependencyInfo;
     }
 
