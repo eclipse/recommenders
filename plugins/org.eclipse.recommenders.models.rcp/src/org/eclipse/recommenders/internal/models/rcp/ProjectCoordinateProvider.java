@@ -16,6 +16,7 @@ import static com.google.common.base.Optional.of;
 import static org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT_ROOT;
 import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createJREDependencyInfo;
 import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.IDENTIFIED_PACKAGE_FRAGMENT_ROOTS;
+import static org.eclipse.recommenders.models.DependencyInfo.SURROUNDING_PROJECT_FILE;
 import static org.eclipse.recommenders.models.DependencyType.JAR;
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.getLocation;
 import static org.eclipse.recommenders.utils.Checks.cast;
@@ -68,6 +69,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.google.common.reflect.TypeToken;
@@ -192,9 +194,18 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
         if (isPartOfJRE(root, javaProject)) {
             return createJREDependencyInfo(javaProject);
         } else {
-            DependencyInfo request = new DependencyInfo(location, JAR);
+            DependencyInfo request = new DependencyInfo(location, JAR, createSurroundingProjectHint(javaProject));
             return of(request);
         }
+    }
+    
+    private ImmutableMap<String, String> createSurroundingProjectHint(final IJavaProject project) {
+        ImmutableMap<String, String> hints = ImmutableMap.of();
+        File location = JdtUtils.getLocation(project).orNull();
+        if (location != null) {
+            hints = ImmutableMap.of(SURROUNDING_PROJECT_FILE, location.getAbsolutePath());
+        }
+        return hints;
     }
 
     private static boolean isPartOfJRE(IPackageFragmentRoot root, IJavaProject javaProject) {

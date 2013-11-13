@@ -128,6 +128,7 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         availableAdvisors.add(ModelIndexFingerprintAdvisor.class.getName());
         availableAdvisors.add(OsgiManifestAdvisor.class.getName());
         availableAdvisors.add(MavenCentralFingerprintSearchAdvisor.class.getName());
+        availableAdvisors.add(NestedJarProjectCoordinateAdvisor.class.getName());
         return ImmutableList.copyOf(availableAdvisors);
     }
 
@@ -175,6 +176,9 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         }
         if (advisorName.equals(MavenCentralFingerprintSearchAdvisor.class.getName())) {
             return new MavenCentralFingerprintSearchAdvisor();
+        }
+        if (advisorName.equals(NestedJarProjectCoordinateAdvisor.class.getName())) {
+            return new NestedJarProjectCoordinateAdvisor();
         }
         throw new IllegalArgumentException("No advisor of name" + advisorName + " found");
     }

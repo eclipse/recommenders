@@ -12,7 +12,9 @@ package org.eclipse.recommenders.internal.models.rcp;
 
 import static com.google.common.base.Optional.fromNullable;
 import static org.eclipse.jdt.core.IJavaElement.JAVA_PROJECT;
-import static org.eclipse.recommenders.internal.models.rcp.Dependencies.*;
+import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createDependencyInfoForProject;
+import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createJREDependencyInfo;
+import static org.eclipse.recommenders.models.DependencyInfo.SURROUNDING_PROJECT_FILE;
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.getLocation;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 
@@ -36,11 +38,13 @@ import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootAdded;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootRemoved;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectClosed;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectOpened;
+import org.eclipse.recommenders.rcp.utils.JdtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
@@ -193,8 +197,18 @@ public class EclipseDependencyListener implements IDependencyListener {
 
     private DependencyInfo createDependencyInfoForJAR(final JarPackageFragmentRoot pfr) {
         File file = ensureIsNotNull(getLocation(pfr).orNull(), "Could not determine absolute location of %s.", pfr);
-        DependencyInfo dependencyInfo = new DependencyInfo(file, DependencyType.JAR);
+
+        DependencyInfo dependencyInfo = new DependencyInfo(file, DependencyType.JAR, createSurroundingProjectHint(pfr));
         return dependencyInfo;
+    }
+
+    private ImmutableMap<String, String> createSurroundingProjectHint(final JarPackageFragmentRoot pfr) {
+        ImmutableMap<String, String> hints = ImmutableMap.of();
+        File location = JdtUtils.getLocation((IJavaProject) pfr.getAncestor(JAVA_PROJECT)).orNull();
+        if (location != null) {
+            hints = ImmutableMap.of(SURROUNDING_PROJECT_FILE, location.getAbsolutePath());
+        }
+        return hints;
     }
 
     private void deregisterDependencyForJAR(final JarPackageFragmentRoot pfr) {
