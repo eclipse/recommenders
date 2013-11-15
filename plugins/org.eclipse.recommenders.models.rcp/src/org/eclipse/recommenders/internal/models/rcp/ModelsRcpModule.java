@@ -129,6 +129,7 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         availableAdvisors.add(ModelIndexFingerprintAdvisor.class.getName());
         availableAdvisors.add(OsgiManifestAdvisor.class.getName());
         availableAdvisors.add(MavenCentralFingerprintSearchAdvisor.class.getName());
+        availableAdvisors.add(WorkspaceMappingsAdvisor.class.getName());
         availableAdvisors.add("!" + NestedJarProjectCoordinateAdvisor.class.getName());
         return ImmutableList.copyOf(availableAdvisors);
     }
@@ -136,11 +137,11 @@ public class ModelsRcpModule extends AbstractModule implements Module {
     @Singleton
     @Provides
     public ProjectCoordinateAdvisorService provideMappingProvider(ModelsRcpPreferences prefs, IModelIndex index,
-            ManualProjectCoordinateAdvisor manualMappingStrategy) throws Exception {
+            IModelRepository repository, ManualProjectCoordinateAdvisor manualMappingStrategy) throws Exception {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList();
         ProjectCoordinateAdvisorService mappingProvider = new ProjectCoordinateAdvisorService();
         for (String advisorName : prefs.advisors.split(";")) {
-            IProjectCoordinateAdvisor advisor = createAdvisor(advisorName, manualMappingStrategy, index).orNull();
+            IProjectCoordinateAdvisor advisor = createAdvisor(advisorName, manualMappingStrategy, index, repository).orNull();
             if (advisor != null){
                 availableAdvisors.add(advisor);
             }
@@ -150,7 +151,7 @@ public class ModelsRcpModule extends AbstractModule implements Module {
     }
 
     private Optional<IProjectCoordinateAdvisor> createAdvisor(String advisorName,
-            ManualProjectCoordinateAdvisor manualMappingStrategy, IModelIndex index) {
+            ManualProjectCoordinateAdvisor manualMappingStrategy, IModelIndex index, IModelRepository repository) {
         if (advisorName.equals(ManualProjectCoordinateAdvisor.class.getName())) {
             return Optional.<IProjectCoordinateAdvisor>of(manualMappingStrategy);
         }
@@ -180,6 +181,9 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         }
         if (advisorName.equals(MavenCentralFingerprintSearchAdvisor.class.getName())) {
             return Optional.<IProjectCoordinateAdvisor>of(new MavenCentralFingerprintSearchAdvisor());
+        }
+        if (advisorName.equals(WorkspaceMappingsAdvisor.class.getName())) {
+            return Optional.<IProjectCoordinateAdvisor>of(new WorkspaceMappingsAdvisor(repository));
         }
         if (advisorName.equals(NestedJarProjectCoordinateAdvisor.class.getName())) {
             return Optional.<IProjectCoordinateAdvisor>of(new NestedJarProjectCoordinateAdvisor());

@@ -9,3 +9,4 @@ Require-Bundle: org.hamcrest,
  org.junit,
  org.mockito
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.recommenders.internal.models.rcp
