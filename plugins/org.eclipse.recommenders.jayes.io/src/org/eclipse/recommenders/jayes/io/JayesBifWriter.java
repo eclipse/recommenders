@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.recommenders.jayes.io;
 
+import static org.eclipse.recommenders.internal.jayes.io.util.JBIFConstants.*;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -56,9 +58,6 @@ import com.google.common.primitives.Shorts;
 public class JayesBifWriter implements IBayesNetWriter {
 
     private static final int HEADER_BYTES = 2 * Ints.BYTES;
-
-    protected static final int MAGIC_NUMBER = 0xBA7E5B1F;
-    protected static final int FORMAT_VERSION = 1;
 
     private OutputStream out;
 

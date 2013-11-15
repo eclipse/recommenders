@@ -10,11 +10,7 @@
  ******************************************************************************/
 package org.eclipse.recommenders.jayes.io;
 
-import static org.eclipse.recommenders.internal.jayes.io.util.XDSLConstants.CPT;
-import static org.eclipse.recommenders.internal.jayes.io.util.XDSLConstants.ID;
-import static org.eclipse.recommenders.internal.jayes.io.util.XDSLConstants.PARENTS;
-import static org.eclipse.recommenders.internal.jayes.io.util.XDSLConstants.PROBABILITIES;
-import static org.eclipse.recommenders.internal.jayes.io.util.XDSLConstants.STATE;
+import static org.eclipse.recommenders.internal.jayes.io.util.XDSLConstants.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -91,7 +87,7 @@ public class XDSLWriter implements IBayesNetWriter {
                     + " has an empty conditional probability table");
         }
         int offset = bldr.length();
-        for (Number d : node.getFactor().getValues()) {
+        for (double d : node.getProbabilities()) {
             bldr.append(d);
             bldr.append(' ');
         }

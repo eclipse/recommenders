@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.recommenders.jayes.io;
 
+import static org.eclipse.recommenders.internal.jayes.io.util.JBIFConstants.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -71,12 +73,12 @@ public class JayesBifReader implements IBayesNetReader {
 
     private void readHeader(ByteBuffer buffer) throws IOException {
         int magicNumber = buffer.getInt();
-        if (magicNumber != JayesBifWriter.MAGIC_NUMBER) {
+        if (magicNumber != MAGIC_NUMBER) {
             throw new IOException("Wrong magic number: " + Integer.toHexString(magicNumber).toUpperCase());
         }
 
         int formatVersion = buffer.getInt();
-        if (formatVersion != JayesBifWriter.FORMAT_VERSION) {
+        if (formatVersion != FORMAT_VERSION) {
             throw new IOException("Wrong JBIF format version: " + formatVersion);
         }
     }
