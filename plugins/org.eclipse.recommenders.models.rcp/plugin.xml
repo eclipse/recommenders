@@ -95,5 +95,12 @@
 			defaultPriority="90"
 			name="Maven Central SHA-1 Fingerrint (Web-Service)">
 		</advisor>
+		<advisor id="org.eclipse.recommenders.models.rcp.advisors.sharedManualMappings"
+			class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.models.advisors.SharedManualMappingsAdvisor"
+			defaultPriority="100"
+			enabledByDefault="false"
+			name="Shared manual mappings"
+			description="Consult a manual-mappings file shared through the model repository.">
+		</advisor>
 	</extension>
 </plugin>
