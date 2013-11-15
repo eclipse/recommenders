@@ -12,7 +12,13 @@ package org.eclipse.recommenders.tests.jayes;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.recommenders.internal.jayes.util.AddressCalc;
+import org.eclipse.recommenders.jayes.BayesNet;
+import org.eclipse.recommenders.jayes.BayesNode;
+import org.eclipse.recommenders.jayes.util.BayesNodeUtil;
 import org.eclipse.recommenders.jayes.util.MathUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,6 +27,13 @@ import org.junit.rules.ExpectedException;
 public class UtilsTest {
 
     private static final int[] testVector = new int[] { 2, 3, 5, 7 };
+    private static final double[] testDoubleVector = new double[] { 2.0, 3.0, 5.0, 7.0 };
+    private static final double TOLERANCE = 1e-5;
+
+    @Test
+    public void testSumOfRange() {
+        assertEquals(MathUtils.sum(testDoubleVector), 17.0, TOLERANCE);
+    }
 
     @Test
     public void testProductOfRange() {
@@ -49,6 +62,12 @@ public class UtilsTest {
         int[] pair = new int[2];
         int[] triple = new int[3];
         MathUtils.scalarProduct(pair, triple);
+    }
+
+    @Test
+    public void testNormalize() {
+        assertArrayEquals(new double[] { 2.0 / 17.0, 3.0 / 17.0, 5.0 / 17.0, 7.0 / 17.0 },
+                MathUtils.normalize(testDoubleVector.clone()), TOLERANCE);
     }
 
     @Rule
@@ -86,6 +105,41 @@ public class UtilsTest {
         thrown.expect(ArrayIndexOutOfBoundsException.class);
 
         AddressCalc.incrementMultiDimensionalCounter(counter, dimensions);
+    }
+
+    @Test
+    public void testMarginalize() {
+        BayesNet net = NetExamples.testNet1();
+
+        BayesNode a = net.getNode("a");
+        BayesNode b = net.getNode("b");
+        BayesNode c = net.getNode("c");
+        BayesNode d = net.getNode("d");
+
+        Map<BayesNode, String> evidence = new HashMap<BayesNode, String>();
+        assertArrayEquals(new double[] { 0.2, 0.8 }, BayesNodeUtil.marginalize(a, evidence), TOLERANCE);
+        assertArrayEquals(new double[] { 0.2, 0.4, 0.4 }, BayesNodeUtil.marginalize(b, evidence), TOLERANCE);
+        assertArrayEquals(new double[] { 0.25, 0.75 }, BayesNodeUtil.marginalize(c, evidence), TOLERANCE);
+        assertArrayEquals(new double[] { 0.35, 0.65 }, BayesNodeUtil.marginalize(d, evidence), TOLERANCE);
+
+        evidence.put(a, "true");
+        evidence.put(b, "le");
+        evidence.put(c, "true");
+        evidence.put(d, "true");
+
+        assertArrayEquals(new double[] { 0.2, 0.8 }, BayesNodeUtil.marginalize(a, evidence), TOLERANCE);
+        assertArrayEquals(new double[] { 0.1, 0.4, 0.5 }, BayesNodeUtil.marginalize(b, evidence), TOLERANCE);
+        assertArrayEquals(new double[] { 0.0, 1.0 }, BayesNodeUtil.marginalize(c, evidence), TOLERANCE);
+        assertArrayEquals(new double[] { 0.5, 0.5 }, BayesNodeUtil.marginalize(d, evidence), TOLERANCE);
+    }
+
+    @Test
+    public void testSumDistribution() {
+        BayesNet net = NetExamples.testNet1();
+        for (BayesNode node : net.getNodes()) {
+            int expected = MathUtils.product(node.getFactor().getDimensions()) / node.getOutcomeCount();
+            assertEquals((double) expected, BayesNodeUtil.sumDistribution(node), TOLERANCE);
+        }
     }
 
 }

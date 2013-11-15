@@ -21,6 +21,7 @@ import org.eclipse.recommenders.internal.jayes.util.BidirectionalMap;
 import org.eclipse.recommenders.jayes.factor.AbstractFactor;
 import org.eclipse.recommenders.jayes.factor.DenseFactor;
 import org.eclipse.recommenders.jayes.factor.arraywrapper.DoubleArrayWrapper;
+import org.eclipse.recommenders.jayes.util.BayesNodeUtil;
 import org.eclipse.recommenders.jayes.util.MathUtils;
 
 public class BayesNode {
@@ -106,18 +107,12 @@ public class BayesNode {
         }
     }
 
+    /**
+     * @deprecated use {@link BayesNodeUtil#marginalize(BayesNode, Map)} instead
+     */
+    @Deprecated
     public double[] marginalize(final Map<BayesNode, String> evidence) {
-        for (final BayesNode p : parents) {
-            if (evidence.containsKey(p)) {
-                factor.select(p.getId(), p.getOutcomeIndex(evidence.get(p)));
-            } else {
-                factor.select(p.getId(), -1);
-            }
-        }
-        final double[] result = MathUtils.normalize(factor.marginalizeAllBut(-1));
-        factor.resetSelections();
-
-        return result;
+        return BayesNodeUtil.marginalize(this, evidence);
     }
 
     public int getId() {
