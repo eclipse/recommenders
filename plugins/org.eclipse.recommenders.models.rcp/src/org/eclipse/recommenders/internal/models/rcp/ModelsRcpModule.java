@@ -14,19 +14,13 @@ import static com.google.inject.Scopes.SINGLETON;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
-import javax.swing.plaf.basic.BasicTreeUI.TreeHomeAction;
 
 import org.eclipse.core.internal.net.ProxyManager;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -34,16 +28,10 @@ import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
-import org.eclipse.recommenders.models.advisors.JREDirectoryNameAdvisor;
-import org.eclipse.recommenders.models.advisors.JREExecutionEnvironmentAdvisor;
-import org.eclipse.recommenders.models.advisors.JREReleaseFileAdvisor;
-import org.eclipse.recommenders.models.advisors.MavenCentralFingerprintSearchAdvisor;
-import org.eclipse.recommenders.models.advisors.MavenPomPropertiesAdvisor;
-import org.eclipse.recommenders.models.advisors.MavenPomXmlAdvisor;
 import org.eclipse.recommenders.models.advisors.ModelIndexBundleSymbolicNameAdvisor;
 import org.eclipse.recommenders.models.advisors.ModelIndexFingerprintAdvisor;
-import org.eclipse.recommenders.models.advisors.OsgiManifestAdvisor;
 import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
+import org.eclipse.recommenders.models.advisors.SharedManualMappingsAdvisor;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.ui.IWorkbench;
 import org.osgi.framework.Bundle;
@@ -51,9 +39,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.io.Files;
@@ -123,11 +108,13 @@ public class ModelsRcpModule extends AbstractModule implements Module {
     @Provides
     public List<IProjectCoordinateAdvisor> provideAdvisors(ModelsRcpPreferences preferences) {
         List<AdvisorDescriptor> registeredAdvisors = AdvisorDescriptors.getRegisteredAdvisors();
-        List<AdvisorDescriptor> load = AdvisorDescriptors.load(preferences.advisorIds, registeredAdvisors);
-        List<IProjectCoordinateAdvisor> advisors = Lists.newArrayListWithCapacity(load.size());
-        for (AdvisorDescriptor descriptor : load) {
+        List<AdvisorDescriptor> loadedDescriptors = AdvisorDescriptors.load(preferences.advisorIds, registeredAdvisors);
+        List<IProjectCoordinateAdvisor> advisors = Lists.newArrayListWithCapacity(loadedDescriptors.size());
+        for (AdvisorDescriptor descriptor : loadedDescriptors) {
             try {
-                advisors.add(descriptor.createAdvisor());
+                if (descriptor.isEnabled()) {
+                    advisors.add(descriptor.createAdvisor());
+                }
             } catch (CoreException e) {
                 continue; // skip
             }
@@ -143,6 +130,11 @@ public class ModelsRcpModule extends AbstractModule implements Module {
     @Provides
     public ModelIndexFingerprintAdvisor provideModelIndexFingerprintAdvisor(IModelIndex index) {
         return new ModelIndexFingerprintAdvisor(index);
+    }
+
+    @Provides
+    public SharedManualMappingsAdvisor provideWorkspaceMappingsAdvisor(IModelRepository repository) {
+        return new SharedManualMappingsAdvisor(repository);
     }
 
     @Singleton
