@@ -45,7 +45,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
@@ -129,7 +128,6 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         availableAdvisors.add(ModelIndexFingerprintAdvisor.class.getName());
         availableAdvisors.add(OsgiManifestAdvisor.class.getName());
         availableAdvisors.add(MavenCentralFingerprintSearchAdvisor.class.getName());
-        availableAdvisors.add("!" + NestedJarProjectCoordinateAdvisor.class.getName());
         return ImmutableList.copyOf(availableAdvisors);
     }
 
@@ -140,51 +138,45 @@ public class ModelsRcpModule extends AbstractModule implements Module {
         List<IProjectCoordinateAdvisor> availableAdvisors = Lists.newArrayList();
         ProjectCoordinateAdvisorService mappingProvider = new ProjectCoordinateAdvisorService();
         for (String advisorName : prefs.advisors.split(";")) {
-            IProjectCoordinateAdvisor advisor = createAdvisor(advisorName, manualMappingStrategy, index).orNull();
-            if (advisor != null){
-                availableAdvisors.add(advisor);
-            }
+            availableAdvisors.add(createAdvisor(advisorName, manualMappingStrategy, index));
         }
         mappingProvider.setAdvisors(Advisors.createAdvisorList(availableAdvisors, prefs.advisors));
         return mappingProvider;
     }
 
-    private Optional<IProjectCoordinateAdvisor> createAdvisor(String advisorName,
+    private IProjectCoordinateAdvisor createAdvisor(String advisorName,
             ManualProjectCoordinateAdvisor manualMappingStrategy, IModelIndex index) {
         if (advisorName.equals(ManualProjectCoordinateAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(manualMappingStrategy);
+            return manualMappingStrategy;
         }
         if (advisorName.equals(MavenPomPropertiesAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new MavenPomPropertiesAdvisor());
+            return new MavenPomPropertiesAdvisor();
         }
         if (advisorName.equals(JREExecutionEnvironmentAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new JREExecutionEnvironmentAdvisor());
+            return new JREExecutionEnvironmentAdvisor();
         }
         if (advisorName.equals(JREReleaseFileAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new JREReleaseFileAdvisor());
+            return new JREReleaseFileAdvisor();
         }
         if (advisorName.equals(JREDirectoryNameAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new JREDirectoryNameAdvisor());
+            return new JREDirectoryNameAdvisor();
         }
         if (advisorName.equals(MavenPomXmlAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new MavenPomXmlAdvisor());
+            return new MavenPomXmlAdvisor();
         }
         if (advisorName.equals(ModelIndexBundleSymbolicNameAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new ModelIndexBundleSymbolicNameAdvisor(index));
+            return new ModelIndexBundleSymbolicNameAdvisor(index);
         }
         if (advisorName.equals(ModelIndexFingerprintAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new ModelIndexFingerprintAdvisor(index));
+            return new ModelIndexFingerprintAdvisor(index);
         }
         if (advisorName.equals(OsgiManifestAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new OsgiManifestAdvisor());
+            return new OsgiManifestAdvisor();
         }
         if (advisorName.equals(MavenCentralFingerprintSearchAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new MavenCentralFingerprintSearchAdvisor());
+            return new MavenCentralFingerprintSearchAdvisor();
         }
-        if (advisorName.equals(NestedJarProjectCoordinateAdvisor.class.getName())) {
-            return Optional.<IProjectCoordinateAdvisor>of(new NestedJarProjectCoordinateAdvisor());
-        }
-        return Optional.<IProjectCoordinateAdvisor>absent();
+        throw new IllegalArgumentException("No advisor of name" + advisorName + " found");
     }
 
     @Provides
