@@ -14,29 +14,19 @@ import static com.google.inject.Scopes.SINGLETON;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import javax.inject.Singleton;
 
 import org.eclipse.core.internal.net.ProxyManager;
 import org.eclipse.core.net.proxy.IProxyService;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
-import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
-import org.eclipse.recommenders.models.advisors.JREDirectoryNameAdvisor;
-import org.eclipse.recommenders.models.advisors.JREExecutionEnvironmentAdvisor;
-import org.eclipse.recommenders.models.advisors.JREReleaseFileAdvisor;
-import org.eclipse.recommenders.models.advisors.MavenCentralFingerprintSearchAdvisor;
-import org.eclipse.recommenders.models.advisors.MavenPomPropertiesAdvisor;
-import org.eclipse.recommenders.models.advisors.MavenPomXmlAdvisor;
 import org.eclipse.recommenders.models.advisors.ModelIndexBundleSymbolicNameAdvisor;
 import org.eclipse.recommenders.models.advisors.ModelIndexFingerprintAdvisor;
-import org.eclipse.recommenders.models.advisors.OsgiManifestAdvisor;
 import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.ui.IWorkbench;
@@ -45,8 +35,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.io.Files;
 import com.google.inject.AbstractModule;
@@ -68,6 +56,9 @@ public class ModelsRcpModule extends AbstractModule implements Module {
     @Override
     protected void configure() {
         requestStaticInjection(Dependencies.class);
+
+        bind(ProjectCoordinateAdvisorService.class).toProvider(ModelsRcpPreferences.class);
+
         //
         bind(IProjectCoordinateProvider.class).to(ProjectCoordinateProvider.class).in(SINGLETON);
 
@@ -114,21 +105,6 @@ public class ModelsRcpModule extends AbstractModule implements Module {
     }
 
     @Provides
-    public List<IProjectCoordinateAdvisor> provideAdvisors(ModelsRcpPreferences preferences) {
-        List<AdvisorDescriptor> registeredAdvisors = AdvisorDescriptors.getRegisteredAdvisors();
-        List<AdvisorDescriptor> load = AdvisorDescriptors.load(preferences.advisorIds, registeredAdvisors);
-        List<IProjectCoordinateAdvisor> advisors = Lists.newArrayListWithCapacity(load.size());
-        for (AdvisorDescriptor descriptor : load) {
-            try {
-                advisors.add(descriptor.createAdvisor());
-            } catch (CoreException e) {
-                continue; // skip
-            }
-        }
-        return advisors;
-    }
-
-    @Provides
     public ModelIndexBundleSymbolicNameAdvisor provideModelIndexBundleSymbolicNameAdvisor(IModelIndex index) {
         return new ModelIndexBundleSymbolicNameAdvisor(index);
     }
@@ -136,14 +112,6 @@ public class ModelsRcpModule extends AbstractModule implements Module {
     @Provides
     public ModelIndexFingerprintAdvisor provideModelIndexFingerprintAdvisor(IModelIndex index) {
         return new ModelIndexFingerprintAdvisor(index);
-    }
-
-    @Singleton
-    @Provides
-    public ProjectCoordinateAdvisorService provideMappingProvider(List<IProjectCoordinateAdvisor> advisors) {
-        ProjectCoordinateAdvisorService mappingProvider = new ProjectCoordinateAdvisorService();
-        mappingProvider.setAdvisors(advisors);
-        return mappingProvider;
     }
 
     @Provides

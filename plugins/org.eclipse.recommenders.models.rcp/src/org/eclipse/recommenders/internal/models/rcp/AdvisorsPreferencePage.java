@@ -21,9 +21,6 @@ import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -33,9 +30,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
-import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
-import org.eclipse.recommenders.models.rcp.ModelEvents.AdvisorConfigurationChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -47,21 +41,14 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
 
 public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
     private static final int UP = -1;
     private static final int DOWN = +1;
 
-    private final EventBus bus;
-    private final ProjectCoordinateAdvisorService advisorService;
-
-    @Inject
-    public AdvisorsPreferencePage(EventBus bus, ProjectCoordinateAdvisorService advisorService) {
+    public AdvisorsPreferencePage() {
         super(GRID);
-        this.bus = bus;
-        this.advisorService = advisorService;
     }
 
     @Override
@@ -209,20 +196,6 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
             }
             String newValue = AdvisorDescriptors.store(descriptors);
             getPreferenceStore().setValue(getPreferenceName(), newValue);
-            reconfigureAdvisorService(tableViewer.getCheckedElements());
-        }
-
-        private void reconfigureAdvisorService(Object... newValues) {
-            List<IProjectCoordinateAdvisor> advisors = Lists.newArrayListWithCapacity(newValues.length);
-            for (Object descriptor : newValues) {
-                try {
-                    advisors.add(((AdvisorDescriptor) descriptor).createAdvisor());
-                } catch (CoreException e) {
-                    continue; // skip
-                }
-            }
-            advisorService.setAdvisors(advisors);
-            bus.post(new AdvisorConfigurationChangedEvent());
         }
 
         @Override

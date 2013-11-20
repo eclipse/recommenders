@@ -15,7 +15,6 @@ import static org.eclipse.recommenders.internal.models.rcp.Constants.P_ADVISOR_L
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_ENABLE_AUTO_DOWNLOAD;
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST;
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST_ACTIV;
-import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.AVAILABLE_ADVISORS;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
