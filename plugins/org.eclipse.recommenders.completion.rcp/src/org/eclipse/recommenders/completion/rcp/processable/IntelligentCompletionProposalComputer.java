@@ -79,7 +79,8 @@ public class IntelligentCompletionProposalComputer extends ProcessableCompletion
 
         if (isJdtAllEnabled(cats) || isMylynInstalledAndEnabled(cats)) {
             // do not compute any recommendations and deactivate yourself in background
-            new DisableContentAssistCategoryJob(RECOMMENDERS_ALL_CATEGORY_ID).schedule(300);
+            new DisableContentAssistCategoryJob(MYLYN_ALL_CATEGORY).schedule(300);
+            new DisableContentAssistCategoryJob(JDT_ALL_CATEGORY).schedule(300);
             return false;
         }
         return true;
