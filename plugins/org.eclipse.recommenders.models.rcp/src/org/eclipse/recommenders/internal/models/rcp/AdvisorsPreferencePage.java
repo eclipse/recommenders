@@ -164,14 +164,14 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
                     AdvisorDescriptor descriptor = cast(element);
                     return descriptor.getName();
                 }
-                
+
                 @Override
                 public String getToolTipText(Object element) {
                     AdvisorDescriptor descriptor = cast(element);
                     return descriptor.getDescription();
                 }
             });
-            ColumnViewerToolTipSupport.enableFor(tableViewer); 
+            ColumnViewerToolTipSupport.enableFor(tableViewer);
             tableViewer.setContentProvider(new ArrayContentProvider());
             return tableViewer;
         }
