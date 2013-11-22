@@ -57,9 +57,18 @@ public class GsonUtil {
 
     private static Gson gson;
 
+    private static GsonBuilder builder;
+
     public static synchronized Gson getInstance() {
         if (gson == null) {
-            final GsonBuilder builder = new GsonBuilder();
+            gson = getBuilderInstance().create();
+        }
+        return gson;
+    }
+
+    public static synchronized GsonBuilder getBuilderInstance() {
+        if (builder == null) {
+            builder = new GsonBuilder();
 
             builder.registerTypeAdapter(VmMethodName.class, new MethodNameTypeAdapter());
             builder.registerTypeAdapter(IMethodName.class, new MethodNameTypeAdapter());
@@ -83,9 +92,8 @@ public class GsonUtil {
 
             builder.enableComplexMapKeySerialization();
             builder.setPrettyPrinting();
-            gson = builder.create();
         }
-        return gson;
+        return builder;
     }
 
     public static <T> T deserialize(final CharSequence json, final Type classOfT) {
