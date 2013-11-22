@@ -31,7 +31,7 @@ import com.google.common.io.Files;
 
 public class SharedManualMappingsAdvisor extends AbstractProjectCoordinateAdvisor {
 
-    private static final ModelCoordinate MAPPINGS = new ModelCoordinate("org.eclipse.recommenders", "mappings", null,
+    public static final ModelCoordinate MAPPINGS = new ModelCoordinate("org.eclipse.recommenders", "mappings", null,
             "properties", "1.0.0");
 
     private final IModelRepository repository;
@@ -54,7 +54,7 @@ public class SharedManualMappingsAdvisor extends AbstractProjectCoordinateAdviso
         String path = dependencyInfo.getFile().getAbsolutePath().replace(File.separatorChar, '/');
         for (Pair<String, ProjectCoordinate> mapping : mappings) {
             String suffixPattern = mapping.getFirst();
-            if (matchesSuffixPattern(path, suffixPattern)) {
+            if (PathUtils.matchesSuffixPattern(path, suffixPattern)) {
                 return Optional.of(mapping.getSecond());
             }
         }
@@ -62,21 +62,10 @@ public class SharedManualMappingsAdvisor extends AbstractProjectCoordinateAdviso
         return Optional.absent();
     }
 
-    @VisibleForTesting
-    static boolean matchesSuffixPattern(String path, String suffixPattern) {
-        int separators = StringUtils.countMatches(suffixPattern, "/") + 1;
-        int separatorIndex = path.length();
-        while (separators > 0) {
-            separatorIndex = path.lastIndexOf("/", separatorIndex - 1);
-            separators--;
-        }
-        String substring = path.substring(separatorIndex + 1);
-        return FilenameUtils.wildcardMatch(substring, suffixPattern);
-    }
-
     private synchronized void initializeMappings() {
         if (mappings == null) {
-            Optional<File> mappingFile = repository.resolve(MAPPINGS, false);
+            // Look for new shared mappings after each restart.
+            Optional<File> mappingFile = repository.resolve(MAPPINGS, true);
             if (mappingFile.isPresent()) {
                 mappings = readMappingFile(mappingFile.get());
             } else {
