@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <extension point="org.eclipse.mylyn.discovery.core.connectorDiscovery">
+    <connectorCategory id="org.eclipse.recommenders.rcp.discovery.category.codetrails" description="Codetrails Crowdsourcing Tools" name="Codetrails Crowdsourcing Tools" relevance="30">
+      <group id="codetrails" />
+      <icon image48="images/extras-48.png" />
+    </connectorCategory>
+    <connectorCategory id="org.eclipse.recommenders.rcp.discovery.category.incubation" description="Incubation projects at Code Recommenders. Note that these incubators may not be production ready." name="Incubator" relevance="10">
+      <group id="incubator"/>
+      <icon image48="images/extras-48.png" />
+    </connectorCategory>
+  </extension>
+  <extension point="org.eclipse.mylyn.discovery.core.connectorDiscovery">
+    <connectorDescriptor siteUrl="http://download.codetrails.com/updates/connect/" id="com.codetrails.connect.hippie.rcp.feature" groupId="codetrails" description="Crowdsourcing Tools" categoryId="org.eclipse.recommenders.rcp.discovery.category.codetrails" name="Codetrails Connect, Community Edition" provider="Codetrails" license="EPL" kind="codetrails">
+      <iu id="com.codetrails.connect.hippie.rcp.feature.feature.group" />
+      <overview summary="Description" url="http://codetrails.com/connect/" />
+    </connectorDescriptor>
+    <connectorDescriptor categoryId="org.eclipse.recommenders.rcp.discovery.category.incubation" groupId="incubator" id="org.eclipse.recommenders.snipmatch.rcp.feature" license="EPL" name="Snipmatch" provider="Eclipse Code Recommenders" siteUrl="http://download.eclipse.org/recommenders.incubator/snipmatch/updates/milestones/">
+       <iu id="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
+       <overview summary="Snipmatch Completion Summary" />
+    </connectorDescriptor>
+  </extension>
+</plugin>

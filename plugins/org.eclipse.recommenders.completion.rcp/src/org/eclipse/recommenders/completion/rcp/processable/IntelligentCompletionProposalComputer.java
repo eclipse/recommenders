@@ -28,6 +28,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
 import org.eclipse.recommenders.internal.completion.rcp.ConfigureCompletionProposal;
+import org.eclipse.recommenders.internal.completion.rcp.DiscoveryCompletionProposal;
 import org.eclipse.recommenders.internal.completion.rcp.EmptyCompletionProposal;
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
@@ -74,6 +75,11 @@ public class IntelligentCompletionProposalComputer extends ProcessableCompletion
             // make sure that we have at least two proposal to prevent auto-apply
             res.add(new EmptyCompletionProposal());
             res.add(config);
+            return res;
+        }
+        if(res.isEmpty()) {
+            res.add(new EmptyCompletionProposal());
+            res.add(new DiscoveryCompletionProposal(images));
         }
         return res;
     }

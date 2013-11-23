@@ -27,4 +27,9 @@ public class EmptyCompletionProposal extends AbstractJavaCompletionProposal {
         setRelevance(RELEVANCE);
         setSortString(text.getString());
     }
+
+    @Override
+    protected boolean isValidPrefix(String prefix) {
+        return true;
+    }
 }
