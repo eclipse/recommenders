@@ -63,8 +63,8 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.DependencyType;
 import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
+import org.eclipse.recommenders.models.IProjectCoordinateAdvisorRegistry;
 import org.eclipse.recommenders.models.ProjectCoordinate;
-import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.models.rcp.ModelEvents.AdvisorConfigurationChangedEvent;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ProjectCoordinateChangeEvent;
 import org.eclipse.recommenders.rcp.SharedImages;
@@ -100,7 +100,7 @@ public class ProjectCoordinatesView extends ViewPart {
     private ContentProvider contentProvider;
 
     private final EclipseDependencyListener dependencyListener;
-    private final ProjectCoordinateAdvisorService pcAdvisors;
+    private final IProjectCoordinateAdvisorRegistry pcAdvisors;
     private ManualProjectCoordinateAdvisor manualPcAdvisor;
 
     private Table table;
@@ -113,7 +113,7 @@ public class ProjectCoordinatesView extends ViewPart {
 
     @Inject
     public ProjectCoordinatesView(final EclipseDependencyListener dependencyListener,
-            final ProjectCoordinateAdvisorService pcAdvisors,
+            final IProjectCoordinateAdvisorRegistry pcAdvisors,
             final ManualProjectCoordinateAdvisor manualProjectCoordinateAdvisor, EventBus bus, SharedImages images) {
         this.dependencyListener = dependencyListener;
         this.pcAdvisors = pcAdvisors;

@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-public class ProjectCoordinateAdvisorService implements IProjectCoordinateAdvisorRegistry, IProjectCoordinateAdvisor {
+public class ProjectCoordinateAdvisorService implements IProjectCoordinateAdvisorRegistry {
 
     private List<IProjectCoordinateAdvisor> advisors = Lists.newArrayList();
 
