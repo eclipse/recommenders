@@ -19,11 +19,7 @@ import static org.eclipse.ui.dialogs.PreferencesUtil.createPreferenceDialogOn;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.text.AbstractInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -35,17 +31,15 @@ import org.eclipse.recommenders.rcp.SharedImages.Images;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 
 @SuppressWarnings("restriction")
-public class ConfigureCompletionProposal extends AbstractJavaCompletionProposal {
+public class EnableCompletionProposal extends AbstractJavaCompletionProposal {
 
     private static final Object DUMMY_INFO = new Object();
     private static final String HERE = "here";
@@ -62,12 +56,13 @@ public class ConfigureCompletionProposal extends AbstractJavaCompletionProposal 
     // leave a bit space for other, maybe more important proposals
     private static final int RELEVANCE = Integer.MAX_VALUE - 10000;
 
-    public ConfigureCompletionProposal(SharedImages images) {
+    public EnableCompletionProposal(SharedImages images, int offset) {
         Image image = images.getImage(Images.OBJ_LIGHTBULB);
         StyledString text = new StyledString("Enable intelligent code completion?", DECORATIONS_STYLER);
         setStyledDisplayString(text);
         setImage(image);
         setRelevance(RELEVANCE);
+        setCursorPosition(offset);
     }
 
     @Override
