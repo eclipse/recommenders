@@ -34,7 +34,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
-import org.eclipse.recommenders.models.advisors.ProjectCoordinateAdvisorService;
+import org.eclipse.recommenders.models.IProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.models.rcp.ModelEvents.AdvisorConfigurationChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -55,13 +55,13 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
     private static final int DOWN = +1;
 
     private final EventBus bus;
-    private final ProjectCoordinateAdvisorService advisorService;
+    private final IProjectCoordinateAdvisorService pcAdvisorService;
 
     @Inject
-    public AdvisorsPreferencePage(EventBus bus, ProjectCoordinateAdvisorService advisorService) {
+    public AdvisorsPreferencePage(EventBus bus, IProjectCoordinateAdvisorService pcAdvisorService) {
         super(GRID);
         this.bus = bus;
-        this.advisorService = advisorService;
+        this.pcAdvisorService = pcAdvisorService;
     }
 
     @Override
@@ -223,7 +223,7 @@ public class AdvisorsPreferencePage extends FieldEditorPreferencePage implements
                     continue; // skip
                 }
             }
-            advisorService.setAdvisors(advisors);
+            pcAdvisorService.setAdvisors(advisors);
             bus.post(new AdvisorConfigurationChangedEvent());
         }
 
