@@ -29,6 +29,10 @@ import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
 import org.eclipse.recommenders.internal.completion.rcp.EmptyCompletionProposal;
 import org.eclipse.recommenders.internal.completion.rcp.EnableCompletionProposal;
+import org.eclipse.recommenders.internal.completion.rcp.ConfigureCompletionProposal;
+import org.eclipse.recommenders.internal.completion.rcp.EnableCompletionProposal;
+import org.eclipse.recommenders.internal.completion.rcp.DiscoverCompletionProposal;
+import org.eclipse.recommenders.internal.completion.rcp.EmptyCompletionProposal;
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 
@@ -76,6 +80,10 @@ public class IntelligentCompletionProposalComputer extends ProcessableCompletion
             res.add(new EmptyCompletionProposal(offset));
             res.add(config);
             return res;
+        }
+        if (res.isEmpty()) {
+            res.add(new EmptyCompletionProposal(offset));
+            res.add(new DiscoverCompletionProposal(images, offset));
         }
         return res;
     }
