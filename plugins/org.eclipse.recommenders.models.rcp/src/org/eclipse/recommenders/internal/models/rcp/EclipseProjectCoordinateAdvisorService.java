@@ -12,6 +12,7 @@ package org.eclipse.recommenders.internal.models.rcp;
 
 import static com.google.common.base.Optional.absent;
 import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.IDENTIFIED_PROJECT_COORDINATES;
+import static com.google.common.base.Optional.of;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +52,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
@@ -72,6 +74,8 @@ public class EclipseProjectCoordinateAdvisorService implements IProjectCoordinat
     @SuppressWarnings("serial")
     private final Type cacheType = new TypeToken<Map<DependencyInfo, Optional<ProjectCoordinate>>>() {
     }.getType();
+
+    private Map<IProjectCoordinateAdvisor, AdvisorDescriptor> descriptors = Maps.newHashMap();
 
     @Inject
     public EclipseProjectCoordinateAdvisorService(@Named(IDENTIFIED_PROJECT_COORDINATES) File persistenceFile,
@@ -105,19 +109,26 @@ public class EclipseProjectCoordinateAdvisorService implements IProjectCoordinat
     }
 
     private List<IProjectCoordinateAdvisor> provideAdvisors(String advisorConfiguration) {
+        descriptors.clear();
         List<AdvisorDescriptor> registeredAdvisors = AdvisorDescriptors.getRegisteredAdvisors();
         List<AdvisorDescriptor> loadedDescriptors = AdvisorDescriptors.load(advisorConfiguration, registeredAdvisors);
         List<IProjectCoordinateAdvisor> advisors = Lists.newArrayListWithCapacity(loadedDescriptors.size());
         for (AdvisorDescriptor descriptor : loadedDescriptors) {
             try {
                 if (descriptor.isEnabled()) {
-                    advisors.add(descriptor.createAdvisor());
+                    IProjectCoordinateAdvisor advisor = descriptor.createAdvisor();
+                    advisors.add(advisor);
+                    descriptors.put(advisor, descriptor);
                 }
             } catch (CoreException e) {
                 LOG.error("Exception during creation of Advisor with id: " + descriptor.getId(), e);
             }
         }
         return advisors;
+    }
+
+    public Optional<AdvisorDescriptor> findDescriptor(IProjectCoordinateAdvisor advisor) {
+        return of(descriptors.get(advisor));
     }
 
     @Override
