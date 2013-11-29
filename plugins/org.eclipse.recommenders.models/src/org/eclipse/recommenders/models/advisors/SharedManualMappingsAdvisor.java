@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.models.advisors;
 
+import static org.apache.commons.lang3.StringUtils.isWhitespace;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +23,8 @@ import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.ModelCoordinate;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
@@ -28,6 +32,8 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 public class SharedManualMappingsAdvisor extends AbstractProjectCoordinateAdvisor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SharedManualMappingsAdvisor.class);
 
     public static final ModelCoordinate MAPPINGS = new ModelCoordinate("org.eclipse.recommenders", "mappings", null,
             "properties", "1.0.0");
@@ -77,6 +83,10 @@ public class SharedManualMappingsAdvisor extends AbstractProjectCoordinateAdviso
             List<Pair<String, ProjectCoordinate>> result = Lists.newLinkedList();
             List<String> lines = Files.readLines(mappingFile, Charsets.UTF_8);
             for (String line : lines) {
+                if (isWhitespace(line) || isComment(line)) {
+                    continue;
+                }
+
                 String[] split = StringUtils.split(line, "=");
                 if (split.length != 2) {
                     throw new IllegalArgumentException();
@@ -85,7 +95,12 @@ public class SharedManualMappingsAdvisor extends AbstractProjectCoordinateAdviso
             }
             return result;
         } catch (Exception e) {
+            LOG.error("Cannot parse mappings: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
+    }
+
+    private boolean isComment(String line) {
+        return line.startsWith("#");
     }
 }
