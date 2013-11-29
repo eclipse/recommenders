@@ -77,6 +77,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
 
     private CallsRcpPreferences prefs;
     private ImageDescriptor overlay;
+    private HashSet<IMethodName> observedCalls;
 
     @Inject
     public CallCompletionSessionProcessor(final IProjectCoordinateProvider pcProvider,
@@ -135,8 +136,8 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         // set definition-type and defined-by
         model.setObservedDefinitionKind(ctx.get(RECEIVER_DEF_TYPE, null));
         model.setObservedDefiningMethod(ctx.get(RECEIVER_DEF_BY, null));
-        // set calls:
-        model.setObservedCalls(newHashSet(ctx.get(RECEIVER_CALLS, Collections.<IMethodName>emptyList())));
+        observedCalls = newHashSet(ctx.get(RECEIVER_CALLS, Collections.<IMethodName>emptyList()));
+        model.setObservedCalls(observedCalls);
 
         // read
         recommendations = model.recommendCalls();
@@ -166,6 +167,10 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
         case CompletionProposal.METHOD_NAME_REFERENCE:
             final ProposalMatcher matcher = new ProposalMatcher(coreProposal);
+
+            if (handleAlreadyUsedProposal(proposal, matcher)) {
+                return;
+            }
             for (final Recommendation<IMethodName> call : recommendations) {
                 final IMethodName crMethod = call.getProposal();
                 if (!matcher.match(crMethod)) {
@@ -189,6 +194,32 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
                 break;
             }
         }
+    }
+
+    private boolean handleAlreadyUsedProposal(final IProcessableProposal proposal, final ProposalMatcher matcher) {
+        if (!prefs.highlightUsedProposals) {
+            return false;
+        }
+        for (IMethodName observed : observedCalls) {
+            if (matcher.match(observed)) {
+                String label = "";
+                if (prefs.decorateProposalText) {
+                    label = "used";
+                }
+                int relevance = 0;
+                if (prefs.changeProposalRelevance) {
+                    relevance = 1;
+                }
+                ProposalProcessorManager mgr = proposal.getProposalProcessorManager();
+                mgr.addProcessor(new SimpleProposalProcessor(relevance, label));
+                if (prefs.decorateProposalIcon) {
+                    overlay(proposal, overlay);
+                }
+                observedCalls.remove(observed);
+                return true;
+            }
+        }
+        return false;
     }
 
     @VisibleForTesting

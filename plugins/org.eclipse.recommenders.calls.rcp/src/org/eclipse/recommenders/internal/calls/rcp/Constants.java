@@ -41,4 +41,9 @@ public class Constants {
      * Preference name to decorate the completion proposal's display string.
      */
     public static final String P_DECORATE_PROPOSAL_TEXT = "decorate_proposal_text";
+    /**
+     * The maximal number of proposals recommended by the recommender.
+     */
+    public static final String P_HIGHLIGHT_USED_PROPOSALS = "highlight_used_proposals";
+
 }
