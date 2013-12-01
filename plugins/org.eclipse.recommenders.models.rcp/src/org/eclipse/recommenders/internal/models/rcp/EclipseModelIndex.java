@@ -51,6 +51,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -73,7 +74,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
     private final EventBus bus;
 
-    private final Map<String, Pair<File, IModelIndex>> delegates = Maps.newHashMap();
+    private ImmutableMap<String, Pair<File, IModelIndex>> delegates;
 
     private final Cache<Pair<ProjectCoordinate, String>, Optional<ModelCoordinate>> cache = CacheBuilder.newBuilder()
             .maximumSize(10).concurrencyLevel(1).build();
@@ -96,23 +97,38 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     private void doOpen(boolean scheduleIndexUpdate) throws IOException {
         Checks.ensureNoDuplicates(prefs.remotes);
         String[] remoteUrls = prefs.remotes;
-        delegates.clear();
+        clearDelegates();
         basedir.mkdir();
         for (String url : remoteUrls) {
             doOpen(url, scheduleIndexUpdate);
         }
     }
 
+    private synchronized void clearDelegates() {
+        delegates = ImmutableMap.of();
+    }
+
     private void doOpen(String remoteUrl, boolean scheduleIndexUpdate) throws IOException {
-        File indexLocation = new File(basedir, Urls.mangle(remoteUrl));
+        File indexLocation = createIndexLocation(remoteUrl);
         IModelIndex modelIndex = createModelIndex(indexLocation);
-        delegates.put(remoteUrl, Pair.newPair(indexLocation, modelIndex));
+        storeDelegate(remoteUrl, Pair.newPair(indexLocation, modelIndex));
         if (!indexAlreadyDownloaded(indexLocation) || scheduleIndexUpdate) {
             triggerIndexDownload(remoteUrl);
-            return;
+        } else {
+            modelIndex.open();
+            bus.post(new ModelIndexOpenedEvent());
         }
-        modelIndex.open();
-        bus.post(new ModelIndexOpenedEvent());
+    }
+
+    private File createIndexLocation(String remoteUrl) {
+        return new File(basedir, Urls.mangle(remoteUrl));
+    }
+
+    private synchronized void storeDelegate(String remoteUrl, Pair<File, IModelIndex> pair) {
+        delegates = new ImmutableMap.Builder<String, Pair<File, IModelIndex>>()
+                .putAll(delegates)
+                .put(remoteUrl, pair)
+                .build();
     }
 
     @VisibleForTesting
@@ -257,9 +273,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
             File location = repository.getLocation(e.model, false).orNull();
             String remoteUrl = e.model.getHint(HINT_REPOSITORY_URL).orNull();
             if (remoteUrl != null) {
-                Pair<File, IModelIndex> delegate = delegates.get(remoteUrl);
-                delegate.getSecond().close();
-                File file = delegate.getFirst();
+                File file = createIndexLocation(remoteUrl);
                 file.mkdir();
                 FileUtils.cleanDirectory(file);
                 Zips.unzip(location, file);
@@ -269,9 +283,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     private boolean isIndex(ModelCoordinate model) {
-        return model.getGroupId().equals(INDEX.getGroupId())
-                && model.getArtifactId().equals(INDEX.getArtifactId())
-                && model.getExtension().equals(INDEX.getExtension())
-                && model.getVersion().equals(INDEX.getVersion());
+        return model.getGroupId().equals(INDEX.getGroupId()) && model.getArtifactId().equals(INDEX.getArtifactId())
+                && model.getExtension().equals(INDEX.getExtension()) && model.getVersion().equals(INDEX.getVersion());
     }
 }
