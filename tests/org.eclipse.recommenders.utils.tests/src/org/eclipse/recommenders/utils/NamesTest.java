@@ -97,6 +97,13 @@ public class NamesTest {
     }
 
     @Test
+    public void testVm2srcQualifiedType_WithArrays2() {
+        String actual = Names.src2vmType("java.lang.Object[][]");
+        assertEquals("[[Ljava/lang/Object", actual);
+        VmTypeName.get(actual);
+    }
+
+    @Test
     public void testVm2srcQualifiedType_WithPrimitives() {
         assertEquals("int", Names.vm2srcQualifiedType(VmTypeName.INT));
         assertEquals("double", Names.vm2srcQualifiedType(VmTypeName.DOUBLE));

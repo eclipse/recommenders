@@ -264,7 +264,7 @@ public class Names {
         int dimensions = 0;
         if (type.endsWith("]")) {
             dimensions = StringUtils.countMatches(type, "[]");
-            type = StringUtils.substringBefore(type, "[") + ";";
+            type = StringUtils.substringBefore(type, "[");
         }
         return StringUtils.repeat("[", dimensions) + "L" + type.replaceAll("\\.", "/");
     }
