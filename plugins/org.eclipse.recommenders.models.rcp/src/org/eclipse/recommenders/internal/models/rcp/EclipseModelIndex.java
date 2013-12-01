@@ -73,7 +73,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
     private final EventBus bus;
 
-    private final Map<String, Pair<File, IModelIndex>> delegates = Maps.newHashMap();
+    private Map<String, Pair<File, IModelIndex>> delegates = Maps.newHashMap();
 
     private final Cache<Pair<ProjectCoordinate, String>, Optional<ModelCoordinate>> cache = CacheBuilder.newBuilder()
             .maximumSize(10).concurrencyLevel(1).build();
@@ -104,15 +104,21 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     private void doOpen(String remoteUrl, boolean scheduleIndexUpdate) throws IOException {
-        File indexLocation = new File(basedir, Urls.mangle(remoteUrl));
+        File indexLocation = createIndexLocation(remoteUrl);
         IModelIndex modelIndex = createModelIndex(indexLocation);
-        delegates.put(remoteUrl, Pair.newPair(indexLocation, modelIndex));
+        synchronized (delegates) {
+            delegates.put(remoteUrl, Pair.newPair(indexLocation, modelIndex));
+        }
         if (!indexAlreadyDownloaded(indexLocation) || scheduleIndexUpdate) {
             triggerIndexDownload(remoteUrl);
-            return;
+        } else {
+            modelIndex.open();
+            bus.post(new ModelIndexOpenedEvent());
         }
-        modelIndex.open();
-        bus.post(new ModelIndexOpenedEvent());
+    }
+
+    private File createIndexLocation(String remoteUrl) {
+        return new File(basedir, Urls.mangle(remoteUrl));
     }
 
     @VisibleForTesting
@@ -257,9 +263,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
             File location = repository.getLocation(e.model, false).orNull();
             String remoteUrl = e.model.getHint(HINT_REPOSITORY_URL).orNull();
             if (remoteUrl != null) {
-                Pair<File, IModelIndex> delegate = delegates.get(remoteUrl);
-                delegate.getSecond().close();
-                File file = delegate.getFirst();
+                File file = createIndexLocation(remoteUrl);
                 file.mkdir();
                 FileUtils.cleanDirectory(file);
                 Zips.unzip(location, file);
@@ -269,9 +273,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     private boolean isIndex(ModelCoordinate model) {
-        return model.getGroupId().equals(INDEX.getGroupId())
-                && model.getArtifactId().equals(INDEX.getArtifactId())
-                && model.getExtension().equals(INDEX.getExtension())
-                && model.getVersion().equals(INDEX.getVersion());
+        return model.getGroupId().equals(INDEX.getGroupId()) && model.getArtifactId().equals(INDEX.getArtifactId())
+                && model.getExtension().equals(INDEX.getExtension()) && model.getVersion().equals(INDEX.getVersion());
     }
 }
