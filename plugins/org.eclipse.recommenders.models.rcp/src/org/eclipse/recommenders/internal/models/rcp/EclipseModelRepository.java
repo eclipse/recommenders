@@ -57,6 +57,7 @@ import com.google.common.eventbus.Subscribe;
 public class EclipseModelRepository implements IModelRepository, IRcpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EclipseModelRepository.class);
+
     @Inject
     @Named(REPOSITORY_BASEDIR)
     File basedir;
