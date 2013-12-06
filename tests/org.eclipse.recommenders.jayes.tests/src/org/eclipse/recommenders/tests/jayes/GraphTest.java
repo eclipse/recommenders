@@ -80,4 +80,20 @@ public class GraphTest {
 
     }
 
+    @Test
+    public void testRemoveIncidentEdges() {
+        Graph g = createTestGraph();
+
+        assertThat(g.getNeighbors(1), hasItem(3));
+        assertThat(g.getNeighbors(3), hasItem(1));
+
+        g.removeIncidentEdges(0);
+
+        assertThat(g.getNeighbors(1), not(hasItem(0)));
+        assertThat(g.getNeighbors(2), not(hasItem(0)));
+        assertThat(g.getNeighbors(3), not(hasItem(0)));
+        assertThat(g.getNeighbors(0), not(anyOf(hasItem(0), hasItem(1), hasItem(2), hasItem(3))));
+
+    }
+
 }
