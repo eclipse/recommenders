@@ -1,0 +1,9 @@
+Verified+1: Hudson CI
+Code-Review+1: Andreas Sewe <andreas.sewe@codetrails.com>
+Code-Review+2: Olav Lenz <olav.lenz.core@gmail.com>
+IP-Clean+1: Olav Lenz <olav.lenz.core@gmail.com>
+Submitted-by: Olav Lenz <olav.lenz.core@gmail.com>
+Submitted-at: Fri, 06 Dec 2013 07:13:05 -0500
+Reviewed-on: https://git.eclipse.org/r/19321
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
