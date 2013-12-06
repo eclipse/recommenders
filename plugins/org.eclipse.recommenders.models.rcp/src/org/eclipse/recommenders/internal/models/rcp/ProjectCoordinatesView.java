@@ -13,17 +13,12 @@ package org.eclipse.recommenders.internal.models.rcp;
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Optional.presentInstances;
-import static com.google.common.collect.Iterables.get;
-import static com.google.common.collect.Iterables.getFirst;
-import static com.google.common.collect.Iterables.isEmpty;
+import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
 import static org.eclipse.recommenders.models.DependencyInfo.EXECUTION_ENVIRONMENT;
 import static org.eclipse.recommenders.models.DependencyInfo.PROJECT_NAME;
-import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_REFRESH;
-import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_JAR;
-import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_JAVA_PROJECT;
-import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_JRE;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.*;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.io.IOException;
@@ -154,9 +149,27 @@ public class ProjectCoordinatesView extends ViewPart {
 
         addSortingFunctionality();
         addFilterFunctionality();
+        addClearCacheButton();
         addRefreshButton();
 
         refreshData();
+    }
+
+    private void addClearCacheButton() {
+        Action clearCache = new Action() {
+            @Override
+            public void run() {
+                clearProjectCoordianteCache();
+                refreshData();
+            }
+        };
+        clearCache.setText("Clear ProjectCoordinateCache");
+        clearCache.setImageDescriptor(images.getDescriptor(ELCL_CLEAR));
+        getViewSite().getActionBars().getMenuManager().add(clearCache);
+    }
+
+    private void clearProjectCoordianteCache() {
+        pcAdvisorsService.clearCache();
     }
 
     class ProjectCoordinateEditing extends EditingSupport {
@@ -283,11 +296,13 @@ public class ProjectCoordinatesView extends ViewPart {
             protected IStatus run(IProgressMonitor monitor) {
                 monitor.beginTask("Resolving dependencies", dependencyInfos.size());
                 strategies = pcAdvisorsService.getAdvisors();
-                for (DependencyInfo dependency : dependencyInfos) {
-                    monitor.subTask("Resolving: " + dependency.getFile().getName());
+                for (DependencyInfo dependencyInfo : dependencyInfos) {
+                    monitor.subTask("Resolving: " + dependencyInfo.getFile().getName());
                     for (IProjectCoordinateAdvisor strategy : strategies) {
-                        data.put(dependency, strategy.suggest(dependency));
+                        data.put(dependencyInfo, strategy.suggest(dependencyInfo));
                     }
+                    // Put the cached value as last element.
+                    data.put(dependencyInfo, pcAdvisorsService.suggest(dependencyInfo));
                     monitor.worked(1);
                 }
                 refreshUI();
@@ -496,7 +511,6 @@ public class ProjectCoordinatesView extends ViewPart {
         getViewSite().getActionBars().getMenuManager().add(showConflictingCoord);
         getViewSite().getActionBars().getMenuManager().add(showManualAssignedCoord);
         showAll.setChecked(true);
-
     }
 
     class TableFilterAction extends Action {
@@ -586,7 +600,8 @@ public class ProjectCoordinatesView extends ViewPart {
                         return name;
                     }
                 case COLUMN_COORDINATE:
-                    Optional<ProjectCoordinate> pc = findFirstMatchingCoordinate(entry.getValue());
+                    // The last element contains the cached value
+                    Optional<ProjectCoordinate> pc = getLast(entry.getValue(), Optional.<ProjectCoordinate>absent());
                     if (pc.isPresent()) {
                         return pc.get().toString();
                     }
