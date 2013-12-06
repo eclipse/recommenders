@@ -186,7 +186,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
                     for (String remote : prefs.remotes) {
                         Pair<File, IModelIndex> pair = openDelegates.get(remote);
                         if (pair == null) {
-                            return absent();
+                            continue; // Index not (yet) available; try next remote repository
                         }
                         IModelIndex index = pair.getSecond();
                         Optional<ModelCoordinate> suggest = index.suggest(pc, modelType);
@@ -289,6 +289,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
                 Zips.unzip(location, file);
                 openDelegate(remoteUrl, file);
             }
+            cache.invalidateAll();
         }
     }
 
