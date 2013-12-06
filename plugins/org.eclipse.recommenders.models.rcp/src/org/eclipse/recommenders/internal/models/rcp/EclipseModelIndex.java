@@ -186,7 +186,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
                     for (String remote : prefs.remotes) {
                         Pair<File, IModelIndex> pair = openDelegates.get(remote);
                         if (pair == null) {
-                            return absent();
+                            continue; // Index not (yet) available; try next remote repository
                         }
                         IModelIndex index = pair.getSecond();
                         Optional<ModelCoordinate> suggest = index.suggest(pc, modelType);
@@ -270,6 +270,12 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @Subscribe
     public void onEvent(ModelRepositoryOpenedEvent e) throws IOException {
         doOpen(true);
+    }
+
+    @Subscribe
+    public void onEvent(ModelIndexOpenedEvent e) {
+        // when there is actually a new index opened, invalidate all we had...
+        cache.invalidateAll();
     }
 
     @Subscribe
