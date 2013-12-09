@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.recommenders.tests.jayes;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
@@ -20,6 +21,8 @@ import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.util.BayesNodeUtil;
 import org.eclipse.recommenders.jayes.util.MathUtils;
+import org.eclipse.recommenders.jayes.util.OrderIgnoringPair;
+import org.eclipse.recommenders.jayes.util.Pair;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -151,6 +154,28 @@ public class UtilsTest {
         evidence.put(net.getNode("b"), "le");
 
         assertArrayEquals(new double[] { 0.0, 1.0 }, BayesNodeUtil.getSubCpt(net.getNode("c"), evidence), TOLERANCE);
+    }
+
+    @Test
+    public void testOrderIgnoringPairIgnoresOrder() {
+        Map<OrderIgnoringPair<Integer>, Integer> map = new HashMap<OrderIgnoringPair<Integer>, Integer>();
+
+        map.put(new OrderIgnoringPair<Integer>(1, 2), 3);
+
+        assertThat(map.get(new OrderIgnoringPair<Object>(1, 2)), is(3));
+        assertThat(map.get(new OrderIgnoringPair<Object>(2, 1)), is(3));
+
+    }
+
+    @Test
+    public void testPairRespectsOrder() {
+        Map<Pair<Integer, Integer>, Integer> map = new HashMap<Pair<Integer, Integer>, Integer>();
+
+        map.put(new Pair<Integer, Integer>(1, 2), 3);
+
+        assertThat(map.get(new Pair<Integer, Integer>(1, 2)), is(3));
+        assertThat(map.get(new Pair<Integer, Integer>(2, 1)), is(nullValue()));
+
     }
 
 }
