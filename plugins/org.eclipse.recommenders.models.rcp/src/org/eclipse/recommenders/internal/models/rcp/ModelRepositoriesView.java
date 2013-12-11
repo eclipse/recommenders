@@ -48,7 +48,6 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
@@ -182,7 +181,7 @@ public class ModelRepositoriesView extends ViewPart {
 
         TreeViewerColumn tvcPrimary = new TreeViewerColumn(treeViewer, SWT.NONE);
         TreeColumn tcPrimary = tvcPrimary.getColumn();
-        treeLayout.setColumnData(tcPrimary, new ColumnWeightData(1, ColumnWeightData.MINIMUM_WIDTH, true));
+        treeLayout.setColumnData(tcPrimary, new ColumnWeightData(20, ColumnWeightData.MINIMUM_WIDTH, true));
         tcPrimary.setText("Repository");
         tvcPrimary.setLabelProvider(new StyledCellLabelProvider() {
 
@@ -441,7 +440,7 @@ public class ModelRepositoriesView extends ViewPart {
         TreeColumn column = tvColumn.getColumn();
         column.setMoveable(true);
         column.setResizable(false);
-        treeLayout.setColumnData(column, new ColumnPixelData(20, false, true));
+        treeLayout.setColumnData(column, new ColumnWeightData(1, ColumnWeightData.MINIMUM_WIDTH, true));
         column.setText(classifier.toUpperCase());
         tvColumn.setLabelProvider(new ColumnLabelProvider() {
 
