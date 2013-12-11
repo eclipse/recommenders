@@ -13,7 +13,17 @@ package org.eclipse.recommenders.internal.models.rcp;
 
 import static org.eclipse.recommenders.internal.models.rcp.Constants.BUNDLE_ID;
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST;
-import static org.eclipse.recommenders.rcp.SharedImages.Images.*;
+import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.MODEL_CLASSIFIER;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_ADD_REPOSITORY;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_COLLAPSE_ALL;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_DELETE;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_EXPAND_ALL;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_REFRESH;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_REMOVE_REPOSITORY;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_BULLET_BLUE;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_CHECK_GREEN;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_CROSS_RED;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_REPOSITORY;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,7 +83,6 @@ import org.eclipse.recommenders.models.rcp.actions.TriggerModelDownloadForModelC
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.ImageResource;
 import org.eclipse.recommenders.rcp.utils.Selections;
-import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -95,6 +104,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
@@ -104,6 +114,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.inject.name.Named;
 
 public class ModelRepositoriesView extends ViewPart {
 
@@ -126,6 +137,10 @@ public class ModelRepositoriesView extends ViewPart {
 
     @Inject
     ModelsRcpPreferences prefs;
+
+    @Inject
+    @Named(MODEL_CLASSIFIER)
+    ImmutableList<String> modelClassifier;
 
     @Inject
     EventBus bus;
@@ -207,7 +222,7 @@ public class ModelRepositoriesView extends ViewPart {
 
         });
 
-        for (String classifier : Constants.MODEL_CLASSIFIER) {
+        for (String classifier : modelClassifier) {
             newColumn(treeLayout, classifier);
         }
 
@@ -508,7 +523,7 @@ public class ModelRepositoriesView extends ViewPart {
     private Multimap<String, ModelCoordinate> fetchDataGroupedByRepository() {
         Multimap<String, ModelCoordinate> temp = LinkedListMultimap.create();
 
-        for (String classifier : Constants.MODEL_CLASSIFIER) {
+        for (String classifier : modelClassifier) {
             addModelCoordinateToIndex(temp, classifier);
         }
 
