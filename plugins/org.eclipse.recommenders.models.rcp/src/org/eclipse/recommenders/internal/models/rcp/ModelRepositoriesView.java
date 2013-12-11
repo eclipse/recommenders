@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.models.rcp;
 
 import static org.eclipse.recommenders.internal.models.rcp.Constants.BUNDLE_ID;
 import static org.eclipse.recommenders.internal.models.rcp.Constants.P_REPOSITORY_URL_LIST;
+import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.MODEL_CLASSIFIER;
 import static org.eclipse.recommenders.rcp.SharedImages.Images.*;
 
 import java.io.IOException;
@@ -22,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -73,7 +72,6 @@ import org.eclipse.recommenders.models.rcp.actions.TriggerModelDownloadForModelC
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.ImageResource;
 import org.eclipse.recommenders.rcp.utils.Selections;
-import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -96,6 +94,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
@@ -104,6 +103,8 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class ModelRepositoriesView extends ViewPart {
 
@@ -115,25 +116,34 @@ public class ModelRepositoriesView extends ViewPart {
 
     private Action addRemoteRepositoryAction;
 
-    @Inject
-    IModelIndex index;
+    private IModelIndex index;
 
-    @Inject
-    SharedImages images;
+    private SharedImages images;
 
-    @Inject
-    EclipseModelRepository repo;
+    private EclipseModelRepository repo;
 
-    @Inject
-    ModelsRcpPreferences prefs;
+    private ModelsRcpPreferences prefs;
 
-    @Inject
-    EventBus bus;
+    private List<String> modelClassifiers;
+
+    private EventBus bus;
 
     private TreeViewer treeViewer;
     private List<KnownCoordinate> values = Lists.newArrayList();
 
     private Text txtSearch;
+
+    @Inject
+    public ModelRepositoriesView(IModelIndex index, SharedImages images, EclipseModelRepository repo,
+            ModelsRcpPreferences prefs, @Named(MODEL_CLASSIFIER) ImmutableSet<String> modelClassifiers, EventBus bus) {
+        this.index = index;
+        this.images = images;
+        this.repo = repo;
+        this.prefs = prefs;
+        this.modelClassifiers = Lists.newArrayList(modelClassifiers);
+        Collections.sort(this.modelClassifiers);
+        this.bus = bus;
+    }
 
     final PatternFilter patternFilter = new PatternFilter() {
         @Override
@@ -207,7 +217,7 @@ public class ModelRepositoriesView extends ViewPart {
 
         });
 
-        for (String classifier : Constants.MODEL_CLASSIFIER) {
+        for (String classifier : modelClassifiers) {
             newColumn(treeLayout, classifier);
         }
 
@@ -508,7 +518,7 @@ public class ModelRepositoriesView extends ViewPart {
     private Multimap<String, ModelCoordinate> fetchDataGroupedByRepository() {
         Multimap<String, ModelCoordinate> temp = LinkedListMultimap.create();
 
-        for (String classifier : Constants.MODEL_CLASSIFIER) {
+        for (String classifier : modelClassifiers) {
             addModelCoordinateToIndex(temp, classifier);
         }
 
