@@ -1,18 +1,24 @@
 package org.eclipse.recommenders.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.eclipse.recommenders.utils.Zips.zip;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class ZipsTest {
 
@@ -46,4 +52,31 @@ public class ZipsTest {
         verify(zos).closeEntry();
     }
 
+    @Rule
+    public TemporaryFolder unzippedRootJar = new TemporaryFolder();
+
+    @Rule
+    public TemporaryFolder zipped = new TemporaryFolder();
+
+    @Test
+    public void testZip() throws IOException {
+        createTempFile(unzippedRootJar, "META-INF/MANIFEST.MF");
+        createTempFile(unzippedRootJar, "java/lang/Object.class");
+
+        File rootJar = zipped.newFile("root.jar");
+        zip(unzippedRootJar.getRoot(), rootJar);
+
+        ZipFile zipFile = new ZipFile(rootJar);
+
+        assertThat(zipFile.getEntry("META-INF/MANIFEST.MF"), is(notNullValue()));
+        assertThat(zipFile.getEntry("java/lang/Object.class"), is(notNullValue()));
+
+        IOUtils.closeQuietly(zipFile);
+    }
+
+    private File createTempFile(TemporaryFolder folder, String relativeName) throws IOException {
+        File file = new File(folder.getRoot(), relativeName);
+        file.getParentFile().mkdirs();
+        return folder.newFile(relativeName);
+    }
 }
