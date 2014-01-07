@@ -41,14 +41,15 @@ import org.eclipse.swt.widgets.Shell;
 @SuppressWarnings("restriction")
 public class DiscoverCompletionProposal extends AbstractJavaCompletionProposal {
 
-    private static final String PROPOSAL_LABEL = "Nothing found? Discover new extensions to Code Recommenders";
+    private static final String PROPOSAL_LABEL = "Not what you're looking for? Discover new extensions to Code Recommenders";
     private static final String PROPOSAL_DESCRIPTION = "There are quite a few extensions available to Code Recommenders. Press return to learn more about Code Recommenders' incubation projects or how to leverage the power of crowd-soucing in your IDE.";
     private static final String PROPOSAL_CATEGORY_NAME = "Eclipse Code Recommenders";
     private static final String DISCOVERY_URL = "http://download.eclipse.org/recommenders/discovery/2.0/directory.xml";
     private static final Object DUMMY_INFO = new Object();
 
-    // leave a bit space for other, maybe more important proposals
-    private static final int RELEVANCE = Integer.MAX_VALUE - 10001;
+    // We want this at the bottom of the list, other proposals can have a relevance of 0 (e. g. package subwords).
+    // Integer.MIN_VALUE + 1 does not work reliable, possibly due an overflow somewhere.
+    private static final int RELEVANCE = -1;
 
     public DiscoverCompletionProposal(SharedImages images, int invocationOffset) {
         Image image = images.getImage(Images.OBJ_LIGHTBULB);
