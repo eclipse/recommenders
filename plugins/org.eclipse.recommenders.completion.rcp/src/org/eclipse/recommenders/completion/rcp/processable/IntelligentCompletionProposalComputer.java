@@ -10,7 +10,9 @@
  */
 package org.eclipse.recommenders.completion.rcp.processable;
 
-import static org.eclipse.recommenders.internal.completion.rcp.Constants.*;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.JDT_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.MYLYN_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.RECOMMENDERS_ALL_CATEGORY_ID;
 
 import java.util.Collections;
 import java.util.List;
@@ -78,8 +80,8 @@ public class IntelligentCompletionProposalComputer extends ProcessableCompletion
             res.add(config);
             return res;
         }
-        if (res.isEmpty()) {
-            res.add(new EmptyCompletionProposal(offset));
+        // Only show this when we have more than one proposal to keep auto completion working.
+        if (res.size() > 1) {
             res.add(new DiscoverCompletionProposal(images, offset));
         }
         return res;
