@@ -66,3 +66,16 @@ In case Workspace Mechanic finds any of your settings amiss, just let it fix the
 
 You are now set up to contribute code of your own to Eclipse Code Recommenders.
 To test your contributions, just start an Eclipse runtime via the `tools/ide.product` product configuration file residing in the `org.eclipse.recommenders` project.
+
+Mirroring the Target Platform
+-----------------------------
+
+To speed up the Maven build and save bandwidth, you should consider mirroring the contents of your selected target platform to a local p2 repository.
+To do so, execute the following command:
+
+    $ export TARGET=kepler # or luna
+    $ mvn org.jboss.tools.tycho-plugins:target-platform-utils:mirror-target-to-repo -pl :$TARGET
+    $ cp targets/$TARGET/target/$TARGET.target.repo /some/path
+
+Then, add `file:/some/path` as [p2 mirror](http://wiki.eclipse.org/Tycho/Target_Platform/Authentication_and_Mirrors) to your `~/.m2/settings.xml`.
+You will need on `<mirror>` element per repository in your target platform of choice.
