@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.completion.rcp.processable;
 
 import static org.eclipse.recommenders.internal.completion.rcp.Constants.*;
+import static org.eclipse.recommenders.internal.completion.rcp.DiscoverCompletionProposal.isLastDiscoveryOlderThan7Days;
 
 import java.util.Collections;
 import java.util.List;
@@ -78,9 +79,10 @@ public class IntelligentCompletionProposalComputer extends ProcessableCompletion
             res.add(config);
             return res;
         }
-        if (res.isEmpty()) {
+        if (res.isEmpty() && isLastDiscoveryOlderThan7Days()) {
             res.add(new EmptyCompletionProposal(offset));
             res.add(new DiscoverCompletionProposal(images, offset));
+
         }
         return res;
     }

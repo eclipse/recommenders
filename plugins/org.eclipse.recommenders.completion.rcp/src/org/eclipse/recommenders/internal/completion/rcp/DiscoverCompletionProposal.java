@@ -12,9 +12,13 @@ package org.eclipse.recommenders.internal.completion.rcp;
 
 import static org.eclipse.jface.viewers.StyledString.DECORATIONS_STYLER;
 
+import java.util.Calendar;
 import java.util.Dictionary;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.RemoteBundleDiscoveryStrategy;
@@ -41,6 +45,8 @@ import org.eclipse.swt.widgets.Shell;
 @SuppressWarnings("restriction")
 public class DiscoverCompletionProposal extends AbstractJavaCompletionProposal {
 
+    private static final String PREF_LAST_DISCOVERY = "last";
+    private static final String DISCOVERY_PREFERENCE_NODE = "org.eclipse.recommenders.completion.rcp.discovery";
     private static final String PROPOSAL_LABEL = "Nothing found? Discover new extensions to Code Recommenders";
     private static final String PROPOSAL_DESCRIPTION = "There are quite a few extensions available to Code Recommenders. Press return to learn more about Code Recommenders' incubation projects or how to leverage the power of crowd-soucing in your IDE.";
     private static final String PROPOSAL_CATEGORY_NAME = "Eclipse Code Recommenders";
@@ -102,6 +108,27 @@ public class DiscoverCompletionProposal extends AbstractJavaCompletionProposal {
         DiscoveryWizard wizard = new DiscoveryWizard(catalog, configuration);
         WizardDialog dialog = new WizardDialog(WorkbenchUtil.getShell(), wizard);
         dialog.open();
+
+        updateCoolDown();
+    }
+
+    private void updateCoolDown() {
+        IEclipsePreferences preferences = ConfigurationScope.INSTANCE
+                .getNode(DISCOVERY_PREFERENCE_NODE);
+        preferences.putLong(PREF_LAST_DISCOVERY, Calendar.getInstance().getTimeInMillis());
+    }
+
+    public static boolean isLastDiscoveryOlderThan7Days() {
+        IEclipsePreferences preferences = ConfigurationScope.INSTANCE
+                .getNode(DISCOVERY_PREFERENCE_NODE);
+        long lastDiscovery = preferences.getLong(PREF_LAST_DISCOVERY, 0);
+        long now = Calendar.getInstance().getTimeInMillis();
+
+        // absolute time difference for the case the clock is reset to some distant past
+        long diff = Math.abs(now - lastDiscovery);
+        long diffDays = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+
+        return diffDays > 7;
     }
 
     private final class ConfigureContentAssistInformationControl extends AbstractInformationControl {
