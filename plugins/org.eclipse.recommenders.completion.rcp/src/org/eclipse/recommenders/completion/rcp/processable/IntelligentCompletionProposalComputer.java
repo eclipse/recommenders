@@ -12,7 +12,9 @@ package org.eclipse.recommenders.completion.rcp.processable;
 
 import static org.eclipse.recommenders.internal.completion.rcp.Constants.*;
 
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +22,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -80,9 +84,24 @@ public class IntelligentCompletionProposalComputer extends ProcessableCompletion
         }
         if (res.isEmpty()) {
             res.add(new EmptyCompletionProposal(offset));
-            res.add(new DiscoverCompletionProposal(images, offset));
+            if (discoveryOlderThan7Days()) {
+                res.add(new DiscoverCompletionProposal(images, offset));
+            }
         }
         return res;
+    }
+
+    private boolean discoveryOlderThan7Days() {
+        IEclipsePreferences preferences = ConfigurationScope.INSTANCE
+                .getNode("org.eclipse.recommenders.completion.rcp.discovery");
+        long lastDiscovery = preferences.getLong("last", 0);
+        Date now = Calendar.getInstance().getTime();
+
+        long diff = now.getTime() - lastDiscovery;
+
+        long diffDays = diff / (24 * 60 * 60 * 1000);
+
+        return diffDays > 7;
     }
 
     @VisibleForTesting

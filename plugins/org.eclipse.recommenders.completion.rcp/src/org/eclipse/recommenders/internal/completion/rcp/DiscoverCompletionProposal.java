@@ -12,9 +12,12 @@ package org.eclipse.recommenders.internal.completion.rcp;
 
 import static org.eclipse.jface.viewers.StyledString.DECORATIONS_STYLER;
 
+import java.util.Calendar;
 import java.util.Dictionary;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.RemoteBundleDiscoveryStrategy;
@@ -102,6 +105,14 @@ public class DiscoverCompletionProposal extends AbstractJavaCompletionProposal {
         DiscoveryWizard wizard = new DiscoveryWizard(catalog, configuration);
         WizardDialog dialog = new WizardDialog(WorkbenchUtil.getShell(), wizard);
         dialog.open();
+
+        updateCoolDown();
+    }
+
+    private void updateCoolDown() {
+        IEclipsePreferences preferences = ConfigurationScope.INSTANCE
+                .getNode("org.eclipse.recommenders.completion.rcp.discovery");
+        preferences.putLong("last", Calendar.getInstance().getTimeInMillis());
     }
 
     private final class ConfigureContentAssistInformationControl extends AbstractInformationControl {
