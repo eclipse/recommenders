@@ -20,8 +20,8 @@
       %license
    </license>
 
-   <includes
-         id="org.eclipse.recommenders.rcp.feature"
-         version="0.0.0"/>
+   <requires>
+      <import feature="org.eclipse.recommenders.rcp.feature" version="2.0.0.qualifier" match="greaterOrEqual"/>
+   </requires>
 
 </feature>
