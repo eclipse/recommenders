@@ -97,6 +97,7 @@ public class Zips {
                 }
             }
         } finally {
+            Closeables.closeQuietly(new ZipFile(zipFile));
             Closeables.close(zis, true);
         }
     }
