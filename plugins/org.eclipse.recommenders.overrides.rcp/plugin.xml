@@ -21,7 +21,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.eclipse.recommenders.completion.rcp.preferences"
+            category="org.eclipse.recommenders.completion.rcp.preferencePages.completions"
             class="org.eclipse.recommenders.internal.overrides.rcp.PreferencePage"
             id="org.eclipse.recommenders.overrides.rcp.preferences"
             name="Overrides">
