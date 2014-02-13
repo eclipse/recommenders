@@ -48,4 +48,6 @@ public interface IModelRepository {
     Optional<File> resolve(ModelCoordinate mc, boolean force);
 
     Optional<File> resolve(ModelCoordinate mc, boolean force, DownloadCallback callback);
+
+    String getRemoteUrl();
 }

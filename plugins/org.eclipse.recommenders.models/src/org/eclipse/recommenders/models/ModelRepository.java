@@ -295,4 +295,9 @@ public class ModelRepository implements IModelRepository {
         return new DefaultArtifact(mc.getGroupId(), mc.getArtifactId(), mc.getClassifier(), mc.getExtension(),
                 mc.getVersion() + "-SNAPSHOT");
     }
+
+    @Override
+    public String getRemoteUrl() {
+        return remoteRepo.getUrl();
+    }
 }
