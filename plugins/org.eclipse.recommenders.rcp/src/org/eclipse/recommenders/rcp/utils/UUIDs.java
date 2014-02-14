@@ -13,7 +13,7 @@ package org.eclipse.recommenders.rcp.utils;
 import static com.google.common.base.Optional.*;
 import static com.google.common.collect.Iterators.*;
 import static java.net.NetworkInterface.getNetworkInterfaces;
-import static org.eclipse.recommenders.internal.rcp.RcpPlugin.P_UUID;
+import static org.eclipse.recommenders.internal.rcp.Constants.PREF_UUID;
 
 import java.net.NetworkInterface;
 import java.util.Enumeration;
@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.recommenders.internal.rcp.Constants;
 import org.eclipse.recommenders.internal.rcp.RcpPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class UUIDs {
     private static Optional<String> lookupUUIDFromStore() {
         final RcpPlugin plugin = RcpPlugin.getDefault();
         final IPreferenceStore prefStore = plugin.getPreferenceStore();
-        final String uuid = prefStore.getString(P_UUID);
+        final String uuid = prefStore.getString(PREF_UUID);
         if (Strings.isNullOrEmpty(uuid)) {
             return Optional.absent();
         }
@@ -55,7 +56,7 @@ public class UUIDs {
     private static void storeUUID(final String uuid) {
         final RcpPlugin plugin = RcpPlugin.getDefault();
         final IPreferenceStore prefStore = plugin.getPreferenceStore();
-        prefStore.putValue(P_UUID, uuid);
+        prefStore.putValue(PREF_UUID, uuid);
     }
 
     public static String generateGlobalUUID() {
@@ -81,7 +82,7 @@ public class UUIDs {
                 return fromNullable(uuid);
             }
         } catch (final Exception e) {
-            LOG.warn("Failed to generate UUID from mac address.", e);
+            LOG.warn("Failed to generate UUID from MAC address.", e); //$NON-NLS-1$
         }
         return absent();
     }
