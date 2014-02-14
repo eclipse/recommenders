@@ -81,7 +81,7 @@ public class UUIDs {
                 return fromNullable(uuid);
             }
         } catch (final Exception e) {
-            LOG.warn("Failed to generate UUID from mac address.", e);
+            LOG.warn("Failed to generate UUID from mac address.", e); //$NON-NLS-1$
         }
         return absent();
     }

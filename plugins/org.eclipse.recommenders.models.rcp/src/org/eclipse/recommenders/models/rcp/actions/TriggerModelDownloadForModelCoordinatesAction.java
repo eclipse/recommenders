@@ -11,14 +11,16 @@
  */
 package org.eclipse.recommenders.models.rcp.actions;
 
-import static java.lang.String.format;
+import static java.text.MessageFormat.format;
 
+import java.text.MessageFormat;
 import java.util.Set;
 
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.recommenders.internal.models.rcp.DownloadModelArchiveJob;
 import org.eclipse.recommenders.internal.models.rcp.EclipseModelRepository;
+import org.eclipse.recommenders.internal.models.rcp.Messages;
 import org.eclipse.recommenders.models.ModelCoordinate;
 import org.eclipse.recommenders.rcp.utils.Jobs;
 
@@ -55,6 +57,6 @@ public class TriggerModelDownloadForModelCoordinatesAction extends Action {
         for (ModelCoordinate mc : mcs) {
             jobs.add(new DownloadModelArchiveJob(repo, mc, false, bus));
         }
-        Jobs.sequential(format("Downloading %d model archives", jobs.size()), jobs);
+        Jobs.sequential(format(Messages.JOB_DOWNLOADING_MODELS, jobs.size()), jobs);
     }
 }

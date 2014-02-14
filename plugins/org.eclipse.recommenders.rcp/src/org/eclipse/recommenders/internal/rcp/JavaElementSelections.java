@@ -46,8 +46,7 @@ import com.google.common.base.Optional;
 @SuppressWarnings("restriction")
 public class JavaElementSelections {
 
-    @VisibleForTesting
-    static Logger log = LoggerFactory.getLogger(JavaElementSelections.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JavaElementSelections.class);
 
     @SuppressWarnings("serial")
     private static final Map<StructuralPropertyDescriptor, JavaElementSelectionLocation> MAPPING = new HashMap<StructuralPropertyDescriptor, JavaElementSelectionLocation>() {
@@ -159,7 +158,7 @@ public class JavaElementSelections {
             // actually, these can happen when using snipmatch's in-editor completion.
             // fractions of seconds seem potentially to lead to this exception, thus, we swallow them here.
             if (!isInvalidSelection(root, offset)) {
-                log(e, "Failed to resolve selection in '%s' at offset %d", root.getHandleIdentifier(), offset); //$NON-NLS-1$
+                LOG.error("Failed to resolve selection in '{}' at offset {}", root.getHandleIdentifier(), offset, e); //$NON-NLS-1$
             }
             return absent();
         }
@@ -171,14 +170,9 @@ public class JavaElementSelections {
             range = root.getSourceRange();
             return range == null || offset < 0 || offset > range.getLength();
         } catch (Exception e) {
-            log.debug("exception while checking editor offset", e); //$NON-NLS-1$
+            LOG.debug("Exception while checking editor offset", e); //$NON-NLS-1$
             return false;
         }
-    }
-
-    private static void log(Exception e, String newMessage, Object... args) {
-        String format = String.format(newMessage, args);
-        log.error(format, e);
     }
 
     public static JavaElementSelectionLocation resolveSelectionLocationFromAst(final CompilationUnit astRoot,
