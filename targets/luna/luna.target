@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Target Definition for Eclipse Luna" sequenceNumber="109">
+<?pde version="3.8"?><target name="Target Definition for Eclipse Luna" sequenceNumber="110">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.sdk.ide" version="0.0.0"/>
@@ -28,6 +28,8 @@
 <unit id="ch.qos.logback.slf4j.source" version="1.0.7.v20121108-1250"/>
 <unit id="com.google.gson" version="2.2.4.v201311231704"/>
 <unit id="com.google.gson.source" version="2.2.4.v201311231704"/>
+<unit id="com.google.guava" version="15.0.0"/>
+<unit id="com.google.guava.source" version="15.0.0.v201402131204"/>
 <unit id="com.google.inject" version="3.0.0.v201312141243"/>
 <unit id="com.google.inject.source" version="3.0.0.v201312141243"/>
 <unit id="javax.inject" version="1.0.0.v20091030"/>
@@ -60,7 +62,7 @@
 <unit id="org.slf4j.api" version="1.7.2.v20121108-1250"/>
 <unit id="org.slf4j.api.source" version="1.7.2.v20121108-1250"/>
 <!-- Stable repository to use for Luna M5. -->
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20140116105218/repository/"/>
+<repository location="http://build.eclipse.org/orbit/committers/orbit-I/20140213164718/I20140213164718/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.recommenders.feature.3rd.nonorbit.feature.group" version="0.0.0"/>
