@@ -10,8 +10,10 @@
  */
 package org.eclipse.recommenders.completion.rcp.processable;
 
-import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.CONTEXT;
 import static org.eclipse.recommenders.completion.rcp.processable.ProcessableProposalFactory.create;
+import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.CONTEXT;
+import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.JDT_CORE_PROPOSAL;
+import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.JDT_UI_PROPOSAL;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.Iterator;
@@ -116,6 +118,8 @@ public abstract class ProcessableCompletionProposalComputer extends JavaAllCompl
             if (jdtProposal instanceof IProcessableProposal) {
                 IProcessableProposal crProposal = (IProcessableProposal) jdtProposal;
                 crProposal.setTag(CONTEXT, crContext);
+                crProposal.setTag(JDT_UI_PROPOSAL, pair.getKey());
+                crProposal.setTag(JDT_CORE_PROPOSAL, pair.getValue());
                 fireProcessProposal(crProposal);
             }
         }
