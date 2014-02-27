@@ -30,6 +30,11 @@ public class LCSS {
         return bestSequence;
     }
 
+    public static int calculateBestScore(String candidate, String token) {
+        //implementation is incomplete
+        return 0;
+    }
+
     public static int scoreSubsequence(int[] s1) {
         int score = 0;
         for (int i = 0; i < s1.length - 1; i++) {
