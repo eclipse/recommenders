@@ -14,65 +14,89 @@ import org.eclipse.recommenders.utils.names.VmTypeName
 
 class JavaElementResolverTest {
 
-    JavaElementResolver sut = new JavaElementResolver()
-    JavaProjectFixture fixture = new JavaProjectFixture(ResourcesPlugin::getWorkspace(), "test")
+	JavaElementResolver sut = new JavaElementResolver()
+	JavaProjectFixture fixture = new JavaProjectFixture(ResourcesPlugin::getWorkspace(), "test")
 
-    @Test
-    def void testBoundReturn() {
-        val code = classbody('''public Iterable<? extends Executor> $m(){return null;}''')
-        val method = getMethod(code)
-        val actual = sut.toRecMethod(method).get
-        assertEquals("m()Ljava/lang/Iterable;", actual.signature)
-    }
+	@Test
+	def void testBoundReturn() {
+		val code = classbody('''public Iterable<? extends Executor> $m(){return null;}''')
+		val method = getMethod(code)
+		val actual = sut.toRecMethod(method).get
+		assertEquals("m()Ljava/lang/Iterable;", actual.signature)
+	}
 
-    @Test
-    def void testArrays() {
-        val code = classbody('''public Iterable[][] $m(String[][] s){return null;}''')
-        val method = getMethod(code)
-        val actual = sut.toRecMethod(method).get
-        assertEquals("m([[Ljava/lang/String;)[[Ljava/lang/Iterable;", actual.signature)
-    }
+	@Test
+	def void testPrimitiveParameter() {
+		val code = classbody('''public void $m(int i){return null;}''')
+		val method = getMethod(code)
+		val actual = sut.toRecMethod(method).get
+		assertEquals("m(I)V", actual.signature)
+	}
 
-    @Test
-    def void testBoundArg() {
-        val code = classbody('''public void $m(Iterable<? extends Executor> e){}''')
-        val method = getMethod(code)
-        val actual = sut.toRecMethod(method)
-        assertTrue(actual.present)
-    }
+	@Test
+	def void testPrimitiveArrayParameter() {
+		val code = classbody('''public void $m(int[] i){return null;}''')
+		val method = getMethod(code)
+		val actual = sut.toRecMethod(method).get
+		assertEquals("m([I)V", actual.signature)
+	}
 
-    @Test
-    def void testUnboundArg() {
-        val code = classbody('''public <T> void $m(T s){}''')
-        val method = getMethod(code)
-        val actual = sut.toRecMethod(method)
-        assertTrue(actual.present)
-    }
+	@Test
+	def void testArrayOfGenericsParameter() {
+		val code = classbody('''public void $m(List<Integer>[] lists){return null;}''')
+		val method = getMethod(code)
+		val actual = sut.toRecMethod(method).get
+		assertEquals("m([Ljava/util/List;)V", actual.signature)
+	}
 
-    @Test
-    def void testJdtMethods() {
-        assertTrue("no hashCode?", sut.toJdtMethod(VmMethodName::get("Ljava/lang/Object.hashCode()I")).present);
-        assertTrue("no Arrays.sort?", sut.toJdtMethod(VmMethodName::get("Ljava/util/Arrays.sort([J)V")).present);
-        assertTrue("no Arrays.equals?",
-            sut.toJdtMethod(VmMethodName::get("Ljava/util/Arrays.equals([Ljava/lang/Object;[Ljava/lang/Object;)Z")).
-                present);
-    }
+	@Test
+	def void testArrays() {
+		val code = classbody('''public Iterable[][] $m(String[][] s){return null;}''')
+		val method = getMethod(code)
+		val actual = sut.toRecMethod(method).get
+		assertEquals("m([[Ljava/lang/String;)[[Ljava/lang/Iterable;", actual.signature)
+	}
 
-    @Test
-    def void testJdtClass() {
-        assertFalse("Lnull found???", sut.toJdtType(VmTypeName::NULL).present)
-        assertFalse("primitive found???", sut.toJdtType(VmTypeName::BOOLEAN).present)
-        assertTrue("Object not found???", sut.toJdtType(VmTypeName::OBJECT).present)
-        assertTrue("NPE not found???", sut.toJdtType(VmTypeName::JAVA_LANG_NULL_POINTER_EXCEPTION).present)
-        assertTrue("NPE not found???", sut.toJdtType(VmTypeName::get("Ljava/util/Map$Entry")).present)
-    }
+	@Test
+	def void testBoundArg() {
+		val code = classbody('''public void $m(Iterable<? extends Executor> e){}''')
+		val method = getMethod(code)
+		val actual = sut.toRecMethod(method)
+		assertTrue(actual.present)
+	}
 
-    def IMethod getMethod(CharSequence code) {
-        val struct = fixture.createFileAndParseWithMarkers(code)
-        val cu = struct.first;
-        val pos = struct.second.head;
-        val selected = cu.codeSelect(pos, 0)
-        val method = selected.get(0) as IMethod
-        Checks::ensureIsNotNull(method);
-    }
+	@Test
+	def void testUnboundArg() {
+		val code = classbody('''public <T> void $m(T s){}''')
+		val method = getMethod(code)
+		val actual = sut.toRecMethod(method)
+		assertTrue(actual.present)
+	}
+
+	@Test
+	def void testJdtMethods() {
+		assertTrue("no hashCode?", sut.toJdtMethod(VmMethodName::get("Ljava/lang/Object.hashCode()I")).present);
+		assertTrue("no Arrays.sort?", sut.toJdtMethod(VmMethodName::get("Ljava/util/Arrays.sort([J)V")).present);
+		assertTrue("no Arrays.equals?",
+			sut.toJdtMethod(VmMethodName::get("Ljava/util/Arrays.equals([Ljava/lang/Object;[Ljava/lang/Object;)Z")).
+				present);
+	}
+
+	@Test
+	def void testJdtClass() {
+		assertFalse("Lnull found???", sut.toJdtType(VmTypeName::NULL).present)
+		assertFalse("primitive found???", sut.toJdtType(VmTypeName::BOOLEAN).present)
+		assertTrue("Object not found???", sut.toJdtType(VmTypeName::OBJECT).present)
+		assertTrue("NPE not found???", sut.toJdtType(VmTypeName::JAVA_LANG_NULL_POINTER_EXCEPTION).present)
+		assertTrue("NPE not found???", sut.toJdtType(VmTypeName::get("Ljava/util/Map$Entry")).present)
+	}
+
+	def IMethod getMethod(CharSequence code) {
+		val struct = fixture.createFileAndParseWithMarkers(code)
+		val cu = struct.first;
+		val pos = struct.second.head;
+		val selected = cu.codeSelect(pos, 0)
+		val method = selected.get(0) as IMethod
+		Checks::ensureIsNotNull(method);
+	}
 }
