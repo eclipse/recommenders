@@ -24,6 +24,14 @@ class JavaElementResolverTest {
         val actual = sut.toRecMethod(method).get
         assertEquals("m()Ljava/lang/Iterable;", actual.signature)
     }
+    
+        @Test
+    def void testPrimitive() {
+        val code = classbody('''public void $m(int i){return null;}''')
+        val method = getMethod(code)
+        val actual = sut.toRecMethod(method).get
+        assertEquals("m(I)V", actual.signature)
+    }
 
     @Test
     def void testArrays() {
