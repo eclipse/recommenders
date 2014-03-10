@@ -48,4 +48,10 @@ public class LCSS {
         boolean res = !findSequences(completion, token).isEmpty();
         return res;
     }
+
+    //incomplete method. Need to add actual implementation
+    public static int calculateBestScore(String firstCandidate, String token) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }
