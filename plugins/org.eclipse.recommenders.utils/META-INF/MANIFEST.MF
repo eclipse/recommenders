@@ -5,7 +5,7 @@ Bundle-Version: 2.1.0.qualifier
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.eclipse.m2e.maven.runtime;bundle-version="[1.4.0,1.5.0)"
+Require-Bundle: org.eclipse.m2e.maven.runtime;bundle-version="[1.5.0,1.6.0)"
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  com.google.common.base;version="[15.0.0,16.0.0)",
  com.google.common.collect;version="[15.0.0,16.0.0)",
