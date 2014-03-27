@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.completion.rcp.processable;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.recommenders.utils.Throws;
+import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,8 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProcessableProposalFactory.class);
 
+    private static Version version = Platform.getBundle("org.eclipse.jdt").getVersion();
+
     public ProcessableProposalFactory() {
     }
 
@@ -53,7 +57,6 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
             JavaContentAssistInvocationContext context, IProcessableProposalFactory factory) {
 
         final Class<? extends IJavaCompletionProposal> c = uiProposal.getClass();
-
         try {
             if (JavaMethodCompletionProposal.class == c) {
                 return factory.newJavaMethodCompletionProposal(coreProposal, context);
@@ -79,7 +82,7 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
             } else if (MethodDeclarationCompletionProposal.class == c) {
                 return factory.newMethodDeclarationCompletionProposal(coreProposal,
                         (MethodDeclarationCompletionProposal) uiProposal, context);
-            } else if (LazyPackageCompletionProposal.class == c) {
+            } else if (versionAtLeast(3, 9) && LazyPackageCompletionProposal.class == c) {
                 return factory.newLazyPackageCompletionProposal(coreProposal,
                         (LazyPackageCompletionProposal) uiProposal, context);
             } else if (GetterSetterCompletionProposal.class == c) {
@@ -217,5 +220,9 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
     public IJavaCompletionProposal newLazyPackageCompletionProposal(CompletionProposal coreProposal,
             LazyPackageCompletionProposal uiProposal, JavaContentAssistInvocationContext context) {
         return postConstruct(new ProcessableLazyPackageCompletionProposal(coreProposal, context));
+    }
+
+    private static boolean versionAtLeast(int major, int minor) {
+        return version.getMajor() >= major && version.getMinor() >= minor;
     }
 }
