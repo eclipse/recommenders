@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.eclipse.recommenders.models.rcp/src-gen" creationCommands="false"
+    creationIcons="false" modelPluginID="org.eclipse.recommenders.models.rcp" modelName="Models"
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container" importerID="org.eclipse.emf.importer.ecore"
+    complianceLevel="6.0" copyrightFields="false" operationReflection="true" importOrganizing="true">
+  <foreignModel>models.ecore</foreignModel>
+  <genPackages prefix="Models" basePackage="org.eclipse.recommenders.internal.models"
+      disposableProviderFactory="true" generateExampleClass="false" multipleEditorPages="false"
+      generateModelWizard="false" ecorePackage="models.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="models.ecore#//ModelArchiveState">
+      <genEnumLiterals ecoreEnumLiteral="models.ecore#//ModelArchiveState/CLOSED"/>
+      <genEnumLiterals ecoreEnumLiteral="models.ecore#//ModelArchiveState/DOWNLOADING"/>
+      <genEnumLiterals ecoreEnumLiteral="models.ecore#//ModelArchiveState/CACHED"/>
+    </genEnums>
+    <genDataTypes ecoreDataType="models.ecore#//EModelCoordinate"/>
+    <genDataTypes ecoreDataType="models.ecore#//EURL"/>
+    <genDataTypes ecoreDataType="models.ecore#//EFile"/>
+    <genClasses ecoreClass="models.ecore#//ModelRepository">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute models.ecore#//ModelRepository/open"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute models.ecore#//ModelRepository/url"/>
+      <genOperations ecoreOperation="models.ecore#//ModelRepository/find">
+        <genParameters ecoreParameter="models.ecore#//ModelRepository/find/mc"/>
+      </genOperations>
+    </genClasses>
+    <genClasses ecoreClass="models.ecore#//ModelArchive">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute models.ecore#//ModelArchive/location"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute models.ecore#//ModelArchive/coordinate"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="rcp" nsURI="http://eclipse.org/recommenders/models" nsPrefix="org.eclipse.recommenders.internal.models">
+  <eClassifiers xsi:type="ecore:EClass" name="ModelRepositorySystem">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="repositories" upperBound="-1"
+        eType="#//ModelRepository"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ModelRepository">
+    <eOperations name="find" lowerBound="1" eType="#//ModelArchiveDescriptor">
+      <eParameters name="mc" eType="#//EModelCoordinate"/>
+    </eOperations>
+    <eOperations name="open"/>
+    <eOperations name="close"/>
+    <eOperations name="download">
+      <eParameters name="descriptor" eType="#//ModelArchiveDescriptor"/>
+      <eParameters name="listener" lowerBound="1" eType="#//Handler"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="url" eType="#//EURL"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="index" eType="#//EModelIndex"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="repository" ordered="false"
+        unique="false" eType="#//EModelRepository"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="accessible" ordered="false"
+        unique="false" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        transient="true" defaultValueLiteral="false" derived="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="basedir" eType="#//EFile"
+        defaultValueLiteral=""/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="requests" upperBound="-1"
+        eType="#//ModelArchiveDescriptor" transient="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ModelArchiveDescriptor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="#//EFile"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coordinate" eType="#//EModelCoordinate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" eType="#//State"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="origin" eType="#//ModelRepository">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel" references="#//ModelArchiveDescriptor/origin/%http:%2F%2Fwww.eclipse.org%2Femf%2F2002%2FGenModel%">
+        <details key="documentation" value="The model repository that created this descriptor"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="State">
+    <eLiterals name="ABSENT"/>
+    <eLiterals name="DOWNLOADING"/>
+    <eLiterals name="CACHED"/>
+    <eLiterals name="ACTIVE"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="EModelCoordinate" instanceClassName="org.eclipse.recommenders.models.ModelCoordinate"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="EURL" instanceClassName="java.net.URL"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="EFile" instanceClassName="java.io.File"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="EModelRepository" instanceClassName="org.eclipse.recommenders.models.IModelRepository"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="EModelIndex" instanceClassName="org.eclipse.recommenders.models.IModelIndex"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Handler" abstract="true" interface="true">
+    <eOperations name="handle">
+      <eParameters name="event" eType="#//DownloadEvent"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DownloadEvent"/>
+</ecore:EPackage>

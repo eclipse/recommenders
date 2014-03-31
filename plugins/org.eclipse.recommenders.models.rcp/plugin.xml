@@ -127,4 +127,12 @@
 	<extension point="org.eclipse.recommenders.injection.modules">
 		<module class="org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule"/>
 	</extension>
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated models -->
+      <package
+            uri="http://eclipse.org/recommenders/models"
+            class="org.eclipse.recommenders.internal.models.rcp.ModelsPackage"
+            genModel="model/models.genmodel"/>
+   </extension>
+
 </plugin>
