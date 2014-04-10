@@ -15,7 +15,6 @@ import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createDe
 import static org.eclipse.recommenders.internal.models.rcp.Dependencies.createJREDependencyInfo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -75,8 +74,10 @@ public class EclipseDependencyListenerTest {
     }
 
     @Before
-    public void before() throws IOException {
+    public void setUp() throws IOException {
         jarFileExample = temporaryFolder.newFile("example.jar");
+        eventBus = new EventBus("org.eclipse.recommenders.tests.models.rcp");
+        sut = new EclipseDependencyListener(eventBus);
     }
 
     private static String generateProjectName() {
@@ -124,16 +125,9 @@ public class EclipseDependencyListenerTest {
         return mock;
     }
 
-    @Before
-    public void init() throws IOException {
-        eventBus = new EventBus("org.eclipse.recommenders.tests.models.rcp");
-        sut = new EclipseDependencyListener(eventBus);
-    }
-
     @Test
     public void testInitialWorkspaceParsing() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+        IJavaProject javaProject = createProject();
 
         EclipseDependencyListener sut = new EclipseDependencyListener(new EventBus(""));
         DependencyInfo expected = Dependencies.createDependencyInfoForProject(javaProject);
@@ -142,9 +136,8 @@ public class EclipseDependencyListenerTest {
     }
 
     @Test
-    public void testProjectIsAddedCorrect() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+    public void testProjectIsAddedCorrectly() throws Exception {
+        IJavaProject javaProject = createProject();
         eventBus.post(new JavaProjectOpened(javaProject));
 
         DependencyInfo expected = Dependencies.createDependencyInfoForProject(javaProject);
@@ -153,9 +146,8 @@ public class EclipseDependencyListenerTest {
     }
 
     @Test
-    public void testProjectIsRemovedCorrectAfterClosing() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+    public void testProjectIsRemovedCorrectlyAfterClosing() throws Exception {
+        IJavaProject javaProject = createProject();
         eventBus.post(new JavaProjectOpened(javaProject));
         eventBus.post(new JavaProjectClosed(javaProject));
 
@@ -166,17 +158,15 @@ public class EclipseDependencyListenerTest {
 
     @Test
     public void testDependencyForSpecificProjectIsASubsetOfAllDependencies() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+        IJavaProject javaProject = createProject();
         eventBus.post(new JavaProjectOpened(javaProject));
         assertTrue(sut.getDependencies().containsAll(
                 sut.getDependenciesForProject(createDependencyInfoForProject(javaProject))));
     }
 
     @Test
-    public void testProjectDependencyIsAddedCorrect() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+    public void testProjectDependencyIsAddedCorrectly() throws Exception {
+        IJavaProject javaProject = createProject();
         eventBus.post(new JavaProjectOpened(javaProject));
 
         DependencyInfo projectDependencyInfo = createDependencyInfoForProject(javaProject);
@@ -185,25 +175,19 @@ public class EclipseDependencyListenerTest {
     }
 
     @Test
-    public void testJREDependencyIsAddedCorrect() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+    public void testJREDependencyIsAddedCorrectly() throws Exception {
+        IJavaProject javaProject = createProject();
         eventBus.post(new JavaProjectOpened(javaProject));
 
         DependencyInfo projectDependencyInfo = createDependencyInfoForProject(javaProject);
         Optional<DependencyInfo> jreDependencyInfo = createJREDependencyInfo(javaProject);
 
-        if (jreDependencyInfo.isPresent()) {
-            assertTrue(sut.getDependenciesForProject(projectDependencyInfo).contains(jreDependencyInfo.get()));
-        } else {
-            fail();
-        }
+        assertTrue(sut.getDependenciesForProject(projectDependencyInfo).contains(jreDependencyInfo.get()));
     }
 
     @Test
     public void testDependenciesAreDeletedWhenProjectIsClosed() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+        IJavaProject javaProject = createProject();
         DependencyInfo projectDependencyInfo = createDependencyInfoForProject(javaProject);
 
         eventBus.post(new JavaProjectOpened(javaProject));
@@ -214,15 +198,12 @@ public class EclipseDependencyListenerTest {
 
     @Test
     public void testJREDependenciesAreDeletedWhenOneJARFromJREIsRemoved() throws Exception {
-        String projectName = generateProjectName();
-        IJavaProject javaProject = createProject(projectName);
+        IJavaProject javaProject = createProject();
         DependencyInfo projectDependencyInfo = createDependencyInfoForProject(javaProject);
         eventBus.post(new JavaProjectOpened(javaProject));
 
         Optional<DependencyInfo> optionalExpectedJREDependencyInfo = createJREDependencyInfo(javaProject);
-        if (!optionalExpectedJREDependencyInfo.isPresent()) {
-            fail();
-        }
+        assertTrue(optionalExpectedJREDependencyInfo.isPresent());
 
         DependencyInfo expectedJREDependencyInfo = createJREDependencyInfo(javaProject).get();
         assertTrue(sut.getDependenciesForProject(projectDependencyInfo).contains(expectedJREDependencyInfo));
@@ -240,7 +221,7 @@ public class EclipseDependencyListenerTest {
     }
 
     @Test
-    public void testDependencyForJarIsAddedCorrect() throws Exception {
+    public void testDependencyForJarIsAddedCorrectly() throws Exception {
         IJavaProject javaProject = createProject();
         DependencyInfo projectDependencyInfo = createDependencyInfoForProject(javaProject);
 
@@ -251,7 +232,7 @@ public class EclipseDependencyListenerTest {
     }
 
     @Test
-    public void testDependencyForJarIsRemovedCorrect() throws Exception {
+    public void testDependencyForJarIsRemovedCorrectly() throws Exception {
         IJavaProject javaProject = createProject();
         DependencyInfo projectDependencyInfo = createDependencyInfoForProject(javaProject);
 

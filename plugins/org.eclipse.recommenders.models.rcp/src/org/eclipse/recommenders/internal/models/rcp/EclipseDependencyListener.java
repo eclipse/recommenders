@@ -104,7 +104,6 @@ public class EclipseDependencyListener implements IDependencyListener {
             jrePackageFragmentRoots.putAll(dependencyInfoForProject, detectJREPackageFragementRoots(javaProject));
         }
 
-        workspaceDependenciesByProject.put(dependencyInfoForProject, dependencyInfoForProject);
         workspaceDependenciesByProject.putAll(dependencyInfoForProject, searchForAllDependenciesOfProject(javaProject));
     }
 
@@ -112,9 +111,14 @@ public class EclipseDependencyListener implements IDependencyListener {
         Set<DependencyInfo> dependencies = Sets.newHashSet();
         Set<IPackageFragmentRoot> jreRoots = jrePackageFragmentRoots.get(createDependencyInfoForProject(javaProject));
         try {
-            for (final IPackageFragmentRoot packageFragmetRoot : javaProject.getAllPackageFragmentRoots()) {
-                if (!jreRoots.contains(packageFragmetRoot) && packageFragmetRoot instanceof JarPackageFragmentRoot) {
-                    DependencyInfo dependencyInfo = createDependencyInfoForJAR((JarPackageFragmentRoot) packageFragmetRoot);
+            for (final IPackageFragmentRoot packageFragmentRoot : javaProject.getAllPackageFragmentRoots()) {
+                if (!jreRoots.contains(packageFragmentRoot) && packageFragmentRoot instanceof JarPackageFragmentRoot) {
+                    DependencyInfo dependencyInfo = createDependencyInfoForJAR((JarPackageFragmentRoot) packageFragmentRoot);
+                    dependencies.add(dependencyInfo);
+                } else if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE
+                        && packageFragmentRoot.getJavaProject() != null) {
+                    DependencyInfo dependencyInfo = Dependencies.createDependencyInfoForProject(packageFragmentRoot
+                            .getJavaProject());
                     dependencies.add(dependencyInfo);
                 }
             }
