@@ -13,7 +13,8 @@
 package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
 import static org.eclipse.core.databinding.beans.PojoProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 
 import java.util.UUID;
@@ -27,6 +28,7 @@ import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.internal.databinding.property.value.SelfValueProperty;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
@@ -113,7 +115,17 @@ public class SnippetMetadataPage extends FormPage {
         btnAddKeyword.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                new InputDialog(btnContainer.getShell(), "Enter new keyword", "Enter a new keyword", "", null) {
+                IInputValidator validator = new IInputValidator() {
+
+                    @Override
+                    public String isValid(String newText) {
+                        if (snippet.getKeywords().contains(newText)) {
+                            return "Keyword already added.";
+                        }
+                        return null;
+                    }
+                };
+                new InputDialog(btnContainer.getShell(), "Enter new keyword", "Enter a new keyword", "", validator) {
                     @Override
                     protected void okPressed() {
                         ppKeywords.add(getValue());
