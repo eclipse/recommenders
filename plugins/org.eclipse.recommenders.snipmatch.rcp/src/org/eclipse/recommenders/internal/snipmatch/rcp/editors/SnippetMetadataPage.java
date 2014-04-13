@@ -13,7 +13,8 @@
 package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
 import static org.eclipse.core.databinding.beans.PojoProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 
 import java.util.UUID;
@@ -23,7 +24,9 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.IChangeListener;
+import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.internal.databinding.property.value.SelfValueProperty;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
@@ -177,6 +180,14 @@ public class SnippetMetadataPage extends FormPage {
         // keywords
         ppKeywords = PojoProperties.list(Snippet.class, "keywords", String.class).observe(snippet);
         ViewerSupport.bind(listViewer, ppKeywords, new SelfValueProperty(String.class));
+        ppKeywords.addListChangeListener(new IListChangeListener() {
+
+            @Override
+            public void handleListChange(ListChangeEvent event) {
+                changeDirtyStatus();
+            }
+
+        });
 
         // uuid
         IObservableValue wpUuidText = text(SWT.Modify).observe(txtUuid);
@@ -191,16 +202,20 @@ public class SnippetMetadataPage extends FormPage {
         strategy.setConverter(new ObjectToBooleanConverter());
         ctx.bindValue(vpKeywordSelection, wpBtnRemoveKeywordsEnable, strategy, null);
 
-        for (Object o : ctx.getValidationStatusProviders()) {
+        for (final Object o : ctx.getValidationStatusProviders()) {
             if (o instanceof Binding) {
                 ((Binding) o).getTarget().addChangeListener(new IChangeListener() {
 
                     @Override
                     public void handleChange(org.eclipse.core.databinding.observable.ChangeEvent event) {
-                        ((SnippetEditor) getEditor()).setDirty(true);
+                        changeDirtyStatus();
                     }
                 });
             }
         }
+    }
+
+    private void changeDirtyStatus() {
+        ((SnippetEditor) getEditor()).setDirty(true);
     }
 }
