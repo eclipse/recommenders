@@ -40,12 +40,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.name.Named;
 
 public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpService {
 
     private static Logger LOG = LoggerFactory.getLogger(EclipseGitSnippetRepository.class);
+
+    private EventBus bus;
 
     private volatile int timesOpened;
     private ISnippetRepository delegate;
@@ -59,7 +62,9 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
     private File basedir;
 
     @Inject
-    public EclipseGitSnippetRepository(@Named(SNIPMATCH_BASEDIR) File basedir, SnipmatchRcpPreferences prefs) {
+    public EclipseGitSnippetRepository(@Named(SNIPMATCH_BASEDIR) File basedir, SnipmatchRcpPreferences prefs,
+            EventBus bus) {
+        this.bus = bus;
         String remoteUri = prefs.getLocation();
         this.basedir = new File(basedir, Urls.mangle(remoteUri));
         this.delegate = new GitSnippetRepository(this.basedir, remoteUri);
@@ -87,6 +92,7 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
                             delegate.open();
                             delegateOpen = true;
                             openJob = null;
+                            bus.post(new SnippetRepositoryChangedEvent());
                             return Status.OK_STATUS;
                         } catch (IOException e) {
                             LOG.error("Exception while opening repository.", e);
@@ -120,6 +126,7 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
                         LOG.error("Failed to join open job", e);
                     }
                     delegate.close();
+                    bus.post(new SnippetRepositoryChangedEvent());
                 }
             }
         } finally {
@@ -156,11 +163,25 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
     }
 
     @Subscribe
-    public void onEvent(SnippetRepositoryChangedEvent e) throws IOException {
+    public void onEvent(SnippetRepositoryUrlChangedEvent e) throws IOException {
         close();
         open();
     }
 
+    /**
+     * Triggered when a snippet repository url was changed (most like in the a preference page).
+     * <p>
+     * Client of this event should be an instance of {@link ISnippetRepository}. Other clients should have a look at
+     * {@link SnippetRepositoryChangedEvent}. Clients of this event may consider refreshing themselves whenever they
+     * receive this event. Clients get notified in a background process.
+     */
+    public static class SnippetRepositoryUrlChangedEvent {
+    }
+
+    /**
+     * Triggered when the snippet repository was opened or closed to inform clients that the snippet repository is
+     * currently not available.
+     */
     public static class SnippetRepositoryChangedEvent {
     }
 
