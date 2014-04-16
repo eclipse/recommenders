@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.models;
 
 import static org.mockito.Mockito.*;
+import static org.eclipse.recommenders.models.DependencyType.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,9 +41,9 @@ public class ModelIndexFingerprintAdvisorTest {
     }
 
     @Test
-    public void testInvalidDependencyType() {
+    public void testUnsupportedDependencyType() {
         ModelIndexFingerprintAdvisor sut = new ModelIndexFingerprintAdvisor(null);
-        sut.suggest(new DependencyInfo(exampleFile, DependencyType.PROJECT));
+        sut.suggest(new DependencyInfo(exampleFile, PROJECT));
     }
 
     @Test
@@ -52,8 +53,7 @@ public class ModelIndexFingerprintAdvisorTest {
                 Optional.fromNullable(COORDINATE));
 
         ModelIndexFingerprintAdvisor sut = new ModelIndexFingerprintAdvisor(mockedIndexer);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(exampleFile,
-                DependencyType.JAR));
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(exampleFile, JAR));
 
         Assert.assertEquals(COORDINATE, optionalProjectCoordinate.get());
     }
