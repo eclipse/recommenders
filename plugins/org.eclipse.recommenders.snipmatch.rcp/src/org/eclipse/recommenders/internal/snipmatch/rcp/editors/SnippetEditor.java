@@ -89,7 +89,6 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
         ISnippet oldSnippet = input.getOldSnippet();
         if (!snippet.getCode().equals(oldSnippet.getCode())) {
             snippet.setUUID(nameUUIDFromBytes(snippet.getCode().getBytes()));
-            snippet.setLocation(null);
         }
 
         try {
