@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.models;
 
+import static com.google.common.base.Optional.of;
+import static org.eclipse.recommenders.models.DependencyType.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
@@ -24,6 +26,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.common.base.Optional;
+
 
 public class ModelIndexFingerprintAdvisorTest {
 
@@ -40,20 +43,19 @@ public class ModelIndexFingerprintAdvisorTest {
     }
 
     @Test
-    public void testInvalidDependencyType() {
+    public void testUnsupportedDependencyType() {
         ModelIndexFingerprintAdvisor sut = new ModelIndexFingerprintAdvisor(null);
-        sut.suggest(new DependencyInfo(exampleFile, DependencyType.PROJECT));
+        sut.suggest(new DependencyInfo(exampleFile, PROJECT));
     }
 
     @Test
     public void testValidJAR() throws IOException {
         IModelIndex mockedIndexer = mock(ModelIndex.class);
         when(mockedIndexer.suggestProjectCoordinateByFingerprint(Fingerprints.sha1(exampleFile))).thenReturn(
-                Optional.fromNullable(COORDINATE));
+                of(COORDINATE));
 
         ModelIndexFingerprintAdvisor sut = new ModelIndexFingerprintAdvisor(mockedIndexer);
-        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(exampleFile,
-                DependencyType.JAR));
+        Optional<ProjectCoordinate> optionalProjectCoordinate = sut.suggest(new DependencyInfo(exampleFile, JAR));
 
         Assert.assertEquals(COORDINATE, optionalProjectCoordinate.get());
     }
