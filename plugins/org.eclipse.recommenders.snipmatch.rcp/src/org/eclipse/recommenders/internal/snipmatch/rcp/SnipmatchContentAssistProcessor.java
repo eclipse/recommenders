@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.template.java.ElementTypeResolver;
 import org.eclipse.jdt.internal.corext.template.java.ImportsResolver;
@@ -47,6 +48,7 @@ import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +144,9 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
             try {
                 proposals.add(SnippetProposal.newSnippetProposal(snippet, template, ctx, region, image));
             } catch (Exception e) {
-                LOG.error("Error while creating snippet proposal", e);
+                String errorMessage = "Error while creating snippet proposal";
+                StatusManager.getManager().handle(new Status(Status.ERROR, Constants.BUNDLE_ID, errorMessage, e));
+                LOG.error(errorMessage, e);
             }
         }
         return Iterables.toArray(proposals, ICompletionProposal.class);
