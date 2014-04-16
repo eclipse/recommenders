@@ -342,7 +342,7 @@ public class FileSnippetRepository implements ISnippetRepository {
             Snippet importSnippet = checkTypeAndConvertSnippet(snippet);
 
             File file = importSnippet.getLocation();
-            if (file == null) {
+            if (!hasSnippet(importSnippet.getUuid())) {
                 file = createFileForSnippet(importSnippet);
             }
 
