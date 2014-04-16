@@ -87,9 +87,23 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
         }
 
         ISnippet oldSnippet = input.getOldSnippet();
+
         if (!snippet.getCode().equals(oldSnippet.getCode())) {
-            snippet.setUUID(nameUUIDFromBytes(snippet.getCode().getBytes()));
-            snippet.setLocation(null);
+            int status = new MessageDialog(getSite().getShell(), "Save snippet.", null,
+                    "The code of this snippet changed. Do you want to store as a new snippetto or override?",
+                    MessageDialog.QUESTION_WITH_CANCEL, new String[] { "Store as new", "Override", "Cancel" }, 0)
+                    .open();
+
+            if (status == 0) {
+                // Store as new
+                snippet.setUUID(nameUUIDFromBytes(snippet.getCode().getBytes()));
+                snippet.setLocation(null);
+            }
+
+            if (status == 2) {
+                // Cancel
+                return;
+            }
         }
 
         try {
