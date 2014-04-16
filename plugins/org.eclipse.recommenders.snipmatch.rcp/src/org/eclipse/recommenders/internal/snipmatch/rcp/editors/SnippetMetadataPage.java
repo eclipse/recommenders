@@ -161,6 +161,11 @@ public class SnippetMetadataPage extends FormPage {
         }
     }
 
+    public void update() {
+        ctx.dispose();
+        initDataBindings();
+    }
+
     protected void initDataBindings() {
         ctx = new DataBindingContext();
 
