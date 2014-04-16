@@ -19,6 +19,7 @@ import org.eclipse.recommenders.models.DependencyType;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 /**
@@ -30,11 +31,17 @@ public class ModelIndexBundleSymbolicNameAdvisor extends AbstractProjectCoordina
     /*
      * Reusing the osgi advisor may be a little bit redundant but it's not too high for the amount of code we save.
      */
-    OsgiManifestAdvisor osgi = new OsgiManifestAdvisor();
+    OsgiManifestAdvisor osgi;
     IModelIndex indexer;
 
     public ModelIndexBundleSymbolicNameAdvisor(IModelIndex indexer) {
+        this(indexer, new OsgiManifestAdvisor());
+    }
+
+    @VisibleForTesting
+    public ModelIndexBundleSymbolicNameAdvisor(IModelIndex indexer, OsgiManifestAdvisor osgi) {
         this.indexer = indexer;
+        this.osgi = osgi;
     }
 
     @Override
