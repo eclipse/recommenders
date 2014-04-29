@@ -58,6 +58,7 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<!-- Single jacoco.exec referenced from both plugins/* and tests/*. -->
 		<sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
+		<jacocoVersion>0.7.0.201403182114</jacocoVersion>
 	</properties>
 	<prerequisites>
 		<maven>3.0.5</maven>
@@ -308,6 +309,113 @@
 					<artifactId>tycho-source-feature-plugin</artifactId>
 					<version>${tychoVersion}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.7</version>
+					<executions>
+						<execution>
+							<id>default-cli</id>
+							<inherited>false</inherited>
+							<configuration>
+								<target if="jacoco.report" xmlns:jacoco="antlib:org.jacoco.ant">
+									<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+										<classpath path="${maven.plugin.classpath}"/>
+									</taskdef>
+									<jacoco:report>
+										<executiondata>
+											<fileset dir="${basedir}" includes="**/jacoco.exec"/>
+										</executiondata>
+										<structure name="All">
+											<group name="Plugins">
+												<classfiles>
+													<fileset dir="plugins/org.eclipse.recommenders.apidocs/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.apidocs.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.calls/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.calls.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.chain.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.completion.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.injection/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.jayes/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.jayes.io/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.jayes.transformation/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.models/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.models.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.mylyn.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.overrides/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.overrides.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.subwords.rcp/target/classes"/>
+													<fileset dir="plugins/org.eclipse.recommenders.utils/target/classes"/>
+												</classfiles>
+												<sourcefiles encoding="${project.build.sourceEncoding}">
+													<fileset dir="plugins/org.eclipse.recommenders.apidocs/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.apidocs.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.calls/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.calls.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.chain.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.completion.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.injection/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.jayes/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.jayes.io/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.jayes.transformation/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.models/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.models.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.mylyn.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.overrides/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.overrides.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.subwords.rcp/src"/>
+													<fileset dir="plugins/org.eclipse.recommenders.utils/src"/>
+												</sourcefiles>
+											</group>
+											<group name="Tests">
+												<classfiles>
+													<fileset dir="tests/org.eclipse.recommenders.apidocs.rcp.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.calls.rcp.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.calls.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.completion.rcp.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.jayes.io.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.jayes.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.jayes.transformation.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.models.rcp.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.models.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.overrides.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.rcp.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.tests/target/classes"/>
+													<fileset dir="tests/org.eclipse.recommenders.utils.tests/target/classes"/>
+												</classfiles>
+												<sourcefiles encoding="${project.build.sourceEncoding}">
+													<fileset dir="tests/org.eclipse.recommenders.apidocs.rcp.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.calls.rcp.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.calls.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.completion.rcp.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.jayes.io.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.jayes.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.jayes.transformation.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.models.rcp.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.models.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.overrides.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.rcp.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.tests/src"/>
+													<fileset dir="tests/org.eclipse.recommenders.utils.tests/src"/>
+												</sourcefiles>
+											</group>
+										</structure>
+										<html destdir="${project.build.directory}/jacoco"/>
+									</jacoco:report>
+								</target>
+							</configuration>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>org.jacoco</groupId>
+							<artifactId>org.jacoco.ant</artifactId>
+							<version>${jacocoVersion}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
 				<!-- Eclipse Common Build Infrastructure plugins -->
 				<plugin>
 					<groupId>org.eclipse.cbi.maven.plugins</groupId>
@@ -386,7 +494,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.7.0.201403182114</version>
+					<version>${jacocoVersion}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.xtend</groupId>
