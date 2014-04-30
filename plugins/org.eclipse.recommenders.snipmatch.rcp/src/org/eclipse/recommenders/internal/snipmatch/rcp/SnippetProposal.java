@@ -62,14 +62,14 @@ public class SnippetProposal extends TemplateProposal {
     public String getAdditionalProposalInfo() {
         StringBuilder additionalProposalInfo = new StringBuilder();
         if (!valid) {
-            additionalProposalInfo.append("// XXX Cannot apply snippet at cursor position");
+            additionalProposalInfo.append("// XXX Cannot apply snippet at cursor position"); //$NON-NLS-1$
             additionalProposalInfo.append(LINE_SEPARATOR);
-            additionalProposalInfo.append("// FIXME Reposition cursor");
+            additionalProposalInfo.append("// FIXME Reposition cursor"); //$NON-NLS-1$
             additionalProposalInfo.append(LINE_SEPARATOR);
             additionalProposalInfo.append(LINE_SEPARATOR);
         }
         if (!isEmpty(snippet.getDescription())) {
-            additionalProposalInfo.append("// ");
+            additionalProposalInfo.append("// "); //$NON-NLS-1$
             additionalProposalInfo.append(snippet.getDescription());
             additionalProposalInfo.append(LINE_SEPARATOR);
             return additionalProposalInfo + super.getAdditionalProposalInfo();
