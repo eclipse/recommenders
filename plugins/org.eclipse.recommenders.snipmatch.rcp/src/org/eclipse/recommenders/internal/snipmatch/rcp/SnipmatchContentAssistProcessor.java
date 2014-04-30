@@ -61,7 +61,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
 
     private static Logger LOG = LoggerFactory.getLogger(SnipmatchContentAssistProcessor.class);
 
-    private static final String CONTEXT_ID = "SnipMatch-Java-Context";
+    private static final String CONTEXT_ID = "SnipMatch-Java-Context"; //$NON-NLS-1$
 
     private final Set<ISnippetRepository> repos;
     private final TemplateContextType contextType;
@@ -84,27 +84,27 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
         contextType.initializeContextTypeResolvers();
 
         ImportsResolver importResolver = new ImportsResolver();
-        importResolver.setType("import");
+        importResolver.setType("import"); //$NON-NLS-1$
         contextType.addResolver(importResolver);
 
         VarResolver varResolver = new VarResolver();
-        varResolver.setType("var");
+        varResolver.setType("var"); //$NON-NLS-1$
         contextType.addResolver(varResolver);
 
         TypeResolver typeResolver = new TypeResolver();
-        typeResolver.setType("newType");
+        typeResolver.setType("newType"); //$NON-NLS-1$
         contextType.addResolver(typeResolver);
 
         LinkResolver linkResolver = new LinkResolver();
-        linkResolver.setType("link");
+        linkResolver.setType("link"); //$NON-NLS-1$
         contextType.addResolver(linkResolver);
 
         NameResolver nameResolver = new NameResolver();
-        nameResolver.setType("newName");
+        nameResolver.setType("newName"); //$NON-NLS-1$
         contextType.addResolver(nameResolver);
 
         ElementTypeResolver elementTypeResolver = new ElementTypeResolver();
-        elementTypeResolver.setType("elemType");
+        elementTypeResolver.setType("elemType"); //$NON-NLS-1$
         contextType.addResolver(elementTypeResolver);
 
         return contextType;
@@ -135,7 +135,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
             ISnippet snippet = recommendation.getProposal();
             ISourceViewer sourceViewer = (ISourceViewer) editor.getAdapter(ITextOperationTarget.class);
             Point range = sourceViewer.getSelectedRange();
-            Template template = new Template(snippet.getName(), Joiner.on(", ").join(snippet.getTags()), CONTEXT_ID,
+            Template template = new Template(snippet.getName(), Joiner.on(", ").join(snippet.getTags()), CONTEXT_ID, //$NON-NLS-1$
                     snippet.getCode(), true);
             IRegion region = new Region(range.x, range.y);
             Position p = new Position(range.x, range.y);
@@ -144,7 +144,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
             try {
                 proposals.add(SnippetProposal.newSnippetProposal(snippet, template, ctx, region, image));
             } catch (Exception e) {
-                String errorMessage = "Error while creating snippet proposal";
+                String errorMessage = "Error while creating snippet proposal"; //$NON-NLS-1$
                 StatusManager.getManager().handle(new Status(Status.ERROR, Constants.BUNDLE_ID, errorMessage, e));
                 LOG.error(errorMessage, e);
             }
