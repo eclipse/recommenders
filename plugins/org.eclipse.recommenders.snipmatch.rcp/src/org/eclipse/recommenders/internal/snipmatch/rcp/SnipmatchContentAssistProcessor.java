@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
+import static org.eclipse.recommenders.internal.rcp.RcpPlugin.logError;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +19,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.template.java.ElementTypeResolver;
 import org.eclipse.jdt.internal.corext.template.java.ImportsResolver;
@@ -48,9 +49,6 @@ import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.statushandlers.StatusManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
@@ -59,9 +57,7 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("restriction")
 public class SnipmatchContentAssistProcessor implements IContentAssistProcessor {
 
-    private static Logger LOG = LoggerFactory.getLogger(SnipmatchContentAssistProcessor.class);
-
-    private static final String CONTEXT_ID = "SnipMatch-Java-Context";
+    private static final String CONTEXT_ID = "SnipMatch-Java-Context"; //$NON-NLS-1$
 
     private final Set<ISnippetRepository> repos;
     private final TemplateContextType contextType;
@@ -84,27 +80,27 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
         contextType.initializeContextTypeResolvers();
 
         ImportsResolver importResolver = new ImportsResolver();
-        importResolver.setType("import");
+        importResolver.setType("import"); //$NON-NLS-1$
         contextType.addResolver(importResolver);
 
         VarResolver varResolver = new VarResolver();
-        varResolver.setType("var");
+        varResolver.setType("var"); //$NON-NLS-1$
         contextType.addResolver(varResolver);
 
         TypeResolver typeResolver = new TypeResolver();
-        typeResolver.setType("newType");
+        typeResolver.setType("newType"); //$NON-NLS-1$
         contextType.addResolver(typeResolver);
 
         LinkResolver linkResolver = new LinkResolver();
-        linkResolver.setType("link");
+        linkResolver.setType("link"); //$NON-NLS-1$
         contextType.addResolver(linkResolver);
 
         NameResolver nameResolver = new NameResolver();
-        nameResolver.setType("newName");
+        nameResolver.setType("newName"); //$NON-NLS-1$
         contextType.addResolver(nameResolver);
 
         ElementTypeResolver elementTypeResolver = new ElementTypeResolver();
-        elementTypeResolver.setType("elemType");
+        elementTypeResolver.setType("elemType"); //$NON-NLS-1$
         contextType.addResolver(elementTypeResolver);
 
         return contextType;
@@ -135,7 +131,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
             ISnippet snippet = recommendation.getProposal();
             ISourceViewer sourceViewer = (ISourceViewer) editor.getAdapter(ITextOperationTarget.class);
             Point range = sourceViewer.getSelectedRange();
-            Template template = new Template(snippet.getName(), Joiner.on(", ").join(snippet.getTags()), CONTEXT_ID,
+            Template template = new Template(snippet.getName(), Joiner.on(", ").join(snippet.getTags()), CONTEXT_ID, //$NON-NLS-1$
                     snippet.getCode(), true);
             IRegion region = new Region(range.x, range.y);
             Position p = new Position(range.x, range.y);
@@ -144,9 +140,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
             try {
                 proposals.add(SnippetProposal.newSnippetProposal(snippet, template, ctx, region, image));
             } catch (Exception e) {
-                String errorMessage = "Error while creating snippet proposal";
-                StatusManager.getManager().handle(new Status(Status.ERROR, Constants.BUNDLE_ID, errorMessage, e));
-                LOG.error(errorMessage, e);
+                logError(e, Messages.ERROR_CREATING_SNIPPET_PROPOSAL_FAILED);
             }
         }
         return Iterables.toArray(proposals, ICompletionProposal.class);
