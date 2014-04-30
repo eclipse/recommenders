@@ -110,7 +110,7 @@ public class SnipmatchCompletionEngine {
         assistant.enablePrefixCompletion(true);
         assistant.setContentAssistProcessor(processor, DEFAULT_CONTENT_TYPE);
         assistant.setInformationControlCreator(new TemplateInformationControlCreator(SWT.LEFT_TO_RIGHT));
-        assistant.setEmptyMessage("No snippets found.");
+        assistant.setEmptyMessage(Messages.COMPLETION_ENGINE_NO_SNIPPETS_FOUND);
         assistant.setRepeatedInvocationMode(true);
         assistant.setStatusLineVisible(true);
 
@@ -128,7 +128,7 @@ public class SnipmatchCompletionEngine {
         Shell parentShell = ctx.getViewer().getTextWidget().getShell();
         searchShell = new Shell(parentShell, SWT.ON_TOP);
         searchBg = colorRegistry.get(P_SEARCH_BOX_BACKGROUND);
-        searchFont = fontRegistry.get("org.eclipse.recommenders.snipmatch.rcp.searchTextFont");
+        searchFont = fontRegistry.get("org.eclipse.recommenders.snipmatch.rcp.searchTextFont"); //$NON-NLS-1$
         searchShell.setLayout(new FillLayout());
         searchShell.addListener(SWT.Traverse, new Listener() {
 
