@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.core.resources.IWorkspace;
@@ -76,6 +77,7 @@ public class RcpModule extends AbstractModule implements Module {
         requestStaticInjection(ASTStringUtils.class);
         requestStaticInjection(ASTNodeUtils.class);
         requestStaticInjection(AstBindings.class);
+        bind(Helper.class).asEagerSingleton();
         bind(SharedImages.class).in(SINGLETON);
         configureAstProvider();
         bindRcpServiceListener();
@@ -221,6 +223,15 @@ public class RcpModule extends AbstractModule implements Module {
             }
             return false;
         }
+    }
+
+    static class Helper {
+
+        @Inject
+        JavaElementSelectionService provider;
+
+        @Inject
+        JavaModelEventsService JavaModelEventsService;
     }
 
     static class Listener implements TypeListener {
