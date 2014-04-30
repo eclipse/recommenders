@@ -42,12 +42,11 @@ public class SnippetEditorActionBarContributor extends MultiPageEditorActionBarC
      * Creates a multi-page contributor.
      */
     public SnippetEditorActionBarContributor() {
-        createActions();
     }
 
     /**
      * Returns the action registed with the given text editor.
-     *
+     * 
      * @return IAction or null if editor is null.
      */
     protected IAction getAction(ITextEditor editor, String actionID) {
@@ -91,19 +90,6 @@ public class SnippetEditorActionBarContributor extends MultiPageEditorActionBarC
                     getAction(editor, IDEActionFactory.BOOKMARK.getId()));
             actionBars.updateActionBars();
         }
-    }
-
-    private void createActions() {
-        sampleAction = new Action() {
-            @Override
-            public void run() {
-                MessageDialog.openInformation(null, "", "Sample Action Executed");
-            }
-        };
-        sampleAction.setText("Sample Action");
-        sampleAction.setToolTipText("Sample Action tool tip");
-        sampleAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-                .getImageDescriptor(IDE.SharedImages.IMG_OBJS_TASK_TSK));
     }
 
     @Override
