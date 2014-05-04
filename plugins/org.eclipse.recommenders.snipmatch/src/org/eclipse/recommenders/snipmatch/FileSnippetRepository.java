@@ -16,6 +16,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.lucene.queryParser.QueryParser.Operator.AND;
 import static org.eclipse.recommenders.utils.Constants.DOT_JSON;
 import static org.eclipse.recommenders.utils.Urls.mangle;
+import static java.util.UUID.nameUUIDFromBytes;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -335,7 +336,7 @@ public class FileSnippetRepository implements ISnippetRepository {
             File file;
             List<File> files = searchSnippetFiles(F_UUID + ":" + importSnippet.getUuid());
             if (files.isEmpty()) {
-                file = createFileForSnippet(importSnippet);
+                file = new File(snippetsdir, nameUUIDFromBytes(importSnippet.getCode().getBytes()) + DOT_JSON);
             } else {
                 file = Iterables.getOnlyElement(files);
             }
@@ -349,16 +350,6 @@ public class FileSnippetRepository implements ISnippetRepository {
         } finally {
             writeLock.unlock();
         }
-    }
-
-    private File createFileForSnippet(Snippet snippet) {
-        File file = new File(snippetsdir, mangle(snippet.getName()) + DOT_JSON);
-        int number = 0;
-        while (file.exists()) {
-            number++;
-            file = new File(snippetsdir, mangle(snippet.getName() + number) + DOT_JSON);
-        }
-        return file;
     }
 
     private Snippet checkTypeAndConvertSnippet(ISnippet snippet) {
