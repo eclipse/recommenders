@@ -34,6 +34,7 @@ import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.Visibl
 import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor;
+import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptors;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -70,7 +71,6 @@ public class CompletionRcpModule extends AbstractModule {
     @Provides
     @Singleton
     SessionProcessorDescriptor[] provideSessionProcessorDescriptors() {
-        return SessionProcessorDescriptor.parseExtensions();
+        return SessionProcessorDescriptors.parseExtensions();
     }
-
 }
