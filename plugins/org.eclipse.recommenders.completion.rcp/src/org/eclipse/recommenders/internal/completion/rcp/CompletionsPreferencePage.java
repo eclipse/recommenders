@@ -11,8 +11,7 @@
 package org.eclipse.recommenders.internal.completion.rcp;
 
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.checkedElements;
-import static org.eclipse.jface.layout.GridDataFactory.fillDefaults;
-import static org.eclipse.jface.layout.GridDataFactory.swtDefaults;
+import static org.eclipse.jface.layout.GridDataFactory.*;
 import static org.eclipse.recommenders.internal.completion.rcp.Constants.RECOMMENDERS_ALL_CATEGORY_ID;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
@@ -40,7 +39,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor;
-import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor.EnabledSessionProcessorPredicate;
+import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptors.EnabledSessionProcessorPredicate;
 import org.eclipse.recommenders.rcp.utils.ContentAssistEnablementBlock;
 import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
 import org.eclipse.swt.SWT;
@@ -137,15 +136,17 @@ public class CompletionsPreferencePage extends PreferencePage implements IWorkbe
         enable.loadSelection();
         Link contentAssistLink = new Link(container, SWT.NONE | SWT.WRAP);
         contentAssistLink
-                .setLayoutData(GridDataFactory.swtDefaults().span(2, 1).align(SWT.FILL, SWT.BEGINNING).grab(true, false)
-                        .hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
-                        .create());
+        .setLayoutData(GridDataFactory.swtDefaults().span(2, 1).align(SWT.FILL, SWT.BEGINNING)
+                .grab(true, false)
+                .hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+                .create());
         contentAssistLink.setText(Messages.PREFPAGE_FOOTER_COMPLETIONS);
         contentAssistLink.addSelectionListener(new SelectionAdapter() {
 
             @Override
             public void widgetSelected(SelectionEvent event) {
-                PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null); //$NON-NLS-1$
+                PreferencesUtil.createPreferenceDialogOn(getShell(),
+                        "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null); //$NON-NLS-1$
             }
         });
 
