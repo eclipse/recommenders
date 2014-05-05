@@ -10,7 +10,9 @@
  */
 package org.eclipse.recommenders.completion.rcp.processable;
 
-import static org.eclipse.recommenders.internal.completion.rcp.Constants.*;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.JDT_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.MYLYN_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.RECOMMENDERS_ALL_CATEGORY_ID;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +29,7 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
+import org.eclipse.recommenders.internal.completion.rcp.CompletionRcpPreferences;
 import org.eclipse.recommenders.internal.completion.rcp.EmptyCompletionProposal;
 import org.eclipse.recommenders.internal.completion.rcp.EnableCompletionProposal;
 import org.eclipse.recommenders.rcp.IAstProvider;
@@ -38,24 +41,23 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("restriction")
 public class IntelligentCompletionProposalComputer extends ProcessableCompletionProposalComputer {
 
-    private SessionProcessorDescriptor[] descriptors;
-    private SharedImages images;
+    private final SharedImages images;
+    private final CompletionRcpPreferences preferences;
 
     @Inject
-    public IntelligentCompletionProposalComputer(SessionProcessorDescriptor[] descriptors, IAstProvider astProvider,
+    public IntelligentCompletionProposalComputer(CompletionRcpPreferences preferences, IAstProvider astProvider,
             SharedImages images, Map<CompletionContextKey, ICompletionContextFunction> map) {
         super(new ProcessableProposalFactory(), Sets.<SessionProcessor>newLinkedHashSet(), astProvider, map);
-        this.descriptors = descriptors;
+        this.preferences = preferences;
         this.images = images;
+
     }
 
     @Override
     public void sessionStarted() {
         processors.clear();
-        for (SessionProcessorDescriptor d : descriptors) {
-            if (d.isEnabled()) {
-                processors.add(d.getProcessor());
-            }
+        for (SessionProcessorDescriptor d : preferences.getEnabledSessionProcessors()) {
+            processors.add(d.getProcessor());
         }
         super.sessionStarted();
     }
