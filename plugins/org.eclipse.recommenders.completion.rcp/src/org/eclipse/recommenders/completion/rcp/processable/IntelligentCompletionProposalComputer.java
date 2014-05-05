@@ -18,15 +18,18 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
+import org.eclipse.recommenders.internal.completion.rcp.Constants;
 import org.eclipse.recommenders.internal.completion.rcp.EmptyCompletionProposal;
 import org.eclipse.recommenders.internal.completion.rcp.EnableCompletionProposal;
 import org.eclipse.recommenders.rcp.IAstProvider;
@@ -38,22 +41,27 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("restriction")
 public class IntelligentCompletionProposalComputer extends ProcessableCompletionProposalComputer {
 
-    private SessionProcessorDescriptor[] descriptors;
-    private SharedImages images;
+    private final SessionProcessorDescriptor[] descriptors;
+    private final SharedImages images;
+    private final IPreferenceStore preferences;
 
     @Inject
-    public IntelligentCompletionProposalComputer(SessionProcessorDescriptor[] descriptors, IAstProvider astProvider,
+    public IntelligentCompletionProposalComputer(SessionProcessorDescriptor[] descriptors,
+            @Named(Constants.COMPLETION_PREFERENCES) IPreferenceStore preferences, IAstProvider astProvider,
             SharedImages images, Map<CompletionContextKey, ICompletionContextFunction> map) {
         super(new ProcessableProposalFactory(), Sets.<SessionProcessor>newLinkedHashSet(), astProvider, map);
+        this.preferences = preferences;
         this.descriptors = descriptors;
         this.images = images;
+
     }
 
     @Override
     public void sessionStarted() {
+        String enabledProcessors = preferences.getString(PREF_NODE_ID_SESSIONPROCESSORS);
         processors.clear();
         for (SessionProcessorDescriptor d : descriptors) {
-            if (d.isEnabled()) {
+            if (SessionProcessorDescriptors.isEnabled(d, enabledProcessors)) {
                 processors.add(d.getProcessor());
             }
         }

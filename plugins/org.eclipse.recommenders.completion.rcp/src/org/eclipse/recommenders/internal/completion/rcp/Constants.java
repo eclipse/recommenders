@@ -17,4 +17,6 @@ public class Constants {
     public static final String MYLYN_ALL_CATEGORY = "org.eclipse.mylyn.java.ui.javaAllProposalCategory"; //$NON-NLS-1$
     public static final String RECOMMENDERS_ALL_CATEGORY_ID = "org.eclipse.recommenders.completion.rcp.proposalCategory.intelligent"; //$NON-NLS-1$
     public static final String COMPLETION_PREFERENCE_PAGE_ID = "org.eclipse.recommenders.completion.rcp.preferencePages.completions"; //$NON-NLS-1$
+    public static final String PREF_NODE_ID_SESSIONPROCESSORS = "org.eclipse.recommenders.completion.rcp.sessionprocessors"; //$NON-NLS-1$
+    public static final String COMPLETION_PREFERENCES = "org.eclipse.recommenders.completion.rcp.preferences"; //$NON-NLS-1$
 }

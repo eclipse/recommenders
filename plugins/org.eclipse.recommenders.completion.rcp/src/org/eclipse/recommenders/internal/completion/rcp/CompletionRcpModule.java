@@ -12,8 +12,13 @@ package org.eclipse.recommenders.internal.completion.rcp;
 
 import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.*;
 
+import java.util.List;
+
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.CompletionOnTypeContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.CompletionPrefixContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.EnclosingAstMethodContextFunction;
@@ -34,6 +39,8 @@ import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.Visibl
 import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor;
+import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptors;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -70,7 +77,14 @@ public class CompletionRcpModule extends AbstractModule {
     @Provides
     @Singleton
     SessionProcessorDescriptor[] provideSessionProcessorDescriptors() {
-        return SessionProcessorDescriptor.parseExtensions();
+        List<SessionProcessorDescriptor> registeredProcessors = SessionProcessorDescriptors.getRegisteredProcessors();
+        return registeredProcessors.toArray(new SessionProcessorDescriptor[registeredProcessors.size()]);
     }
 
+    @Provides
+    @Named(Constants.COMPLETION_PREFERENCES)
+    @Singleton
+    IPreferenceStore provideCompletionPreferences() {
+        return new ScopedPreferenceStore(InstanceScope.INSTANCE, Constants.BUNDLE_NAME);
+    }
 }

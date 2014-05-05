@@ -8,16 +8,18 @@ import org.eclipse.jdt.core.IMethod
 import org.eclipse.jdt.core.IType
 import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer
+import org.eclipse.jface.preference.IPreferenceStore
 import org.eclipse.recommenders.calls.ICallModel
 import org.eclipse.recommenders.calls.ICallModelProvider
 import org.eclipse.recommenders.calls.NullCallModel
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions
 import org.eclipse.recommenders.completion.rcp.processable.IntelligentCompletionProposalComputer
-import org.eclipse.recommenders.completion.rcp.processable.ProcessableProposalFactory
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor
+import org.eclipse.recommenders.internal.calls.rcp.CallCompletionContextFunctions
 import org.eclipse.recommenders.internal.calls.rcp.CallCompletionSessionProcessor
 import org.eclipse.recommenders.internal.calls.rcp.CallsRcpPreferences
+import org.eclipse.recommenders.internal.completion.rcp.Constants
 import org.eclipse.recommenders.internal.overrides.rcp.OverrideCompletionSessionProcessor
 import org.eclipse.recommenders.internal.overrides.rcp.OverridesRcpPreferences
 import org.eclipse.recommenders.internal.rcp.CachingAstProvider
@@ -46,7 +48,6 @@ import static org.mockito.Matchers.*
 import static org.mockito.Mockito.*
 
 import static extension com.google.common.collect.Iterables.*
-import org.eclipse.recommenders.internal.calls.rcp.CallCompletionContextFunctions
 
 @RunWith(Parameterized)
 class CompletionSmokeTest {
@@ -396,6 +397,9 @@ class CompletionSmokeTest {
         when(pcp.toUniqueName(anyObject() as IType)).thenReturn(
             Optional.of(new UniqueTypeName(ProjectCoordinate.UNKNOWN, VmTypeName.NULL)))
 
+        val preferences = mock(IPreferenceStore)
+        when(preferences.getString(Constants.PREF_NODE_ID_SESSIONPROCESSORS)).thenReturn(
+            "org.eclipse.recommenders.calls.rcp.sessionprocessors.call;org.eclipse.recommenders.overrides.rcp.completion.processor;org.eclipse.recommenders.subwords.rcp.sessionprocessors.subwords")
         val sut = createSut(pcp, jer)
 
         val struct = fixture.createFileAndParseWithMarkers(scenario)
@@ -405,7 +409,8 @@ class CompletionSmokeTest {
         // just be sure that this file still compiles...
         val ast = cu.reconcile(AST::JLS4, true, true, null, null);
         Assert.assertNotNull(ast)
-        val computer = new MockedIntelligentCompletionProposalComputer(sut)
+
+        val computer = new MockedIntelligentCompletionProposalComputer(sut, preferences)
 
         for (completionIndex : struct.second) {
             val ctx = new JavaContentAssistContextMock(cu, completionIndex)
@@ -452,10 +457,11 @@ class MockedIntelligentCompletionProposalComputer<T extends SessionProcessor> ex
 
     T processor;
 
-    new(T processor) {
+    new(T processor, IPreferenceStore preferences) {
         super(
             #{new SessionProcessorDescriptor("", "", "", null, 0, true, "", processor)}.toArray(
-                SessionProcessorDescriptor), new CachingAstProvider(), new SharedImages,  CallCompletionContextFunctions.registerDefaults( CompletionContextFunctions.defaultFunctions));
+                SessionProcessorDescriptor), preferences, new CachingAstProvider(), new SharedImages,
+            CallCompletionContextFunctions.registerDefaults(CompletionContextFunctions.defaultFunctions));
         this.processor = processor
     }
 

@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.calls.rcp.it;
 
 import static com.google.common.base.Optional.*;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.PREF_NODE_ID_SESSIONPROCESSORS;
 import static org.eclipse.recommenders.models.ProjectCoordinate.UNKNOWN;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
@@ -20,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.recommenders.calls.ICallModel;
 import org.eclipse.recommenders.calls.ICallModelProvider;
 import org.eclipse.recommenders.completion.rcp.it.MockedIntelligentCompletionProposalComputer;
@@ -171,6 +173,10 @@ public class Stubs {
         when(mp.acquireModel((UniqueTypeName) anyObject())).thenReturn(Optional.<ICallModel>of(new CallModelSpy()));
         CallCompletionSessionProcessor sut = new CallCompletionSessionProcessor(pcProvider, mp,
                 new CallsRcpPreferences(), new SharedImages());
-        return new MockedIntelligentCompletionProposalComputer(sut);
+
+        IPreferenceStore preferences = mock(IPreferenceStore.class);
+        when(preferences.getString(PREF_NODE_ID_SESSIONPROCESSORS)).thenReturn(
+                "org.eclipse.recommenders.calls.rcp.sessionprocessors.call");
+        return new MockedIntelligentCompletionProposalComputer(sut, preferences);
     }
 }
