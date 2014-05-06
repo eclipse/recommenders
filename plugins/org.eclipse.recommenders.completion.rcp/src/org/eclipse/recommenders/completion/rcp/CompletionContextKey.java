@@ -58,6 +58,9 @@ public class CompletionContextKey<T> {
 
     public static final CompletionContextKey<JavaContentAssistInvocationContext> JAVA_CONTENTASSIST_CONTEXT = make();
     public static final CompletionContextKey<Map<IJavaCompletionProposal, CompletionProposal>> JAVA_PROPOSALS = make();
+    public static final CompletionContextKey<Map<IJavaCompletionProposal, CompletionProposal>> JAVA_NON_CONSTRUCTOR_NON_TYPE_PROPOSALS = make();
+    public static final CompletionContextKey<Map<IJavaCompletionProposal, CompletionProposal>> JAVA_NON_TYPE_PROPOSALS = make();
+    public static final CompletionContextKey<Map<IJavaCompletionProposal, CompletionProposal>> JAVA_NON_CONSTRUCTOR_PROPOSALS = make();
     public static final CompletionContextKey<LookupEnvironment> LOOKUP_ENVIRONMENT = make();
     public static final CompletionContextKey<String> RECEIVER_NAME = make();
     public static final CompletionContextKey<TypeBinding> RECEIVER_TYPEBINDING = make();

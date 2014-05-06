@@ -26,6 +26,7 @@ import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.Expect
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.InternalCompletionContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.JavaContentAssistInvocationContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.LookupEnvironmentContextFunction;
+import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ModifiedJavaProposalsContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ReceiverNameContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ReceiverTypeBindingContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.VisibleFieldsContextFunction;
@@ -58,6 +59,11 @@ public class CompletionRcpModule extends AbstractModule {
         functions.addBinding(IS_COMPLETION_ON_TYPE).to(CompletionOnTypeContextFunction.class);
         functions.addBinding(INTERNAL_COMPLETIONCONTEXT).to(InternalCompletionContextFunction.class);
         functions.addBinding(JAVA_PROPOSALS).to(InternalCompletionContextFunction.class);
+        functions.addBinding(JAVA_NON_CONSTRUCTOR_PROPOSALS).toInstance(
+                new ModifiedJavaProposalsContextFunction(true, false));
+        functions.addBinding(JAVA_NON_TYPE_PROPOSALS).toInstance(new ModifiedJavaProposalsContextFunction(false, true));
+        functions.addBinding(JAVA_NON_CONSTRUCTOR_NON_TYPE_PROPOSALS).toInstance(
+                new ModifiedJavaProposalsContextFunction(true, true));
         functions.addBinding(JAVA_CONTENTASSIST_CONTEXT).to(JavaContentAssistInvocationContextFunction.class);
         functions.addBinding(LOOKUP_ENVIRONMENT).to(LookupEnvironmentContextFunction.class);
         functions.addBinding(RECEIVER_TYPEBINDING).to(ReceiverTypeBindingContextFunction.class);
@@ -72,5 +78,4 @@ public class CompletionRcpModule extends AbstractModule {
     SessionProcessorDescriptor[] provideSessionProcessorDescriptors() {
         return SessionProcessorDescriptor.parseExtensions();
     }
-
 }

@@ -33,6 +33,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.CompletionContexts;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.RecommendersCompletionContext;
@@ -43,16 +44,19 @@ import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.ui.IEditorPart;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
 public class SubwordsSessionProcessor extends SessionProcessor {
 
-    private IAstProvider astProvider;
+    private final IAstProvider astProvider;
+    private final SubwordsRcpPreferences prefs;
 
     @Inject
-    public SubwordsSessionProcessor(IAstProvider astProvider) {
+    public SubwordsSessionProcessor(IAstProvider astProvider, SubwordsRcpPreferences prefs) {
         this.astProvider = astProvider;
+        this.prefs = prefs;
     }
 
     @Override
@@ -69,25 +73,24 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
         int offset = crContext.getInvocationOffset();
 
-        // List l = new list$
+        // List l = new List$ --> L$
         if (completionNode instanceof CompletionOnSingleTypeReference
                 && completionNodeParent instanceof LocalDeclaration && length > 1) {
             triggerlocations.add(offset - length + 1);
         }
 
-        // getPath(pat$) --> getPath(p$):'pat'
+        // getPath(pat$) --> p$
         if (completionNode instanceof CompletionOnSingleNameReference && completionNodeParent instanceof MessageSend
                 && length > 1) {
             triggerlocations.add(offset - length + 1);
         }
         if (completionNode instanceof CompletionOnSingleNameReference && completionNodeParent == null && length > 1) {
-            // pat$ --> $pat
-            triggerlocations.add(offset - length);
             // pat$ --> p$at
             triggerlocations.add(offset - length + 1);
-        } else {
-            triggerlocations.add(offset - length);
         }
+
+        // pat$ --> $pat
+        triggerlocations.add(offset - length);
 
         JavaContentAssistInvocationContext javaContext = crContext.getJavaContext();
         ICompilationUnit cu = crContext.getCompilationUnit();
@@ -100,11 +103,8 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         }
 
         for (int trigger : triggerlocations) {
-            JavaContentAssistInvocationContext newJavaContext = new JavaContentAssistInvocationContext(viewer, trigger,
-                    editor);
-            IRecommendersCompletionContext newCrContext = new RecommendersCompletionContext(newJavaContext, astProvider);
-
-            Map<IJavaCompletionProposal, CompletionProposal> newProposals = newCrContext.getProposals();
+            final Map<IJavaCompletionProposal, CompletionProposal> newProposals = getNewProposals(viewer, editor,
+                    trigger);
 
             for (IJavaCompletionProposal p : newProposals.keySet()) {
                 String displayString = p.getDisplayString();
@@ -116,6 +116,28 @@ public class SubwordsSessionProcessor extends SessionProcessor {
             }
         }
         return true;
+    }
+
+    private Map<IJavaCompletionProposal, CompletionProposal> getNewProposals(ITextViewer viewer, IEditorPart editor,
+            int trigger) {
+        JavaContentAssistInvocationContext newJavaContext = new JavaContentAssistInvocationContext(viewer, trigger,
+                editor);
+        IRecommendersCompletionContext newCrContext = new RecommendersCompletionContext(newJavaContext, astProvider);
+
+        if (!prefs.completionOnConstructors && !prefs.completionOnTypes) {
+            return newCrContext.get(CompletionContextKey.JAVA_NON_CONSTRUCTOR_NON_TYPE_PROPOSALS,
+                    Maps.<IJavaCompletionProposal, CompletionProposal>newHashMap());
+        } else if (!prefs.completionOnConstructors) {
+            return newCrContext.get(CompletionContextKey.JAVA_NON_CONSTRUCTOR_PROPOSALS,
+                    Maps.<IJavaCompletionProposal, CompletionProposal>newHashMap());
+        } else if (!prefs.completionOnTypes) {
+            return newCrContext.get(CompletionContextKey.JAVA_NON_TYPE_PROPOSALS,
+                    Maps.<IJavaCompletionProposal, CompletionProposal>newHashMap());
+        } else {
+            newCrContext.getProposals();
+            return newCrContext.get(CompletionContextKey.JAVA_PROPOSALS,
+                    Maps.<IJavaCompletionProposal, CompletionProposal>newHashMap());
+        }
     }
 
     @VisibleForTesting

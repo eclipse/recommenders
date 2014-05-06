@@ -12,28 +12,7 @@ package org.eclipse.recommenders.completion.rcp;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static org.apache.commons.lang3.StringUtils.substring;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ASSIST_NODE;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ASSIST_NODE_PARENT;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ASSIST_SCOPE;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.CCTX_COMPILATION_UNIT_DECLARATION;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.COMPLETION_PREFIX;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ENCLOSING_AST_METHOD;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ENCLOSING_ELEMENT;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ENCLOSING_METHOD;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ENCLOSING_METHOD_FIRST_DECLARATION;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ENCLOSING_TYPE;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.EXPECTED_TYPE;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.EXPECTED_TYPENAMES;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.INTERNAL_COMPLETIONCONTEXT;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.IS_COMPLETION_ON_TYPE;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.JAVA_CONTENTASSIST_CONTEXT;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.JAVA_PROPOSALS;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.LOOKUP_ENVIRONMENT;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.RECEIVER_NAME;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.RECEIVER_TYPEBINDING;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.VISIBLE_FIELDS;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.VISIBLE_LOCALS;
-import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.VISIBLE_METHODS;
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.*;
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.findFirstDeclaration;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
@@ -111,6 +90,9 @@ public class CompletionContextFunctions {
         res.put(EXPECTED_TYPENAMES, new ExpectedTypeNamesContextFunction());
         res.put(INTERNAL_COMPLETIONCONTEXT, new InternalCompletionContextFunction());
         res.put(JAVA_PROPOSALS, new InternalCompletionContextFunction());
+        res.put(JAVA_NON_CONSTRUCTOR_PROPOSALS, new ModifiedJavaProposalsContextFunction(true, false));
+        res.put(JAVA_NON_TYPE_PROPOSALS, new ModifiedJavaProposalsContextFunction(false, true));
+        res.put(JAVA_NON_CONSTRUCTOR_NON_TYPE_PROPOSALS, new ModifiedJavaProposalsContextFunction(true, true));
         res.put(JAVA_CONTENTASSIST_CONTEXT, new JavaContentAssistInvocationContextFunction());
         res.put(LOOKUP_ENVIRONMENT, new LookupEnvironmentContextFunction());
         res.put(RECEIVER_TYPEBINDING, new ReceiverTypeBindingContextFunction());
@@ -400,11 +382,43 @@ public class CompletionContextFunctions {
             Map<IJavaCompletionProposal, CompletionProposal> proposals = collector.getProposals();
             context.set(JAVA_PROPOSALS, proposals);
 
-            if (JAVA_PROPOSALS.equals(key)) {
-                return proposals;
-            } else {
+            if (INTERNAL_COMPLETIONCONTEXT.equals(key)) {
                 return internal;
+            } else {
+                return proposals;
             }
+        }
+    }
+
+    public static class ModifiedJavaProposalsContextFunction implements ICompletionContextFunction<Object> {
+
+        private final boolean ignoreConstructors;
+        private final boolean ignoreTypes;
+
+        public ModifiedJavaProposalsContextFunction(boolean ignoreConstructors, boolean ignoreTypes) {
+            this.ignoreConstructors = ignoreConstructors;
+            this.ignoreTypes = ignoreTypes;
+        }
+
+        @Override
+        public Object compute(IRecommendersCompletionContext context, CompletionContextKey<Object> key) {
+            JavaContentAssistInvocationContext coreContext = context.getJavaContext();
+
+            int offset = context.getInvocationOffset();
+            if (offset == -1) {
+                return null;
+            }
+            ICompilationUnit cu = context.getCompilationUnit();
+            ProposalCollectingCompletionRequestor collector = new ProposalCollectingCompletionRequestor(coreContext,
+                    ignoreConstructors, ignoreTypes);
+            try {
+                cu.codeComplete(offset, collector, new TimeDelimitedProgressMonitor(5000));
+            } catch (final Exception e) {
+                RcpPlugin.logError(e, Messages.LOG_ERROR_EXCEPTION_DURING_CODE_COMPLETION);
+            }
+            Map<IJavaCompletionProposal, CompletionProposal> proposals = collector.getProposals();
+            context.set(key, proposals);
+            return proposals;
         }
     }
 
