@@ -420,11 +420,14 @@ public class ModelRepositoriesView extends ViewPart {
         return coordinates;
     }
 
-    private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(Collection<ModelCoordinate> modelCoordinates) {
-        Multimap<ProjectCoordinate, ModelCoordinate> coordinatesGroupedByProjectCoordinate = LinkedListMultimap.create();
+    private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(
+            Collection<ModelCoordinate> modelCoordinates) {
+        Multimap<ProjectCoordinate, ModelCoordinate> coordinatesGroupedByProjectCoordinate = LinkedListMultimap
+                .create();
 
         for (ModelCoordinate modelCoordinate : modelCoordinates) {
-            coordinatesGroupedByProjectCoordinate.put(Coordinates.toProjectCoordinate(modelCoordinate), modelCoordinate);
+            coordinatesGroupedByProjectCoordinate
+                    .put(Coordinates.toProjectCoordinate(modelCoordinate), modelCoordinate);
         }
         return coordinatesGroupedByProjectCoordinate;
     }
@@ -620,10 +623,12 @@ public class ModelRepositoriesView extends ViewPart {
             @Override
             public IStatus runInUIThread(IProgressMonitor monitor) {
                 KnownCoordinate key = createKey(e.model);
-                KnownCoordinate element = Iterables.tryFind(coordinatesGroupedByRepo.get(key.url),
-                        Predicates.equalTo(key)).orNull();
-                if (element != null) {
-                    treeViewer.update(element, null);
+                if (key != null) {
+                    KnownCoordinate element = Iterables.tryFind(coordinatesGroupedByRepo.get(key.url),
+                            Predicates.equalTo(key)).orNull();
+                    if (element != null) {
+                        treeViewer.update(element, null);
+                    }
                 }
                 return Status.OK_STATUS;
             }
