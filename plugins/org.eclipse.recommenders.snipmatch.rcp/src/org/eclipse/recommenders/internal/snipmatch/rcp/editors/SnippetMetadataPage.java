@@ -12,11 +12,10 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
-import static org.eclipse.core.databinding.beans.PojoProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
-import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.core.databinding.beans.PojoProperties.value;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
+import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 
 import java.util.UUID;
 
@@ -33,6 +32,8 @@ import org.eclipse.core.internal.databinding.property.value.SelfValueProperty;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Messages;
 import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
@@ -40,6 +41,8 @@ import org.eclipse.recommenders.rcp.utils.Selections;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -104,6 +107,22 @@ public class SnippetMetadataPage extends FormPage {
 
         txtName = managedForm.getToolkit().createText(managedForm.getForm().getBody(), null, SWT.NONE);
         txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+        final ControlDecoration decor = new ControlDecoration(txtName, SWT.TOP);
+        decor.setDescriptionText(Messages.ERROR_SNIPPET_NAME_CAN_NOT_BE_EMPTY);
+        decor.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR)
+                .getImage());
+
+        txtName.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent arg0) {
+                if (isNullOrEmpty(txtName.getText())) {
+                    decor.show();
+                } else {
+                    decor.hide();
+                }
+            }
+        });
 
         Label lblDescription = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
                 Messages.EDITOR_LABEL_SNIPPET_DESCRIPTION, SWT.NONE);
