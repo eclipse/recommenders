@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -63,7 +65,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.recommenders.models.Coordinates;
 import org.eclipse.recommenders.models.IModelIndex;
@@ -89,7 +90,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.service.prefs.BackingStoreException;
@@ -98,7 +98,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
@@ -134,6 +136,10 @@ public class ModelRepositoriesView extends ViewPart {
 
     private TreeViewer treeViewer;
 
+    private Text txtSearch;
+
+    private String filterText;
+
     private ListMultimap<String, KnownCoordinate> coordinatesGroupedByRepo = LinkedListMultimap.create();
 
     private final Function<ModelRepositoriesView.KnownCoordinate, String> toStringRepresentation = new Function<ModelRepositoriesView.KnownCoordinate, String>() {
@@ -143,8 +149,6 @@ public class ModelRepositoriesView extends ViewPart {
             return input.pc.toString();
         }
     };
-
-    private Text txtSearch;
 
     @Inject
     public ModelRepositoriesView(IModelIndex index, SharedImages images, EclipseModelRepository repo,
@@ -157,20 +161,6 @@ public class ModelRepositoriesView extends ViewPart {
         Collections.sort(this.modelClassifiers);
         this.bus = bus;
     }
-
-    final PatternFilter patternFilter = new PatternFilter() {
-        @Override
-        protected boolean isLeafMatch(final Viewer viewer, final Object element) {
-            if (element instanceof KnownCoordinate) {
-                final KnownCoordinate coor = (KnownCoordinate) element;
-                return wordMatches(coor.pc.toString());
-            }
-            if (element instanceof String) {
-                return true;
-            }
-            return super.isLeafMatch(viewer, element);
-        }
-    };
 
     @Override
     public void createPartControl(Composite parent) {
@@ -238,8 +228,31 @@ public class ModelRepositoriesView extends ViewPart {
         treeViewer.setUseHashlookup(true);
         treeViewer.setContentProvider(new ILazyTreeContentProvider() {
 
+            ListMultimap<String, KnownCoordinate> filteredCoordinatesGroupedByRepo = ArrayListMultimap.create();
+
             @Override
             public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+                filteredCoordinatesGroupedByRepo.clear();
+                for (String key : coordinatesGroupedByRepo.keySet()) {
+                    List<KnownCoordinate> unfiltered = coordinatesGroupedByRepo.get(key);
+
+                    if (!isNullOrEmpty(filterText)) {
+                        Iterable<KnownCoordinate> filtered = Iterables.filter(unfiltered,
+                                new Predicate<KnownCoordinate>() {
+
+                                    @Override
+                                    public boolean apply(KnownCoordinate kc) {
+                                        Pattern pattern = Pattern.compile(".*" + filterText + ".*");
+                                        Matcher matcher = pattern.matcher(kc.pc.toString());
+                                        return matcher.matches();
+                                    }
+                                });
+                        filteredCoordinatesGroupedByRepo.putAll(key, filtered);
+                    } else {
+                        filteredCoordinatesGroupedByRepo.putAll(key, unfiltered);
+                    }
+                }
+
             }
 
             @Override
@@ -259,7 +272,7 @@ public class ModelRepositoriesView extends ViewPart {
 
             private Object[] getChildren(Object element) {
                 if (element instanceof String) {
-                    return coordinatesGroupedByRepo.get((String) element).toArray();
+                    return filteredCoordinatesGroupedByRepo.get((String) element).toArray();
                 }
                 return new Object[0];
             }
@@ -571,11 +584,8 @@ public class ModelRepositoriesView extends ViewPart {
 
     // needs to be public to work with PojoProperties
     public void setFilter(final String filter) {
-        treeViewer.getTree().setRedraw(false);
-        PatternFilter patternFilter = new KnownCoordinatePatternFilter();
-        patternFilter.setPattern("*" + filter); //$NON-NLS-1$
-        treeViewer.setFilters(new ViewerFilter[] { patternFilter });
-        treeViewer.getTree().setRedraw(true);
+        this.filterText = filter;
+        treeViewer.setInput(getViewSite());
         if (!isNullOrEmpty(filter)) {
             treeViewer.expandAll();
         }
