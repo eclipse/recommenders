@@ -15,6 +15,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.recommenders.internal.snipmatch.rcp.messages"; //$NON-NLS-1$
     public static String COMPLETION_ENGINE_NO_SNIPPETS_FOUND;
+    public static String COMPLETION_ENGINE_SEARCH_PLACEHOLDER;
 
     public static String DIALOG_MESSAGE_ENTER_NEW_KEYWORD;
     public static String DIALOG_MESSAGE_NEW_SNIPPET_REPOSITORY;

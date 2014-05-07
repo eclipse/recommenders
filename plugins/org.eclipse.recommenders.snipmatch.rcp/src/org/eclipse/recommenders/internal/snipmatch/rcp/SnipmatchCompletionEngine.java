@@ -28,12 +28,12 @@ import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.EventBus;
@@ -66,12 +67,13 @@ public class SnipmatchCompletionEngine {
     private Shell searchShell;
     private JavaContentAssistInvocationContext ctx;
     private TemplateProposal selectedProposal;
-    private StyledText searchText;
+    private Text searchText;
     private Color searchBg;
     private Font searchFont;
 
     @Inject
-    public SnipmatchCompletionEngine(SnipmatchContentAssistProcessor processor, EventBus bus, ColorRegistry colorRegistry, FontRegistry fontRegistry) {
+    public SnipmatchCompletionEngine(SnipmatchContentAssistProcessor processor, EventBus bus,
+            ColorRegistry colorRegistry, FontRegistry fontRegistry) {
         this.processor = processor;
         this.bus = bus;
         this.colorRegistry = colorRegistry;
@@ -139,8 +141,8 @@ public class SnipmatchCompletionEngine {
                 }
             }
         });
-        searchText = new StyledText(searchShell, SWT.BORDER);
-
+        searchText = new Text(searchShell, SWT.BORDER);
+        searchText.setMessage(Messages.COMPLETION_ENGINE_SEARCH_PLACEHOLDER);
         searchText.addFocusListener(new FocusAdapter() {
 
             @Override
@@ -150,10 +152,10 @@ public class SnipmatchCompletionEngine {
         });
         searchText.setBackground(searchBg);
         searchText.setFont(searchFont);
-        searchText.addVerifyKeyListener(new VerifyKeyListener() {
+        searchText.addKeyListener(new KeyListener() {
 
             @Override
-            public void verifyKey(VerifyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 switch (e.character) {
                 case SWT.CR:
                     e.doit = false;
@@ -175,9 +177,11 @@ public class SnipmatchCompletionEngine {
                 switch (e.keyCode) {
                 case SWT.ARROW_UP:
                     execute(ContentAssistant.SELECT_PREVIOUS_PROPOSAL_COMMAND_ID);
+                    e.doit = false;
                     return;
                 case SWT.ARROW_DOWN:
                     execute(ContentAssistant.SELECT_NEXT_PROPOSAL_COMMAND_ID);
+                    e.doit = false;
                     return;
                 }
             }
@@ -188,6 +192,11 @@ public class SnipmatchCompletionEngine {
                 } catch (ExecutionException e) {
                     Throwables.propagate(e);
                 }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // no-op
             }
         });
         searchText.addModifyListener(new ModifyListener() {
