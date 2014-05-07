@@ -6,7 +6,7 @@
 			class="org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditor"
 			contributorClass="org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditorActionBarContributor"
 			default="false"
-			icon="icons/eview16/snippets.png"
+			icon="icons/eview16/editor.png"
 			id="org.eclipse.recommenders.snipmatch.rcp.editors.snippet"
 			name="%editors.snippet.name"/>
 	</extension>
@@ -15,6 +15,11 @@
 			categoryId="org.eclipse.jdt.ui.category.source"
 			name="%commands.search.name"
 			description="%commands.search.description"/>
+	</extension>
+	<extension point="org.eclipse.ui.commandImages">
+		<image
+			commandId="org.eclipse.recommenders.snipmatch.rcp.commands.search"
+			icon="icons/eview16/snipmatch.png" />
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page id="org.eclipse.recommenders.snipmatch.rpc.preferences.SnipmatchPreferencePage"
