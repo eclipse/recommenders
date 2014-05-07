@@ -14,10 +14,13 @@ import static org.eclipse.recommenders.utils.Checks.*;
 import static org.eclipse.recommenders.utils.Throws.*;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.MapMaker;
 
 public class VmTypeName implements ITypeName {
@@ -64,8 +67,15 @@ public class VmTypeName implements ITypeName {
         return res;
     }
 
-    private static String removeGenerics(final String typeName) {
-        return StringUtils.substringBefore(typeName, "<");
+    private static String removeGenerics(String typeName) {
+        String re = "<[^<>]*>";
+        Pattern pattern = Pattern.compile(re);
+        Matcher matcher = pattern.matcher(typeName);
+        while (matcher.find()) {
+            typeName = matcher.replaceAll("");
+            matcher = pattern.matcher(typeName);
+        }
+        return typeName;
     }
 
     private String identifier;
