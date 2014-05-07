@@ -222,7 +222,32 @@ public class VmTypeNameTest {
     }
 
     @Test
-    public void testNameWithGenerics() {
-        VmTypeName.get("Lm/M<Lpackage/N>");
+    public void testNameWithSimpleGenerics() {
+        VmTypeName actual = VmTypeName.get("Lm/M<Lpackage/N>");
+        assertEquals("Lm/M", actual.getIdentifier());
+    }
+
+    @Test
+    public void testNameWithNestedGenerics() {
+        VmTypeName actual = VmTypeName.get("Lm/M<Lpackage/N<Lpackage/O>>");
+        assertEquals("Lm/M", actual.getIdentifier());
+    }
+
+    @Test
+    public void testNameWithSubclassAndSimpleGenerics() {
+        VmTypeName actual = VmTypeName.get("Lm/M<Lpackage/N>$S");
+        assertEquals("Lm/M$S", actual.getIdentifier());
+    }
+
+    @Test
+    public void testNameWithSubclassAndNestedGenerics() {
+        VmTypeName actual = VmTypeName.get("Lm/M<Lpackage/N<Lpackage/O>>$S");
+        assertEquals("Lm/M$S", actual.getIdentifier());
+    }
+
+    @Test
+    public void testNameWithGenericSubclass() {
+        VmTypeName actual = VmTypeName.get("Lm/M$S<Lpackage/N>");
+        assertEquals("Lm/M$S", actual.getIdentifier());
     }
 }
