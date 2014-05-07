@@ -16,6 +16,11 @@
 			name="%commands.search.name"
 			description="%commands.search.description"/>
 	</extension>
+	<extension point="org.eclipse.ui.commandImages">
+		<image
+			commandId="org.eclipse.recommenders.snipmatch.rcp.commands.search"
+			icon="icons/eview16/snippets.png" />
+	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page id="org.eclipse.recommenders.snipmatch.rpc.preferences.SnipmatchPreferencePage"
 			category="org.eclipse.recommenders.rcp.preferencePages.root"
