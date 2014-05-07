@@ -97,6 +97,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
@@ -104,6 +105,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -228,6 +230,14 @@ public class ModelRepositoriesView extends ViewPart {
         treeViewer.setUseHashlookup(true);
         treeViewer.setContentProvider(new ILazyTreeContentProvider() {
 
+            private final Function<ModelRepositoriesView.KnownCoordinate, String> STRING_REPRESENTATION = new Function<ModelRepositoriesView.KnownCoordinate, String>() {
+
+                @Override
+                public String apply(KnownCoordinate input) {
+                    return input.pc.toString();
+                }
+            };
+
             @Override
             public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
             }
@@ -249,7 +259,11 @@ public class ModelRepositoriesView extends ViewPart {
 
             private Object[] getChildren(Object element) {
                 if (element instanceof String) {
-                    return coordinatesGroupedByRepo.get((String) element).toArray();
+
+                    List<KnownCoordinate> sorted = Ordering.natural().onResultOf(STRING_REPRESENTATION)
+                            .sortedCopy(Lists.newArrayList(coordinatesGroupedByRepo.get((String) element)));
+
+                    return sorted.toArray();
                 }
                 return new Object[0];
             }
@@ -420,11 +434,14 @@ public class ModelRepositoriesView extends ViewPart {
         return coordinates;
     }
 
-    private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(Collection<ModelCoordinate> modelCoordinates) {
-        Multimap<ProjectCoordinate, ModelCoordinate> coordinatesGroupedByProjectCoordinate = LinkedListMultimap.create();
+    private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(
+            Collection<ModelCoordinate> modelCoordinates) {
+        Multimap<ProjectCoordinate, ModelCoordinate> coordinatesGroupedByProjectCoordinate = LinkedListMultimap
+                .create();
 
         for (ModelCoordinate modelCoordinate : modelCoordinates) {
-            coordinatesGroupedByProjectCoordinate.put(Coordinates.toProjectCoordinate(modelCoordinate), modelCoordinate);
+            coordinatesGroupedByProjectCoordinate
+                    .put(Coordinates.toProjectCoordinate(modelCoordinate), modelCoordinate);
         }
         return coordinatesGroupedByProjectCoordinate;
     }
