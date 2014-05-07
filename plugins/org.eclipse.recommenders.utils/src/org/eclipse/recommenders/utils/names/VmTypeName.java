@@ -10,12 +10,15 @@
  */
 package org.eclipse.recommenders.utils.names;
 
-import static org.eclipse.recommenders.utils.Checks.*;
-import static org.eclipse.recommenders.utils.Throws.*;
+import static org.eclipse.recommenders.utils.Checks.ensureIsFalse;
+import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
+import static org.eclipse.recommenders.utils.Checks.ensureIsTrue;
+import static org.eclipse.recommenders.utils.Throws.throwIllegalArgumentException;
+import static org.eclipse.recommenders.utils.Throws.throwUnreachable;
 
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.MapMaker;
@@ -64,8 +67,15 @@ public class VmTypeName implements ITypeName {
         return res;
     }
 
-    private static String removeGenerics(final String typeName) {
-        return StringUtils.substringBefore(typeName, "<");
+    private static String removeGenerics(String typeName) {
+        String re = "<[^<>]*>";
+        Pattern pattern = Pattern.compile(re);
+        Matcher matcher = pattern.matcher(typeName);
+        while (matcher.find()) {
+            typeName = matcher.replaceAll("");
+            matcher = pattern.matcher(typeName);
+        }
+        return typeName;
     }
 
     private String identifier;
