@@ -175,11 +175,16 @@ public class FileSnippetRepository implements ISnippetRepository {
                     doc.add(new Field(F_DESCRIPTION, description, Store.YES, Index.ANALYZED));
                     doc.add(new Field(F_DEFAULT_SEARCH_FIELD, description, Store.YES, Index.ANALYZED));
 
-                    if (!fSnippet.getParentFile().equals(snippetsdir)) {
-                        String parentName = fSnippet.getParentFile().getName();
-                        doc.add(new Field(F_TAG, parentName, Store.YES, Index.ANALYZED));
-                        doc.add(new Field(F_DEFAULT_SEARCH_FIELD, parentName, Store.NO, Index.ANALYZED));
+                    for (String tag : snippet.getTags()) {
+                        doc.add(new Field(F_TAG, tag, Store.YES, Index.ANALYZED));
+                        doc.add(new Field(F_DEFAULT_SEARCH_FIELD, tag, Store.NO, Index.ANALYZED));
                     }
+
+                    for (String keyword : snippet.getKeywords()) {
+                        doc.add(new Field(F_TAG, keyword, Store.YES, Index.ANALYZED));
+                        doc.add(new Field(F_DEFAULT_SEARCH_FIELD, keyword, Store.NO, Index.ANALYZED));
+                    }
+
                     writer.addDocument(doc);
                 } catch (Exception e) {
                     log.error("Failed to index snippet in " + fSnippet, e);
