@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.snipmatch;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.recommenders.utils.Uuidable;
 
