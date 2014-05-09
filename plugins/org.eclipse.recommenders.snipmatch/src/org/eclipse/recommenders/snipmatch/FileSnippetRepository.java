@@ -351,6 +351,11 @@ public class FileSnippetRepository implements ISnippetRepository {
         }
     }
 
+    @Override
+    public boolean isImportSupported() {
+        return true;
+    }
+
     private Snippet checkTypeAndConvertSnippet(ISnippet snippet) {
         if (snippet instanceof Snippet) {
             return (Snippet) snippet;
