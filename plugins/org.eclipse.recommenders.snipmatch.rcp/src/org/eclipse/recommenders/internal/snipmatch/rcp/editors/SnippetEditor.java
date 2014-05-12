@@ -10,9 +10,9 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.UUID.nameUUIDFromBytes;
 import static org.eclipse.recommenders.utils.Checks.ensureIsInstanceOf;
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.io.IOException;
 
@@ -121,6 +121,7 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
         }
 
         try {
+            input.setOldSnippet(Snippet.copy(snippet));
             repo.importSnippet(snippet);
             setPartName(getEditorInput().getName());
             setDirty(false);
