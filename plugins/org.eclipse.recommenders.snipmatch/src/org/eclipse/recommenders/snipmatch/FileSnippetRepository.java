@@ -33,7 +33,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
@@ -153,8 +152,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     public void index() throws IOException {
         writeLock.lock();
         try {
-            Collection<File> snippets = FileUtils.listFiles(snippetsdir, SNIPPETS_FILENAME_FILTER,
-                    TrueFileFilter.INSTANCE);
+            Collection<File> snippets = FileUtils.listFiles(snippetsdir, SNIPPETS_FILENAME_FILTER, null);
             Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
             IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_35, analyzer);
             config.setOpenMode(OpenMode.CREATE);
@@ -213,7 +211,7 @@ public class FileSnippetRepository implements ISnippetRepository {
             Preconditions.checkState(isOpen());
             // TODO MB: this is a costly operation that works only well with small repos.
             Set<Recommendation<ISnippet>> res = Sets.newHashSet();
-            for (File fSnippet : FileUtils.listFiles(snippetsdir, SNIPPETS_FILENAME_FILTER, TrueFileFilter.INSTANCE)) {
+            for (File fSnippet : FileUtils.listFiles(snippetsdir, SNIPPETS_FILENAME_FILTER, null)) {
                 try {
                     ISnippet snippet = snippetCache.get(fSnippet);
                     res.add(Recommendation.newRecommendation(snippet, 0));
@@ -334,6 +332,7 @@ public class FileSnippetRepository implements ISnippetRepository {
         }
     }
 
+    @Override
     public void importSnippet(ISnippet snippet) throws IOException {
         writeLock.lock();
         try {
