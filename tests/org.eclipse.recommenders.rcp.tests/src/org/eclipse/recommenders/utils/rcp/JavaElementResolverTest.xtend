@@ -2,16 +2,15 @@ package org.eclipse.recommenders.utils.rcp
 
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.jdt.core.IMethod
+import org.eclipse.recommenders.rcp.JavaElementResolver
 import org.eclipse.recommenders.tests.jdt.JavaProjectFixture
 import org.eclipse.recommenders.utils.Checks
 import org.eclipse.recommenders.utils.names.VmMethodName
-import org.eclipse.recommenders.rcp.JavaElementResolver
+import org.eclipse.recommenders.utils.names.VmTypeName
 import org.junit.Test
 
 import static junit.framework.Assert.*
 import static org.eclipse.recommenders.tests.CodeBuilder.*
-import org.eclipse.recommenders.utils.names.VmTypeName
-import org.junit.Ignore
 
 class JavaElementResolverTest {
 
@@ -124,12 +123,36 @@ class JavaElementResolverTest {
     }
 
     @Test
-    @Ignore("See Bug 429979")
+    //    @Ignore("See Bug 429979")
     def void testBoundMethod() {
         val code = classbody('''public <T extends List> void $m(T s){}''')
         val method = getMethod(code)
         val actual = sut.toRecMethod(method).get
         assertEquals("m(Ljava/util/List;)V", actual.signature)
+    }
+
+    @Test
+    def void testBoundWithNestedGenericMethod() {
+        val code = classbody('''public <T extends List<String>> void $m(T s){}''')
+        val method = getMethod(code)
+        val actual = sut.toRecMethod(method).get
+        assertEquals("m(Ljava/util/List;)V", actual.signature)
+    }
+
+    @Test
+    def void testMultiBoundMethod() {
+        val code = classbody('''public <L extends List, M extends Map> void $m(L l, M m){}''')
+        val method = getMethod(code)
+        val actual = sut.toRecMethod(method).get
+        assertEquals("m(Ljava/util/List;Ljava/util/Map;)V", actual.signature)
+    }
+
+    @Test
+    def void testBoundReturnType() {
+        val code = classbody('''public <T extends List> T $m(T s){}''')
+        val method = getMethod(code)
+        val actual = sut.toRecMethod(method).get
+        assertEquals("m(Ljava/util/List;)Ljava/util/List;", actual.signature)
     }
 
     @Test
