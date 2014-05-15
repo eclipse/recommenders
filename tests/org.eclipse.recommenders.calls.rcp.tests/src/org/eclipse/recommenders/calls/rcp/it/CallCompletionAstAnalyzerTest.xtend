@@ -112,6 +112,192 @@ class CallCompletionAstAnalyzerTest {
         verifyCalls(newHashSet("equals", "hashCode", "wait"))
     }
 
+    @Test
+    def void testIfCondition() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (o.hashCode() != 0) {
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfConditionThenCompletion() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (o.hashCode() != 0) {
+                o.$
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfThen() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (true) {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfElse() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (true) {
+                } else {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfThenElse() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (true) {
+                    o.equals()
+                } else {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("equals", "hashCode"))
+    }
+
+    @Test
+    def void testElse() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (o.equals()) {
+                    o.wait();
+                } else {
+                    o.hashCode();
+                    o.$
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("equals", "wait", "hashCode"))
+    }
+
+    @Test
+    def void testSwitch() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                switch(o.hashCode()) {
+                    case 0: o.equals();
+                    default: o.wait();
+                }
+                o.$;
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals", "wait"))
+    }
+
+    @Test
+    def void testSwitchBreak() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                switch(o.hashCode()) {
+                    case 0: o.equals(); break;
+                    default: o.wait(); break;
+                }
+                o.$;
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals", "wait"))
+    }
+
+    @Test
+    def void testWhileLoop() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                while (o.equals()) {
+                    o.hashCode();
+                    o.$
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("equals", "hashCode"))
+    }
+
+    @Test
+    def void testDoLoop() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                do {
+                    o.hashCode();
+                } while (o.equals());
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals"))
+    }
+
+    @Test
+    def void testForLoop() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                for (int i=0; i<5; i++) {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testForLoopCondition() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                for (int i=0; i<o.hashCode(); i++) {
+                    o.equals();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals"))
+    }
+
+    @Test
+    def void testForEachLoop() {
+        code = CodeBuilder::method(
+            '''
+                List l = null;
+                for (Object o : l) {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("iterator"))
+    }
 
     def verifyCalls(HashSet<String> strings) {
         val actual = model.observedCalls.map[name].toSet
