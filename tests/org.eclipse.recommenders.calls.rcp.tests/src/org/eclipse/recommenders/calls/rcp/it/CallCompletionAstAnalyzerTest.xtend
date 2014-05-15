@@ -3,7 +3,14 @@ package org.eclipse.recommenders.calls.rcp.it
 import com.google.common.collect.Sets
 import java.util.HashSet
 import org.eclipse.core.resources.ResourcesPlugin
+import org.eclipse.core.runtime.NullProgressMonitor
+import org.eclipse.jdt.core.ICompilationUnit
+import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.dom.AST
+import org.eclipse.jdt.core.dom.ASTNode
+import org.eclipse.jdt.core.dom.ASTParser
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions
+import org.eclipse.jdt.ui.SharedASTProvider
 import org.eclipse.recommenders.calls.ICallModel
 import org.eclipse.recommenders.calls.ICallModel.DefinitionKind
 import org.eclipse.recommenders.completion.rcp.it.CompletionSmokeTest
@@ -112,6 +119,193 @@ class CallCompletionAstAnalyzerTest {
         verifyCalls(newHashSet("equals", "hashCode", "wait"))
     }
 
+    @Test
+    def void testIfCondition() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (o.hashCode() != 0) {
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfConditionThenCompletion() {
+        code = CodeBuilder::method(
+            '''
+                Object o = new Object();
+                if (o.hashCode() != 0) {
+                o.$
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfThen() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (true) {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfElse() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (true) {
+                } else {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testIfThenElse() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (true) {
+                    o.equals()
+                } else {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("equals", "hashCode"))
+    }
+
+    @Test
+    def void testElse() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                if (o.equals()) {
+                    o.wait();
+                } else {
+                    o.hashCode();
+                    o.$
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("equals", "wait", "hashCode"))
+    }
+
+    @Test
+    def void testSwitch() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                switch(o.hashCode()) {
+                    case 0: o.equals();
+                    default: o.wait();
+                }
+                o.$;
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals", "wait"))
+    }
+
+    @Test
+    def void testSwitchBreak() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                switch(o.hashCode()) {
+                    case 0: o.equals(); break;
+                    default: o.wait(); break;
+                }
+                o.$;
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals", "wait"))
+    }
+
+    @Test
+    def void testWhileLoop() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                while (o.equals()) {
+                    o.hashCode();
+                    o.$
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("equals", "hashCode"))
+    }
+
+    @Test
+    def void testDoLoop() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                do {
+                    o.hashCode();
+                } while (o.equals());
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals"))
+    }
+
+    @Test
+    def void testForLoop() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                for (int i=0; i<5; i++) {
+                    o.hashCode();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode"))
+    }
+
+    @Test
+    def void testForLoopCondition() {
+        code = CodeBuilder::method(
+            '''
+                Object o = null;
+                for (int i=0; i<o.hashCode(); i++) {
+                    o.equals();
+                }
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals"))
+    }
+
+    @Test
+    def void testForEachLoop() {
+        code = CodeBuilder::method(
+            '''
+                List l = null;
+                for (Object o : l) {
+                    o.hashCode();
+                    l.size();
+                }
+                l.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("size"))
+    }
 
     def verifyCalls(HashSet<String> strings) {
         val actual = model.observedCalls.map[name].toSet
@@ -223,14 +417,29 @@ class CallCompletionAstAnalyzerTest {
         val cu = struct.first;
         cu.becomeWorkingCopy(null)
 
-        // just be sure that this file still compiles...
-        val ast = cu.reconcile(AST::JLS4, true, true, null, null);
+        val ast = SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, new NullProgressMonitor());
         Assert.assertNotNull(ast)
 
         computer = Stubs.newCallComputer
         processor = computer.getProcessor
         CompletionSmokeTest.complete(computer, cu, struct.second.head)
         model = processor.model
+    }
+
+    def ASTNode createCompilationUnit(ICompilationUnit cu, CharSequence scenario) {
+        val parser = ASTParser.newParser(AST.JLS3)
+        parser.setKind(ASTParser.K_COMPILATION_UNIT)
+        parser.setBindingsRecovery(true)
+        parser.setResolveBindings(true)
+        parser.setSource(cu)
+
+        val options = JavaCore.getDefaultOptions()
+        options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_6)
+        options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_6)
+        options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6)
+        parser.setCompilerOptions(options)
+
+        return parser.createAST(null)
     }
 
 }
