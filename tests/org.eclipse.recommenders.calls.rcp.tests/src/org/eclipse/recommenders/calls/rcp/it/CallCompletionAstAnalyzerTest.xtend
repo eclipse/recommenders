@@ -19,11 +19,10 @@ import org.eclipse.recommenders.internal.calls.rcp.CallCompletionSessionProcesso
 import org.eclipse.recommenders.tests.CodeBuilder
 import org.eclipse.recommenders.tests.jdt.JavaProjectFixture
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 
 import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.*
-import java.io.IOException
-import org.junit.Ignore
 
 class CallCompletionAstAnalyzerTest {
 
@@ -410,6 +409,155 @@ class CallCompletionAstAnalyzerTest {
         code = CodeBuilder::method('''String[] args=new String[0]; List l = null; l.$''')
         exercise()
         verifyDefinition(NULL_LITERAL)
+    }
+
+    /**
+     * documentation purpose: we simply match on variable names.
+     * We do no control flow or variable scope analysis!
+     */
+    @Test
+    def void testCallsOnReusedVar() {
+        code = CodeBuilder::method(
+            '''
+                Object o = new Object();
+                o.hashCode();
+                o = new Object();
+                o.equals(null);
+                o.$
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "equals"))
+        verifyDefinition(NEW)
+    }
+
+    //    @Test
+    //    def void testCallsOnParam01() {
+    //        // this test ensures that not accidentally calls on this are collected for parameter (as happened)
+    //        code = CodeBuilder::classbody(
+    //            '''
+    //                public void m1(String s$) {
+    //                    hashCode();
+    //                }
+    //            ''')
+    //        exercise()
+    //        verifyCalls(newHashSet())
+    //        verifyDefinition(DefinitionKind.PARAM)
+    //    }
+    @Test
+    def void testCallsOnThisAndSuper() {
+        code = CodeBuilder::method(
+            '''
+                hashCode();
+                super.wait();
+                this.equals(null);
+                $
+            ''')
+        exercise()
+        verifyCalls(newHashSet("hashCode", "wait", "equals"))
+    }
+
+    @Test
+    def void testCallsSuperConstructor() {
+        val className = "TestCallsSuperConstructor"
+        code = CodeBuilder::classbody(className,
+            className + '''
+                () {
+                    super();
+                    $
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("<init>"))
+    }
+
+    @Test
+    def void testCallThisConstructor() {
+        val className = "TestCallThisConstructor"
+        code = CodeBuilder::classbody(className,
+            className + '''
+                () {
+                }
+            ''' + className + '''
+                (String s) {
+                    this();
+                    $
+                }
+            ''')
+        exercise()
+        verifyCalls(newHashSet("<init>"))
+    }
+
+    @Test
+    def void testDefConstructor() {
+        code = CodeBuilder::method(
+            '''
+                Object o = new Object();
+                o.$
+            ''')
+        exercise()
+        verifyDefinition(NEW)
+    }
+
+    @Test
+    def void testDefSuperMethodReturn() {
+        code = CodeBuilder::method(
+            '''
+                Integer hash = super.hashCode();
+                hash.$
+            ''')
+        exercise()
+        verifyDefinition(RETURN)
+    }
+
+    @Test
+    def void testDefOnCallChain() {
+        code = CodeBuilder::method(
+            '''
+                Integer i = Executors.newCachedThreadPool().hashCode();
+                i.$
+            ''')
+        exercise()
+        verifyDefinition(RETURN)
+    }
+
+    @Test
+    def void testDefOnAlias() {
+        code = CodeBuilder::method(
+            '''
+                Object a = new Object();
+                Object b = a;
+                b.$
+            ''')
+        exercise()
+
+        // Field is really just an unknown definition
+        verifyDefinition(FIELD)
+    }
+
+    @Test
+    def void testDefAssignment() {
+        code = CodeBuilder::method(
+            '''
+                Object a = new Object();
+                Object b = new Object();
+                b = a;
+                b.$
+            ''')
+        exercise()
+        verifyDefinition(NEW)
+    }
+
+    @Test
+    def void testDefFor() {
+        code = CodeBuilder.method(
+            '''
+                List<String> l;
+                for(Iterator<String> it = l.iterator(); it.$) {
+                    
+                }
+            ''')
+        exercise()
+        verifyDefinition(RETURN);
     }
 
     def verifyDefinition(DefinitionKind expected) {
