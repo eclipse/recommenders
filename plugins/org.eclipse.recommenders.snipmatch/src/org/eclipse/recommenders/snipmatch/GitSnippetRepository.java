@@ -38,41 +38,61 @@ public class GitSnippetRepository extends FileSnippetRepository {
         super(basedir);
         this.basedir = basedir;
         this.repoUrl = repoUrl;
-        gitFile = new File(basedir.getAbsolutePath() + "/.git");
+        gitFile = new File(basedir.getAbsolutePath() + "/.git"); //$NON-NLS-1$
     }
 
     @Override
     public void open() throws IOException {
         synchronized (this) {
+            boolean gitFileExists = gitFile.exists();
             try {
-                if (gitFile.exists()) {
+                if (gitFileExists) {
                     updateSnippetsRepo();
                 } else {
                     cloneSnippetsRepo();
                 }
             } catch (InvalidRemoteException e) {
-                LOG.error("Invalid remote repository.", e);
-                throw new IOException(String.format("Invalid remote repository '%s'. Check the repository's URL.",
-                        repoUrl), e);
+                LOG.error("Invalid remote repository.", e); //$NON-NLS-1$
+                throw createException(gitFileExists,
+                        String.format(Messages.ERROR_INVALID_REMOTE_REPOSITORY, repoUrl), e);
             } catch (TransportException e) {
-                LOG.error("Transport operation failed.", e);
-                throw new IOException("Could not connect to remote repository. Your internet connection may be down.",
-                        e);
+                LOG.error("Transport operation failed.", e); //$NON-NLS-1$
+                throw createException(gitFileExists,
+                        Messages.ERROR_COULD_NOT_CONNECT_TO_REMOTE_REPOSITORY, e);
             } catch (GitAPIException e) {
-                LOG.error("Exception while update/clone repository.", e);
-                throw new IOException("Exception while update/clone repository.", e);
+                LOG.error("Exception while update/clone repository.", e); //$NON-NLS-1$
+                throw createException(gitFileExists, Messages.ERROR_WHILE_UPDATE_CLONE_REPOSITORY, e);
             } catch (CoreException e) {
-                LOG.error("Exception while opening repository.", e);
-                throw new IOException("Exception while opening repository", e);
+                LOG.error("Exception while opening repository.", e); //$NON-NLS-1$
+                throw createException(gitFileExists, Messages.ERROR_WHILE_OPENING_REPOSITORY, e);
+            } finally {
+                if (gitFileExists) {
+                    super.open();
+                }
             }
         }
         super.open();
     }
 
+    @SuppressWarnings("serial")
+    public class GitUpdateException extends IOException {
+        public GitUpdateException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    private IOException createException(boolean gitFileExists, String message, Throwable e) {
+        if (gitFileExists) {
+            return new GitUpdateException(message, e);
+        } else {
+            return new IOException(message, e);
+        }
+    }
+
     private void cloneSnippetsRepo() throws GitAPIException, InvalidRemoteException, TransportException, IOException {
         CloneCommand clone = Git.cloneRepository();
         clone.setBare(false);
-        clone.setBranch("master");
+        clone.setBranch("master"); //$NON-NLS-1$
         clone.setCloneAllBranches(false);
         clone.setDirectory(basedir).setURI(getRepositoryLocation());
         clone.call();
@@ -82,9 +102,9 @@ public class GitSnippetRepository extends FileSnippetRepository {
             CoreException {
         FileRepository localRepo = new FileRepository(gitFile);
         FileBasedConfig config = localRepo.getConfig();
-        Set<String> subsections = config.getSubsections("remote");
+        Set<String> subsections = config.getSubsections("remote"); //$NON-NLS-1$
         for (String subsection : subsections) {
-            String remoteUrl = config.getString("remote", subsection, "url");
+            String remoteUrl = config.getString("remote", subsection, "url"); //$NON-NLS-1$ //$NON-NLS-2$
             if (!remoteUrl.equals(getRepositoryLocation())) {
                 cloneSnippetsRepo();
                 return;
