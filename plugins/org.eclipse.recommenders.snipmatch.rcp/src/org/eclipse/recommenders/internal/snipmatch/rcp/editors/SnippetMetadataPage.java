@@ -19,10 +19,10 @@ import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelec
 
 import java.util.UUID;
 
-import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -277,11 +277,13 @@ public class SnippetMetadataPage extends FormPage {
         IObservableValue wpTxtNameText = text(SWT.Modify).observe(txtName);
         IObservableValue ppName = value(Snippet.class, "name", String.class).observe(snippet); //$NON-NLS-1$
         ctx.bindValue(wpTxtNameText, ppName, null, null);
+        wpTxtNameText.addChangeListener(new ChangeListener());
 
         // description
         IObservableValue wpTxtDescriptionText = text(SWT.Modify).observe(txtDescription);
         IObservableValue ppDescription = value(Snippet.class, "description", String.class).observe(snippet); //$NON-NLS-1$
         ctx.bindValue(wpTxtDescriptionText, ppDescription, null, null);
+        wpTxtDescriptionText.addChangeListener(new ChangeListener());
 
         // keywords
         ppKeywords = PojoProperties.list(Snippet.class, "keywords", String.class).observe(snippet); //$NON-NLS-1$
@@ -323,18 +325,6 @@ public class SnippetMetadataPage extends FormPage {
         IObservableValue vpTagSelection = singleSelection().observe(listViewerTags);
         IObservableValue wpBtnRemoveTagsEnable = enabled().observe(btnRemoveTag);
         ctx.bindValue(vpTagSelection, wpBtnRemoveTagsEnable, strategy, null);
-
-        for (Object o : ctx.getValidationStatusProviders()) {
-            if (o instanceof Binding) {
-                ((Binding) o).getTarget().addChangeListener(new IChangeListener() {
-
-                    @Override
-                    public void handleChange(org.eclipse.core.databinding.observable.ChangeEvent event) {
-                        changeDirtyStatus();
-                    }
-                });
-            }
-        }
     }
 
     @Override
@@ -360,5 +350,12 @@ public class SnippetMetadataPage extends FormPage {
 
     private void changeDirtyStatus() {
         ((SnippetEditor) getEditor()).setDirty(true);
+    }
+
+    private final class ChangeListener implements IChangeListener {
+        @Override
+        public void handleChange(ChangeEvent event) {
+            changeDirtyStatus();
+        }
     }
 }
