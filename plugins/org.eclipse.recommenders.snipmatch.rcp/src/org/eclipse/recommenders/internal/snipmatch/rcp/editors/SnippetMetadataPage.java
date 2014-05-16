@@ -19,11 +19,9 @@ import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelec
 
 import java.util.UUID;
 
-import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
-import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.ListChangeEvent;
@@ -147,7 +145,7 @@ public class SnippetMetadataPage extends FormPage {
         listViewerKeywords = new ListViewer(managedForm.getForm().getBody(), SWT.BORDER | SWT.V_SCROLL);
         List lstKeywords = listViewerKeywords.getList();
         lstKeywords
-                .setLayoutData(GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0).create());
+        .setLayoutData(GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0).create());
 
         btnContainerKeywords = managedForm.getToolkit().createComposite(managedForm.getForm().getBody(), SWT.NONE);
         btnContainerKeywords.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
@@ -323,18 +321,6 @@ public class SnippetMetadataPage extends FormPage {
         IObservableValue vpTagSelection = singleSelection().observe(listViewerTags);
         IObservableValue wpBtnRemoveTagsEnable = enabled().observe(btnRemoveTag);
         ctx.bindValue(vpTagSelection, wpBtnRemoveTagsEnable, strategy, null);
-
-        for (Object o : ctx.getValidationStatusProviders()) {
-            if (o instanceof Binding) {
-                ((Binding) o).getTarget().addChangeListener(new IChangeListener() {
-
-                    @Override
-                    public void handleChange(org.eclipse.core.databinding.observable.ChangeEvent event) {
-                        changeDirtyStatus();
-                    }
-                });
-            }
-        }
     }
 
     @Override
