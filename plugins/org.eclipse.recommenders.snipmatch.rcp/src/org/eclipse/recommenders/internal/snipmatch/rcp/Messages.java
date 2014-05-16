@@ -64,6 +64,7 @@ public class Messages extends NLS {
     public static String SNIPPETS_VIEW_BUTTON_REMOVE;
     public static String WARNING_CANNOT_APPLY_SNIPPET;
     public static String WARNING_REPOSITION_CURSOR;
+    public static String WARNING_WORKING_WITH_PREVIOSLY_DOWNLOADED_VERSION;
 
     static {
         // initialize resource bundle
