@@ -116,7 +116,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     public FileSnippetRepository(File basedir) {
         snippetsdir = new File(basedir, "snippets");
         indexdir = new File(basedir, "index");
-        this.repoUrl = mangle(basedir.getAbsolutePath());
+        repoUrl = mangle(basedir.getAbsolutePath());
 
         analyzer = createAnalyzer();
         parser = createParser();
@@ -211,6 +211,7 @@ public class FileSnippetRepository implements ISnippetRepository {
         }
     }
 
+    @Override
     public boolean isOpen() {
         return timesOpened > 0;
     }

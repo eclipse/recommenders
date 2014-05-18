@@ -12,8 +12,8 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 
 import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
-import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.internal.snipmatch.rcp.SnippetProposal.createDisplayString;
+import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -214,7 +214,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             Display.getDefault().asyncExec(new Runnable() {
                 @Override
                 public void run() {
-                    btnAdd.setEnabled(true);
+                    btnAdd.setEnabled(isImportSupported());
                 }
             });
         }
@@ -223,12 +223,19 @@ public class SnippetsView extends ViewPart implements IRcpService {
     @Subscribe
     public void onEvent(SnippetRepositoryClosedEvent e) throws IOException {
         refreshInput();
-        btnAdd.setEnabled(isImportSupported());
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                if (!btnAdd.isDisposed()) {
+                    btnAdd.setEnabled(isImportSupported());
+                }
+            }
+        });
     }
 
     private boolean isImportSupported() {
         for (ISnippetRepository repo : repos) {
-            if (repo.isImportSupported()) {
+            if (repo.isOpen() && repo.isImportSupported()) {
                 return true;
             }
         }
@@ -248,7 +255,9 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
                 final Set<Recommendation<ISnippet>> snippets = Sets.newHashSet();
                 for (ISnippetRepository repo : repos) {
-                    snippets.addAll(repo.getSnippets());
+                    if (repo.isOpen()) {
+                        snippets.addAll(repo.getSnippets());
+                    }
                 }
                 Display.getDefault().asyncExec(new Runnable() {
                     @Override

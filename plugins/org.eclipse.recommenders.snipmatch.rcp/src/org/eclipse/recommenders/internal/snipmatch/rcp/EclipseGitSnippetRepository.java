@@ -68,7 +68,7 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
         this.bus = bus;
         String remoteUri = prefs.getLocation();
         this.basedir = new File(basedir, Urls.mangle(remoteUri));
-        this.delegate = new GitSnippetRepository(this.basedir, remoteUri);
+        delegate = new GitSnippetRepository(this.basedir, remoteUri);
 
         ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         readLock = readWriteLock.readLock();
@@ -288,7 +288,8 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
         }
     }
 
-    private boolean isOpen() {
+    @Override
+    public boolean isOpen() {
         return timesOpened > 0;
     }
 
