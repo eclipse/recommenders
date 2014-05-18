@@ -132,9 +132,8 @@ public class FileSnippetRepositoryTest {
         sut.hasSnippet(UUID.randomUUID());
     }
 
-    @Test(expected = IllegalStateException.class)
     public void testCallDeleteOnClosedRepo() throws Exception {
-        sut.delete(UUID.randomUUID());
+        assertThat(sut.delete(UUID.randomUUID()), is(false));
     }
 
     @Test(expected = IllegalStateException.class)
