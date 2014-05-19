@@ -21,14 +21,14 @@ public class SubwordsRcpPreferences {
 
     @Inject
     @Preference(PREF_COMPUTE_ADDITIONAL_TYPE_PROPOSALS)
-    public boolean computeAdditionalTypeProposals;
+    public boolean fastModeAdditionalTypeProposals;
 
     @Inject
     @Preference(PREF_COMPUTE_ADDITIONAL_CONSTRUCTOR_PROPOSALS)
-    public boolean computeAdditionalConstructorProposals;
+    public boolean fastModeConstructorProposals;
 
     public SubwordsRcpPreferences() {
-        computeAdditionalTypeProposals = true;
-        computeAdditionalConstructorProposals = true;
+        fastModeAdditionalTypeProposals = false;
+        fastModeConstructorProposals = false;
     }
 }
