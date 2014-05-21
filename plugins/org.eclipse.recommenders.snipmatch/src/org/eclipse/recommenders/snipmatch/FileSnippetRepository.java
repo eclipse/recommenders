@@ -326,7 +326,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         writeLock.lock();
         try {
             if (timesOpened == 0) {
