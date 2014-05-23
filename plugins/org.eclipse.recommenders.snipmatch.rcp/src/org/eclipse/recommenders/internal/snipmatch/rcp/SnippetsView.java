@@ -69,6 +69,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
@@ -78,7 +79,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
     private static Logger LOG = LoggerFactory.getLogger(SnippetsView.class);
 
     private final Set<ISnippetRepository> repos;
-    private Text txtSearch;
+    private Text txtFilter;
     private List list;
     private ListViewer viewer;
     private Button btnEdit;
@@ -101,10 +102,10 @@ public class SnippetsView extends ViewPart implements IRcpService {
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout(2, false));
 
-        txtSearch = new Text(composite, SWT.BORDER | SWT.ICON_SEARCH | SWT.SEARCH | SWT.CANCEL);
-        txtSearch.setMessage(Messages.SEARCH_PLACEHOLDER_FILTER_TEXT);
-        txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        txtSearch.addModifyListener(new ModifyListener() {
+        txtFilter = new Text(composite, SWT.BORDER | SWT.ICON_SEARCH | SWT.SEARCH | SWT.CANCEL);
+        txtFilter.setMessage(Messages.SEARCH_PLACEHOLDER_FILTER_TEXT);
+        txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        txtFilter.addModifyListener(new ModifyListener() {
 
             @Override
             public void modifyText(ModifyEvent e) {
@@ -112,7 +113,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             }
         });
 
-        txtSearch.addKeyListener(new KeyAdapter() {
+        txtFilter.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.keyCode == SWT.ARROW_DOWN && list.getItemCount() != 0) {
@@ -281,10 +282,20 @@ public class SnippetsView extends ViewPart implements IRcpService {
                     @Override
                     public void run() {
                         if (!viewer.getControl().isDisposed()) {
-                            final Set<Recommendation<ISnippet>> snippets = Sets.newHashSet();
+                            Set<Recommendation<ISnippet>> snippets = Sets.newHashSet();
                             for (ISnippetRepository repo : repos) {
-                                snippets.addAll(repo.search(txtSearch.getText()));
+                                snippets.addAll(repo.getSnippets());
                             }
+                            final String filterText = txtFilter.getText().toLowerCase();
+                            snippets = Sets.filter(snippets, new Predicate<Recommendation<ISnippet>>() {
+
+                                @Override
+                                public boolean apply(Recommendation<ISnippet> input) {
+                                    String snippetName = input.getProposal().getName().toLowerCase();
+                                    String snippetDescription = input.getProposal().getName().toLowerCase();
+                                    return snippetName.contains(filterText) || snippetDescription.contains(filterText);
+                                }
+                            });
                             viewer.setInput(snippets);
                         }
                         if (!btnAdd.isDisposed()) {

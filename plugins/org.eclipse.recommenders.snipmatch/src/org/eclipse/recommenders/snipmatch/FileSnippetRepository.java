@@ -72,6 +72,9 @@ import com.google.common.collect.Sets;
 
 public class FileSnippetRepository implements ISnippetRepository {
 
+    private static final int MAX_SEARCH_RESULTS = 100;
+    private static final int CACHE_SIZE = 200;
+
     private static final Set<String> EMPTY_STOPWORDS = emptySet();
 
     private static final String F_NAME = "name";
@@ -103,7 +106,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     private final Analyzer analyzer;
     private final QueryParser parser;
 
-    private LoadingCache<File, Snippet> snippetCache = CacheBuilder.newBuilder().maximumSize(200)
+    private LoadingCache<File, Snippet> snippetCache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE)
             .build(new CacheLoader<File, Snippet>() {
 
                 @Override
@@ -115,6 +118,8 @@ public class FileSnippetRepository implements ISnippetRepository {
             });
 
     public FileSnippetRepository(File basedir) {
+        Preconditions.checkArgument(CACHE_SIZE > MAX_SEARCH_RESULTS,
+                "The cache size needs to be larger than the maximum number of search results.");
         snippetsdir = new File(basedir, "snippets");
         indexdir = new File(basedir, "index");
         repoUrl = mangle(basedir.getAbsolutePath());
@@ -271,7 +276,7 @@ public class FileSnippetRepository implements ISnippetRepository {
             Query q = parser.parse(query);
 
             searcher = new IndexSearcher(reader);
-            for (ScoreDoc hit : searcher.search(q, null, 100).scoreDocs) {
+            for (ScoreDoc hit : searcher.search(q, null, MAX_SEARCH_RESULTS).scoreDocs) {
                 Document doc = searcher.doc(hit.doc);
                 results.add(new File(doc.get(F_PATH)));
             }
