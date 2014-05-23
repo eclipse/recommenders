@@ -24,7 +24,27 @@ public interface ISnippetRepository extends Openable, Closeable {
 
     ImmutableSet<Recommendation<ISnippet>> getSnippets();
 
+    /**
+     * Returns <b>all</b> snippets matching the search query. Does not use timeouts or relevance thresholds.
+     *
+     * This method may block for some time.
+     *
+     * @param query
+     * @return a list of all snippets matching the search query
+     */
     List<Recommendation<ISnippet>> search(String query);
+
+    /**
+     * Returns <b>at most</b> <code>maxResults</code> snippets matching the search query. Implementations may return
+     * less than the specified number of snippets at their own discretion. This maybe due to performance reasons,
+     * timeouts or relevance thresholds.
+     *
+     * Implementations should provide results quickly.
+     *
+     * @param query
+     * @return a list of all snippets matching the search query
+     */
+    List<Recommendation<ISnippet>> search(String query, int maxResults);
 
     String getRepositoryLocation();
 
