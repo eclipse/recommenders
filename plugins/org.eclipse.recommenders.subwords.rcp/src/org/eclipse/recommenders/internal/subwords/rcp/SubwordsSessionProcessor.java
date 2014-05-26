@@ -23,10 +23,11 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnFieldType;
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMethodReturnType;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleNameReference;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -46,7 +47,6 @@ import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.utils.TimeDelimitedProgressMonitor;
 import org.eclipse.ui.IEditorPart;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -76,13 +76,22 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
         int offset = crContext.getInvocationOffset();
 
-        // List l = new List$ --> L$
-        if (completionNode instanceof CompletionOnSingleTypeReference
-                && completionNodeParent instanceof LocalDeclaration && length > 1) {
+        // new Ctor$ --> C$
+        if (completionNode instanceof CompletionOnSingleTypeReference && length > 1) {
             triggerlocations.add(offset - length + 1);
         }
 
-        // getPath(pat$) --> p$
+        // public void method(Pt$) --> P$
+        if (completionNode instanceof CompletionOnFieldType && length > 1) {
+            triggerlocations.add(offset - length + 1);
+        }
+
+        // public Rt$ getPath() --> R$
+        if (completionNode instanceof CompletionOnMethodReturnType && length > 1) {
+            triggerlocations.add(offset - length + 1);
+        }
+
+        // method(Pt$); --> P$
         if (completionNode instanceof CompletionOnSingleNameReference && completionNodeParent instanceof MessageSend
                 && length > 1) {
             triggerlocations.add(offset - length + 1);
@@ -145,7 +154,6 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         return proposals != null ? proposals : Maps.<IJavaCompletionProposal, CompletionProposal>newHashMap();
     }
 
-    @VisibleForTesting
     protected IEditorPart lookupEditor(ICompilationUnit cu) {
         return EditorUtility.isOpenInEditor(cu);
     }

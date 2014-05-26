@@ -28,7 +28,11 @@ public class SubwordsRcpPreferences {
     public boolean computeAdditionalConstructorProposals;
 
     public SubwordsRcpPreferences() {
-        computeAdditionalTypeProposals = true;
-        computeAdditionalConstructorProposals = true;
+        this(true, true);
+    }
+
+    public SubwordsRcpPreferences(boolean computeAdditionalTypeProposals, boolean computeAdditionalConstructorProposals) {
+        this.computeAdditionalTypeProposals = computeAdditionalTypeProposals;
+        this.computeAdditionalConstructorProposals = computeAdditionalConstructorProposals;
     }
 }
