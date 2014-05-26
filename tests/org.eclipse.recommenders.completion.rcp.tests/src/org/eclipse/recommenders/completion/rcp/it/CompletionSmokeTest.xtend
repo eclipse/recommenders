@@ -446,7 +446,7 @@ class CompletionSmokeTest {
                     new OverridesRcpPreferences)
             }
             case "subwords": {
-                return new MockSubwordsSessionProcessor(new CachingAstProvider)
+                return new SubwordsSessionProcessor(new CachingAstProvider, new SubwordsRcpPreferences)
             }
         }
     }
@@ -469,20 +469,5 @@ class MockedIntelligentCompletionProposalComputer<T extends SessionProcessor> ex
 
     override isContentAssistConfigurationOkay() {
         true;
-    }
-}
-
-class MockSubwordsSessionProcessor extends SubwordsSessionProcessor {
-
-    new(IAstProvider astProvider) {
-        super(astProvider, new SubwordsRcpPreferences())
-    }
-
-    override IEditorPart lookupEditor(ICompilationUnit cu) {
-        val ed = mock(IEditorPart)
-        val in = mock(IEditorInput)
-        when(ed.editorInput).thenReturn(in)
-        when(in.getAdapter(any())).thenReturn(cu)
-        ed
     }
 }
