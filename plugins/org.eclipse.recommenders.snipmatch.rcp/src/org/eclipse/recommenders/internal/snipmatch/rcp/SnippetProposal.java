@@ -69,9 +69,9 @@ public class SnippetProposal extends TemplateProposal {
         StringBuilder header = new StringBuilder();
 
         if (!valid) {
-            header.append(MessageFormat.format(Messages.WARNING_CANNOT_APPLY_SNIPPET, "// XXX")); // NON-NLS-1$
+            header.append(MessageFormat.format(Messages.WARNING_CANNOT_APPLY_SNIPPET, Messages.PREVIEW_COMMENT_XXX)); // NON-NLS-1$
             header.append(LINE_SEPARATOR);
-            header.append(MessageFormat.format(Messages.WARNING_REPOSITION_CURSOR, "// FIXME")); // NON-NLS-1$
+            header.append(MessageFormat.format(Messages.WARNING_REPOSITION_CURSOR, Messages.PREVIEW_COMMENT_TODO)); // NON-NLS-1$
             header.append(LINE_SEPARATOR);
             header.append(LINE_SEPARATOR);
         }
@@ -104,7 +104,7 @@ public class SnippetProposal extends TemplateProposal {
         if (isNullOrEmpty(snippet.getDescription())) {
             return snippet.getName();
         } else {
-            return MessageFormat.format("{0} \u2013 {1}", snippet.getName(), snippet.getDescription()); // NON-NLS-1$
+            return MessageFormat.format(Messages.SEARCH_DISPLAY_STRING, snippet.getName(), snippet.getDescription()); // NON-NLS-1$
         }
     }
 
