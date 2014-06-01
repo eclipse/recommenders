@@ -10,10 +10,9 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
-import static com.google.inject.Scopes.SINGLETON;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import javax.inject.Singleton;
 
@@ -22,7 +21,7 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.FontRegistry;
-import org.eclipse.recommenders.snipmatch.ISnippetRepository;
+import org.eclipse.recommenders.snipmatch.ISnippetRepositoryProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.themes.ITheme;
@@ -30,31 +29,45 @@ import org.eclipse.ui.themes.IThemeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.common.eventbus.EventBus;
 import com.google.common.io.Files;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.multibindings.Multibinder;
+import com.google.inject.Scopes;
 import com.google.inject.name.Named;
 
 public class SnipmatchRcpModule extends AbstractModule {
 
     public static final String SNIPPET_REPOSITORY_BASEDIR = "SNIPPET_REPOSITORY_BASEDIR"; //$NON-NLS-1$
+    public static final String SNIPPET_REPOSITORY_PROVIDERS = "SNIPPET_REPOSITORY_PROVIDERS"; //$NON-NLS-1$
 
     private static final Logger LOG = LoggerFactory.getLogger(SnipmatchRcpModule.class);
 
     @Override
     protected void configure() {
-        Multibinder<ISnippetRepository> uriBinder = Multibinder.newSetBinder(binder(), ISnippetRepository.class);
-        uriBinder.addBinding().to(EclipseGitSnippetRepository.class);
-        bind(EclipseGitSnippetRepository.class).in(SINGLETON);
+        bind(Repositories.class).in(Scopes.SINGLETON);
     }
 
     @Provides
     @Singleton
-    public SnipmatchRcpPreferences provide(IWorkbench wb) {
+    public SnipmatchRcpPreferences provide(IWorkbench wb, EventBus bus,
+            @Named(SNIPPET_REPOSITORY_PROVIDERS) ImmutableSet<ISnippetRepositoryProvider> providers) {
         IEclipseContext context = (IEclipseContext) wb.getService(IEclipseContext.class);
-        SnipmatchRcpPreferences prefs = ContextInjectionFactory.make(SnipmatchRcpPreferences.class, context);
+        SnipmatchRcpPreferences prefs = new SnipmatchRcpPreferences(bus, providers);
+        ContextInjectionFactory.inject(prefs, context);
         return prefs;
+    }
+
+    @Provides
+    @Singleton
+    @Named(SNIPPET_REPOSITORY_PROVIDERS)
+    public ImmutableSet<ISnippetRepositoryProvider> provide(EventBus bus) {
+        Set<ISnippetRepositoryProvider> providers = Sets.newHashSet();
+        // TODO: Read extension point
+        providers.add(new EclipseGitSnippetRepositoryProvider(bus));
+        return ImmutableSet.copyOf(providers);
     }
 
     @Provides

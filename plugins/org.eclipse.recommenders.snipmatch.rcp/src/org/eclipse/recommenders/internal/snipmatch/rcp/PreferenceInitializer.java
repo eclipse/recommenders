@@ -23,7 +23,10 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
     @Override
     public void initializeDefaultPreferences() {
+        String configuration = new EclipseGitSnippetRepositoryProvider().convert(new EclipseGitSnippetRepositoryConfiguration(
+                REPO_URL, true));
+
         ScopedPreferenceStore store = new ScopedPreferenceStore(DefaultScope.INSTANCE, Constants.BUNDLE_ID);
-        store.setDefault(Constants.PREF_SNIPPETS_REPO, REPO_URL);
+        store.setDefault(Constants.PREF_SNIPPETS_REPO, configuration);
     }
 }
