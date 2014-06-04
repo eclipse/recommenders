@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.LinkResolver;
 import org.eclipse.jdt.internal.corext.template.java.NameResolver;
 import org.eclipse.jdt.internal.corext.template.java.TypeResolver;
+import org.eclipse.jdt.internal.corext.template.java.TypeVariableResolver;
 import org.eclipse.jdt.internal.corext.template.java.VarResolver;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -103,6 +104,10 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
         ElementTypeResolver elementTypeResolver = new ElementTypeResolver();
         elementTypeResolver.setType("elemType"); //$NON-NLS-1$
         contextType.addResolver(elementTypeResolver);
+
+        TypeVariableResolver typeVariableResolver = new TypeVariableResolver();
+        typeVariableResolver.setType("argType"); //$NON-NLS-1$
+        contextType.addResolver(typeVariableResolver);
 
         return contextType;
     }
