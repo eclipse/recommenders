@@ -133,10 +133,10 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
         JavaContentAssistContextMock ctx = new JavaContentAssistContextMock(cu, completionIndex);
         SessionProcessor processor = new SubwordsSessionProcessor(new CachingAstProvider(), preferences);
         CompletionRcpPreferences prefs = Mockito.mock(CompletionRcpPreferences.class);
-        Mockito.when(prefs.getSessionProcessors())
-                .thenReturn(
-                        singletonList(new SessionProcessorDescriptor("subwords", "name", "desc", null, 0, true, "",
-                                processor)));
+        Mockito.when(prefs.getEnabledSessionProcessors())
+        .thenReturn(
+                singletonList(new SessionProcessorDescriptor("subwords", "name", "desc", null, 0, true, "",
+                        processor)));
 
         IntelligentCompletionProposalComputer sut = new MockedIntelligentCompletionProposalComputer(processor, prefs);
         sut.sessionStarted();

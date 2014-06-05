@@ -400,7 +400,7 @@ class CompletionSmokeTest {
         val sessionProcessor = new SessionProcessorDescriptor("", "", "", null, 0, true, "", sut)
 
         val preferences = mock(CompletionRcpPreferences)
-        when(preferences.getSessionProcessors).thenReturn(ImmutableList.of(sessionProcessor))
+        when(preferences.getEnabledSessionProcessors).thenReturn(ImmutableList.of(sessionProcessor))
 
         val struct = fixture.createFileAndParseWithMarkers(scenario)
         val cu = struct.first;

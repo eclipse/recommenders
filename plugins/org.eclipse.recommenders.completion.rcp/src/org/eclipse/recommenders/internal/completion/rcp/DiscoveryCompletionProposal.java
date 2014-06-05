@@ -14,6 +14,8 @@ import static org.eclipse.jface.viewers.StyledString.DECORATIONS_STYLER;
 
 import java.util.Dictionary;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
@@ -39,16 +41,18 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 @SuppressWarnings("restriction")
-public class DiscoveryCompletionProposal extends AbstractJavaCompletionProposal {
+public class DiscoveryCompletionProposal extends AbstractJavaCompletionProposal implements ICompletionTipProposal {
 
     private static final String DISCOVERY_URL = "http://download.eclipse.org/recommenders/discovery/2.0/directory.xml"; //$NON-NLS-1$
 
     private static final Object DUMMY_INFO = new Object();
 
     // Place this proposal at the bottom of the list.
-    // Use -1 as Integer.MIN_VALUE does not work (possibly due to underflow) and other proposals (e.g., package subwords) can have a relevance of 0..
+    // Use -1 as Integer.MIN_VALUE does not work (possibly due to underflow) and other proposals (e.g., package
+    // subwords) can have a relevance of 0..
     private static final int RELEVANCE = -1;
 
+    @Inject
     public DiscoveryCompletionProposal(SharedImages images) {
         Image image = images.getImage(Images.OBJ_LIGHTBULB);
         StyledString text = new StyledString(Messages.PROPOSAL_LABEL_DISCOVER_EXTENSIONS, DECORATIONS_STYLER);
@@ -71,7 +75,8 @@ public class DiscoveryCompletionProposal extends AbstractJavaCompletionProposal 
 
             @Override
             public IInformationControl createInformationControl(Shell parent) {
-                return new ConfigureContentAssistInformationControl(parent, Messages.PROPOSAL_CATEGORY_CODE_RECOMMENDERS);
+                return new ConfigureContentAssistInformationControl(parent,
+                        Messages.PROPOSAL_CATEGORY_CODE_RECOMMENDERS);
             }
         };
     }
@@ -124,4 +129,10 @@ public class DiscoveryCompletionProposal extends AbstractJavaCompletionProposal 
             link.setText(Messages.PROPOSAL_TOOLTIP_DISCOVER_EXTENSIONS);
         }
     }
+
+    @Override
+    public boolean isApplicable() {
+        return true;
+    }
+
 }

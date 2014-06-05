@@ -178,7 +178,7 @@ public class Stubs {
 
         CompletionRcpPreferences preferences = mock(CompletionRcpPreferences.class);
         SessionProcessorDescriptor sessionProcessor = new SessionProcessorDescriptor("", "", "", null, 0, true, "", sut);
-    when(preferences.getSessionProcessors()).thenReturn(ImmutableList.of(sessionProcessor));
+    when(preferences.getEnabledSessionProcessors()).thenReturn(ImmutableList.of(sessionProcessor));
         return new MockedIntelligentCompletionProposalComputer(sut, preferences);
     }
 }
