@@ -10,61 +10,57 @@
  */
 package org.eclipse.recommenders.completion.rcp.processable;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Optional.fromNullable;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static java.lang.Boolean.TRUE;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.google.common.base.Optional;
 
-public class SessionProcessorDescriptor implements Comparable<SessionProcessorDescriptor> {
+public class SessionProcessorDescriptor {
 
-    private final String id;
-    private final String name;
-    private final String description;
-    private final Image icon;
-    private final int priority;
+    private static final String ENABLED_BY_DEFAULT_ATTRIBUTE = "enabledByDefault"; //$NON-NLS-1$
+
+    private final IConfigurationElement config;
     private boolean enabled;
-    private final SessionProcessor processor;
-    private final String preferencePageId;
+    private SessionProcessor processor;
 
-    public SessionProcessorDescriptor(String id, String name, String description, Image icon, int priority,
-            boolean enabled, String preferencePageId, SessionProcessor processor) {
-        checkNotNull(id);
-        checkNotNull(name);
-        checkNotNull(processor);
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.icon = icon;
-        this.priority = priority;
-        this.enabled = enabled;
-        this.preferencePageId = preferencePageId;
-        this.processor = processor;
+    public SessionProcessorDescriptor(IConfigurationElement config) {
+        this.config = config;
+        enabled = Boolean.valueOf(firstNonNull(config.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE), TRUE.toString()));
     }
 
     public String getId() {
-        return id;
+        return config.getAttribute("id"); //$NON-NLS-1$
     }
 
     public String getName() {
-        return name;
+        return config.getAttribute("name"); //$NON-NLS-1$
     }
 
     public String getDescription() {
-        return defaultString(description, ""); //$NON-NLS-1$
+        return firstNonNull(config.getAttribute("description"), ""); //$NON-NLS-1$
     }
 
     public Image getIcon() {
-        return icon;
+        String pluginId = config.getContributor().getName();
+        String iconPath = config.getAttribute("icon"); //$NON-NLS-1$
+        return AbstractUIPlugin.imageDescriptorFromPlugin(pluginId, iconPath).createImage();
     }
 
     public int getPriority() {
-        return priority;
+        String priority = config.getAttribute("priority"); //$NON-NLS-1$
+        return priority == null ? 10 : Integer.parseInt(priority);
     }
 
-    public SessionProcessor getProcessor() {
+    public synchronized SessionProcessor getProcessor() throws CoreException {
+        if (processor == null) {
+            processor = (SessionProcessor) config.createExecutableExtension("class"); //$NON-NLS-1$
+        }
         return processor;
     }
 
@@ -77,18 +73,11 @@ public class SessionProcessorDescriptor implements Comparable<SessionProcessorDe
     }
 
     public Optional<String> getPreferencePage() {
-        return fromNullable(preferencePageId);
+        return fromNullable(config.getAttribute("preferencePage")); //$NON-NLS-1$
     }
 
     @Override
     public String toString() {
         return getId();
-    }
-
-    @Override
-    public int compareTo(SessionProcessorDescriptor o) {
-        String other = o.priority + o.id;
-        String self = priority + id;
-        return self.compareTo(other);
     }
 }
