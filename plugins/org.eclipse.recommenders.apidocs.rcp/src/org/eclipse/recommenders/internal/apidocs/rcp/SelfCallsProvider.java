@@ -101,7 +101,7 @@ public final class SelfCallsProvider extends ApidocProvider {
         private final IType type;
         private final ClassSelfcallDirectives directive;
         private final Composite parent;
-        private Composite container;
+        private PseudoComposite container;
 
         public TypeSelfcallDirectivesRenderer(final IType type, final ClassSelfcallDirectives selfcalls,
                 final Composite parent) {
@@ -118,7 +118,7 @@ public final class SelfCallsProvider extends ApidocProvider {
         }
 
         private void createContainer() {
-            container = new Composite(parent, SWT.NONE);
+            container = new PseudoComposite(parent, SWT.NONE);
             setInfoBackgroundColor(container);
             container.setLayout(new GridLayout());
         }
@@ -143,7 +143,7 @@ public final class SelfCallsProvider extends ApidocProvider {
         private final MethodSelfcallDirectives directive;
         private final Composite parent;
 
-        private Composite container;
+        private PseudoComposite container;
 
         public MethodSelfcallDirectivesRenderer(final IMethod method, final MethodSelfcallDirectives selfcalls,
                 final Composite parent) {
@@ -160,7 +160,7 @@ public final class SelfCallsProvider extends ApidocProvider {
         }
 
         private void createContainer() {
-            container = new Composite(parent, SWT.NONE);
+            container = new PseudoComposite(parent, SWT.NONE);
             setInfoBackgroundColor(container);
             container.setLayout(new GridLayout());
         }

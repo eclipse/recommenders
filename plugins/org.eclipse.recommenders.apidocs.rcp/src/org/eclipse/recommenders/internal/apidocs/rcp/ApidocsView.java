@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Sebastian Proksch - initial API and implementation
  *     Patrick Gottschaemmer, Olav Lenz - add Drag'n'Drop support
@@ -95,7 +95,7 @@ public class ApidocsView extends ViewPart {
 
     private SashForm sash;
     private ScrolledComposite scrollable;
-    private Composite content;
+    private PseudoComposite content;
     private TableViewer viewer;
     private List<ApidocProvider> providerRanking;
 
@@ -319,7 +319,7 @@ public class ApidocsView extends ViewPart {
         scrollable.getVerticalBar().setIncrement(20);
         scrollable.setExpandHorizontal(true);
         scrollable.setExpandVertical(true);
-        content = new Composite(scrollable, SWT.NONE);
+        content = new PseudoComposite(scrollable, SWT.NONE);
         content.setLayout(new GridLayout());
         content.setFont(JFaceResources.getDialogFont());
         ApidocsViewUtils.setInfoBackgroundColor(content);
@@ -427,7 +427,7 @@ public class ApidocsView extends ViewPart {
             text = JavaElementLabels.getElementLabel(element, LABEL_FLAGS);
             break;
         }
-        Composite header = new Composite(content, SWT.NONE);
+        PseudoComposite header = new PseudoComposite(content, SWT.NONE);
         ApidocsViewUtils.setInfoBackgroundColor(header);
         header.setLayout(new GridLayout(2, false));
 
