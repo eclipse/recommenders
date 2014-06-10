@@ -87,15 +87,21 @@ public final class ApidocsViewUtils {
         c.setBackground(color);
     }
 
+    public static void setInfoBackgroundColor(final PseudoComposite c) {
+        final Display display = c.getDisplay();
+        final Color color = display.getSystemColor(COLOR_INFO_BACKGROUND);
+        c.setBackgroundInternal(color);
+    }
+
     public static void setInfoForegroundColor(final Control c) {
         final Display display = c.getDisplay();
         final Color color = display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
         c.setForeground(color);
     }
 
-    public static Composite createGridComposite(final Composite parent, final int columns, final int hSpacing,
+    public static PseudoComposite createGridComposite(final Composite parent, final int columns, final int hSpacing,
             final int vSpacing, final int hMargin, final int vMargin) {
-        final Composite composite = new Composite(parent, SWT.NONE);
+        final PseudoComposite composite = new PseudoComposite(parent, SWT.NONE);
         setInfoBackgroundColor(composite);
         final GridLayout layout = GridLayoutFactory.swtDefaults().numColumns(columns).margins(hMargin, vMargin)
                 .spacing(hSpacing, vSpacing).create();
@@ -381,8 +387,8 @@ public final class ApidocsViewUtils {
         return COLORCACHE.get(color);
     }
 
-    public static Composite createComposite(final Composite parent, final int numColumns) {
-        final Composite container = new Composite(parent, SWT.NONE);
+    public static PseudoComposite createComposite(final Composite parent, final int numColumns) {
+        final PseudoComposite container = new PseudoComposite(parent, SWT.NONE);
         setInfoBackgroundColor(container);
         container.setLayout(GridLayoutFactory.fillDefaults().margins(10, 0).spacing(0, 0).numColumns(numColumns)
                 .create());

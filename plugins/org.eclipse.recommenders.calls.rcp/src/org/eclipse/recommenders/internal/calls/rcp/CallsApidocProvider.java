@@ -14,16 +14,10 @@ package org.eclipse.recommenders.internal.calls.rcp;
 import static com.google.common.collect.Iterables.isEmpty;
 import static java.text.MessageFormat.format;
 import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.PARAM;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.createComposite;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.createLabel;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.percentageToRecommendationPhrase;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.setInfoBackgroundColor;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.setInfoForegroundColor;
+import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.*;
 import static org.eclipse.recommenders.rcp.JavaElementSelectionEvent.JavaElementSelectionLocation.METHOD_BODY;
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.resolveMethod;
-import static org.eclipse.recommenders.utils.Recommendations.asPercentage;
-import static org.eclipse.recommenders.utils.Recommendations.filterRelevance;
-import static org.eclipse.recommenders.utils.Recommendations.sortByRelevance;
+import static org.eclipse.recommenders.utils.Recommendations.*;
 import static org.eclipse.swt.SWT.COLOR_INFO_FOREGROUND;
 
 import java.util.Set;
@@ -217,8 +211,7 @@ public final class CallsApidocProvider extends ApidocProvider {
 
                 createLabel(container, Messages.TABLE_CELL_RELATION_CALL + " ", false);
                 ApidocsViewUtils.createMethodLink(container, rec.getProposal(), jdtResolver, workspaceBus);
-                createLabel(container,
-                        " - " + format(Messages.TABLE_CELL_SUFFIX_PERCENTAGE, rec.getRelevance()), false); //$NON-NLS-1$
+                createLabel(container, " - " + format(Messages.TABLE_CELL_SUFFIX_PERCENTAGE, rec.getRelevance()), false); //$NON-NLS-1$
             }
 
             new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -246,7 +239,8 @@ public final class CallsApidocProvider extends ApidocProvider {
                 createLabel(container, Messages.TABLE_CELL_RELATION_DEFINED_BY, true, false, SWT.COLOR_DARK_GRAY, false);
                 createLabel(container, "", false, false, SWT.COLOR_DARK_GRAY, false); //$NON-NLS-1$
                 if (def == VmMethodName.NULL) {
-                    createLabel(container, Messages.TABLE_CELL_DEFINITION_UNTRAINED, false, false, SWT.COLOR_DARK_GRAY, false);
+                    createLabel(container, Messages.TABLE_CELL_DEFINITION_UNTRAINED, false, false, SWT.COLOR_DARK_GRAY,
+                            false);
                 } else {
                     ApidocsViewUtils.createMethodLink(container, def, jdtResolver, workspaceBus);
                 }
@@ -256,7 +250,8 @@ public final class CallsApidocProvider extends ApidocProvider {
 
             for (final IMethodName observedCall : calls) {
                 createLabel(container, Messages.TABLE_CELL_RELATION_OBSERVED, true, false, SWT.COLOR_DARK_GRAY, false);
-                createLabel(container, Messages.TABLE_CELL_RELATION_CALL + " ", false, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, Messages.TABLE_CELL_RELATION_CALL + " ", false, false, SWT.COLOR_DARK_GRAY,
+                        false);
                 ApidocsViewUtils.createMethodLink(container, observedCall, jdtResolver, workspaceBus);
                 createLabel(container, "", true, false, SWT.COLOR_DARK_GRAY, false); //$NON-NLS-1$
             }

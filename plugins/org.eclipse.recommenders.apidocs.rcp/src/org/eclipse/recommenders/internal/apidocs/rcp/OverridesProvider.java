@@ -52,7 +52,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -134,7 +133,7 @@ public final class OverridesProvider extends ApidocProvider {
         private final IType type;
         private final ClassOverrideDirectives directive;
         private final Composite parent;
-        private Composite container;
+        private PseudoComposite container;
 
         public TypeOverrideDirectivesRenderer(final IType type, final ClassOverrideDirectives directive,
                 final Composite parent) {
@@ -151,14 +150,14 @@ public final class OverridesProvider extends ApidocProvider {
         }
 
         private void createContainer() {
-            container = new Composite(parent, SWT.NONE);
+            container = new PseudoComposite(parent, SWT.NONE);
             setInfoBackgroundColor(container);
             container.setLayout(new GridLayout());
         }
 
         private void addHeader() {
-            final String message = format(Messages.PROVIDER_INTRO_OVERRIDE_STATISTICS, directive.getNumberOfSubclasses(),
-                    type.getElementName());
+            final String message = format(Messages.PROVIDER_INTRO_OVERRIDE_STATISTICS,
+                    directive.getNumberOfSubclasses(), type.getElementName());
             Label label = new Label(container, SWT.NONE);
             label.setText(message);
             setInfoForegroundColor(label);
@@ -176,7 +175,7 @@ public final class OverridesProvider extends ApidocProvider {
     private class OverridePatternsRenderer implements Runnable {
 
         private final Composite parent;
-        private Composite container;
+        private PseudoComposite container;
 
         double totalNumberOfExamples;
         private List<MethodPattern> patterns;
@@ -231,7 +230,7 @@ public final class OverridesProvider extends ApidocProvider {
         }
 
         private void createContainer() {
-            container = new Composite(parent, SWT.NONE);
+            container = new PseudoComposite(parent, SWT.NONE);
             setInfoBackgroundColor(container);
             container.setLayout(new GridLayout());
             container.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -245,7 +244,7 @@ public final class OverridesProvider extends ApidocProvider {
 
         private void addDirectives(final org.eclipse.recommenders.apidocs.MethodPattern pattern, final int index) {
 
-            final double patternPercentage = pattern.getNumberOfObservations() / (double) totalNumberOfExamples;
+            final double patternPercentage = pattern.getNumberOfObservations() / totalNumberOfExamples;
             final String text = format(Messages.TABLE_HEADER_OVERRIDE_PATTERN, index, patternPercentage,
                     pattern.getNumberOfObservations());
             createLabel(container, text, true, false, SWT.COLOR_DARK_GRAY, true);
@@ -260,8 +259,8 @@ public final class OverridesProvider extends ApidocProvider {
                 }
             });
 
-            final Table table = new Table(group, SWT.NONE | SWT.HIDE_SELECTION);
-            table.setBackground(createColor(SWT.COLOR_INFO_BACKGROUND));
+            final PseudoTable table = new PseudoTable(group, SWT.NONE | SWT.HIDE_SELECTION);
+            table.setBackgroundInternal(createColor(SWT.COLOR_INFO_BACKGROUND));
             table.setLayoutData(GridDataFactory.fillDefaults().indent(10, 0).create());
             final TableColumn column1 = new TableColumn(table, SWT.NONE);
             final TableColumn column2 = new TableColumn(table, SWT.NONE);
