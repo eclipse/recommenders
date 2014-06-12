@@ -19,6 +19,8 @@ import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.snipmatch.rcp.SnippetEditor;
+import org.eclipse.recommenders.snipmatch.rcp.SnippetEditorInput;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -77,7 +79,6 @@ public class SnippetSourcePage extends FormPage {
                 });
             }
         }
-
     }
 
     @Override
@@ -94,11 +95,9 @@ public class SnippetSourcePage extends FormPage {
     @Override
     public void dispose() {
         super.dispose();
-        // TODO: ctx is sometimes null. this is a workaround, see that ctx is
-        // always initialized.
+        // TODO ctx is sometimes null. This is a workaround; see that ctx is always initialized.
         if (ctx != null) {
             ctx.dispose();
         }
     }
-
 }
