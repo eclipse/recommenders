@@ -4,27 +4,23 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      Marcel Bruch - Initial design and API
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
-import static org.eclipse.core.databinding.beans.PojoProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
-
-import org.eclipse.core.databinding.Binding;
-import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.recommenders.snipmatch.ISnippet;
-import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.snipmatch.rcp.SnippetEditorInput;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.forms.AbstractFormPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
@@ -34,8 +30,6 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 public class SnippetSourcePage extends FormPage {
 
     private ISnippet snippet;
-    private Text txtCode;
-    private DataBindingContext ctx;
 
     public SnippetSourcePage(FormEditor editor, String id, String title) {
         super(editor, id, title);
@@ -45,39 +39,13 @@ public class SnippetSourcePage extends FormPage {
     protected void createFormContent(IManagedForm managedForm) {
         FormToolkit toolkit = managedForm.getToolkit();
         ScrolledForm form = managedForm.getForm();
-        form.setText(getTitle());
+        form.setText("Blablub");
         Composite body = form.getBody();
         toolkit.decorateFormHeading(form.getForm());
         toolkit.paintBordersFor(body);
-        managedForm.getForm().getBody().setLayout(new FillLayout(SWT.HORIZONTAL));
-
-        txtCode = managedForm.getToolkit()
-                .createText(managedForm.getForm().getBody(), "New Text", SWT.WRAP | SWT.MULTI); //$NON-NLS-1$
-        txtCode.setEditable(true);
-
-        initDataBindings();
-    }
-
-    private void initDataBindings() {
-        ctx = new DataBindingContext();
-
-        // code
-        IObservableValue wpTxtCode = text(SWT.Modify).observe(txtCode);
-        IObservableValue ppCode = value(Snippet.class, "code", String.class).observe(snippet); //$NON-NLS-1$
-        ctx.bindValue(wpTxtCode, ppCode, null, null);
-
-        for (Object o : ctx.getValidationStatusProviders()) {
-            if (o instanceof Binding) {
-                ((Binding) o).getTarget().addChangeListener(new IChangeListener() {
-
-                    @Override
-                    public void handleChange(org.eclipse.core.databinding.observable.ChangeEvent event) {
-                        ((SnippetEditor) getEditor()).setDirty(true);
-                    }
-                });
-            }
-        }
-
+        body.setLayout(new FillLayout(SWT.HORIZONTAL));
+        snippet = ((SnippetEditorInput) getEditorInput()).getSnippet();
+        managedForm.addPart(new CodePart(body, toolkit));
     }
 
     @Override
@@ -86,19 +54,24 @@ public class SnippetSourcePage extends FormPage {
         super.init(site, input);
     }
 
-    public void update() {
-        ctx.dispose();
-        initDataBindings();
-    }
+    private final class CodePart extends AbstractFormPart {
+        private Text txtCode;
 
-    @Override
-    public void dispose() {
-        super.dispose();
-        // TODO: ctx is sometimes null. this is a workaround, see that ctx is
-        // always initialized.
-        if (ctx != null) {
-            ctx.dispose();
+        public CodePart(Composite parent, FormToolkit toolkit) {
+            txtCode = toolkit.createText(parent, snippet.getCode(), SWT.WRAP | SWT.MULTI);
+            txtCode.addModifyListener(new ModifyListener() {
+
+                @Override
+                public void modifyText(ModifyEvent e) {
+                    markDirty();
+                }
+            });
+        }
+
+        @Override
+        public void refresh() {
+            txtCode.setText(snippet.getCode());
+            super.refresh();
         }
     }
-
 }
