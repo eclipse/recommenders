@@ -8,20 +8,30 @@
  * Contributors:
  *     Stefan Prisca - initial API and implementation
  */
-package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
+package org.eclipse.recommenders.snipmatch.rcp;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.eclipse.recommenders.utils.Checks.ensureIsInstanceOf;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.recommenders.internal.snipmatch.rcp.Constants;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Messages;
+import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetSourcePage;
+import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetMetadataPage;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.Snippet;
@@ -30,8 +40,14 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.editor.FormEditor;
+import org.eclipse.ui.forms.editor.IFormPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 
 public class SnippetEditor extends FormEditor implements IResourceChangeListener {
 
@@ -55,13 +71,37 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
     @Override
     protected void addPages() {
         try {
-            metadataEditorPage = new SnippetMetadataPage(this, "meta", Messages.EDITOR_PAGE_NAME_METADATA); //$NON-NLS-1$
-            addPage(metadataEditorPage);
-            sourceEditorPage = new SnippetSourcePage(this, "source", Messages.EDITOR_PAGE_NAME_SOURCE); //$NON-NLS-1$
-            addPage(sourceEditorPage);
+            for (IFormPage page : readExtensionPoint(this)) {
+                addPage(page);
+            }
         } catch (PartInitException e) {
             LOG.error("Exception while adding editor pages.", e); //$NON-NLS-1$
         }
+    }
+
+    private static List<IFormPage> readExtensionPoint(SnippetEditor editor) {
+        IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
+                Constants.EXT_POINT_PAGE_FACTORIES);
+
+        List<IFormPage> pages = Lists.newLinkedList();
+        for (final IConfigurationElement element : Ordering.natural().onResultOf(new Function<IConfigurationElement, Integer>() {
+            @Override
+            public Integer apply(IConfigurationElement element) {
+                String priorityString = element.getAttribute("priority");
+                return priorityString == null ? 100 : Integer.valueOf(priorityString);
+            }}).sortedCopy(asList(elements))) {
+            try {
+                String id = element.getAttribute("id");
+                String name = element.getAttribute("name");
+                ISnippetEditorPageFactory pageFactory;
+                pageFactory = (ISnippetEditorPageFactory) element.createExecutableExtension("class");
+                IFormPage page = pageFactory.createPage(editor, id, name);
+                pages.add(page);
+            } catch (CoreException e) {
+                continue;
+            }
+        }
+        return pages;
     }
 
     public void setDirty(boolean newDirty) {
