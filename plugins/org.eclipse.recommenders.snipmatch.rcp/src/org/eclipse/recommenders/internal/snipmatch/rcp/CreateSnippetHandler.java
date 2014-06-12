@@ -45,10 +45,10 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditor;
-import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditorInput;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.snipmatch.rcp.SnippetEditor;
+import org.eclipse.recommenders.snipmatch.rcp.SnippetEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -198,7 +198,7 @@ public class CreateSnippetHandler extends AbstractHandler {
         sb.append("${").append(varname);
         if (vars.add(varname)) {
             sb.append(":").append(command).append("(")
-                    .append(type.isArray() ? "array" : type.getErasure().getQualifiedName()).append(")");
+            .append(type.isArray() ? "array" : type.getErasure().getQualifiedName()).append(")");
         }
         sb.append("}");
 
