@@ -16,6 +16,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnippetRepositoryConfiguration;
 import org.eclipse.recommenders.utils.Checks;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -147,10 +149,23 @@ public class SnippetRepositoryTypeSelectionWizard extends AbstractSnippetReposit
 
             });
 
+            lstWizards.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseDoubleClick(MouseEvent e) {
+                    int index = e.y / lstWizards.getItemHeight();
+                    if (index < lstWizards.getItemCount()) {
+                        if (canFlipToNextPage()) {
+                            getContainer().showPage(getNextPage());
+                        }
+                    }
+                }
+
+            });
+
             setControl(container);
             setPageComplete(false);
         }
-
     }
 
 }
