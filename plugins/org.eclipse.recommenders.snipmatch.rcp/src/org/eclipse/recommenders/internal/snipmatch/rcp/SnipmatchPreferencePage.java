@@ -56,6 +56,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
     private EventBus bus;
     private SnippetRepositoryConfigurations configuration;
     private List<WizardDescriptor> availableWizards;
+    private boolean dirty;
 
     @Inject
     public SnipmatchPreferencePage(EventBus bus, SnippetRepositoryConfigurations configuration) {
@@ -71,6 +72,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
         ConfigurationEditor configurationEditor = new ConfigurationEditor("", //$NON-NLS-1$
                 Messages.PREFPAGE_LABEL_REMOTE_SNIPPETS_REPOSITORY, getFieldEditorParent());
         addField(configurationEditor);
+        dirty = false;
     }
 
     @Override
@@ -108,6 +110,9 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
 
                 @Override
                 public void widgetSelected(SelectionEvent e) {
+                    if (e.detail == SWT.CHECK) {
+                        dirty = true;
+                    }
                     updateButtonStatus();
                 }
             });
@@ -174,7 +179,8 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
         protected void removeConfiguration(SnippetRepositoryConfiguration configuration) {
             List<SnippetRepositoryConfiguration> configurations = cast(tableViewer.getInput());
             configurations.remove(configuration);
-            tableViewer.setInput(configurations);
+            updateTableContent(configurations);
+            dirty = true;
         }
 
         protected void editConfiguration(SnippetRepositoryConfiguration oldConfiguration) {
@@ -196,6 +202,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                     configurations.add(configurations.indexOf(oldConfiguration), wizard.getConfiguration());
                     configurations.remove(oldConfiguration);
                     updateTableContent(configurations);
+                    dirty = true;
                 }
             }
         }
@@ -208,6 +215,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                     List<SnippetRepositoryConfiguration> configurations = cast(tableViewer.getInput());
                     configurations.add(newWizard.getConfiguration());
                     updateTableContent(configurations);
+                    dirty = true;
                 }
             }
 
@@ -255,7 +263,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
 
         @Override
         protected void doLoad() {
-            updateTableContent(configuration.getRepos());
+            updateTableContent(Lists.newArrayList(configuration.getRepos()));
         }
 
         public void updateTableContent(List<SnippetRepositoryConfiguration> configurations) {
@@ -274,12 +282,22 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
         }
 
         @Override
+        public void loadDefault() {
+            super.loadDefault();
+            setPresentsDefaultValue(false);
+        }
+
+        @Override
         protected void doLoadDefault() {
             updateTableContent(RepositoryConfigurations.fetchDefaultConfigurations());
+            dirty = true;
         }
 
         @Override
         protected void doStore() {
+            if (!dirty) {
+                return;
+            }
             List<SnippetRepositoryConfiguration> oldconfigs = cast(tableViewer.getInput());
             List<SnippetRepositoryConfiguration> newConfigs = Lists.newArrayList();
             for (SnippetRepositoryConfiguration config : oldconfigs) {
@@ -292,6 +310,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
 
             RepositoryConfigurations.storeConfigurations(configuration);
             bus.post(new SnippetRepositoryConfigurationChangedEvent());
+            dirty = false;
         }
 
         @Override
