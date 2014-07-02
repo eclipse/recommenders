@@ -48,12 +48,16 @@ public class RepositoryConfigurations {
 
     public static SnippetRepositoryConfigurations loadConfigurations() {
         Resource resource = provideResource();
+        SnippetRepositoryConfigurations configurations = SnipmatchFactory.eINSTANCE
+                .createSnippetRepositoryConfigurations();
 
-        SnippetRepositoryConfigurations configurations;
-        if (!resource.getContents().isEmpty()) {
-            configurations = (SnippetRepositoryConfigurations) resource.getContents().get(0);
-        } else {
-            configurations = SnipmatchFactory.eINSTANCE.createSnippetRepositoryConfigurations();
+        try {
+            resource.load(Collections.EMPTY_MAP);
+            if (!resource.getContents().isEmpty()) {
+                configurations = (SnippetRepositoryConfigurations) resource.getContents().get(0);
+            }
+        } catch (IOException e) {
+            LOG.error("Exception while loading repository configurations.", e); //$NON-NLS-1$
         }
 
         return configurations;
