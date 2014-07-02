@@ -145,6 +145,13 @@ public class SnippetRepositoryTypeSelectionWizard extends AbstractSnippetReposit
                     }
                 }
 
+                @Override
+                public void widgetDefaultSelected(SelectionEvent e) {
+                    if (canFlipToNextPage()) {
+                        getContainer().showPage(getNextPage());
+                    }
+                }
+
             });
 
             setControl(container);
