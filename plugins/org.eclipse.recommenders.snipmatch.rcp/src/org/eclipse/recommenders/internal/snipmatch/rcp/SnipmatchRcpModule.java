@@ -62,9 +62,13 @@ public class SnipmatchRcpModule extends AbstractModule {
     public SnipmatchRcpPreferences provide(IWorkbench wb, EventBus bus,
             @Named(SNIPPET_REPOSITORY_PROVIDERS) ImmutableSet<ISnippetRepositoryProvider> providers) {
         IEclipseContext context = (IEclipseContext) wb.getService(IEclipseContext.class);
+<<<<<<< HEAD   (4bd239 [snipmatch] Bug 436587: Introduce ISnippetRepositoryConfigur)
         SnipmatchRcpPreferences prefs = new SnipmatchRcpPreferences(bus, providers);
         ContextInjectionFactory.inject(prefs, context);
         return prefs;
+=======
+        return ContextInjectionFactory.make(SnipmatchRcpPreferences.class, context);
+>>>>>>> BRANCH (9e8497 [ast] Bug 437637: Removed unused & deprecated code)
     }
 
     @Provides
