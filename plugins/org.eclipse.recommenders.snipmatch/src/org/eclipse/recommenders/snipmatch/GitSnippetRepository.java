@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
@@ -117,7 +118,7 @@ public class GitSnippetRepository extends FileSnippetRepository {
     }
 
     private void initializeSnippetsRepo() throws GitAPIException, InvalidRemoteException, TransportException,
-    IOException {
+            IOException {
         InitCommand init = Git.init();
         init.setBare(false);
         init.setDirectory(basedir);
@@ -129,6 +130,8 @@ public class GitSnippetRepository extends FileSnippetRepository {
         StoredConfig config = git.getRepository().getConfig();
         config.setString("remote", "origin", "url", getRepositoryLocation());
         config.setString("remote", "origin", "fetch", "+refs/heads/*:refs/remotes/origin/*");
+        config.setString("remote", "origin", "pushUrl",
+                StringUtils.replace(getRepositoryLocation(), "/gitroot/", "/r/"));
         String pushBranch = "HEAD:refs/for/" + FORMAT_VERSION;
         config.setString("remote", "origin", "push", pushBranch);
 
@@ -142,7 +145,7 @@ public class GitSnippetRepository extends FileSnippetRepository {
     }
 
     private void pullSnippets() throws IOException, InvalidRemoteException, TransportException, GitAPIException,
-    CoreException {
+            CoreException {
         String remoteBranch = "origin/" + FORMAT_VERSION;
         FileRepository localRepo = new FileRepository(gitFile);
         Git git = new Git(localRepo);
