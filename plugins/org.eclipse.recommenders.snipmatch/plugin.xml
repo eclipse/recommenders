@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+-->
+
+<plugin>
+
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<!-- @generated snipmatchrcp -->
+		<package
+			class="org.eclipse.recommenders.snipmatch.model.SnipmatchModelPackage"
+			genModel="model/snipmatch.genmodel"
+			uri="org.eclips.recommenders.snipmatch"/>
+	</extension>
+
+</plugin>
