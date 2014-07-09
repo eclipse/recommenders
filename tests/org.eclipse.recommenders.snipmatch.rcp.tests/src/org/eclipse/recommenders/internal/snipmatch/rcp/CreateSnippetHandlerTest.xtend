@@ -12,59 +12,60 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 import com.google.common.eventbus.EventBus
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnipmatchFactory
+import org.eclipse.recommenders.rcp.model.SnipmatchRcpModelFactory
 
 class CreateSnippetHandlerTest {
 
-    static val fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test")
-    CharSequence code
+	static val fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test")
+	CharSequence code
 
-    Snippet actual
+	Snippet actual
 
-    @Test
-    def void testNewArrayAndCalls() {
-        code = CodeBuilder::method(
-            '''
-                $String[] s[] = new String[0][];
-                s.hashCode();$
-            ''')
-        exercise()
+	@Test
+	def void testNewArrayAndCalls() {
+		code = CodeBuilder::method(
+			'''
+				$String[] s[] = new String[0][];
+				s.hashCode();$
+			''')
+		exercise()
 
-        assertEquals(
-            '''
-                String[] ${s:newName(array)}[] = new String[0][];
-                ${s}.hashCode();
-                ${:import(java.lang.String)}${cursor}
-            '''.toString,
-            actual.code
-        )
-    }
+		assertEquals(
+			'''
+				String[] ${s:newName(array)}[] = new String[0][];
+				${s}.hashCode();
+				${:import(java.lang.String)}${cursor}
+			'''.toString,
+			actual.code
+		)
+	}
 
-    @Test
-    def void testGenerics() {
-        code = CodeBuilder::method(
-            '''
-                $HashMap<String, List> map = null$;
-            ''')
-        exercise()
+	@Test
+	def void testGenerics() {
+		code = CodeBuilder::method(
+			'''
+				$HashMap<String, List> map = null$;
+			''')
+		exercise()
 
-        assertEquals(
-            '''
-                HashMap<String, List> ${map:newName(java.util.HashMap)} = null
-                ${:import(java.lang.String, java.util.HashMap, java.util.List)}${cursor}
-            '''.toString,
-            actual.code
-        )
-    }
+		assertEquals(
+			'''
+				HashMap<String, List> ${map:newName(java.util.HashMap)} = null
+				${:import(java.lang.String, java.util.HashMap, java.util.List)}${cursor}
+			'''.toString,
+			actual.code
+		)
+	}
 
-    def void exercise() {
-        val struct = fixture.createFileAndParseWithMarkers(code)
-        val cu = struct.first;
-        val start = struct.second.head;
-        val end = struct.second.last;
-        val editor = EditorUtility.openInEditor(cu)as CompilationUnitEditor;
-        editor.selectionProvider.selection = new TextSelection(start, end - start)
-        val sut = new CreateSnippetHandler(new Repositories(new EventBus, SnipmatchFactory.eINSTANCE.createSnippetRepositoryConfigurations()))
-        actual = sut.createSnippet(editor)
-    }
+	def void exercise() {
+		val struct = fixture.createFileAndParseWithMarkers(code)
+		val cu = struct.first;
+		val start = struct.second.head;
+		val end = struct.second.last;
+		val editor = EditorUtility.openInEditor(cu)as CompilationUnitEditor;
+		editor.selectionProvider.selection = new TextSelection(start, end - start)
+		val sut = new CreateSnippetHandler(
+			new Repositories(new EventBus, SnipmatchRcpModelFactory.eINSTANCE.createSnippetRepositoryConfigurations()))
+		actual = sut.createSnippet(editor)
+	}
 }
