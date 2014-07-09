@@ -28,11 +28,11 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.recommenders.injection.InjectionService;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.DefaultSnippetRepositoryConfigurationProvider;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnipmatchFactory;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnipmatchPackage;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnippetRepositoryConfiguration;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnippetRepositoryConfigurations;
+import org.eclipse.recommenders.snipmatch.model.DefaultSnippetRepositoryConfigurationProvider;
+import org.eclipse.recommenders.snipmatch.model.SnipmatchModelPackage;
+import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
+import org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelFactory;
+import org.eclipse.recommenders.snipmatch.rcp.model.SnippetRepositoryConfigurations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class RepositoryConfigurations {
     @VisibleForTesting
     protected static SnippetRepositoryConfigurations loadConfigurations(File file) {
         Resource resource = provideResource(file);
-        SnippetRepositoryConfigurations configurations = SnipmatchFactory.eINSTANCE
+        SnippetRepositoryConfigurations configurations = SnipmatchRcpModelFactory.eINSTANCE
                 .createSnippetRepositoryConfigurations();
 
         try {
@@ -102,7 +102,7 @@ public class RepositoryConfigurations {
         for (String key : instance.keySet()) {
             EPackage ePackage = instance.getEPackage(key);
             List<EClass> subtypes = searchSubtypes(ePackage,
-                    SnipmatchPackage.Literals.DEFAULT_SNIPPET_REPOSITORY_CONFIGURATION_PROVIDER);
+                    SnipmatchModelPackage.Literals.DEFAULT_SNIPPET_REPOSITORY_CONFIGURATION_PROVIDER);
             for (EClass eClass : subtypes) {
                 DefaultSnippetRepositoryConfigurationProvider configurationProvider = cast(instance.getEFactory(key)
                         .create(eClass));

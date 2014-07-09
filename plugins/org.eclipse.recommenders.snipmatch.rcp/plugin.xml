@@ -83,7 +83,7 @@
 		<package
 			uri="org.eclips.recommenders.snipmatch.rcp"
 			class="org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnipmatchPackage"
-			genModel="model/snipmatch.genmodel"/>
+			genModel="model/snipmatchrcp.genmodel"/>
 	</extension>
 
 	<extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
@@ -98,11 +98,12 @@
 				org.eclipse.emf.edit.provider.IItemLabelProvider
 				org.eclipse.emf.edit.provider.IItemPropertySource"/>
 	</extension>
-	<extension point="org.eclipse.recommenders.snipmatch.rcp.configurationwizards">
-		<configurationwizard
-			name="%wizards.git-based-repo.name"
-			wizard="org.eclipse.recommenders.internal.snipmatch.rcp.GitBasedRepositoryConfigurationWizard">
-		</configurationwizard>
-	</extension>
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated snipmatchrcp -->
+      <package
+            uri="org.eclips.recommenders.snipmatch.rcp"
+            class="org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelPackage"
+            genModel="model/snipmatchrcp.genmodel"/>
+   </extension>
 
 </plugin>

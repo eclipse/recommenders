@@ -31,9 +31,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Repositories.SnippetRepositoryConfigurationChangedEvent;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.EclipseGitSnippetRepositoryConfiguration;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnippetRepositoryConfiguration;
-import org.eclipse.recommenders.snipmatch.model.snipmatchmodel.SnippetRepositoryConfigurations;
+import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
+import org.eclipse.recommenders.snipmatch.rcp.model.EclipseGitSnippetRepositoryConfiguration;
+import org.eclipse.recommenders.snipmatch.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -103,7 +103,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
 
             tableViewer = getTableControl(parent);
             GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(numColumns - 1, 1).grab(true, true)
-            .applyTo(tableViewer.getTable());
+                    .applyTo(tableViewer.getTable());
             tableViewer.getTable().addSelectionListener(new SelectionAdapter() {
 
                 @Override
@@ -281,15 +281,15 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
             Collection<SnippetRepositoryConfiguration> checkedConfigurations = Collections2.filter(configurations,
                     new Predicate<SnippetRepositoryConfiguration>() {
 
-                @Override
-                public boolean apply(SnippetRepositoryConfiguration input) {
-                    if (oldConfigurations != null && oldConfigurations.contains(input)) {
-                        return tableViewer.getChecked(input);
-                    }
-                    return input.isEnabled();
-                }
+                        @Override
+                        public boolean apply(SnippetRepositoryConfiguration input) {
+                            if (oldConfigurations != null && oldConfigurations.contains(input)) {
+                                return tableViewer.getChecked(input);
+                            }
+                            return input.isEnabled();
+                        }
 
-            });
+                    });
 
             tableViewer.setInput(configurations);
             tableViewer.setCheckedElements(checkedConfigurations.toArray());
