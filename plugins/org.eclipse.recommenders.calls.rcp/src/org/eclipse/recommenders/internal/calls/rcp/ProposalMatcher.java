@@ -59,6 +59,11 @@ public class ProposalMatcher {
         jName = String.valueOf(proposal.getName());
         jParams = new ITypeName[parameterTypes.length];
 
+        if (receiverTypeBinding.isPresent() && receiverTypeBinding.get().isTypeVariable()
+                && receiverTypeBinding.get() instanceof TypeVariableBinding) {
+            TypeVariableBinding typeVariableBinding = (TypeVariableBinding) receiverTypeBinding.get();
+            receiverTypeBinding = Optional.of(typeVariableBinding.firstBound);
+        }
         final String[] classTypeParameters = extractClassTypeParameters(receiverTypeBinding);
 
         for (int i = 0; i < jParams.length; i++) {
@@ -71,11 +76,15 @@ public class ProposalMatcher {
             return NO_TYPE_PARAMETERS;
         }
         TypeBinding typeBinding = receiverTypeBinding.get();
-        if (!typeBinding.isParameterizedTypeWithActualArguments() || !(typeBinding instanceof ParameterizedTypeBinding)) {
+        final TypeVariableBinding[] typeVariableBindings;
+        if (typeBinding instanceof ParameterizedTypeBinding) {
+            final ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) typeBinding;
+            typeVariableBindings = parameterizedTypeBinding.genericType().typeVariables();
+        } else if (typeBinding instanceof TypeVariableBinding) {
+            typeVariableBindings = new TypeVariableBinding[] { (TypeVariableBinding) typeBinding };
+        } else {
             return NO_TYPE_PARAMETERS;
         }
-        ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) typeBinding;
-        TypeVariableBinding[] typeVariableBindings = parameterizedTypeBinding.genericType().typeVariables();
         final String[] classTypeParameters = new String[typeVariableBindings.length];
         for (int i = 0; i < classTypeParameters.length; i++) {
             TypeVariableBinding typeVariableBinding = typeVariableBindings[i];
