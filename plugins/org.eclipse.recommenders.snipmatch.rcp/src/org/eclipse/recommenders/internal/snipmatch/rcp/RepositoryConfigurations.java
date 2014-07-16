@@ -53,6 +53,10 @@ public class RepositoryConfigurations {
         SnippetRepositoryConfigurations configurations = SnipmatchFactory.eINSTANCE
                 .createSnippetRepositoryConfigurations();
 
+        if (!file.exists()) {
+            return configurations;
+        }
+
         try {
             resource.load(Collections.EMPTY_MAP);
             if (!resource.getContents().isEmpty()) {
