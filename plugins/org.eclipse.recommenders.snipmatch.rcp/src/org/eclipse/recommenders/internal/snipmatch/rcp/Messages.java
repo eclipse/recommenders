@@ -80,17 +80,26 @@ public class Messages extends NLS {
     public static String JOB_RECONNECTING_SNIPPET_REPOSITORY;
     public static String JOB_REFRESHING_SNIPPETS_VIEW;
 
+<<<<<<< HEAD   (ed8faa [snipmatch] Bug 438745: Double click support for pref page a)
     public static String PREFPAGE_BUTTON_EDIT;
     public static String PREFPAGE_BUTTON_NEW;
     public static String PREFPAGE_BUTTON_REMOVE;
     public static String PREFPAGE_LABEL_REMOTE_SNIPPETS_REPOSITORY;
+=======
+    public static String PREFPAGE_LABEL_SNIPPETS_REPO_FETCH_URL;
+    public static String PREFPAGE_LABEL_SNIPPETS_PUSH_SETTINGS_DESCRIPTION;
+    public static String PREFPAGE_LABEL_SNIPPETS_REPO_PUSH_URL;
+    public static String PREFPAGE_LABEL_SNIPPETS_REPO_PUSH_BRANCH;
+>>>>>>> BRANCH (21be1e [releng] 2.1.2-SNAPSHOT)
     public static String PREFPAGE_DESCRIPTION;
+    public static String PREFPAGE_ERROR_INVALID_BRANCH_PREFIX_FORMAT;
 
     public static String WARNING_CANNOT_APPLY_SNIPPET;
     public static String WARNING_INVALID_URL_FORMAT;
     public static String WARNING_REPOSITION_CURSOR;
     public static String WARNING_FAILURE_TO_UPDATE_REPOSITORY;
 
+<<<<<<< HEAD   (ed8faa [snipmatch] Bug 438745: Double click support for pref page a)
     public static String WIZARD_GIT_REPOSITORY_DESCRIPTION;
     public static String WIZARD_GIT_REPOSITORY_LABEL_NAME;
     public static String WIZARD_GIT_REPOSITORY_LABEL_URL;
@@ -102,6 +111,10 @@ public class Messages extends NLS {
     public static String WIZARD_TYPE_SELECTION_NAME;
     public static String WIZARD_TYPE_SELECTION_TITLE;
     public static String WIZARD_TYPE_SELECTION_WINDOW_TITLE;
+=======
+    public static String GROUP_FETCH_SETTINGS;
+    public static String GROUP_PUSH_SETTINGS;
+>>>>>>> BRANCH (21be1e [releng] 2.1.2-SNAPSHOT)
 
     static {
         // initialize resource bundle
