@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.testing
-Bundle-Version: 2.1.1.qualifier
+Bundle-Version: 2.1.2.qualifier
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -19,9 +19,14 @@ Require-Bundle: org.eclipse.core.resources,
  com.google.guava
 Import-Package: org.apache.commons.lang3;version="[3.1.0,4.0.0)",
  org.apache.commons.lang3.builder;version="[3.1.0,4.0.0)"
+<<<<<<< HEAD   (ed8faa [snipmatch] Bug 438745: Double click support for pref page a)
 Export-Package: org.eclipse.recommenders.testing,
  org.eclipse.recommenders.testing.jayes,
  org.eclipse.recommenders.testing.jdt,
  src.org.eclipse.recommenders.testing,
  src.org.eclipse.recommenders.testing.jayes,
  src.org.eclipse.recommenders.testing.jdt
+=======
+Export-Package: org.eclipse.recommenders.testing,org.eclipse.recommend
+ ers.testing.jayes,org.eclipse.recommenders.testing.jdt
+>>>>>>> BRANCH (21be1e [releng] 2.1.2-SNAPSHOT)
