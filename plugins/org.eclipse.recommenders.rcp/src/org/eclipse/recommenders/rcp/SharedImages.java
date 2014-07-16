@@ -107,7 +107,7 @@ public final class SharedImages implements IDisposable {
         OBJ_BULLET_YELLOW(obj16("bullet_yellow.png")), //$NON-NLS-1$
         OBJ_CHECK_GREEN(obj16("tick_small.png")), //$NON-NLS-1$
         OBJ_CROSS_RED(obj16("cross_small.png")), //$NON-NLS-1$
-        OBJ_CONTAINER(obj16("container_obj.gif")), //$NON-NLS-1$
+        OBJ_CONTAINER(obj16("container_obj.png")), //$NON-NLS-1$
         OBJ_FAVORITE_STAR(obj16("favorite_star.png")), //$NON-NLS-1$
         OBJ_HOMEPAGE(obj16("homepage.png")), //$NON-NLS-1$
         OBJ_LIGHTBULB(obj16("lightbulb.gif")), //$NON-NLS-1$
