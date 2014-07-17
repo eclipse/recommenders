@@ -32,4 +32,6 @@ public interface IModelIndex extends IModelArchiveCoordinateAdvisor {
 
     Optional<ProjectCoordinate> suggestProjectCoordinateByFingerprint(String fingerprint);
 
+    void updateIndex(Object index) throws IOException;
+
 }

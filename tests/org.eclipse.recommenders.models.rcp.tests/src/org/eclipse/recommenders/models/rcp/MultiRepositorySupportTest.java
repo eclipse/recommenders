@@ -13,7 +13,6 @@ package org.eclipse.recommenders.models.rcp;
 import static com.google.common.base.Optional.of;
 import static org.eclipse.recommenders.utils.Constants.EXT_ZIP;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
@@ -110,8 +109,6 @@ public class MultiRepositorySupportTest {
                 return map.get(captor.getValue().getName());
             }
         });
-
-        doReturn(true).when(sut).indexAlreadyDownloaded(any(File.class));
 
         sut.open();
         return sut;
