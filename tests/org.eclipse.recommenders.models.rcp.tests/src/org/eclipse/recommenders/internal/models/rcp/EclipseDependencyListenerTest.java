@@ -8,7 +8,7 @@
  * Contributors:
  *     Olav Lenz - initial API and implementation
  */
-package org.eclipse.recommenders.models.rcp;
+package org.eclipse.recommenders.internal.models.rcp;
 
 import static com.google.common.collect.ObjectArrays.concat;
 import static org.eclipse.jdt.core.IJavaElement.JAVA_PROJECT;

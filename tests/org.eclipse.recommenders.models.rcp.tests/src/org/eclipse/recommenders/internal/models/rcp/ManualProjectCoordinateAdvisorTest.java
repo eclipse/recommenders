@@ -1,4 +1,4 @@
-package org.eclipse.recommenders.models.rcp;
+package org.eclipse.recommenders.internal.models.rcp;
 
 import static org.junit.Assert.*;
 
@@ -16,7 +16,7 @@ import org.junit.rules.TemporaryFolder;
 
 import com.google.common.base.Optional;
 
-public class ManualMappingStrategyTest {
+public class ManualProjectCoordinateAdvisorTest {
 
     private static final ProjectCoordinate EXPECTED_PROJECT_COORDINATE = new ProjectCoordinate("example",
             "example.project", "1.0.0");
