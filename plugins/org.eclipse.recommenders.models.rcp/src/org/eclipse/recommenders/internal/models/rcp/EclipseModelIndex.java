@@ -11,8 +11,7 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.*;
 import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.INDEX_BASEDIR;
 import static org.eclipse.recommenders.models.ModelCoordinate.HINT_REPOSITORY_URL;
 
@@ -58,6 +57,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.io.Files;
 
 /**
  * The Eclipse RCP wrapper around an IModelIndex that responds to (@link ModelRepositoryChangedEvent)s by closing the
@@ -96,19 +96,21 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @PostConstruct
     @Override
     public void open() throws IOException {
-        doOpen(false);
+        open(false);
     }
 
-    private void doOpen(boolean forceIndexUpdate) throws IOException {
+    @VisibleForTesting
+    public void open(boolean testSetup) throws IOException {
         Checks.ensureNoDuplicates(prefs.remotes);
         clearDelegates();
         basedir.mkdir();
         for (String remoteUrl : prefs.remotes) {
-            File indexLocation = createIndexLocation(remoteUrl);
-            if (!indexAlreadyDownloaded(indexLocation) || forceIndexUpdate) {
+            File file = createIndexLocation(remoteUrl);
+            if (indexAlreadyDownloaded(file) || testSetup) {
+                openDelegate(remoteUrl, file);
+            }
+            if (!testSetup) {
                 triggerIndexDownload(remoteUrl);
-            } else {
-                openDelegate(remoteUrl, indexLocation);
             }
         }
     }
@@ -269,7 +271,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
     @Subscribe
     public void onEvent(ModelRepositoryOpenedEvent e) throws IOException {
-        doOpen(true);
+        open();
     }
 
     @Subscribe
@@ -290,11 +292,20 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
             File location = repository.getLocation(e.model, false).orNull();
             String remoteUrl = e.model.getHint(HINT_REPOSITORY_URL).orNull();
             if (remoteUrl != null) {
-                File file = createIndexLocation(remoteUrl);
-                file.mkdir();
-                FileUtils.cleanDirectory(file);
-                Zips.unzip(location, file);
-                openDelegate(remoteUrl, file);
+                Pair<File, IModelIndex> pair = openDelegates.get(remoteUrl);
+                if (pair == null) {
+                    File folder = createIndexLocation(remoteUrl);
+                    folder.mkdir();
+                    Zips.unzip(location, folder);
+                    openDelegate(remoteUrl, folder);
+                } else {
+                    File folder = Files.createTempDir();
+                    Zips.unzip(location, folder);
+                    IModelIndex modelIndex = pair.getSecond();
+                    modelIndex.updateIndex(folder);
+                    bus.post(new ModelIndexOpenedEvent());
+                    FileUtils.deleteDirectory(folder);
+                }
             }
         }
     }
@@ -302,5 +313,10 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     private boolean isIndex(ModelCoordinate model) {
         return model.getGroupId().equals(INDEX.getGroupId()) && model.getArtifactId().equals(INDEX.getArtifactId())
                 && model.getExtension().equals(INDEX.getExtension()) && model.getVersion().equals(INDEX.getVersion());
+    }
+
+    @Override
+    public void updateIndex(Object index) throws IOException {
+        throw new UnsupportedOperationException();
     }
 }
