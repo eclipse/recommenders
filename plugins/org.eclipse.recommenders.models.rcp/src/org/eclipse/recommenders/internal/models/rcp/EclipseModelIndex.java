@@ -96,20 +96,15 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @PostConstruct
     @Override
     public void open() throws IOException {
-        doOpen(false);
+        doOpen();
     }
 
-    private void doOpen(boolean forceIndexUpdate) throws IOException {
+    private void doOpen() throws IOException {
         Checks.ensureNoDuplicates(prefs.remotes);
         clearDelegates();
         basedir.mkdir();
         for (String remoteUrl : prefs.remotes) {
-            File indexLocation = createIndexLocation(remoteUrl);
-            if (!indexAlreadyDownloaded(indexLocation) || forceIndexUpdate) {
-                triggerIndexDownload(remoteUrl);
-            } else {
-                openDelegate(remoteUrl, indexLocation);
-            }
+            triggerIndexDownload(remoteUrl);
         }
     }
 
@@ -269,7 +264,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
 
     @Subscribe
     public void onEvent(ModelRepositoryOpenedEvent e) throws IOException {
-        doOpen(true);
+        doOpen();
     }
 
     @Subscribe
