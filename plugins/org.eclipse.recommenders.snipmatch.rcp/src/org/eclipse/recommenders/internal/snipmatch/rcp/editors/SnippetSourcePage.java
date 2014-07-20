@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      Marcel Bruch - Initial design and API
  */
@@ -17,11 +17,14 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -35,6 +38,7 @@ public class SnippetSourcePage extends FormPage {
 
     private ISnippet snippet;
     private Text txtCode;
+    private Label statusBar;
     private DataBindingContext ctx;
 
     public SnippetSourcePage(FormEditor editor, String id, String title) {
@@ -49,12 +53,16 @@ public class SnippetSourcePage extends FormPage {
         Composite body = form.getBody();
         toolkit.decorateFormHeading(form.getForm());
         toolkit.paintBordersFor(body);
-        managedForm.getForm().getBody().setLayout(new FillLayout(SWT.HORIZONTAL));
+        Composite formBody = managedForm.getForm().getBody();
+        formBody.setLayout(GridLayoutFactory.fillDefaults().create());
 
-        txtCode = managedForm.getToolkit()
-                .createText(managedForm.getForm().getBody(), "New Text", SWT.WRAP | SWT.MULTI); //$NON-NLS-1$
+        txtCode = managedForm.getToolkit().createText(formBody, "New Text", SWT.WRAP | SWT.MULTI); //$NON-NLS-1$
         txtCode.setEditable(true);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(txtCode);
 
+        statusBar = new Label(formBody, SWT.BORDER);
+        GridDataFactory.fillDefaults().grab(true, false).applyTo(statusBar);
+        statusBar.setForeground(JFaceColors.getErrorText(formBody.getDisplay()));
         initDataBindings();
     }
 
@@ -73,6 +81,8 @@ public class SnippetSourcePage extends FormPage {
                     @Override
                     public void handleChange(org.eclipse.core.databinding.observable.ChangeEvent event) {
                         ((SnippetEditor) getEditor()).setDirty(true);
+                        String sourceValid = SnippetSourceValidator.isSourceValid(txtCode.getText());
+                        statusBar.setText(sourceValid);
                     }
                 });
             }
