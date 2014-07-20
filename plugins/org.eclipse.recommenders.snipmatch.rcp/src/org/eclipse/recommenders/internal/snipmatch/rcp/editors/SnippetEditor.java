@@ -15,6 +15,7 @@ import static java.util.UUID.randomUUID;
 import static org.eclipse.recommenders.utils.Checks.ensureIsInstanceOf;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -100,13 +101,20 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
             return;
         }
 
+        String sourceValid = SnippetSourceValidator.isSourceValid(snippet.getCode());
+        if (!sourceValid.isEmpty()) {
+            MessageDialog.openError(getSite().getShell(), Messages.DIALOG_TITLE_ERROR_SNIPPET_SOURCE_INVALID,
+                    MessageFormat.format(Messages.DIALOG_MESSAGE_ERROR_SNIPPET_SOURCE_INVALID, sourceValid));
+            return;
+        }
+
         ISnippet oldSnippet = input.getOldSnippet();
 
         if (!oldSnippet.getCode().isEmpty() && !snippet.getCode().equals(oldSnippet.getCode())) {
             int status = new MessageDialog(getSite().getShell(), Messages.DIALOG_TITLE_SAVE_SNIPPET, null,
                     Messages.DIALOG_MESSAGE_SAVE_SNIPPET_WITH_MODIFIED_CODE, MessageDialog.QUESTION, new String[] {
-                Messages.DIALOG_OPTION_SAVE, Messages.DIALOG_OPTION_SAVE_AS_NEW,
-                Messages.DIALOG_OPTION_CANCEL }, 0).open();
+                            Messages.DIALOG_OPTION_SAVE, Messages.DIALOG_OPTION_SAVE_AS_NEW,
+                            Messages.DIALOG_OPTION_CANCEL }, 0).open();
 
             if (status == 1) {
                 // Store as new
