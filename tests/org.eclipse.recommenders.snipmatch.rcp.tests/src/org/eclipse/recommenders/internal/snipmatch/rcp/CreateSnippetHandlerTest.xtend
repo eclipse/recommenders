@@ -80,8 +80,8 @@ class CreateSnippetHandlerTest {
     def void testNoJavaLangImportButOtherImports() {
         code = CodeBuilder::method(
             '''
-                $String s = null;$
-                $List l = null;$
+                $String s = null;
+                List l = null;$
             ''')
         exercise()
 
@@ -203,6 +203,97 @@ class CreateSnippetHandlerTest {
                     ${l} = null;
                 }
                 ${:import(java.util.List)}${cursor}
+            '''.toString,
+            actual.code
+        )
+    }
+
+    /*
+     * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437687
+     */
+    @Test
+    def void testVariableDeclarationsInDifferentBlocks() {
+        code = CodeBuilder::classbody(
+            '''
+                $void method1() {
+                    String e;
+                }
+                void method2() {
+                    String e;
+                }$
+            ''')
+        exercise()
+
+        assertEquals(
+            '''
+                void method1() {
+                    String ${e:newName(java.lang.String)};
+                }
+                void method2() {
+                    String ${e2:newName(java.lang.String)};
+                }
+                ${cursor}
+            '''.toString,
+            actual.code
+        )
+    }
+
+    /*
+     * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437687
+     */
+    @Test
+    def void testVariableDeclarationsInDifferentLoops() {
+        code = CodeBuilder::classbody(
+            '''
+                $for (int i = 0; i < 10; i++) {
+                    String e;
+                }
+                for (int i = 0; i < 10; i++) {
+                    String e;
+                }$
+            ''')
+        exercise()
+
+        assertEquals(
+            '''
+                for (int ${i:newName(int)} = 0; ${i} < 10; ${i}++) {
+                    String ${e:newName(java.lang.String)};
+                }
+                for (int ${i:newName(int)} = 0; ${i} < 10; ${i}++) {
+                    String ${e2:newName(java.lang.String)};
+                }
+                ${cursor}
+            '''.toString,
+            actual.code
+        )
+    }
+
+    /*
+     * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437687
+     */
+    @Test
+    def void testVariableDeclarationsInNestedBlocks() {
+        code = CodeBuilder::classbody(
+            '''
+                $while (true) {
+                    String e;
+                    for (int i = 0; i < 10; i++) {
+                        String e;
+                    }
+                }$
+                
+            ''')
+        exercise()
+
+        assertEquals(
+            '''
+                while (true) {
+                    String ${e:newName(java.lang.String)};
+                    for (int ${i:newName(int)} = 0; ${i} < 10; ${i}++) {
+                        String ${e2:newName(java.lang.String)};
+                    }
+                }
+                ${cursor}
             '''.toString,
             actual.code
         )
