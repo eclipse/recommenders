@@ -207,6 +207,36 @@ class CreateSnippetHandlerTest {
             actual.code
         )
     }
+    
+    /*
+     * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437687
+     */
+    @Test
+    def void testVariableDeclarationsInDifferentBlocks() {
+        code = CodeBuilder::classbody(
+            '''
+                $void method1() {
+                    String e;
+                }
+                void method2() {
+                    String e;
+                }$
+            ''')
+        exercise()
+
+        assertEquals(
+            '''
+                void method1() {
+                    String ${e:newName(java.lang.String)};
+                }
+                void method2() {
+                    String ${e2:newName(java.lang.String)};
+                }
+                ${cursor}
+            '''.toString,
+            actual.code
+        )
+    }
 
     @Test
     def void testGenerics() {
