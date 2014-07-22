@@ -68,6 +68,15 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
         writeLock = readWriteLock.writeLock();
     }
 
+<<<<<<< HEAD   (ed8faa [snipmatch] Bug 438745: Double click support for pref page a)
+=======
+    private void setupDelegate() {
+        String remoteUri = prefs.getFetchUrl();
+        delegate = new GitSnippetRepository(new File(basedir, Urls.mangle(remoteUri)), remoteUri, prefs.getPushUrl(),
+                prefs.getPushBranch());
+    }
+
+>>>>>>> BRANCH (21be1e [releng] 2.1.2-SNAPSHOT)
     @Override
     public void open() {
         writeLock.lock();
@@ -168,6 +177,26 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
         } finally {
             readLock.unlock();
         }
+<<<<<<< HEAD   (ed8faa [snipmatch] Bug 438745: Double click support for pref page a)
+=======
+    }
+
+    @Subscribe
+    public void onEvent(SnippetRepositoryConfigurationChangedEvent e) throws IOException {
+        close();
+        setupDelegate();
+        open();
+    }
+
+    /**
+     * Triggered when a snippet repository URL was changed (most likely in the a preference page).
+     * <p>
+     * Clients of this event should be an instance of {@link ISnippetRepository}. Other clients should have a look at
+     * {@link SnippetRepositoryClosedEvent} and {@link SnippetRepositoryClosedEvent}. Clients of this event may consider
+     * refreshing themselves whenever they receive this event. Clients get notified in a background process.
+     */
+    public static class SnippetRepositoryConfigurationChangedEvent {
+>>>>>>> BRANCH (21be1e [releng] 2.1.2-SNAPSHOT)
     }
 
     /**
