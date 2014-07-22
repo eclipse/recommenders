@@ -288,6 +288,10 @@ public class ProcessableParameterGuessingProposal extends JavaMethodCompletionPr
         }
 
         buffer.append(RPAREN);
+        
+        if (canAutomaticallyAppendSemicolon()) {
+            buffer.append(SEMICOLON);
+        }
 
         return buffer.toString();
     }
