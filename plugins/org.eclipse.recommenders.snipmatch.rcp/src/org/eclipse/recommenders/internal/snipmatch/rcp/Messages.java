@@ -25,7 +25,11 @@ public class Messages extends NLS {
     public static String DIALOG_MESSAGE_INVALID_SNIPPET_NAME;
     public static String DIALOG_MESSAGE_NO_REPOSITORY_AVAILABLE;
     public static String DIALOG_MESSAGE_SAVE_SNIPPET_WITH_MODIFIED_CODE;
+<<<<<<< HEAD   (cde3d5 [snipmatch] Bug 439213: Move emf model to non *.rcp project)
     public static String DIALOG_MESSAGE_SET_SNIPPET_REPOSITORY_URL;
+=======
+    public static String DIALOG_MESSAGE_ERROR_SNIPPET_SOURCE_INVALID;
+>>>>>>> BRANCH (f6ba34 Merge "[completion] Bug 440087: ParameterGuessingProposal in)
 
     public static String DIALOG_OPTION_CANCEL;
     public static String DIALOG_OPTION_SAVE;
@@ -38,7 +42,11 @@ public class Messages extends NLS {
     public static String DIALOG_TITLE_ERROR_WHILE_STORING_SNIPPET;
     public static String DIALOG_TITLE_INAVLID_SNIPPET_NAME;
     public static String DIALOG_TITLE_SAVE_SNIPPET;
+<<<<<<< HEAD   (cde3d5 [snipmatch] Bug 439213: Move emf model to non *.rcp project)
     public static String DIALOG_TITLE_SET_SNIPPET_REPOSITORY_URL;
+=======
+    public static String DIALOG_TITLE_ERROR_SNIPPET_SOURCE_INVALID;
+>>>>>>> BRANCH (f6ba34 Merge "[completion] Bug 440087: ParameterGuessingProposal in)
 
     public static String DIALOG_VALIDATOR_EXTRA_SEARCH_TERM_ALREADY_ADDED;
     public static String DIALOG_VALIDATOR_TAG_ALREADY_ADDED;
