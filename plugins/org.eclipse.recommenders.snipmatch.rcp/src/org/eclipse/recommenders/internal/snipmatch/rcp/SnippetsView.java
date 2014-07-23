@@ -32,12 +32,17 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.viewers.IViewerObservableList;
 import org.eclipse.jface.databinding.viewers.ViewersObservables;
-import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.TreeColumnLayout;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.recommenders.internal.snipmatch.rcp.EclipseGitSnippetRepository.SnippetRepositoryClosedEvent;
 import org.eclipse.recommenders.internal.snipmatch.rcp.EclipseGitSnippetRepository.SnippetRepositoryContentChangedEvent;
 import org.eclipse.recommenders.internal.snipmatch.rcp.EclipseGitSnippetRepository.SnippetRepositoryOpenedEvent;
@@ -56,13 +61,13 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
@@ -80,7 +85,6 @@ public class SnippetsView extends ViewPart implements IRcpService {
     private final Repositories repos;
     private Text txtSearch;
     private List list;
-    private ListViewer viewer;
     private Button btnEdit;
     private Button btnRemove;
     private Button btnAdd;
@@ -90,6 +94,12 @@ public class SnippetsView extends ViewPart implements IRcpService {
     private IViewerObservableList selection;
     private Job reconnectJob;
 
+    private TreeViewer treeViewer;
+
+    private Tree tree;
+
+    private IContentProvider contentprovider;
+
     @Inject
     public SnippetsView(Repositories repos) {
         this.repos = repos;
@@ -97,9 +107,8 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
     @Override
     public void createPartControl(Composite parent) {
-
         Composite composite = new Composite(parent, SWT.NONE);
-        composite.setLayout(new GridLayout(2, false));
+        GridLayoutFactory.swtDefaults().spacing(0, 5).numColumns(2).equalWidth(false).applyTo(composite);
 
         txtSearch = new Text(composite, SWT.BORDER | SWT.ICON_SEARCH | SWT.SEARCH | SWT.CANCEL);
         txtSearch.setMessage(Messages.SEARCH_PLACEHOLDER_SEARCH_TEXT);
@@ -123,11 +132,24 @@ public class SnippetsView extends ViewPart implements IRcpService {
         });
         new Label(composite, SWT.NONE);
 
-        viewer = new ListViewer(composite);
-        list = viewer.getList();
-        list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 4));
+        Composite treeComposite = new Composite(composite, SWT.NONE);
 
-        btnAdd = new Button(composite, SWT.NONE);
+        TreeColumnLayout treeLayout = new TreeColumnLayout();
+        treeComposite.setLayout(treeLayout);
+        treeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+
+        treeViewer = new TreeViewer(treeComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.VIRTUAL);
+        ColumnViewerToolTipSupport.enableFor(treeViewer);
+        tree = treeViewer.getTree();
+        tree.setHeaderVisible(true);
+        tree.setLinesVisible(true);
+        GridDataFactory.fillDefaults().grab(true, false).span(1, 1).applyTo(tree);
+
+        Composite buttonComposite = new Composite(composite, SWT.NONE);
+        GridLayoutFactory.swtDefaults().numColumns(1).equalWidth(false).applyTo(buttonComposite);
+        GridDataFactory.fillDefaults().grab(false, false).applyTo(buttonComposite);
+
+        btnAdd = new Button(buttonComposite, SWT.NONE);
         btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
         btnAdd.setText(Messages.SNIPPETS_VIEW_BUTTON_ADD);
         btnAdd.setEnabled(isImportSupported());
@@ -145,7 +167,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             }
         });
 
-        btnEdit = new Button(composite, SWT.NONE);
+        btnEdit = new Button(buttonComposite, SWT.NONE);
         btnEdit.setEnabled(false);
         btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
         btnEdit.setText(Messages.SNIPPETS_VIEW_BUTTON_EDIT);
@@ -156,7 +178,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             }
         });
 
-        btnRemove = new Button(composite, SWT.NONE);
+        btnRemove = new Button(buttonComposite, SWT.NONE);
         btnRemove.setEnabled(false);
         btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
         btnRemove.setText(Messages.SNIPPETS_VIEW_BUTTON_REMOVE);
@@ -176,7 +198,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             }
         });
 
-        btnReconnect = new Button(composite, SWT.NONE);
+        btnReconnect = new Button(buttonComposite, SWT.NONE);
         btnReconnect.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
         btnReconnect.setText(Messages.SNIPPETS_VIEW_BUTTON_RECONNECT);
         btnReconnect.addSelectionListener(new SelectionAdapter() {
@@ -186,7 +208,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             }
         });
 
-        viewer.setLabelProvider(new LabelProvider() {
+        treeViewer.setLabelProvider(new LabelProvider() {
             @Override
             public String getText(Object element) {
                 Recommendation<ISnippet> recommendation = cast(element);
@@ -194,17 +216,74 @@ public class SnippetsView extends ViewPart implements IRcpService {
                 return createDisplayString(snippet);
             }
         });
-        viewer.addOpenListener(new IOpenListener() {
+        treeViewer.addOpenListener(new IOpenListener() {
 
             @Override
             public void open(OpenEvent event) {
                 doOpen();
             }
         });
-        viewer.setContentProvider(new ArrayContentProvider());
-        viewer.setSorter(new ViewerSorter());
+        treeViewer.setUseHashlookup(true);
+        contentprovider = new ILazyTreeContentProvider() {
+
+            private Set<Recommendation<ISnippet>> data = Sets.newHashSet();
+
+            @Override
+            public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+                data = cast(newInput);
+            }
+
+            @Override
+            public void dispose() {
+            }
+
+            @Override
+            public void updateElement(Object parent, int index) {
+                // if (parent instanceof IViewSite) {
+                // String element = prefs.remotes[index];
+                // treeViewer.replace(parent, index, element);
+                // treeViewer.setChildCount(element, getChildren(element).length);
+                // } else if (parent instanceof String) {
+                // treeViewer.replace(parent, index, getChildren(parent)[index]);
+                // }
+            }
+
+            private Object[] getChildren(Object element) {
+                // if (element instanceof String) {
+                // return filteredCoordinatesGroupedByRepo.get((String) element).toArray();
+                // }
+                return new Object[0];
+            }
+
+            @Override
+            public void updateChildCount(Object element, int currentChildCount) {
+                // int count = 0;
+                //
+                // if (element instanceof IViewSite) {
+                // count = prefs.remotes.length;
+                // }
+                //
+                // if (contains(prefs.remotes, element)) {
+                // count = getChildren(element).length;
+                // }
+                //
+                // if (count != currentChildCount) {
+                // treeViewer.setChildCount(element, count);
+                // }
+            }
+
+            @Override
+            public Object getParent(Object element) {
+                // if (element instanceof KnownCoordinate) {
+                // KnownCoordinate v = (KnownCoordinate) element;
+                // return v.url;
+                // }
+                return null;
+            }
+        };
+        // treeViewer.setSorter(new ViewerSorter());
         refreshInput();
-        selection = ViewersObservables.observeMultiSelection(viewer);
+        selection = ViewersObservables.observeMultiSelection(treeViewer);
         initDataBindings();
     }
 
@@ -276,12 +355,13 @@ public class SnippetsView extends ViewPart implements IRcpService {
                 Display.getDefault().asyncExec(new Runnable() {
                     @Override
                     public void run() {
-                        if (!viewer.getControl().isDisposed()) {
+                        if (!treeViewer.getControl().isDisposed()) {
                             Set<Recommendation<ISnippet>> snippets = Sets.newHashSet();
                             for (ISnippetRepository repo : repos.getRepositories()) {
                                 snippets.addAll(repo.search(txtSearch.getText()));
                             }
-                            viewer.setInput(snippets);
+                            treeViewer.setContentProvider(contentprovider);
+                            treeViewer.setInput(snippets);
                         }
                         if (!btnAdd.isDisposed()) {
                             btnAdd.setEnabled(isImportSupported());
@@ -341,7 +421,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
     @Override
     public void setFocus() {
-        viewer.getControl().setFocus();
+        treeViewer.getControl().setFocus();
     }
 
     protected void initDataBindings() {
@@ -350,7 +430,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
         UpdateValueStrategy simpleStrategy = new UpdateValueStrategy();
         simpleStrategy.setConverter(new ObjectToBooleanConverter());
 
-        IObservableValue selectionValue = singleSelection().observe(viewer);
+        IObservableValue selectionValue = singleSelection().observe(treeViewer);
         IObservableValue enabledBtnEditValue = enabled().observe(btnEdit);
         ctx.bindValue(selectionValue, enabledBtnEditValue, simpleStrategy, null);
 
