@@ -12,14 +12,19 @@ package org.eclipse.recommenders.jayes.inference;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
+import org.eclipse.recommenders.jayes.factor.AbstractFactor;
+import org.eclipse.recommenders.jayes.factor.DenseFactor;
 import org.eclipse.recommenders.jayes.factor.FactorFactory;
+import org.eclipse.recommenders.jayes.factor.arraywrapper.DoubleArrayWrapper;
 
 public abstract class AbstractInferrer implements IBayesInferer {
 
     protected Map<BayesNode, String> evidence = new HashMap<BayesNode, String>();
+    protected Map<BayesNode, AbstractFactor> virtualEvidence = new HashMap<BayesNode, AbstractFactor>();
 
     protected double[][] beliefs;
     protected boolean beliefsValid;
@@ -72,6 +77,51 @@ public abstract class AbstractInferrer implements IBayesInferer {
     @Override
     public Map<BayesNode, String> getEvidence() {
         return evidence;
+    }
+
+    /**
+     * although it is possible to set virtual evidence for multiple variables, it is advised to only do so with one var
+     *
+     * @param node
+     * @param evidence
+     */
+    @Override
+    public void addVirtualEvidence(BayesNode node, double[] evidence) {
+        DenseFactor f = new DenseFactor();
+        f.setDimensionIDs(node.getId());
+        f.setDimensions(node.getOutcomeCount());
+        f.setValues(new DoubleArrayWrapper(evidence));
+        addVirtualEvidence(node, f);
+    }
+
+    @Override
+    public void addVirtualEvidence(BayesNode node, AbstractFactor evidence) {
+        if (evidence.getDimensionIDs().length != 1) {
+            throw new IllegalArgumentException("Only virtual evidence over one variable is allowed");
+        }
+        if (evidence.getDimensionIDs()[0] != node.getId()) {
+            throw new IllegalArgumentException("virtual evidence and node don't fit together");
+        }
+        virtualEvidence.put(node, evidence);
+        beliefsValid = false;
+    }
+
+    @Override
+    public void setVirtualEvidence(Map<BayesNode, double[]> virtualEvidence) {
+        this.virtualEvidence.clear();
+        for (Entry<BayesNode, double[]> entry : virtualEvidence.entrySet()) {
+            addVirtualEvidence(entry.getKey(), entry.getValue());
+        }
+
+    }
+
+    @Override
+    public Map<BayesNode, AbstractFactor> getVirtualEvidence() {
+        return virtualEvidence;
+    }
+
+    public void resetVirtualEvidence() {
+        virtualEvidence.clear();
     }
 
     protected abstract void updateBeliefs();

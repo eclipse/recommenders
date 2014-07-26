@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
+import org.eclipse.recommenders.jayes.factor.AbstractFactor;
 
 public interface IBayesInferrer {
 
@@ -24,6 +25,14 @@ public interface IBayesInferrer {
     void addEvidence(BayesNode node, String outcome);
 
     Map<BayesNode, String> getEvidence();
+
+    void setVirtualEvidence(Map<BayesNode, double[]> virtualEvidence);
+
+    void addVirtualEvidence(BayesNode node, double[] virtualEvidence);
+
+    void addVirtualEvidence(BayesNode node, AbstractFactor virtualEvidence);
+
+    Map<BayesNode, AbstractFactor> getVirtualEvidence();
 
     double[] getBeliefs(BayesNode node);
 }
