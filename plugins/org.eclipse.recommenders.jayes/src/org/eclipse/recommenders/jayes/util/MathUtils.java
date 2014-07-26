@@ -64,7 +64,7 @@ public class MathUtils {
     /**
      * computes c := a / b , but avoids division by zero. In the context of the JTA, this is valid because it holds that
      * b == 0 -> a == 0
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -82,6 +82,12 @@ public class MathUtils {
             if (b[i] != Double.NEGATIVE_INFINITY) {
                 c[i] = a[i] - b[i];
             }
+        }
+    }
+
+    public static void multiply(double[] a, double[] b, double[] c) {
+        for (int i = 0; i < a.length; i++) {
+            c[i] = a[i] * b[i];
         }
     }
 
@@ -125,7 +131,7 @@ public class MathUtils {
 
     /**
      * product of the values in the array, from index start (inclusive) to end (exclusive)
-     * 
+     *
      * @throws ArrayIndexOutOfBoundsException
      *             if end >= vector.length
      */

@@ -12,6 +12,7 @@ package org.eclipse.recommenders.jayes.inference;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
@@ -21,6 +22,7 @@ import org.eclipse.recommenders.jayes.factor.FactorFactory;
 public abstract class AbstractInferrer implements IBayesInferer {
 
     protected Map<BayesNode, String> evidence = new HashMap<BayesNode, String>();
+    protected Map<BayesNode, double[]> virtualEvidence = new HashMap<BayesNode, double[]>();
 
     protected double[][] beliefs;
     protected boolean beliefsValid;
@@ -73,6 +75,30 @@ public abstract class AbstractInferrer implements IBayesInferer {
     @Override
     public Map<BayesNode, String> getEvidence() {
         return evidence;
+    }
+
+    @Override
+    public void addVirtualEvidence(BayesNode node, double[] evidence) {
+        beliefsValid = false;
+        virtualEvidence.put(node, evidence);
+    }
+
+    @Override
+    public void setVirtualEvidence(Map<BayesNode, double[]> virtualEvidence) {
+        this.virtualEvidence.clear();
+        for (Entry<BayesNode, double[]> entry : virtualEvidence.entrySet()) {
+            addVirtualEvidence(entry.getKey(), entry.getValue());
+        }
+
+    }
+
+    @Override
+    public Map<BayesNode, double[]> getVirtualEvidence() {
+        return virtualEvidence;
+    }
+
+    public void resetVirtualEvidence() {
+        virtualEvidence.clear();
     }
 
     protected abstract void updateBeliefs();

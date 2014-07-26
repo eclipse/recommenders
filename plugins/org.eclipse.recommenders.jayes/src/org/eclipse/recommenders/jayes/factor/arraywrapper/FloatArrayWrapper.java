@@ -15,12 +15,22 @@ import java.util.Iterator;
 
 import org.eclipse.recommenders.internal.jayes.util.ArrayUtils;
 
-public class FloatArrayWrapper implements IArrayWrapper {
+public final class FloatArrayWrapper implements IArrayWrapper {
 
     private float[] array;
 
     public FloatArrayWrapper(float... array) {
         this.array = array;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof FloatArrayWrapper && Arrays.equals(array, ((FloatArrayWrapper) obj).array);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(array);
     }
 
     @Override

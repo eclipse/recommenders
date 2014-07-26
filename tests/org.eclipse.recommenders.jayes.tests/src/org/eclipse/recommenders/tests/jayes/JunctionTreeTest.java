@@ -20,7 +20,9 @@ import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.factor.AbstractFactor;
 import org.eclipse.recommenders.jayes.factor.FactorFactory;
 import org.eclipse.recommenders.jayes.inference.IBayesInferrer;
+import org.eclipse.recommenders.jayes.inference.SoftEvidenceInferrer;
 import org.eclipse.recommenders.jayes.inference.jtree.JunctionTreeAlgorithm;
+import org.eclipse.recommenders.jayes.util.MathUtils;
 import org.eclipse.recommenders.testing.jayes.NetExamples;
 import org.eclipse.recommenders.tests.jayes.lbp.LoopyBeliefPropagation;
 import org.junit.Test;
@@ -160,6 +162,103 @@ public class JunctionTreeTest {
         for (BayesNode n : net.getNodes()) {
             assertArrayEquals(compare.getBeliefs(n), inference.getBeliefs(n), TOLERANCE);
         }
+    }
+
+    @Test
+    public void testVirtualEvidence() {
+        BayesNet net = NetExamples.testNet1();
+
+        BayesNode a = net.getNode("a");
+        BayesNode b = net.getNode("b");
+        BayesNode c = net.getNode("c");
+
+        JunctionTreeAlgorithm inference = new JunctionTreeAlgorithm();
+        inference.setNetwork(net);
+        inference.addVirtualEvidence(a, new double[] { 2, 0.5 });
+
+        assertArrayEquals(new double[] { 0.5, 0.5 }, inference.getBeliefs(a), TOLERANCE);
+        assertArrayEquals(new double[] { 0.2, 0.4, 0.4 }, inference.getBeliefs(b), TOLERANCE);
+
+    }
+
+    // Test that everything gets correctly reset
+    @Test
+    public void testVirtualEvidence2() {
+        BayesNet net = NetExamples.testNet1();
+
+        BayesNode a = net.getNode("a");
+        BayesNode b = net.getNode("b");
+        BayesNode c = net.getNode("c");
+
+        JunctionTreeAlgorithm inference = new JunctionTreeAlgorithm();
+        inference.setNetwork(net);
+        inference.addVirtualEvidence(a, new double[] { 2, 0.5 });
+
+        assertArrayEquals(new double[] { 0.5, 0.5 }, inference.getBeliefs(a), TOLERANCE);
+        assertArrayEquals(new double[] { 0.2, 0.4, 0.4 }, inference.getBeliefs(b), TOLERANCE);
+
+        inference.addVirtualEvidence(a, new double[] { 1, 1 });
+
+        assertArrayEquals(new double[] { 0.2, 0.8 }, inference.getBeliefs(a), TOLERANCE);
+
+    }
+
+    // Test multiple virtual evidences work as expected
+    @Test
+    public void testVirtualEvidence3() {
+        BayesNet net = NetExamples.testNet1();
+
+        BayesNode a = net.getNode("a");
+        BayesNode b = net.getNode("b");
+        BayesNode c = net.getNode("c");
+
+        JunctionTreeAlgorithm inference = new JunctionTreeAlgorithm();
+        inference.setNetwork(net);
+        inference.addVirtualEvidence(a, new double[] { 2, 0.5 });
+        inference.addVirtualEvidence(b, new double[] { 1, 0, 1 });
+
+        assertArrayEquals(new double[] { 0.5, 0.5 }, inference.getBeliefs(a), TOLERANCE);
+        assertArrayEquals(new double[] { 1.0 / 3.0, 0, 2.0 / 3.0 }, inference.getBeliefs(b), TOLERANCE);
+
+    }
+
+    @Test
+    public void testSoftEvidence() {
+        BayesNet net = NetExamples.testNet1();
+
+        BayesNode a = net.getNode("a");
+        BayesNode b = net.getNode("b");
+        BayesNode c = net.getNode("c");
+
+        SoftEvidenceInferrer inference = new SoftEvidenceInferrer(new JunctionTreeAlgorithm());
+        inference.setNetwork(net);
+        inference.addSoftEvidence(a, new double[] { 0.5, 0.5 });
+
+        assertArrayEquals(new double[] { 0.5, 0.5 }, inference.getBeliefs(a), TOLERANCE);
+        assertArrayEquals(new double[] { 0.2, 0.4, 0.4 }, inference.getBeliefs(b), TOLERANCE);
+
+    }
+
+    @Test
+    public void testSoftEvidence2() {
+        BayesNet net = NetExamples.testNet1();
+
+        BayesNode a = net.getNode("a");
+        BayesNode b = net.getNode("b");
+        BayesNode c = net.getNode("c");
+        BayesNode d = net.getNode("d");
+
+        SoftEvidenceInferrer inference = new SoftEvidenceInferrer(new JunctionTreeAlgorithm());
+        inference.setNetwork(net);
+        inference.addSoftEvidence(a, new double[] { 0.5, 0.5 });
+        inference.addSoftEvidence(c, new double[] { 0.2, 0.8 });
+
+        assertArrayEquals(new double[] { 0.5, 0.5 }, inference.getBeliefs(a), TOLERANCE);
+        // assertArrayEquals(new double[] { 0.5, 0, 0.5 }, inference.getBeliefs(b), TOLERANCE);
+        assertArrayEquals(new double[] { 0.2, 0.8 }, inference.getBeliefs(c), TOLERANCE);
+        assertArrayEquals(MathUtils.normalize(new double[] { 0.2 * 0.5 + 0.8 * 0.2, 0.2 * 0.5 + 0.8 * 0.8 }),
+                inference.getBeliefs(d), TOLERANCE);
+
     }
 
 }
