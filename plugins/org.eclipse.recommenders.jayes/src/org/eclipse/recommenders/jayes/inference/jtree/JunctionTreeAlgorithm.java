@@ -26,6 +26,7 @@ import org.eclipse.recommenders.jayes.factor.AbstractFactor;
 import org.eclipse.recommenders.jayes.factor.arraywrapper.DoubleArrayWrapper;
 import org.eclipse.recommenders.jayes.factor.arraywrapper.IArrayWrapper;
 import org.eclipse.recommenders.jayes.inference.AbstractInferer;
+import org.eclipse.recommenders.jayes.util.BayesNodeUtil;
 import org.eclipse.recommenders.jayes.util.Graph;
 import org.eclipse.recommenders.jayes.util.MathUtils;
 import org.eclipse.recommenders.jayes.util.NumericalInstabilityException;
@@ -57,6 +58,7 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
     // used for computing evidence collection skip
     protected Set<Integer> clustersHavingEvidence;
     protected boolean[] isObserved;
+    protected boolean[] hasVirtualEvidence;
 
     protected double[] scratchpad;
 
@@ -108,13 +110,25 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
     }
 
     private void doUpdateBeliefs() {
+        resetEvidence();
+        incorporateAllHardEvidence();
+        replayFactorInitializations();
+        incorporateAllVirtualEvidence();
 
-        incorporateAllEvidence();
         int propagationRoot = findPropagationRoot();
 
-        replayFactorInitializations();
         collectEvidence(propagationRoot, skipCollection(propagationRoot));
         distributeEvidence(propagationRoot, skipDistribution(propagationRoot));
+    }
+
+    private void resetEvidence() {
+        clustersHavingEvidence.clear();
+        for (Pair<AbstractFactor, IArrayWrapper> init : initializations) {
+            init.getFirst().resetSelections();
+        }
+
+        Arrays.fill(isObserved, false);
+        Arrays.fill(hasVirtualEvidence, false);
     }
 
     private void replayFactorInitializations() {
@@ -123,15 +137,15 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
         }
     }
 
-    private void incorporateAllEvidence() {
-        for (Pair<AbstractFactor, IArrayWrapper> init : initializations) {
-            init.getFirst().resetSelections();
-        }
-
-        clustersHavingEvidence.clear();
-        Arrays.fill(isObserved, false);
+    private void incorporateAllHardEvidence() {
         for (BayesNode n : evidence.keySet()) {
             incorporateEvidence(n);
+        }
+    }
+
+    private void incorporateAllVirtualEvidence() {
+        for (BayesNode n : virtualEvidence.keySet()) {
+            incorporateVirtualEvidence(n);
         }
     }
 
@@ -142,6 +156,22 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
         for (final Integer concernedCluster : concernedClusters[n]) {
             nodePotentials[concernedCluster].select(n, node.getOutcomeIndex(evidence.get(node)));
             clustersHavingEvidence.add(concernedCluster);
+        }
+    }
+
+    private void incorporateVirtualEvidence(final BayesNode node) {
+        int n = node.getId();
+        // virtual evidence
+        if (virtualEvidence.containsKey(node)) {
+            AbstractFactor factor = nodePotentials[concernedClusters[n][0]];
+            AbstractFactor ev = BayesNodeUtil.createFactorForVariable(node);
+            ev.setValues(new DoubleArrayWrapper(virtualEvidence.get(node)));
+            if (factor.isLogScale()) {
+                factor.multiplyCompatibleToLog(ev);
+            } else {
+                factor.multiplyCompatible(ev);
+            }
+            clustersHavingEvidence.add(concernedClusters[n][0]);
         }
     }
 
@@ -156,7 +186,7 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
     /**
      * checks which nodes need not be processed during collectEvidence (because of preprocessing). These are those nodes
      * without evidence which are leaves or which only have non-evidence descendants
-     * 
+     *
      * @param root
      *            the node to start the check from
      * @return a set of the nodes not needing a call of collectEvidence
@@ -190,7 +220,7 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
      * <li>not the query factor of a non-evidence variable</li>
      * <li>AND have no descendants that cannot be skipped</li>
      * </ul>
-     * 
+     *
      * @param distNode
      * @return
      */
@@ -218,7 +248,7 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
 
     private boolean isQueryFactorOfUnobservedVariable(final int node) {
         for (int i : queryFactorReverseMapping[node]) {
-            if (!isObserved[i]) {
+            if (!isObserved[i] && !hasVirtualEvidence[i]) {
                 return true;
             }
         }
@@ -282,7 +312,7 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
      */
     private boolean needMessagePass(final AbstractFactor sepSet) {
         for (final int var : sepSet.getDimensionIDs()) {
-            if (!isObserved[var]) {
+            if (!isObserved[var] && !hasVirtualEvidence[var]) {
                 return true;
             }
         }
@@ -345,6 +375,7 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
         initializations = new ArrayList<Pair<AbstractFactor, IArrayWrapper>>();
         clustersHavingEvidence = new HashSet<Integer>(numNodes);
         isObserved = new boolean[numNodes];
+        hasVirtualEvidence = new boolean[numNodes];
     }
 
     private JunctionTree buildJunctionTree(BayesNet net) {
@@ -444,10 +475,9 @@ public class JunctionTreeAlgorithm extends AbstractInferer {
     private void prepareSepsetMultiplications(final CanonicalIntArrayManager flyWeight) {
         for (int node = 0; node < nodePotentials.length; node++) {
             for (final int n : junctionTree.getNeighbors(node)) {
-                final int[] preparedMultiplication = nodePotentials[n]
-                        .prepareMultiplication(sepSets.get(new OrderIgnoringPair<Integer>(node, n)));
-                preparedMultiplications.put(Pair.newPair(node, n),
-                        flyWeight.getInstance(preparedMultiplication));
+                final int[] preparedMultiplication = nodePotentials[n].prepareMultiplication(sepSets
+                        .get(new OrderIgnoringPair<Integer>(node, n)));
+                preparedMultiplications.put(Pair.newPair(node, n), flyWeight.getInstance(preparedMultiplication));
             }
         }
     }

@@ -25,5 +25,11 @@ public interface IBayesInferrer {
 
     Map<BayesNode, String> getEvidence();
 
+    void setVirtualEvidence(Map<BayesNode, double[]> virtualEvidence);
+
+    void addVirtualEvidence(BayesNode node, double[] virtualEvidence);
+
+    Map<BayesNode, double[]> getVirtualEvidence();
+
     double[] getBeliefs(BayesNode node);
 }
