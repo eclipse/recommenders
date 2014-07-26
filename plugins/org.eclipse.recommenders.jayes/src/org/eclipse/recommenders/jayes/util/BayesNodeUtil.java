@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Michael Kutschke - initial API and implementation
  ******************************************************************************/
@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.factor.AbstractFactor;
 import org.eclipse.recommenders.jayes.factor.Cut;
+import org.eclipse.recommenders.jayes.factor.DenseFactor;
 
 public class BayesNodeUtil {
 
@@ -41,7 +42,7 @@ public class BayesNodeUtil {
         cut.initialize();
 
         if (cut.getSubCut() != null || cut.getStepSize() != 1
-                || (cut.getEnd() - cut.getStart()) != node.getOutcomeCount()) {
+                || cut.getEnd() - cut.getStart() != node.getOutcomeCount()) {
             throw new AssertionError("Unexpected factor structure: node's dimension is not the lowest");
         }
 
@@ -54,6 +55,13 @@ public class BayesNodeUtil {
         factor.resetSelections();
 
         return subCpt;
+    }
+
+    public static AbstractFactor createFactorForVariable(BayesNode v) {
+        DenseFactor f = new DenseFactor();
+        f.setDimensionIDs(v.getId());
+        f.setDimensions(v.getOutcomeCount());
+        return f;
     }
 
 }

@@ -17,6 +17,11 @@ import org.eclipse.recommenders.internal.jayes.util.ArrayUtils;
 
 public class DoubleArrayWrapper implements IArrayWrapper {
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof DoubleArrayWrapper && Arrays.equals(array, ((DoubleArrayWrapper) obj).array);
+    }
+
     private double[] array;
 
     public DoubleArrayWrapper(double... array) {
