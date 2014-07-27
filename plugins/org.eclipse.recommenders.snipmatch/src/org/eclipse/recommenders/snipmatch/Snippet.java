@@ -31,7 +31,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Snippet implements ISnippet {
 
-    public static final String FORMAT_VERSION = "format-3";
+    public static final String FORMAT_VERSION = "format-4";
 
     private transient PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
@@ -47,24 +47,29 @@ public class Snippet implements ISnippet {
     private List<String> tags = Lists.newArrayList();
     @SerializedName("code")
     private String code;
+    @SerializedName("contextType")
+    private String contextType = "java";
 
     public Snippet(UUID uuid, String name, String description, List<String> extraSearchTerms, List<String> tags,
-            String code) {
+            String code, String contextType) {
         ensureIsNotNull(uuid);
         ensureIsNotNull(name);
         ensureIsNotNull(description);
         ensureIsNotNull(extraSearchTerms);
         ensureIsNotNull(tags);
         ensureIsNotNull(code);
+        ensureIsNotNull(contextType);
         this.uuid = uuid;
         this.name = name;
         this.description = description;
         this.extraSearchTerms = extraSearchTerms;
         this.tags = tags;
         this.code = code;
+        this.contextType = contextType;
     }
 
     protected Snippet() {
+        this.contextType = "java"; //$NON-NLS-1$
     }
 
     @Override
@@ -97,6 +102,11 @@ public class Snippet implements ISnippet {
         return description;
     }
 
+    @Override
+    public String getContextType() {
+        return contextType;
+    }
+
     public void setCode(String code) {
         firePropertyChange("code", this.code, this.code = code);
     }
@@ -107,6 +117,10 @@ public class Snippet implements ISnippet {
 
     public void setDescription(String description) {
         firePropertyChange("description", this.description, this.description = description);
+    }
+
+    public void setContextType(String contextType) {
+        this.contextType = contextType;
     }
 
     public void setExtraSearchTerms(List<String> extraSearchTerms) {
@@ -140,7 +154,8 @@ public class Snippet implements ISnippet {
 
     public static Snippet copy(ISnippet snippet) {
         return new Snippet(snippet.getUuid(), snippet.getName(), snippet.getDescription(), Lists.newArrayList(snippet
-                .getExtraSearchTerms()), Lists.newArrayList(snippet.getTags()), snippet.getCode());
+                .getExtraSearchTerms()), Lists.newArrayList(snippet.getTags()), snippet.getCode(),
+                snippet.getContextType() != null ? snippet.getContextType() : "");
     }
 
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
