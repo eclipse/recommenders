@@ -14,8 +14,7 @@ package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.core.databinding.beans.BeanProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 
 import java.util.Arrays;
@@ -79,6 +78,7 @@ public class SnippetMetadataPage extends FormPage {
 
     private Text txtName;
     private Text txtDescription;
+    private Text txtContextType;
     private Text txtUuid;
 
     private ListViewer listViewerExtraSearchTerms;
@@ -153,6 +153,15 @@ public class SnippetMetadataPage extends FormPage {
                 txtDescription = managedForm.getToolkit().createText(managedForm.getForm().getBody(),
                         snippet.getDescription(), SWT.NONE);
                 txtDescription.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER)
+                        .grab(true, false).span(2, 1).indent(horizontalIndent, 0).create());
+
+                Label lblContext = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
+                        Messages.EDITOR_LABEL_SNIPPET_CONTEXT_TYPE, SWT.NONE);
+                lblContext.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+
+                txtContextType = managedForm.getToolkit().createText(managedForm.getForm().getBody(),
+                        snippet.getContextType(), SWT.NONE);
+                txtContextType.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER)
                         .grab(true, false).span(2, 1).indent(horizontalIndent, 0).create());
 
                 Label lblExtraSearchTerms = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
@@ -333,6 +342,21 @@ public class SnippetMetadataPage extends FormPage {
             @Override
             public void handleChange(ChangeEvent event) {
                 if (!txtDescription.getText().equals(snippet.getDescription())) {
+                    contentsPart.markStale();
+                } else {
+                    contentsPart.markDirty();
+                }
+            }
+        });
+
+        // context
+        IObservableValue wpTxtContextType = text(SWT.Modify).observe(txtContextType);
+        IObservableValue ppContextType = value(Snippet.class, "contextType", String.class).observe(snippet); //$NON-NLS-1$
+        context.bindValue(wpTxtContextType, ppContextType, null, null);
+        ppDescription.addChangeListener(new IChangeListener() {
+            @Override
+            public void handleChange(ChangeEvent event) {
+                if (!txtContextType.getText().equals(snippet.getContextType())) {
                     contentsPart.markStale();
                 } else {
                     contentsPart.markDirty();
