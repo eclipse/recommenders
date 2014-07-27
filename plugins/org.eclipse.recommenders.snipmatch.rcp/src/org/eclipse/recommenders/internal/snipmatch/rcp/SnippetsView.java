@@ -311,7 +311,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
         try {
             ISnippet snippet = new Snippet(UUID.randomUUID(), "", "", Collections.<String>emptyList(), //$NON-NLS-1$ //$NON-NLS-2$
-                    Collections.<String>emptyList(), ""); //$NON-NLS-1$
+                    Collections.<String>emptyList(), "", ""); //$NON-NLS-1$
 
             final SnippetEditorInput input = new SnippetEditorInput(snippet, repo);
             SnippetEditor editor = cast(page

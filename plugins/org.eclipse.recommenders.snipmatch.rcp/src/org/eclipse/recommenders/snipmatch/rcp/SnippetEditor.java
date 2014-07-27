@@ -127,6 +127,13 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
             return;
         }
 
+        if (isNullOrEmpty(snippet.getContextType())) {
+            MessageDialog.openError(getSite().getShell(), Messages.DIALOG_TITLE_INVALID_SNIPPET_CONTEXT,
+                    Messages.DIALOG_MESSAGE_INVALID_SNIPPET_CONTEXT);
+            monitor.setCanceled(true);
+            return;
+        }
+
         String sourceValid = SnippetSourceValidator.isSourceValid(snippet.getCode());
         if (!sourceValid.isEmpty()) {
             MessageDialog.openError(getSite().getShell(), Messages.DIALOG_TITLE_ERROR_SNIPPET_SOURCE_INVALID,
@@ -140,8 +147,8 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
         if (!oldSnippet.getCode().isEmpty() && !snippet.getCode().equals(oldSnippet.getCode())) {
             int status = new MessageDialog(getSite().getShell(), Messages.DIALOG_TITLE_SAVE_SNIPPET, null,
                     Messages.DIALOG_MESSAGE_SAVE_SNIPPET_WITH_MODIFIED_CODE, MessageDialog.QUESTION, new String[] {
-                            Messages.DIALOG_OPTION_SAVE, Messages.DIALOG_OPTION_SAVE_AS_NEW,
-                            Messages.DIALOG_OPTION_CANCEL }, 0).open();
+                Messages.DIALOG_OPTION_SAVE, Messages.DIALOG_OPTION_SAVE_AS_NEW,
+                Messages.DIALOG_OPTION_CANCEL }, 0).open();
 
             if (status == 1) {
                 // Store as new

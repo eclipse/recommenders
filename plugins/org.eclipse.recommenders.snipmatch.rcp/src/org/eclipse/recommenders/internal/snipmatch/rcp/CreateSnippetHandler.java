@@ -81,7 +81,7 @@ public class CreateSnippetHandler extends AbstractHandler {
 
         List<String> keywords = Lists.<String>newArrayList();
         List<String> tags = Lists.<String>newArrayList();
-        return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, code);
+        return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, code, ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     private void openSnippetInEditor(Snippet snippet) {
