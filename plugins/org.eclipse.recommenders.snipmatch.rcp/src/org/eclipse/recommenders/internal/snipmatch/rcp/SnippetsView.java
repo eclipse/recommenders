@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 import static org.eclipse.recommenders.internal.snipmatch.rcp.SnippetProposal.createDisplayString;
+import static org.eclipse.recommenders.snipmatch.LocationConstraint.FILE;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.io.IOException;
@@ -45,6 +46,8 @@ import org.eclipse.recommenders.rcp.IRcpService;
 import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
+import org.eclipse.recommenders.snipmatch.LocationConstraint;
+import org.eclipse.recommenders.snipmatch.SnipmatchContext;
 import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.recommenders.snipmatch.rcp.SnippetEditor;
 import org.eclipse.recommenders.snipmatch.rcp.SnippetEditorInput;
@@ -285,7 +288,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
                         if (!viewer.getControl().isDisposed()) {
                             Set<Recommendation<ISnippet>> snippets = Sets.newHashSet();
                             for (ISnippetRepository repo : repos) {
-                                snippets.addAll(repo.search(txtSearch.getText()));
+                                snippets.addAll(repo.search(new SnipmatchContext(txtSearch.getText(), FILE)));
                             }
                             viewer.setInput(snippets);
                         }
@@ -311,7 +314,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
         try {
             ISnippet snippet = new Snippet(UUID.randomUUID(), "", "", Collections.<String>emptyList(), //$NON-NLS-1$ //$NON-NLS-2$
-                    Collections.<String>emptyList(), ""); //$NON-NLS-1$
+                    Collections.<String>emptyList(), "", LocationConstraint.NONE); //$NON-NLS-1$
 
             final SnippetEditorInput input = new SnippetEditorInput(snippet, repo);
             SnippetEditor editor = cast(page
