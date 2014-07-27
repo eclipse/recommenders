@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.text.BadLocationException;
@@ -176,7 +177,8 @@ public class CreateSnippetHandler extends AbstractHandler {
 
         List<String> keywords = Lists.<String>newArrayList();
         List<String> tags = Lists.<String>newArrayList();
-        return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, sb.toString());
+        return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, sb.toString(),
+                JavaContextType.ID_ALL);
     }
 
     private String generateUniqueVariableName(IVariableBinding vb, String name) {

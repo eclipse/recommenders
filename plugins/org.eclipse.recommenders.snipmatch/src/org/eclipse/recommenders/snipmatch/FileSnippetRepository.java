@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -89,6 +90,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     private static final String F_TAG = "tag";
     private static final String F_PATH = "path";
     private static final String F_UUID = "uuid";
+    private static final String F_CONTEXT = "context";
 
     private static final float NAME_BOOST = 4.0f;
     private static final float DESCRIPTION_BOOST = 2.0f;
@@ -213,7 +215,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     }
 
     private void indexSnippet(IndexWriter writer, ISnippet snippet, String path) throws CorruptIndexException,
-            IOException {
+    IOException {
         Document doc = new Document();
 
         doc.add(new Field(F_PATH, path, Store.YES, Index.NO));
@@ -232,6 +234,11 @@ public class FileSnippetRepository implements ISnippetRepository {
 
         for (String extraSearchTerm : snippet.getExtraSearchTerms()) {
             doc.add(new Field(F_EXTRA_SEARCH_TERM, extraSearchTerm, Store.YES, Index.ANALYZED));
+        }
+
+        String contextType = snippet.getContextType();
+        if (!Strings.isNullOrEmpty(contextType)) {
+            doc.add(new Field(F_CONTEXT, contextType, Store.NO, Index.NOT_ANALYZED));
         }
 
         writer.addDocument(doc);

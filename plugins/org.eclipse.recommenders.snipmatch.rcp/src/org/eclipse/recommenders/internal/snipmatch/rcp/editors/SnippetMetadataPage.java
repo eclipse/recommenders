@@ -73,6 +73,7 @@ public class SnippetMetadataPage extends FormPage {
     private Text txtName;
     private Text txtDescription;
     private Text txtUuid;
+    private Text txtContextType;
 
     private ListViewer listViewerExtraSearchTerms;
     private ListViewer listViewerTags;
@@ -138,6 +139,14 @@ public class SnippetMetadataPage extends FormPage {
 
         txtDescription = managedForm.getToolkit().createText(managedForm.getForm().getBody(), null, SWT.NONE);
         txtDescription.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
+                .span(2, 1).indent(horizontalIndent, 0).create());
+
+        Label lblContextType = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
+                Messages.EDITOR_LABEL_SNIPPET_DESCRIPTION, SWT.NONE);
+        lblContextType.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+
+        txtContextType = managedForm.getToolkit().createText(managedForm.getForm().getBody(), null, SWT.NONE);
+        txtContextType.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
                 .span(2, 1).indent(horizontalIndent, 0).create());
 
         Label lblExtraSearchTerms = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
@@ -285,6 +294,12 @@ public class SnippetMetadataPage extends FormPage {
         IObservableValue ppDescription = value(Snippet.class, "description", String.class).observe(snippet); //$NON-NLS-1$
         ctx.bindValue(wpTxtDescriptionText, ppDescription, null, null);
         wpTxtDescriptionText.addChangeListener(new ChangeListener());
+
+        // contextType
+        IObservableValue wpTxtContextTypeText = text(SWT.Modify).observe(txtContextType);
+        IObservableValue ppContextType = value(Snippet.class, "contextType", String.class).observe(snippet); //$NON-NLS-1$
+        ctx.bindValue(wpTxtContextTypeText, ppContextType, null, null);
+        wpTxtContextTypeText.addChangeListener(new ChangeListener());
 
         // extra search terms
         ppExtraSearchTerms = PojoProperties.list(Snippet.class, "extraSearchTerms", String.class).observe(snippet); //$NON-NLS-1$
