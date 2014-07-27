@@ -14,9 +14,9 @@ package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.core.databinding.beans.BeanProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Messages.*;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -31,6 +31,9 @@ import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.internal.databinding.property.value.SelfValueProperty;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -53,6 +56,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
@@ -73,12 +77,16 @@ import com.google.common.base.Optional;
 @SuppressWarnings("restriction")
 public class SnippetMetadataPage extends FormPage {
 
+    private static final String[] SNIPMATCH_CONTEXT_TYPES = { SNIPMATCH_CONTEXT_TYPE_JAVA,
+        SNIPMATCH_CONTEXT_TYPE_JAVA_STATEMENTS, SNIPMATCH_CONTEXT_TYPE_JAVA_MEMBERS, SNIPMATCH_CONTEXT_TYPE_JAVADOC };
+
     private ISnippet snippet;
 
     private AbstractFormPart contentsPart;
 
     private Text txtName;
     private Text txtDescription;
+    private Combo comboContextType;
     private Text txtUuid;
 
     private ListViewer listViewerExtraSearchTerms;
@@ -154,6 +162,17 @@ public class SnippetMetadataPage extends FormPage {
                         snippet.getDescription(), SWT.NONE);
                 txtDescription.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER)
                         .grab(true, false).span(2, 1).indent(horizontalIndent, 0).create());
+
+                Label lblContext = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
+                        Messages.EDITOR_LABEL_SNIPPET_CONTEXT_TYPE, SWT.NONE);
+                lblContext.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+
+                comboContextType = new Combo(managedForm.getForm().getBody(), SWT.DROP_DOWN | SWT.BORDER);
+                managedForm.getToolkit().adapt(comboContextType, true, true);
+                comboContextType.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER)
+                        .grab(true, false).span(2, 1).indent(horizontalIndent, 0).create());
+                comboContextType.setItems(SNIPMATCH_CONTEXT_TYPES);
+                comboContextType.select(getContextTypeIndex(snippet.getContextType()));
 
                 Label lblExtraSearchTerms = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
                         Messages.EDITOR_LABEL_SNIPPETS_EXTRA_SEARCH_TERMS, SWT.NONE);
@@ -340,6 +359,33 @@ public class SnippetMetadataPage extends FormPage {
             }
         });
 
+        // context
+        IObservableValue wpTxtContextType = WidgetProperties.singleSelectionIndex().observe(comboContextType);
+        IObservableValue ppContextType = value(Snippet.class, "contextType", String.class).observe(snippet); //$NON-NLS-1$
+        context.bindValue(wpTxtContextType, ppContextType, new UpdateValueStrategy() {
+            @Override
+            public Object convert(Object value) {
+                String contextType = getContextType((Integer) value);
+                return contextType;
+            }
+        }, new UpdateValueStrategy() {
+            @Override
+            public Object convert(Object value) {
+                int contextTypeIndex = getContextTypeIndex((String) value);
+                return contextTypeIndex;
+            }
+        });
+        ppContextType.addChangeListener(new IChangeListener() {
+            @Override
+            public void handleChange(ChangeEvent event) {
+                if (!getContextType(comboContextType.getSelectionIndex()).equals(snippet.getContextType())) {
+                    contentsPart.markStale();
+                } else {
+                    contentsPart.markDirty();
+                }
+            }
+        });
+
         // Extra search terms
         ppExtraSearchTerms = BeanProperties.list(Snippet.class, "extraSearchTerms", String.class).observe(snippet); //$NON-NLS-1$
         ViewerSupport.bind(listViewerExtraSearchTerms, ppExtraSearchTerms, new SelfValueProperty(String.class));
@@ -429,6 +475,37 @@ public class SnippetMetadataPage extends FormPage {
         context = createDataBindingContext();
 
         super.setInputWithNotify(input);
+    }
+
+    private int getContextTypeIndex(String contextType) {
+        if (contextType.equals(JavaContextType.ID_ALL)) {
+            return 0;
+        }
+        if (contextType.equals(JavaContextType.ID_STATEMENTS)) {
+            return 1;
+        }
+        if (contextType.equals(JavaContextType.ID_MEMBERS)) {
+            return 2;
+        }
+        if (contextType.equals(JavaDocContextType.ID)) {
+            return 3;
+        }
+        return -1;
+    }
+
+    private String getContextType(int index) {
+        switch (index) {
+        case 0:
+            return JavaContextType.ID_ALL;
+        case 1:
+            return JavaContextType.ID_STATEMENTS;
+        case 2:
+            return JavaContextType.ID_MEMBERS;
+        case 3:
+            return JavaDocContextType.ID;
+        default:
+            return ""; //$NON-NLS-1$
+        }
     }
 
     @Override
