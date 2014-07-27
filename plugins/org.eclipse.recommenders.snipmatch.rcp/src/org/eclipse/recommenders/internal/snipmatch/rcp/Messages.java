@@ -47,6 +47,12 @@ public class Messages extends NLS {
     public static String EDITOR_LABEL_SNIPPET_UUID;
     public static String EDITOR_LABEL_SNIPPETS_EXTRA_SEARCH_TERMS;
     public static String EDITOR_LABEL_SNIPPETS_TAG;
+    public static String EDITOR_LABEL_SNIPPET_CONTEXT_TYPE;
+
+    public static String SNIPMATCH_CONTEXT_TYPE_JAVA;
+    public static String SNIPMATCH_CONTEXT_TYPE_JAVA_STATEMENTS;
+    public static String SNIPMATCH_CONTEXT_TYPE_JAVA_MEMBERS;
+    public static String SNIPMATCH_CONTEXT_TYPE_JAVADOC;
 
     public static String EDITOR_TITLE_METADATA;
     public static String EDITOR_TITLE_RAW_SOURCE;

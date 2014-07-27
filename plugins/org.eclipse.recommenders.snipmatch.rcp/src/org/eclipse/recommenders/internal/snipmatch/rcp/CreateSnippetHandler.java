@@ -26,6 +26,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.text.IDocument;
@@ -81,7 +82,8 @@ public class CreateSnippetHandler extends AbstractHandler {
 
         List<String> keywords = Lists.<String>newArrayList();
         List<String> tags = Lists.<String>newArrayList();
-        return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, code);
+        return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, code,
+                JavaContextType.ID_ALL);
     }
 
     private void openSnippetInEditor(Snippet snippet) {
