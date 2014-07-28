@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.completion.rcp.processable;
 
 import static com.google.common.base.Optional.fromNullable;
+import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.IS_VISIBLE;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 
 import java.util.Map;
@@ -20,9 +21,10 @@ import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-@SuppressWarnings("restriction")
+@SuppressWarnings({ "restriction", "unchecked" })
 public class ProcessableLazyJavaTypeCompletionProposal extends LazyJavaTypeCompletionProposal implements
         IProcessableProposal {
 
@@ -41,10 +43,9 @@ public class ProcessableLazyJavaTypeCompletionProposal extends LazyJavaTypeCompl
     @Override
     public boolean isPrefix(final String prefix, final String completion) {
         lastPrefix = prefix;
-        if (mgr.prefixChanged(prefix)) {
-            return true;
-        }
-        return super.isPrefix(prefix, completion);
+        boolean res = mgr.prefixChanged(prefix) ? true : super.isPrefix(prefix, completion);
+        setTag(IS_VISIBLE, res);
+        return res;
     }
 
     @Override
@@ -77,9 +78,15 @@ public class ProcessableLazyJavaTypeCompletionProposal extends LazyJavaTypeCompl
         }
     }
 
+
     @Override
     public <T> Optional<T> getTag(IProposalTag key) {
         return Optional.fromNullable((T) tags.get(key));
+    }
+
+    @Override
+    public <T> Optional<T> getTag(String key) {
+        return Proposals.getTag(this, key);
     }
 
     @Override
@@ -88,4 +95,12 @@ public class ProcessableLazyJavaTypeCompletionProposal extends LazyJavaTypeCompl
         return res != null ? res : defaultValue;
     }
 
+    @Override
+    public <T> T getTag(String key, T defaultValue) {
+        return this.<T> getTag(key).or(defaultValue);
+    }
+
+    public ImmutableSet<IProposalTag> tags() {
+        return ImmutableSet.copyOf(tags.keySet());
+    }
 }
