@@ -12,7 +12,9 @@ package org.eclipse.recommenders.completion.rcp.processable;
 
 import static org.eclipse.recommenders.completion.rcp.processable.ProcessableProposalFactory.create;
 import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.*;
-import static org.eclipse.recommenders.internal.completion.rcp.Constants.*;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.JDT_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.MYLYN_ALL_CATEGORY;
+import static org.eclipse.recommenders.internal.completion.rcp.Constants.RECOMMENDERS_ALL_CATEGORY_ID;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.Collections;
@@ -59,9 +61,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-@SuppressWarnings("restriction")
+@SuppressWarnings({ "restriction", "rawtypes" })
 public class IntelligentCompletionProposalComputer extends JavaAllCompletionProposalComputer implements
-ICompletionListener, ICompletionListenerExtension2 {
+        ICompletionListener, ICompletionListenerExtension2 {
 
     private static final Logger LOG = LoggerFactory.getLogger(IntelligentCompletionProposalComputer.class);
 
@@ -101,7 +103,8 @@ ICompletionListener, ICompletionListenerExtension2 {
         }
         activeProcessors.clear();
         activeProcessors.addAll(processors);
-        // code looks odd? This method unregisters this instance from the last(!) source viewer
+        // code looks odd? This method unregisters this instance from the
+        // last(!) source viewer
         // see unregisterCompletionListener for details
         unregisterCompletionListener();
     }
@@ -138,8 +141,10 @@ ICompletionListener, ICompletionListenerExtension2 {
                 if (jdtProposal instanceof IProcessableProposal) {
                     IProcessableProposal crProposal = (IProcessableProposal) jdtProposal;
                     crProposal.setTag(CONTEXT, crContext);
+                    crProposal.setTag(IS_VISIBLE, true);
                     crProposal.setTag(JDT_UI_PROPOSAL, pair.getKey());
                     crProposal.setTag(JDT_CORE_PROPOSAL, pair.getValue());
+                    crProposal.setTag(JDT_SCORE, jdtProposal.getRelevance());
                     fireProcessProposal(crProposal);
                 }
             }
@@ -163,7 +168,8 @@ ICompletionListener, ICompletionListenerExtension2 {
     protected boolean isContentAssistConfigurationOkay() {
         Set<String> cats = Sets.newHashSet(PreferenceConstants.getExcludedCompletionProposalCategories());
         if (cats.contains(RECOMMENDERS_ALL_CATEGORY_ID)) {
-            // If we are excluded on the default tab, then we cannot be on the default tab now, as we are executing.
+            // If we are excluded on the default tab, then we cannot be on the
+            // default tab now, as we are executing.
             // Hence, we must be on a subsequent tab.
             return true;
         }
@@ -277,8 +283,10 @@ ICompletionListener, ICompletionListenerExtension2 {
     public void assistSessionEnded(ContentAssistEvent event) {
         // ignore
 
-        // Calling unregister here seems like a good choice here but unfortunately isn't. "proposal applied" events are
-        // fired after the sessionEnded event, and thus, we cannot use this method to unsubscribe from the current
+        // Calling unregister here seems like a good choice here but
+        // unfortunately isn't. "proposal applied" events are
+        // fired after the sessionEnded event, and thus, we cannot use this
+        // method to unsubscribe from the current
         // editor. See unregisterCompletionListern for details.
     }
 

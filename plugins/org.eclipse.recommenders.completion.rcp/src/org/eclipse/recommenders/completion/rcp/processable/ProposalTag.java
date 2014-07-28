@@ -14,7 +14,10 @@ public enum ProposalTag implements IProposalTag {
     CONTEXT,
     JDT_UI_PROPOSAL,
     JDT_CORE_PROPOSAL,
+    JDT_SCORE,
     RECOMMENDERS_SCORE,
     SUBWORDS_SCORE,
-    IS_PREFIX_MATCH
+    IS_PREFIX_MATCH,
+    IS_VISIBLE,
+    PREFIX
 }

@@ -16,4 +16,6 @@ package org.eclipse.recommenders.completion.rcp.processable;
  * @see ProposalTag standard tags
  */
 public interface IProposalTag {
+
+    String name();
 }

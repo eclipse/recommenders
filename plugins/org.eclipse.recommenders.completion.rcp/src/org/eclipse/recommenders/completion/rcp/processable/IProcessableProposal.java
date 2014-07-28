@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 
 @Beta
 public interface IProcessableProposal extends IJavaCompletionProposal {
@@ -41,5 +42,12 @@ public interface IProcessableProposal extends IJavaCompletionProposal {
 
     <T> Optional<T> getTag(IProposalTag key);
 
+    <T> Optional<T> getTag(String key);
+
     <T> T getTag(IProposalTag key, T defaultValue);
+
+    <T> T getTag(String key, T defaultValue);
+
+    ImmutableSet<IProposalTag> tags();
+
 }
