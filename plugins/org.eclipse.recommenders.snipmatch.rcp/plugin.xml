@@ -78,13 +78,13 @@
 				mnemonic="S"/>
 		</menuContribution>
 	</extension>
-	<extension point="org.eclipse.emf.ecore.generated_package">
-		<!-- @generated snipmatchrcp -->
-		<package
-			uri="org.eclipse.recommenders.snipmatch.rcp"
-			class="org.eclipse.recommenders.rcp.model.SnipmatchRcpModelPackage"
-			genModel="model/snipmatchrcp.genmodel"/>
-	</extension>
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated snipmatchrcp -->
+      <package
+            uri="org.eclipse.recommenders.snipmatch.rcp"
+            class="org.eclipse.recommenders.rcp.model.SnipmatchRcpModelPackage"
+            genModel="model/snipmatchrcp.genmodel"/>
+   </extension>
 	<extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
 		<!-- @generated snipmatch -->
 		<factory
