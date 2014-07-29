@@ -391,7 +391,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
     private ListMultimap<String, KnownSnippet> searchSnippets(String searchTerm) {
         ListMultimap<String, KnownSnippet> snippetsGroupedByRepositoryName = LinkedListMultimap.create();
         for (ISnippetRepository repo : repos.getRepositories()) {
-            String repoName = repo.getRepositoryLocation();
+            String repoName = repo.getName();
             Set<KnownSnippet> knownSnippets = Sets.newHashSet();
             for (Recommendation<ISnippet> recommendation : repo.search(searchTerm)) {
                 knownSnippets.add(new KnownSnippet(repoName, recommendation.getProposal()));

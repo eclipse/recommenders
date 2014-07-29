@@ -42,6 +42,8 @@ public interface ISnippetRepository extends Openable, Closeable {
      */
     List<Recommendation<ISnippet>> search(String query, int maxResults);
 
+    String getName();
+
     String getRepositoryLocation();
 
     boolean hasSnippet(UUID uuid);
