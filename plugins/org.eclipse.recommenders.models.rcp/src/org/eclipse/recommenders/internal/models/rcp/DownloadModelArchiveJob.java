@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -51,6 +52,10 @@ import com.google.common.eventbus.EventBus;
 
 public class DownloadModelArchiveJob extends Job {
 
+    private static final int TOTAL_WORK_UNITS = 100000;
+    private static final int MAXIMUM_NUMBER_OF_DOWNLOAD_TASKS_PER_JOB = 2;
+    private static final int WORK_UNITS_PER_DOWNLOAD_TASK = TOTAL_WORK_UNITS / MAXIMUM_NUMBER_OF_DOWNLOAD_TASKS_PER_JOB;
+
     private final Map<String, IProgressMonitor> downloads = Maps.newHashMap();
 
     private final IModelRepository repository;
@@ -69,11 +74,20 @@ public class DownloadModelArchiveJob extends Job {
     @Override
     protected IStatus run(final IProgressMonitor monitor) {
         try {
-            monitor.beginTask(MessageFormat.format(Messages.TASK_RESOLVING_MODEL, mc), IProgressMonitor.UNKNOWN);
+            int downloadCountBeforeJob = downloads.size();
+            monitor.beginTask(MessageFormat.format(Messages.TASK_RESOLVING_MODEL, mc), TOTAL_WORK_UNITS);
             ModelArchiveDownloadCallback cb = new ModelArchiveDownloadCallback(monitor);
             File result = repository.resolve(mc, forceDownload, cb).orNull();
             if (cb.downloadedArchive) {
                 bus.post(new ModelArchiveDownloadedEvent(mc));
+            }
+
+            // zero to two tasks might be executed but all work is done.
+            int executedDownloadTasks = downloads.size() - downloadCountBeforeJob;
+            int skippedDownloadTasks = MAXIMUM_NUMBER_OF_DOWNLOAD_TASKS_PER_JOB - executedDownloadTasks;
+            // Skipped tasks count as work to indicate correct progress.
+            for (int i = 0; i < skippedDownloadTasks; i++) {
+                monitor.worked(WORK_UNITS_PER_DOWNLOAD_TASK);
             }
 
             // Returns null if the model coordinate could not be resolved. This may because we are requesting an mc that
@@ -120,6 +134,8 @@ public class DownloadModelArchiveJob extends Job {
     private final class ModelArchiveDownloadCallback extends DownloadCallback {
         private final IProgressMonitor monitor;
         private boolean downloadedArchive;
+        private long lastTransferred;
+        private int finishedWorkUnits;
 
         private ModelArchiveDownloadCallback(IProgressMonitor monitor) {
             this.monitor = monitor;
@@ -127,35 +143,51 @@ public class DownloadModelArchiveJob extends Job {
 
         @Override
         public synchronized void downloadInitiated(String path) {
-            downloads.put(path, new SubProgressMonitor(monitor, 1));
+            SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor, WORK_UNITS_PER_DOWNLOAD_TASK);
+            subProgressMonitor.beginTask(path, WORK_UNITS_PER_DOWNLOAD_TASK);
+            downloads.put(path, subProgressMonitor);
+            lastTransferred = 0;
+            finishedWorkUnits = 0;
         }
 
         @Override
         public synchronized void downloadProgressed(String path, long transferred, long total) {
+            long newTransferred = transferred - lastTransferred;
+            lastTransferred = transferred;
             IProgressMonitor submonitor = downloads.get(path);
-            String message = bytesToString(transferred) + "/" + bytesToString(total); //$NON-NLS-1$
+            String message;
+            if (total >= 0) {
+                message = MessageFormat.format(Messages.JOB_DOWNLOAD_TRANSFERRED_TOTAL_SIZE,
+                        FileUtils.byteCountToDisplaySize(transferred), FileUtils.byteCountToDisplaySize(total));
+                double amount = (double) newTransferred / total;
+                int workUnits = (int) (WORK_UNITS_PER_DOWNLOAD_TASK * amount);
+                finishedWorkUnits += workUnits;
+                submonitor.worked(workUnits);
+            } else {
+                message = MessageFormat.format(Messages.JOB_DOWNLOAD_TRANSFERRED_SIZE,
+                        FileUtils.byteCountToDisplaySize(transferred));
+            }
             submonitor.subTask(message);
-            submonitor.worked(1);
         }
 
         @Override
         public synchronized void downloadSucceeded(String path) {
-            downloads.get(path).done();
+            finishMonitorWork(path);
             downloadedArchive = true;
         }
 
         @Override
         public synchronized void downloadFailed(String path) {
-            downloads.get(path).done();
+            finishMonitorWork(path);
         }
 
-        private String bytesToString(long bytes) {
-            if (bytes < 1024) {
-                return bytes + " B"; //$NON-NLS-1$
+        private void finishMonitorWork(String path) {
+            IProgressMonitor submonitor = downloads.get(path);
+            int unfinishedWorkUnits = WORK_UNITS_PER_DOWNLOAD_TASK - finishedWorkUnits;
+            if (unfinishedWorkUnits > 0) {
+                submonitor.worked(unfinishedWorkUnits);
             }
-            int exp = (int) (Math.log(bytes) / Math.log(1024));
-            String pre = "KMGTPE".charAt(exp - 1) + "i"; //$NON-NLS-1$ //$NON-NLS-2$
-            return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre); //$NON-NLS-1$
+            submonitor.done();
         }
     }
 
