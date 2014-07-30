@@ -361,4 +361,22 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
         result.add(configuration);
         return result;
     }
+
+    @Override
+    public boolean delete() {
+        writeLock.lock();
+        try {
+            try {
+                delegate.close();
+                delegate.delete();
+                return true;
+            } catch (IOException e) {
+                LOG.error("Exception while deleting files on disk.", e);
+                return false;
+            }
+
+        } finally {
+            writeLock.unlock();
+        }
+    }
 }
