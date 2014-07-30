@@ -392,13 +392,10 @@ public class SnippetsView extends ViewPart implements IRcpService {
         addSnippetAction = new Action() {
             @Override
             public void run() {
-                for (ISnippetRepository repo : repos.getRepositories()) {
-                    if (repo.isImportSupported()) {
-                        // TODO Make the repo selectable
-                        // don't just store in the first that can import
-                        doAdd(repo);
-                        break;
-                    }
+                ISnippetRepository selectedRepository = SelectRepositoryDialog.openSelectRepositoryDialog(
+                        parent.getShell(), repos, configs).orNull();
+                if (selectedRepository != null) {
+                    doAdd(selectedRepository);
                 }
             }
         };
