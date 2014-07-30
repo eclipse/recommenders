@@ -18,6 +18,7 @@ import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -392,13 +393,10 @@ public class SnippetsView extends ViewPart implements IRcpService {
         addSnippetAction = new Action() {
             @Override
             public void run() {
-                for (ISnippetRepository repo : repos.getRepositories()) {
-                    if (repo.isImportSupported()) {
-                        // TODO Make the repo selectable
-                        // don't just store in the first that can import
-                        doAdd(repo);
-                        break;
-                    }
+                ISnippetRepository selectedRepository = SelectRepositoryDialog.openSelectRepositoryDialog(
+                        parent.getShell(), repos, configs).orNull();
+                if (selectedRepository != null) {
+                    doAdd(selectedRepository);
                 }
             }
         };
@@ -456,6 +454,9 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
     private void addToolBar(final Composite parent) {
         IToolBarManager toolBarManager = getViewSite().getActionBars().getToolBarManager();
+
+        addAction(Messages.SNIPPETS_VIEW_MENUITEM_ADD_SNIPPET, ELCL_ADD_SNIPPET, toolBarManager, addSnippetAction);
+
         addActions(toolBarManager);
 
         toolBarManager.add(new Separator());
@@ -485,8 +486,6 @@ public class SnippetsView extends ViewPart implements IRcpService {
     }
 
     private void addActions(IContributionManager contributionManager) {
-        addAction(Messages.SNIPPETS_VIEW_MENUITEM_ADD_SNIPPET, ELCL_ADD_SNIPPET, contributionManager, addSnippetAction);
-
         addAction(Messages.SNIPPETS_VIEW_MENUITEM_REMOVE_SNIPPET, ELCL_REMOVE_SNIPPET, contributionManager,
                 removeSnippetAction);
 
@@ -510,6 +509,21 @@ public class SnippetsView extends ViewPart implements IRcpService {
         menuManager.addMenuListener(new IMenuListener() {
             @Override
             public void menuAboutToShow(IMenuManager manager) {
+                if (selection.size() == 1 && selection.get(0) instanceof SnippetRepositoryConfiguration) {
+                    SnippetRepositoryConfiguration config = cast(selection.get(0));
+                    final ISnippetRepository repo = repos.getRepository(config.getId()).orNull();
+
+                    addAction(
+                            MessageFormat.format(Messages.SNIPPETS_VIEW_MENUITEM_ADD_SNIPPET_TO_REPO, config.getName()),
+                            ELCL_ADD_SNIPPET, manager, new Action() {
+                                @Override
+                                public void run() {
+                                    doAdd(repo);
+                                }
+                            });
+                } else {
+                    addAction(Messages.SNIPPETS_VIEW_MENUITEM_ADD_SNIPPET, ELCL_ADD_SNIPPET, manager, addSnippetAction);
+                }
                 addActions(manager);
             }
 
