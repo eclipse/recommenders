@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Repositories.SnippetRepositoryConfigurationChangedEvent;
+import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.model.EclipseGitSnippetRepositoryConfiguration;
 import org.eclipse.recommenders.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
@@ -64,15 +65,17 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
     private final SnippetRepositoryConfigurations configuration;
     private boolean dirty;
     private final File repositoryConfigurationFile;
+    private final SharedImages images;
 
     @Inject
     public SnipmatchPreferencePage(EventBus bus, SnippetRepositoryConfigurations configuration,
-            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile) {
+            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile, SharedImages images) {
         super(GRID);
         setDescription(Messages.PREFPAGE_DESCRIPTION);
         this.bus = bus;
         this.configuration = configuration;
         this.repositoryConfigurationFile = repositoryConfigurationFile;
+        this.images = images;
     }
 
     @Override
@@ -223,7 +226,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                     wizard = Iterables.getOnlyElement(suitableWizardDescriptors).getWizard();
                     wizard.setConfiguration(oldConfiguration);
                 } else {
-                    wizard = new SnippetRepositoryTypeSelectionWizard(oldConfiguration);
+                    wizard = new SnippetRepositoryTypeSelectionWizard(oldConfiguration, images);
                 }
 
                 WizardDialog dialog = new WizardDialog(this.getPage().getShell(), wizard);
@@ -248,7 +251,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
         protected void addNewConfiguration() {
             List<WizardDescriptor> availableWizards = WizardDescriptors.loadAvailableWizards();
             if (!availableWizards.isEmpty()) {
-                SnippetRepositoryTypeSelectionWizard newWizard = new SnippetRepositoryTypeSelectionWizard();
+                SnippetRepositoryTypeSelectionWizard newWizard = new SnippetRepositoryTypeSelectionWizard(images);
                 WizardDialog dialog = new WizardDialog(this.getPage().getShell(), newWizard);
                 if (dialog.open() == Window.OK) {
                     List<SnippetRepositoryConfiguration> configurations = getTableInput();

@@ -14,13 +14,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
 
+import javax.inject.Inject;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.model.EclipseGitSnippetRepositoryConfiguration;
 import org.eclipse.recommenders.rcp.model.SnipmatchRcpModelFactory;
+import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
 import org.eclipse.recommenders.utils.Checks;
 import org.eclipse.swt.SWT;
@@ -41,9 +44,14 @@ public class GitBasedRepositoryConfigurationWizard extends AbstractSnippetReposi
     private EclipseGitSnippetRepositoryConfiguration configuration;
     private final BranchInputValidator branchInputValidator = new BranchInputValidator();
 
-    public GitBasedRepositoryConfigurationWizard() {
+    private final SharedImages images;
+
+    @Inject
+    public GitBasedRepositoryConfigurationWizard(SharedImages images) {
+        this.images = images;
         setWindowTitle(Messages.WIZARD_GIT_REPOSITORY_WINDOW_TITLE);
         page.setWizard(this);
+        page.setImageDescriptor(images.getDescriptor(SharedImages.Images.WIZBAN_ADD_GIT_REPOSITORY));
     }
 
     @Override
@@ -85,6 +93,9 @@ public class GitBasedRepositoryConfigurationWizard extends AbstractSnippetReposi
     @Override
     public void setConfiguration(SnippetRepositoryConfiguration configuration) {
         this.configuration = Checks.cast(configuration);
+        if (configuration != null) {
+            page.setImageDescriptor(images.getDescriptor(SharedImages.Images.WIZBAN_EDIT_GIT_REPOSITORY));
+        }
     }
 
     class GitBasedRepositoryConfigurationWizardPage extends WizardPage {

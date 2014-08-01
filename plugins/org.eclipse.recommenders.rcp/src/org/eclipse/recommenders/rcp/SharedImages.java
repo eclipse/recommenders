@@ -120,7 +120,11 @@ public final class SharedImages implements IDisposable {
         OBJ_JRE(obj16("jre.gif")), //$NON-NLS-1$
         OBJ_REPOSITORY(obj16("repository.gif")), //$NON-NLS-1$
         OVR_STAR(ovr16("star.png")), //$NON-NLS-1$
-        VIEW_SLICE(view16("slice.gif")); //$NON-NLS-1$
+        VIEW_SLICE(view16("slice.gif")), //$NON-NLS-1$
+        WIZBAN_ADD_REPOSITORY(wizban("add_repository.png")), //$NON-NLS-1$
+        WIZBAN_ADD_GIT_REPOSITORY(wizban("add_git_repository.png")), //$NON-NLS-1$
+        WIZBAN_EDIT_REPOSITORY(wizban("edit_repository.png")), //$NON-NLS-1$
+        WIZBAN_EDIT_GIT_REPOSITORY(wizban("edit_git_repository.png")); //$NON-NLS-1$
         // @formatter:on
 
         private final String name;
