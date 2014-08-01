@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.eclipse.recommenders.internal.stacktraces.rcp.LogListener"></startup>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.eclipse.recommenders.stacktraces.rcp.actionSet"
+            label="Sample Action Set"
+            visible="true">
+         <menu
+               id="sampleMenu"
+               label="Sample &amp;Menu">
+            <separator
+                  name="sampleGroup">
+            </separator>
+         </menu>
+         <action
+               class="org.eclipse.recommenders.stacktraces.rcp.actions.SampleAction"
+               icon="icons/sample.gif"
+               id="org.eclipse.recommenders.stacktraces.rcp.actions.SampleAction"
+               label="&amp;Sample Action"
+               menubarPath="sampleMenu/sampleGroup"
+               toolbarPath="sampleGroup"
+               tooltip="Hello, Eclipse world">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.eclipse.recommenders.internal.stacktraces.rcp.PreferenceInitializer">
+      </initializer>
+   </extension>
+</plugin>
