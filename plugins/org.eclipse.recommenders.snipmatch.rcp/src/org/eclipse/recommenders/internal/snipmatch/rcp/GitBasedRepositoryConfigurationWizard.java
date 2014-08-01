@@ -10,9 +10,14 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.*;
+import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
+
+import javax.inject.Inject;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -41,9 +46,11 @@ public class GitBasedRepositoryConfigurationWizard extends AbstractSnippetReposi
     private EclipseGitSnippetRepositoryConfiguration configuration;
     private final BranchInputValidator branchInputValidator = new BranchInputValidator();
 
+    @Inject
     public GitBasedRepositoryConfigurationWizard() {
         setWindowTitle(Messages.WIZARD_GIT_REPOSITORY_WINDOW_TITLE);
         page.setWizard(this);
+        page.setImageDescriptor(imageDescriptorFromPlugin(BUNDLE_ID, WIZBAN_ADD_GIT_REPOSITORY));
     }
 
     @Override
@@ -85,6 +92,9 @@ public class GitBasedRepositoryConfigurationWizard extends AbstractSnippetReposi
     @Override
     public void setConfiguration(SnippetRepositoryConfiguration configuration) {
         this.configuration = Checks.cast(configuration);
+        if (configuration != null) {
+            page.setImageDescriptor(imageDescriptorFromPlugin(BUNDLE_ID, WIZBAN_EDIT_GIT_REPOSITORY));
+        }
     }
 
     class GitBasedRepositoryConfigurationWizardPage extends WizardPage {
