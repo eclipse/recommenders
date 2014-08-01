@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Repositories.SnippetRepositoryConfigurationChangedEvent;
+import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.model.EclipseGitSnippetRepositoryConfiguration;
 import org.eclipse.recommenders.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
@@ -68,11 +69,13 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
     private final SnippetRepositoryConfigurations configuration;
     private boolean dirty;
     private final File repositoryConfigurationFile;
+    private final SharedImages images;
 
     @Inject
     public SnipmatchPreferencePage(EventBus bus, Repositories repos, SnippetRepositoryConfigurations configuration,
-            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile) {
+            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile, SharedImages images) {
         super(GRID);
+        this.images = images;
         setDescription(Messages.PREFPAGE_DESCRIPTION);
         this.bus = bus;
         this.repos = repos;
@@ -118,7 +121,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
 
             tableViewer = getTableControl(parent);
             GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(numColumns - 1, 1).grab(true, true)
-                    .applyTo(tableViewer.getTable());
+            .applyTo(tableViewer.getTable());
             tableViewer.getTable().addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
@@ -247,7 +250,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                     wizard = Iterables.getOnlyElement(suitableWizardDescriptors).getWizard();
                     wizard.setConfiguration(oldConfiguration);
                 } else {
-                    wizard = new SnippetRepositoryTypeSelectionWizard(oldConfiguration);
+                    wizard = new SnippetRepositoryTypeSelectionWizard(oldConfiguration, images);
                 }
 
                 WizardDialog dialog = new WizardDialog(this.getPage().getShell(), wizard);
@@ -272,7 +275,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
         protected void addNewConfiguration() {
             List<WizardDescriptor> availableWizards = WizardDescriptors.loadAvailableWizards();
             if (!availableWizards.isEmpty()) {
-                SnippetRepositoryTypeSelectionWizard newWizard = new SnippetRepositoryTypeSelectionWizard();
+                SnippetRepositoryTypeSelectionWizard newWizard = new SnippetRepositoryTypeSelectionWizard(images);
                 WizardDialog dialog = new WizardDialog(this.getPage().getShell(), newWizard);
                 if (dialog.open() == Window.OK) {
                     List<SnippetRepositoryConfiguration> configurations = getTableInput();
@@ -331,15 +334,15 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
             Collection<SnippetRepositoryConfiguration> checkedConfigurations = Collections2.filter(configurations,
                     new Predicate<SnippetRepositoryConfiguration>() {
 
-                        @Override
-                        public boolean apply(SnippetRepositoryConfiguration input) {
-                            if (oldConfigurations != null && oldConfigurations.contains(input)) {
-                                return tableViewer.getChecked(input);
-                            }
-                            return input.isEnabled();
-                        }
+                @Override
+                public boolean apply(SnippetRepositoryConfiguration input) {
+                    if (oldConfigurations != null && oldConfigurations.contains(input)) {
+                        return tableViewer.getChecked(input);
+                    }
+                    return input.isEnabled();
+                }
 
-                    });
+            });
 
             tableViewer.setInput(configurations);
             tableViewer.setCheckedElements(checkedConfigurations.toArray());

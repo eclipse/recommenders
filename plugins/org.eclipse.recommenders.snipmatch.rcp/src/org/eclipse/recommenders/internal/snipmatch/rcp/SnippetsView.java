@@ -315,7 +315,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             public void run() {
                 List<WizardDescriptor> availableWizards = WizardDescriptors.loadAvailableWizards();
                 if (!availableWizards.isEmpty()) {
-                    SnippetRepositoryTypeSelectionWizard newWizard = new SnippetRepositoryTypeSelectionWizard();
+                    SnippetRepositoryTypeSelectionWizard newWizard = new SnippetRepositoryTypeSelectionWizard(images);
                     WizardDialog dialog = new WizardDialog(parent.getShell(), newWizard);
                     if (dialog.open() == Window.OK) {
                         SnippetRepositoryConfiguration newConfiguration = newWizard.getConfiguration();
@@ -412,6 +412,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
         };
 
         removeSnippetAction = new Action() {
+            @Override
             public void run() {
                 Object selectedItem = selection.get(0);
                 if (selectedItem instanceof KnownSnippet) {

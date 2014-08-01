@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
 import org.eclipse.recommenders.utils.Checks;
 import org.eclipse.swt.SWT;
@@ -37,15 +38,17 @@ public class SnippetRepositoryTypeSelectionWizard extends AbstractSnippetReposit
     private SnippetRepositoryConfiguration configurationToEdit;
     private SnippetRepositoryTypeSelectionWizardPage page;
 
-    public SnippetRepositoryTypeSelectionWizard() {
+    public SnippetRepositoryTypeSelectionWizard(SharedImages images) {
         setWindowTitle(Messages.WIZARD_TYPE_SELECTION_WINDOW_TITLE);
         page = new SnippetRepositoryTypeSelectionWizardPage();
+        page.setImageDescriptor(images.getDescriptor(SharedImages.Images.WIZBAN_ADD_REPOSITORY));
         availableWizards = WizardDescriptors.loadAvailableWizards();
     }
 
-    public SnippetRepositoryTypeSelectionWizard(SnippetRepositoryConfiguration configuration) {
+    public SnippetRepositoryTypeSelectionWizard(SnippetRepositoryConfiguration configuration, SharedImages images) {
         super();
         this.configurationToEdit = configuration;
+        page.setImageDescriptor(images.getDescriptor(SharedImages.Images.WIZBAN_EDIT_REPOSITORY));
         availableWizards = WizardDescriptors.filterApplicableWizardDescriptors(availableWizards, configuration);
     }
 
@@ -57,7 +60,7 @@ public class SnippetRepositoryTypeSelectionWizard extends AbstractSnippetReposit
     @Override
     public void addPages() {
         addPage(page);
-        // Add a second page is necessary since otherwise no next Button is displace
+        // Add a second page is necessary since otherwise no next Button is displayed
         addPage(new SnippetRepositoryTypeSelectionWizardPage());
     }
 
