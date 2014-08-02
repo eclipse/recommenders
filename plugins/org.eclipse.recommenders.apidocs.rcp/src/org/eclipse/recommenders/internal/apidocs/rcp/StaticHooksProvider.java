@@ -11,15 +11,9 @@
  */
 package org.eclipse.recommenders.internal.apidocs.rcp;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
-import static org.eclipse.jdt.ui.JavaElementLabels.M_APP_RETURNTYPE;
-import static org.eclipse.jdt.ui.JavaElementLabels.M_PARAMETER_TYPES;
-import static org.eclipse.jdt.ui.JavaElementLabels.getElementLabel;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.createComposite;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.createLabel;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.setInfoBackgroundColor;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.setInfoForegroundColor;
+import static com.google.common.base.Optional.*;
+import static org.eclipse.jdt.ui.JavaElementLabels.*;
+import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.*;
 import static org.eclipse.recommenders.rcp.JavaElementSelectionEvent.JavaElementSelectionLocation.METHOD_DECLARATION;
 
 import java.util.Comparator;
@@ -63,6 +57,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.eventbus.EventBus;
 
+@SuppressWarnings("restriction")
 public class StaticHooksProvider extends ApidocProvider {
 
     private final class HooksRendererRunnable implements Runnable {
