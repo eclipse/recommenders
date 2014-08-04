@@ -16,6 +16,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static java.text.MessageFormat.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.*;
+import static org.eclipse.recommenders.rcp.utils.JdtUtils.findTypeFromSignature;
 import static org.eclipse.recommenders.utils.Bags.newHashMultiset;
 import static org.eclipse.swt.SWT.COLOR_INFO_FOREGROUND;
 
@@ -28,8 +29,12 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.recommenders.apidocs.ClassOverrideDirectives;
@@ -100,6 +105,32 @@ public final class OverridesProvider extends ApidocProvider {
     }
 
     @JavaSelectionSubscriber
+    public void onMethodSelection(final IMethod method, final JavaElementSelectionEvent event, final Composite parent)
+            throws ExecutionException {
+        onTypeSelection(method.getDeclaringType(), event, parent);
+    }
+
+    @JavaSelectionSubscriber
+    public void onVariableSelection(ILocalVariable var, JavaElementSelectionEvent event, Composite parent)
+            throws ExecutionException {
+        String signature = var.getTypeSignature();
+        IType type = findTypeFromSignature(signature, var).orNull();
+        if (type != null) {
+            onTypeSelection(type, event, parent);
+        }
+    }
+
+    @JavaSelectionSubscriber
+    public void onVariableSelection(IField var, JavaElementSelectionEvent event, Composite parent)
+            throws ExecutionException, JavaModelException {
+        String signature = var.getTypeSignature();
+        IType type = findTypeFromSignature(signature, var).orNull();
+        if (type != null) {
+            onTypeSelection(type, event, parent);
+        }
+    }
+
+    @JavaSelectionSubscriber
     public void onTypeSelection(final IType type, final JavaElementSelectionEvent event, final Composite parent)
             throws ExecutionException {
         renderClassOverrideDirectives(type, parent);
@@ -111,7 +142,11 @@ public final class OverridesProvider extends ApidocProvider {
         if (!model.isPresent() || model.get().getOverrides() == null) {
             return false;
         }
-        runSyncInUiThread(new TypeOverrideDirectivesRenderer(type, model.get(), parent));
+        try {
+            runSyncInUiThread(new TypeOverrideDirectivesRenderer(type, model.get(), parent));
+        } finally {
+            dStore.releaseModel(model.get());
+        }
         return true;
     }
 
@@ -120,7 +155,11 @@ public final class OverridesProvider extends ApidocProvider {
         if (!opt.isPresent()) {
             return false;
         }
-        runSyncInUiThread(new OverridePatternsRenderer(type, opt.get(), parent));
+        try {
+            runSyncInUiThread(new OverridePatternsRenderer(type, opt.get(), parent));
+        } finally {
+            pStore.releaseModel(opt.get());
+        }
         return true;
     }
 
@@ -157,8 +196,8 @@ public final class OverridesProvider extends ApidocProvider {
         }
 
         private void addHeader() {
-            final String message = format(Messages.PROVIDER_INTRO_OVERRIDE_STATISTICS, directive.getNumberOfSubclasses(),
-                    type.getElementName());
+            final String message = format(Messages.PROVIDER_INTRO_OVERRIDE_STATISTICS,
+                    directive.getNumberOfSubclasses(), type.getElementName());
             Label label = new Label(container, SWT.NONE);
             label.setText(message);
             setInfoForegroundColor(label);
@@ -245,7 +284,7 @@ public final class OverridesProvider extends ApidocProvider {
 
         private void addDirectives(final org.eclipse.recommenders.apidocs.MethodPattern pattern, final int index) {
 
-            final double patternPercentage = pattern.getNumberOfObservations() / (double) totalNumberOfExamples;
+            final double patternPercentage = pattern.getNumberOfObservations() / totalNumberOfExamples;
             final String text = format(Messages.TABLE_HEADER_OVERRIDE_PATTERN, index, patternPercentage,
                     pattern.getNumberOfObservations());
             createLabel(container, text, true, false, SWT.COLOR_DARK_GRAY, true);
