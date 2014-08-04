@@ -11,15 +11,9 @@
  */
 package org.eclipse.recommenders.internal.apidocs.rcp;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
-import static org.eclipse.jdt.ui.JavaElementLabels.M_APP_RETURNTYPE;
-import static org.eclipse.jdt.ui.JavaElementLabels.M_PARAMETER_TYPES;
-import static org.eclipse.jdt.ui.JavaElementLabels.getElementLabel;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.createComposite;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.createLabel;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.setInfoBackgroundColor;
-import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.setInfoForegroundColor;
+import static com.google.common.base.Optional.*;
+import static org.eclipse.jdt.ui.JavaElementLabels.*;
+import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.*;
 import static org.eclipse.recommenders.rcp.JavaElementSelectionEvent.JavaElementSelectionLocation.METHOD_DECLARATION;
 
 import java.util.Comparator;
@@ -269,6 +263,15 @@ public class StaticHooksProvider extends ApidocProvider {
         }
 
         runSyncInUiThread(new HooksRendererRunnable(index, parent));
+    }
+
+    @JavaSelectionSubscriber
+    public void onJavaElementSelection(final IJavaElement e, final JavaElementSelectionEvent event,
+            final Composite parent) throws ExecutionException {
+        IPackageFragment pkg = (IPackageFragment) e.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+        if (pkg != null) {
+            onPackageSelection(pkg, event, parent);
+        }
     }
 
     private void findStaticHooks(final IPackageFragment pkg, final TreeMultimap<IType, IMethod> index)
