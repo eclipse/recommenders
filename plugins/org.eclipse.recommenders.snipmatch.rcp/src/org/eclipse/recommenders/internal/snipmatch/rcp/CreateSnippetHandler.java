@@ -150,7 +150,7 @@ public class CreateSnippetHandler extends AbstractHandler {
                         String uniqueVariableName = generateUniqueVariableName(vb, name.toString());
                         if (isDeclaration(name)) {
                             appendNewName(uniqueVariableName, vb);
-                        } else if (!selection.covers(ast.findDeclaringNode(vb))) {
+                        } else if (!declaredInSelection(selection, vb)) {
                             if (vb.isField()) {
                                 appendVarReference(uniqueVariableName, vb, "field");
                             } else {
@@ -175,6 +175,14 @@ public class CreateSnippetHandler extends AbstractHandler {
         List<String> keywords = Lists.<String>newArrayList();
         List<String> tags = Lists.<String>newArrayList();
         return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, sb.toString());
+    }
+
+    private boolean declaredInSelection(Selection selection, IVariableBinding vb) {
+        ASTNode declaringNode = ast.findDeclaringNode(vb);
+        if (declaringNode == null) {
+            return false; // Declared in different compilation unit
+        }
+        return selection.covers(declaringNode);
     }
 
     private boolean isDeclaration(SimpleName node) {

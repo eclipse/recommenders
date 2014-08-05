@@ -225,6 +225,26 @@ class CreateSnippetHandlerTest {
         )
     }
 
+    /*
+     * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=441205
+     */
+    @Test
+    def void testReferenceToExternalField() {
+        code = CodeBuilder::method(
+            '''
+                $Class type = Integer.TYPE$
+            ''')
+        exercise()
+
+        assertEquals(
+            '''
+                Class ${type:newName(java.lang.Class)} = Integer.TYPE;
+                ${cursor}
+            '''.toString,
+            actual.code
+        )
+    }
+
     @Test
     def void testReferenceToParameterInSelection() {
         code = CodeBuilder::classbody(
