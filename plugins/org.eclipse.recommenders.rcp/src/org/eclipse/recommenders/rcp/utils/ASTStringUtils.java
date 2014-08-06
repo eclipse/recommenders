@@ -130,7 +130,7 @@ public class ASTStringUtils {
         return binding.getName();
     }
 
-    public static String toQualifiedString(@Nullable final ITypeBinding binding) {
+    public static @Nullable String toQualifiedString(@Nullable final ITypeBinding binding) {
         if (binding == null) {
             return null;
         }

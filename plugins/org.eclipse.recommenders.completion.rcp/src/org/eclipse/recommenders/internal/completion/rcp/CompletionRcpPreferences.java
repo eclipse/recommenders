@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.e4.core.di.extensions.Preference;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessorDescriptor;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -90,11 +91,11 @@ public class CompletionRcpPreferences extends AbstractPreferenceInitializer {
         return Maps.filterValues(fromString(availableProcessors, enabledSessionProcessorString),
                 new Predicate<Boolean>() {
 
-            @Override
-            public boolean apply(Boolean input) {
-                return input;
-            }
-        }).keySet();
+                    @Override
+                    public boolean apply(Boolean input) {
+                        return input;
+                    }
+                }).keySet();
     }
 
     public SessionProcessorDescriptor getSessionProcessorDescriptor(String id) {
@@ -163,7 +164,7 @@ public class CompletionRcpPreferences extends AbstractPreferenceInitializer {
         return result;
     }
 
-    private static SessionProcessorDescriptor find(Iterable<SessionProcessorDescriptor> descriptors, String id) {
+    private static @Nullable SessionProcessorDescriptor find(Iterable<SessionProcessorDescriptor> descriptors, String id) {
         for (SessionProcessorDescriptor descriptor : descriptors) {
             if (descriptor.getId().equals(id)) {
                 return descriptor;

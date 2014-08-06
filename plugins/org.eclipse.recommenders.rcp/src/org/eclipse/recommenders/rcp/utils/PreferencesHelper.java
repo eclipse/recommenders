@@ -12,6 +12,7 @@ package org.eclipse.recommenders.rcp.utils;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.recommenders.utils.Nullable;
 
 public class PreferencesHelper {
 
@@ -40,7 +41,7 @@ public class PreferencesHelper {
         return getAttributeOfPreferencePage(preferencePageID, "category"); //$NON-NLS-1$
     }
 
-    private static String getAttributeOfPreferencePage(String preferencePageID, String attribute) {
+    private static @Nullable String getAttributeOfPreferencePage(String preferencePageID, String attribute) {
         if (preferencePageID != null) {
             IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
                     PREFERENCE_PAGE_EXTENTIONPOINT_ID);

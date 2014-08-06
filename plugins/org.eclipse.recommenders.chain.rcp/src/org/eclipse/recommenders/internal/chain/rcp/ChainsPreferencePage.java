@@ -11,6 +11,8 @@
  */
 package org.eclipse.recommenders.internal.chain.rcp;
 
+import static org.eclipse.recommenders.utils.Throws.throwIllegalArgumentException;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -21,7 +23,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.ListEditor;
-import org.eclipse.recommenders.utils.Throws;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -105,8 +106,7 @@ public class ChainsPreferencePage extends org.eclipse.jface.preference.FieldEdit
                 }
                 return ((IType) dialog.getResult()[0]).getFullyQualifiedName();
             } catch (final JavaModelException e) {
-                Throws.throwIllegalArgumentException(e.getMessage());
-                return null;
+                throw throwIllegalArgumentException(e.getMessage());
             }
         }
 

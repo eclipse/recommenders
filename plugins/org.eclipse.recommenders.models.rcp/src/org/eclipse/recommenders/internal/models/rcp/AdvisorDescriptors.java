@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.recommenders.utils.Nullable;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -108,7 +109,7 @@ public class AdvisorDescriptors {
         return sb.toString();
     }
 
-    private static AdvisorDescriptor find(List<AdvisorDescriptor> descriptors, String id) {
+    private static @Nullable AdvisorDescriptor find(List<AdvisorDescriptor> descriptors, String id) {
         for (AdvisorDescriptor descriptor : descriptors) {
             if (descriptor.getId().equals(id)) {
                 return descriptor;

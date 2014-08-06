@@ -21,6 +21,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.recommenders.rcp.utils.BrowserUtils;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -63,7 +64,7 @@ public class BundleResolutionFailureDialog extends MessageDialogWithToggle {
             Collection<Bundle> unresolvedBundles) {
         super(parentShell, Messages.DIALOG_TITLE_BUNDLE_RESOLUTION_FAILURE, null,
                 Messages.DIALOG_MESSAGE_BUNDLE_RESOLUTION_FAILURE, MessageDialog.ERROR, new String[] {
-                IDialogConstants.CANCEL_LABEL, Messages.DIALOG_BUTTON_RESTART }, 1,
+                        IDialogConstants.CANCEL_LABEL, Messages.DIALOG_BUTTON_RESTART }, 1,
                 Messages.DIALOG_TOGGLE_IGNORE_BUNDLE_RESOLUTION_FAILURES, false);
         this.recommendersVersion = recommendersVersion;
         this.unresolvedBundles = unresolvedBundles;
@@ -87,11 +88,11 @@ public class BundleResolutionFailureDialog extends MessageDialogWithToggle {
         Collection<String> unresolvedBundleNames = Collections2.transform(unresolvedBundles,
                 new Function<Bundle, String>() {
 
-            @Override
-            public String apply(Bundle input) {
-                return input.getSymbolicName();
-            }
-        });
+                    @Override
+                    public String apply(Bundle input) {
+                        return input.getSymbolicName();
+                    }
+                });
         String version = recommendersVersion.getMajor() + "." + recommendersVersion.getMinor() + "."
                 + recommendersVersion.getMicro();
         String bugLinkUrl = MessageFormat.format(BUGZILLA_URL, version, StringUtils.join(unresolvedBundleNames, '\n'));
@@ -146,7 +147,7 @@ public class BundleResolutionFailureDialog extends MessageDialogWithToggle {
      *            the directory to use as the new workspace
      * @return a string of command line options or null on error
      */
-    private String buildCommandLine() {
+    private @Nullable String buildCommandLine() {
         String property = System.getProperty(PROP_VM);
         if (property == null) {
             RcpPlugin.logWarning(Messages.DIALOG_RESTART_NOT_POSSIBLE);

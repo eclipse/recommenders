@@ -76,6 +76,7 @@ import org.eclipse.recommenders.models.rcp.actions.TriggerModelDownloadForModelC
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.ImageResource;
 import org.eclipse.recommenders.rcp.utils.Selections;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -360,7 +361,7 @@ public class ModelRepositoriesView extends ViewPart {
                 coordinatesGroupedByRepo.clear();
                 for (Entry<String, Collection<ModelCoordinate>> entry : fetchedCoordinates.asMap().entrySet()) {
                     coordinatesGroupedByRepo
-                            .putAll(entry.getKey(), createCoordiantes(entry.getKey(), entry.getValue()));
+                    .putAll(entry.getKey(), createCoordiantes(entry.getKey(), entry.getValue()));
                 }
 
                 treeViewer.setInput(getViewSite());
@@ -405,7 +406,7 @@ public class ModelRepositoriesView extends ViewPart {
 
         for (ModelCoordinate modelCoordinate : modelCoordinates) {
             coordinatesGroupedByProjectCoordinate
-                    .put(Coordinates.toProjectCoordinate(modelCoordinate), modelCoordinate);
+            .put(Coordinates.toProjectCoordinate(modelCoordinate), modelCoordinate);
         }
         return coordinatesGroupedByProjectCoordinate;
     }
@@ -511,12 +512,12 @@ public class ModelRepositoriesView extends ViewPart {
                     if (url.isPresent() && prefs.remotes.length > 1) {
                         addAction(Messages.MENUITEM_REMOVE_REPOSITORY, ELCL_REMOVE_REPOSITORY, menuManager,
                                 new Action() {
-                                    @Override
-                                    public void run() {
-                                        deleteRepository(url.get());
-                                        refreshData();
-                                    }
-                                });
+                            @Override
+                            public void run() {
+                                deleteRepository(url.get());
+                                refreshData();
+                            }
+                        });
                     }
                 }
             }
@@ -657,7 +658,7 @@ public class ModelRepositoriesView extends ViewPart {
                 return Status.OK_STATUS;
             }
 
-            private KnownCoordinate createKey(ModelCoordinate mc) {
+            private @Nullable KnownCoordinate createKey(ModelCoordinate mc) {
                 Optional<String> remoteUrl = mc.getHint(ModelCoordinate.HINT_REPOSITORY_URL);
                 if (remoteUrl.isPresent()) {
                     return new KnownCoordinate(remoteUrl.get(), Coordinates.toProjectCoordinate(mc),

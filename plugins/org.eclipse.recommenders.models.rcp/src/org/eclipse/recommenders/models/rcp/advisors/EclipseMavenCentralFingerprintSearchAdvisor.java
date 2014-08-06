@@ -23,6 +23,7 @@ import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.IProjectCoordinateAdvisor;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.advisors.MavenCentralFingerprintSearchAdvisor;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.Urls;
 
 import com.google.common.base.Optional;
@@ -55,7 +56,7 @@ public class EclipseMavenCentralFingerprintSearchAdvisor implements IProjectCoor
         return delegate.suggest(dependencyInfo);
     }
 
-    private ProxyConfig updateProxyConfig() {
+    private @Nullable ProxyConfig updateProxyConfig() {
         final String currentProxyHost;
         final int currentProxyPort;
         final String currentProxyUser;

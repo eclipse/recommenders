@@ -13,9 +13,11 @@ package org.eclipse.recommenders.stacktraces;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.recommenders.utils.Nullable;
+
 public class ThrowableDto {
 
-    public static ThrowableDto from(Throwable throwable) {
+    public static @Nullable ThrowableDto from(@Nullable Throwable throwable) {
         if (throwable == null) {
             return null;
         }
