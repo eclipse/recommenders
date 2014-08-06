@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -21,7 +22,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
         IEclipsePreferences s = DefaultScope.INSTANCE.getNode("org.eclipse.recommenders.stacktraces.rcp");
         s.put("server", "http://recommenders.eclipse.org/stats/stacktraces/0.1.0/new/");
-        s.put("name", "anonymous");
+        s.put("name", SystemUtils.USER_NAME);
         s.put("email", "anonymous@eclipse.org");
         s.put("mode", "ask");
     }
