@@ -12,6 +12,8 @@
  */
 package org.eclipse.recommenders.rcp.utils;
 
+import static com.google.common.base.Optional.*;
+
 import java.lang.reflect.Field;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ import org.eclipse.jdt.internal.codeassist.InternalCompletionProposal;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
@@ -29,7 +32,7 @@ import org.eclipse.recommenders.utils.names.VmTypeName;
 import com.google.common.base.Optional;
 
 @SuppressWarnings("restriction")
-public class MatchingUtils {
+public class ProposalMatchingUtils {
     private static final String[] NO_TYPE_PARAMETERS = new String[0];
 
     private static Field fOriginalSignature;
@@ -50,8 +53,12 @@ public class MatchingUtils {
                 && fOriginalSignature.isAccessible();
     }
 
-    public static IMethodName asMethodName(CompletionProposal proposal, Optional<TypeBinding> receiverTypeBinding) {
-        final String jSignature = MatchingUtils.getSignature(proposal);
+    public static Optional<IMethodName> asMethodName(CompletionProposal proposal,
+            @Nullable TypeBinding receiverTypeBinding) {
+        if (receiverTypeBinding == null) {
+            return absent();
+        }
+        final String jSignature = getSignature(proposal);
 
         String declarationSignature = String.valueOf(proposal.getDeclarationSignature());
         String name = String.valueOf(proposal.getName());
@@ -59,34 +66,43 @@ public class MatchingUtils {
         final String[] methodTypeParameters = Signature.getTypeParameters(jSignature);
         final String returnTypeSignature = Signature.getReturnType(jSignature);
 
-        receiverTypeBinding = resolveTypeVariable(receiverTypeBinding);
-        final String[] classTypeParameters = MatchingUtils.extractClassTypeParameters(receiverTypeBinding);
+        receiverTypeBinding = resolveTypeVariable(receiverTypeBinding).orNull();
+        if (receiverTypeBinding == null) {
+            return absent();
+        }
+        final String[] classTypeParameters = extractClassTypeParameters(receiverTypeBinding);
 
-        ITypeName elementType = MatchingUtils.asTypeName(declarationSignature, methodTypeParameters,
-                classTypeParameters);
+        ITypeName elementType = asTypeName(declarationSignature, methodTypeParameters, classTypeParameters).orNull();
+        if (elementType == null) {
+            return absent();
+        }
         ITypeName[] params = new ITypeName[parameterTypes.length];
         for (int i = 0; i < params.length; i++) {
-            params[i] = MatchingUtils.asTypeName(parameterTypes[i], methodTypeParameters, classTypeParameters);
+            ITypeName param = asTypeName(parameterTypes[i], methodTypeParameters, classTypeParameters).orNull();
+            if (param == null) {
+                return absent();
+            }
+            params[i] = param;
         }
-        ITypeName returnType = MatchingUtils.asTypeName(returnTypeSignature, methodTypeParameters, classTypeParameters);
-
-        return MatchingUtils.createMethodName(elementType, name, params, returnType);
+        ITypeName returnType = asTypeName(returnTypeSignature, methodTypeParameters, classTypeParameters).orNull();
+        if (returnType == null) {
+            return absent();
+        }
+        return of(createMethodName(elementType, name, params, returnType));
     }
 
-    private static Optional<TypeBinding> resolveTypeVariable(Optional<TypeBinding> typeBinding) {
-        if (typeBinding.isPresent() && typeBinding.get().isTypeVariable()
-                && typeBinding.get() instanceof TypeVariableBinding) {
-            TypeVariableBinding typeVariableBinding = (TypeVariableBinding) typeBinding.get();
-            typeBinding = Optional.of(typeVariableBinding.firstBound);
+    private static Optional<TypeBinding> resolveTypeVariable(@Nullable TypeBinding typeBinding) {
+        if (typeBinding instanceof TypeVariableBinding && typeBinding.isTypeVariable()) {
+            TypeVariableBinding typeVariableBinding = (TypeVariableBinding) typeBinding;
+            typeBinding = typeVariableBinding.firstBound;
         }
-        return typeBinding;
+        return fromNullable(typeBinding);
     }
 
-    public static String[] extractClassTypeParameters(Optional<TypeBinding> receiverTypeBinding) {
-        if (!receiverTypeBinding.isPresent()) {
+    public static String[] extractClassTypeParameters(TypeBinding typeBinding) {
+        if (typeBinding == null) {
             return NO_TYPE_PARAMETERS;
         }
-        TypeBinding typeBinding = receiverTypeBinding.get();
         final TypeVariableBinding[] typeVariableBindings;
         if (typeBinding instanceof ParameterizedTypeBinding) {
             final ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) typeBinding;
@@ -104,36 +120,44 @@ public class MatchingUtils {
         return classTypeParameters;
     }
 
-    public static ITypeName asTypeName(String typeSignature, String[] primaryTypeParameters,
+    public static Optional<ITypeName> asTypeName(String typeSignature, String[] primaryTypeParameters,
             String[] secondaryTypeParameters) {
         int signatureKind = Signature.getTypeSignatureKind(typeSignature);
         switch (signatureKind) {
         case Signature.ARRAY_TYPE_SIGNATURE:
             int arrayCount = Signature.getArrayCount(typeSignature);
-            return VmTypeName.get(StringUtils.repeat('[', arrayCount)
-                    + asTypeName(Signature.getElementType(typeSignature), primaryTypeParameters,
-                            secondaryTypeParameters).getIdentifier());
+            ITypeName elementType = asTypeName(Signature.getElementType(typeSignature), primaryTypeParameters,
+                    secondaryTypeParameters).orNull();
+            if (elementType == null) {
+                return absent();
+            }
+            return _of(VmTypeName.get(StringUtils.repeat('[', arrayCount) + elementType.getIdentifier()));
         case Signature.CLASS_TYPE_SIGNATURE:
             final String erasedTypedSignature = Signature.getTypeErasure(typeSignature);
-            return VmTypeName.get(StringUtils.removeEnd(erasedTypedSignature.replace('.', '/'), ";"));
+            return _of(VmTypeName.get(StringUtils.removeEnd(erasedTypedSignature.replace('.', '/'), ";")));
         case Signature.BASE_TYPE_SIGNATURE:
-            return VmTypeName.get(typeSignature);
+            return _of(VmTypeName.get(typeSignature));
         case Signature.TYPE_VARIABLE_SIGNATURE:
             String identifier = StringUtils.substring(typeSignature, 1, typeSignature.length() - 1);
-            ITypeName typeParameter = locateTypeParameter(identifier, primaryTypeParameters, secondaryTypeParameters);
+            ITypeName typeParameter = locateTypeParameter(identifier, primaryTypeParameters, secondaryTypeParameters)
+                    .orNull();
             if (typeParameter == null) {
-                typeParameter = locateTypeParameter(identifier, secondaryTypeParameters, NO_TYPE_PARAMETERS);
+                typeParameter = locateTypeParameter(identifier, secondaryTypeParameters, NO_TYPE_PARAMETERS).orNull();
             }
-            return typeParameter;
+            return Optional.<ITypeName>fromNullable(typeParameter);
         case Signature.WILDCARD_TYPE_SIGNATURE:
-            return null; // Could not think of a case where this occurs.
+            return absent(); // Could not think of a case where this occurs.
         case Signature.CAPTURE_TYPE_SIGNATURE:
-            return null; // Could not think of a case where this occurs.
+            return absent(); // Could not think of a case where this occurs.
         case Signature.INTERSECTION_TYPE_SIGNATURE:
-            return null; // Could not think of a case where this occurs.
+            return absent(); // Could not think of a case where this occurs.
         default:
-            return null; // Unknown/unsupported type signature.
+            return absent(); // Unknown/unsupported type signature.
         }
+    }
+
+    private static Optional<ITypeName> _of(VmTypeName vmTypeName) {
+        return Optional.<ITypeName>of(vmTypeName);
     }
 
     /**
@@ -142,7 +166,7 @@ public class MatchingUtils {
      * Primary type parameters (e.g., of a method) can reference secondary type parameters (of a class) but not vice
      * versa.
      */
-    private static ITypeName locateTypeParameter(String identifier, String[] primaryTypeParameters,
+    private static Optional<ITypeName> locateTypeParameter(String identifier, String[] primaryTypeParameters,
             String[] secondaryTypeParameters) {
         for (int i = 0; i < primaryTypeParameters.length; i++) {
             final String primaryTypeParameter = primaryTypeParameters[i];
@@ -153,13 +177,13 @@ public class MatchingUtils {
             if (typeVariable.equals(identifier)) {
                 String[] typeParameterBounds = Signature.getTypeParameterBounds(primaryTypeParameter);
                 if (typeParameterBounds.length == 0) {
-                    return VmTypeName.OBJECT;
+                    return _of(VmTypeName.OBJECT);
                 } else {
                     return asTypeName(typeParameterBounds[0], primaryTypeParameters, secondaryTypeParameters);
                 }
             }
         }
-        return null;
+        return absent();
     }
 
     public static String getSignature(CompletionProposal proposal) {

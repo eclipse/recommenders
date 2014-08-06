@@ -77,7 +77,7 @@ public class ProposalMatcherTest {
         scenarios.add(match(classbody("void method(Collection<? extends Number> c) { this.method$ }"),
                 METHOD_COLLECTION));
         scenarios
-                .add(match(classbody("void method(Collection<? super Number> c) { this.method$ }"), METHOD_COLLECTION));
+        .add(match(classbody("void method(Collection<? super Number> c) { this.method$ }"), METHOD_COLLECTION));
 
         scenarios.add(match(classbody(classname() + "<T>", "void method(T t) { this.method$ }"), METHOD_OBJECT));
         scenarios.add(match(classbody(classname() + "<O extends Object>", "void method(O o) { this.method$ }"),
@@ -129,7 +129,7 @@ public class ProposalMatcherTest {
         IRecommendersCompletionContext context = extractProposals(code);
         Collection<CompletionProposal> proposals = context.getProposals().values();
         Optional<TypeBinding> receiverTypeBinding = context.get(CompletionContextKey.RECEIVER_TYPEBINDING);
-        ProposalMatcher sut = new ProposalMatcher(getOnlyElement(proposals), receiverTypeBinding);
+        ProposalMatcher sut = new ProposalMatcher(getOnlyElement(proposals), receiverTypeBinding.orNull());
 
         assertThat(sut.match(method), is(equalTo(matchExpected)));
     }

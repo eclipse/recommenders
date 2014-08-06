@@ -167,7 +167,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
 
     @Override
     public void process(final IProcessableProposal proposal) {
-        if (isEmpty(recommendations)) {
+        if (isEmpty(recommendations) || !receiverTypeBinding.isPresent()) {
             return;
         }
 
@@ -176,7 +176,7 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         case CompletionProposal.METHOD_REF:
         case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
         case CompletionProposal.METHOD_NAME_REFERENCE:
-            final ProposalMatcher matcher = new ProposalMatcher(coreProposal, receiverTypeBinding);
+            final ProposalMatcher matcher = new ProposalMatcher(coreProposal, receiverTypeBinding.get());
 
             if (prefs.highlightUsedProposals && handleAlreadyUsedProposal(proposal, matcher)) {
                 return;

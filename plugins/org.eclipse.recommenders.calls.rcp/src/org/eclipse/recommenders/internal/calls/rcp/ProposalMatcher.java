@@ -12,22 +12,23 @@ package org.eclipse.recommenders.internal.calls.rcp;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.recommenders.rcp.utils.MatchingUtils;
+import org.eclipse.recommenders.rcp.utils.ProposalMatchingUtils;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
-
-import com.google.common.base.Optional;
 
 @SuppressWarnings({ "restriction" })
 public class ProposalMatcher {
 
     private final IMethodName proposedMethod;
 
-    public ProposalMatcher(CompletionProposal proposal, Optional<TypeBinding> receiverTypeBinding) {
-        proposedMethod = MatchingUtils.asMethodName(proposal, receiverTypeBinding);
+    public ProposalMatcher(CompletionProposal proposal, TypeBinding receiverTypeBinding) {
+        proposedMethod = ProposalMatchingUtils.asMethodName(proposal, receiverTypeBinding).orNull();
     }
 
     public boolean match(IMethodName rMethod) {
+        if (proposedMethod == null) {
+            return false;
+        }
         String rName = rMethod.getName();
         ITypeName[] rParams = rMethod.getParameterTypes();
 
