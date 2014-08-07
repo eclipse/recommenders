@@ -40,6 +40,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Caret;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -56,6 +58,12 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("restriction")
 public class SnipmatchCompletionEngine {
 
+    private static enum SearchState {
+        OPEN,
+        CONFIRMED,
+        CANCELED
+    }
+
     private static final int SEARCH_BOX_WIDTH = 273;
 
     private final SnipmatchContentAssistProcessor processor;
@@ -70,6 +78,7 @@ public class SnipmatchCompletionEngine {
     private StyledText searchText;
     private Color searchBg;
     private Font searchFont;
+    private SearchState state;
 
     @Inject
     public SnipmatchCompletionEngine(SnipmatchContentAssistProcessor processor, EventBus bus,
@@ -82,7 +91,22 @@ public class SnipmatchCompletionEngine {
     }
 
     private ContentAssistant newContentAssistant() {
-        ContentAssistant assistant = new ContentAssistant();
+        ContentAssistant assistant = new ContentAssistant() {
+
+            @Override
+            public void hide() {
+                if (!isFocussed(searchText) || state == SearchState.CANCELED || state == SearchState.CONFIRMED) {
+                    super.hide();
+                } else {
+                    // Ignore
+                }
+            }
+
+            private boolean isFocussed(Control control) {
+                Control focusControl = Display.getCurrent().getFocusControl();
+                return control.equals(focusControl);
+            }
+        };
         assistant.addCompletionListener(new ICompletionListener() {
 
             @Override
@@ -125,6 +149,7 @@ public class SnipmatchCompletionEngine {
         this.ctx = ctx;
         processor.setContext(ctx);
         assistant.install(ctx.getViewer());
+        state = SearchState.OPEN;
         createSearchPopup();
     }
 
@@ -139,6 +164,7 @@ public class SnipmatchCompletionEngine {
             @Override
             public void handleEvent(Event e) {
                 if (e.detail == SWT.TRAVERSE_ESCAPE) {
+                    state = SearchState.CANCELED;
                     assistant.uninstall();
                 }
             }
@@ -149,7 +175,11 @@ public class SnipmatchCompletionEngine {
 
             @Override
             public void focusLost(FocusEvent e) {
-                searchShell.dispose();
+                if (!assistant.hasProposalPopupFocus()) {
+                    state = SearchState.CANCELED;
+                    searchShell.dispose();
+                    assistant.uninstall();
+                }
             }
         });
         searchText.setBackground(searchBg);
@@ -162,6 +192,7 @@ public class SnipmatchCompletionEngine {
                 case SWT.CR:
                     e.doit = false;
                     if (selectedProposal != null) {
+                        state = SearchState.CONFIRMED;
                         assistant.uninstall();
                         if (selectedProposal.isValidFor(ctx.getDocument(), ctx.getInvocationOffset())) {
                             if (selectedProposal instanceof SnippetProposal) {
