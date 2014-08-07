@@ -45,7 +45,7 @@ public class ThrowableDto {
 
     @Override
     public String toString() {
-        String s = classname + ": " + message + Joiner.on("\n\t").join(elements);
+        String s = classname + ": " + message + "\n\tat " + Joiner.on("\n\tat ").join(elements);
         if (cause != null) {
             s += "\ncause:\n" + cause.toString();
         }

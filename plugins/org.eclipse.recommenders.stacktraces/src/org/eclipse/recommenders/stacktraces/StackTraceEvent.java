@@ -10,8 +10,11 @@
  */
 package org.eclipse.recommenders.stacktraces;
 
+import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
+
 import java.io.Serializable;
-import java.util.Map;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class StackTraceEvent implements Serializable {
 
@@ -21,13 +24,24 @@ public class StackTraceEvent implements Serializable {
     public String name;
 
     public String pluginId;
+    public String pluginVersion;
+
+    public String eclipseBuildId;
+    public String javaRuntimeVersion;
+
+    public String osgiWs;
+    public String osgiOs;
+    public String osgiOsVersion;
+    public String osgiArch;
+
     public int severity;
     public int code;
     public String message;
 
     public ThrowableDto exception;
 
-    public Map<String, String> properties;
-
-    public String pluginVersion;
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
+    }
 }

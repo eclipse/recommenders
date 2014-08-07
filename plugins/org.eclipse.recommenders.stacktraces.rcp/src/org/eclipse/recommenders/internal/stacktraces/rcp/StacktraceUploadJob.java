@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.eclipse.core.runtime.IStatus.WARNING;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.Stacktraces.PLUGIN_ID;
 
@@ -50,7 +51,8 @@ public class StacktraceUploadJob extends Job {
             updateProxySettings();
 
             String body = GsonUtil.serialize(event);
-            Response response = executor.execute(Request.Post(target).bodyString(body, ContentType.APPLICATION_JSON));
+            Request request = Request.Post(target).bodyString(body, ContentType.APPLICATION_JSON);
+            Response response = executor.execute(request);
             return new Status(IStatus.INFO, PLUGIN_ID,
                     "Reported error log entry to recommenders.eclipse.org. Thank you for your help. "
                             + response.returnContent());
@@ -63,7 +65,9 @@ public class StacktraceUploadJob extends Job {
 
     private void updateProxySettings() {
         IProxyData[] proxies = ProxyManager.getProxyManager().select(target);
-        if (proxies.length > 0) {
+        if (isEmpty(proxies)) {
+            executor.clearAuth();
+        } else {
             IProxyData proxy = proxies[0];
             HttpHost host = new HttpHost(proxy.getHost(), proxy.getPort());
             executor.authPreemptiveProxy(host);

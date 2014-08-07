@@ -71,11 +71,16 @@ public class LogListener implements ILogListener, IStartup {
             tmp.email = "[filled on submit]";
             int open = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                     new StacktraceWizard(pref, GsonUtil.serialize(tmp))).open();
-            if (open == Dialog.OK) {
-                StackTraceEvent event = createDto(status, pref);
-                new StacktraceUploadJob(event, pref.getServerUri()).schedule();
+            if (open != Dialog.OK) {
+                return;
+            } else if (pref.modeIgnore()) {
+                // the user may have chosen to ignore events in the wizard just now. Respect this preference:
+                return;
             }
         }
+        StackTraceEvent event = createDto(status, pref);
+        System.out.println(event);
+        new StacktraceUploadJob(event, pref.getServerUri()).schedule();
     }
 
     @Override

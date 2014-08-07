@@ -28,6 +28,6 @@ public class StackTraceElementDto {
 
     @Override
     public String toString() {
-        return classname + "." + methodname + " (" + line + ")";
+        return classname + "." + methodname + " (line: " + line + ")";
     }
 }
