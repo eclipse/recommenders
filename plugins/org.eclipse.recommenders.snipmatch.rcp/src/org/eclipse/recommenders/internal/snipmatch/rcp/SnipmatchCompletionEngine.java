@@ -40,6 +40,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Caret;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -82,7 +84,16 @@ public class SnipmatchCompletionEngine {
     }
 
     private ContentAssistant newContentAssistant() {
-        ContentAssistant assistant = new ContentAssistant();
+        ContentAssistant assistant = new ContentAssistant() {
+            @Override
+            public void hide() {
+                Control focusControl = Display.getCurrent().getFocusControl();
+                if (!searchText.equals(focusControl)) {
+                    super.hide();
+                }
+            }
+
+        };
         assistant.addCompletionListener(new ICompletionListener() {
 
             @Override
@@ -149,7 +160,10 @@ public class SnipmatchCompletionEngine {
 
             @Override
             public void focusLost(FocusEvent e) {
-                searchShell.dispose();
+                if (!assistant.hasProposalPopupFocus()) {
+                    searchShell.dispose();
+                    assistant.uninstall();
+                }
             }
         });
         searchText.setBackground(searchBg);
