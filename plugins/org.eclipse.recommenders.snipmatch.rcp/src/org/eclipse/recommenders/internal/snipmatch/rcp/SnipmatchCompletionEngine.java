@@ -150,6 +150,7 @@ public class SnipmatchCompletionEngine {
             @Override
             public void focusLost(FocusEvent e) {
                 searchShell.dispose();
+                assistant.uninstall();
             }
         });
         searchText.setBackground(searchBg);
