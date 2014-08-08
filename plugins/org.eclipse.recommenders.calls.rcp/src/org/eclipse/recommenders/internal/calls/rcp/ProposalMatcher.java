@@ -21,30 +21,33 @@ import com.google.common.base.Optional;
 @SuppressWarnings({ "restriction" })
 public class ProposalMatcher {
 
-    private final IMethodName proposedMethod;
+    private final Optional<IMethodName> proposedMethod;
 
     public ProposalMatcher(CompletionProposal proposal, Optional<TypeBinding> receiverTypeBinding) {
-        proposedMethod = MatchingUtils.asMethodName(proposal, receiverTypeBinding);
+        proposedMethod = Optional.fromNullable(MatchingUtils.asMethodName(proposal, receiverTypeBinding));
     }
 
-    public boolean match(IMethodName rMethod) {
-        String rName = rMethod.getName();
-        ITypeName[] rParams = rMethod.getParameterTypes();
-
-        if (!rName.equals(proposedMethod.getName())) {
+    public boolean match(IMethodName candidate) {
+        if (!proposedMethod.isPresent()) {
             return false;
         }
 
-        ITypeName[] parameterTypes = proposedMethod.getParameterTypes();
-        if (rParams.length != parameterTypes.length) {
+        String candidateName = candidate.getName();
+        if (!candidateName.equals(proposedMethod.get().getName())) {
             return false;
         }
 
-        for (int i = rParams.length; i-- > 0;) {
-            if (!rParams[i].equals(parameterTypes[i])) {
+        ITypeName[] params = proposedMethod.get().getParameterTypes();
+        ITypeName[] candidateParams = candidate.getParameterTypes();
+        if (candidateParams.length != params.length) {
+            return false;
+        }
+        for (int i = candidateParams.length; i-- > 0;) {
+            if (!candidateParams[i].equals(params[i])) {
                 return false;
             }
         }
+
         return true;
     }
 }
