@@ -78,7 +78,7 @@ public class SingleZipCallModelProvider implements ICallModelProvider, Openable 
     }
 
     public Set<ITypeName> acquireableTypes() {
-        return Zips.types(zip.entries(), ".data");
+        return Zips.types(zip.entries(), ".jbif");
     }
 
     @Override
