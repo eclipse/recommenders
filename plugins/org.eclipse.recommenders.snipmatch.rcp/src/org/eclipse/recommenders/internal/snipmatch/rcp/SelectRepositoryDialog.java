@@ -31,6 +31,11 @@ public final class SelectRepositoryDialog {
 
     public static Optional<ISnippetRepository> openSelectRepositoryDialog(final Shell shell, Repositories repos,
             SnippetRepositoryConfigurations configs) {
+        return openSelectRepositoryDialog(shell, repos, configs, null);
+    }
+    
+    public static Optional<ISnippetRepository> openSelectRepositoryDialog(final Shell shell, Repositories repos,
+            SnippetRepositoryConfigurations configs, SnippetRepositoryConfiguration preSelectedConfiguration) {
         List<SnippetRepositoryConfiguration> filteredConfigurations = Lists.newArrayList();
         for (SnippetRepositoryConfiguration config : configs.getRepos()) {
             ISnippetRepository repository = repos.getRepository(config.getId()).orNull();
@@ -51,8 +56,10 @@ public final class SelectRepositoryDialog {
         selectRepositoryDialog.setMessage(Messages.SELECT_REPOSITORY_DIALOG_MESSAGE);
         selectRepositoryDialog.setContentProvider(new ArrayContentProvider());
         selectRepositoryDialog.setInput(filteredConfigurations);
-        selectRepositoryDialog.setInitialSelections(new SnippetRepositoryConfiguration[] { filteredConfigurations
-                .get(0) });
+        if (preSelectedConfiguration == null && !configs.getRepos().isEmpty()){
+            preSelectedConfiguration = configs.getRepos().get(0);
+        }
+        selectRepositoryDialog.setInitialSelections(new SnippetRepositoryConfiguration[] { preSelectedConfiguration });
         selectRepositoryDialog.setLabelProvider(new LabelProvider() {
             @Override
             public String getText(Object element) {
