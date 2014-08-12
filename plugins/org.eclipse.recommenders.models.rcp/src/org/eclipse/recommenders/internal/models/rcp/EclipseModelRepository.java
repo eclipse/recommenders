@@ -19,9 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -161,19 +161,18 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
     }
 
     void updateProxySettings() {
-        Collection<ModelRepository> modelRepositories = delegates.values();
-        for (ModelRepository modelRepository : modelRepositories) {
-            updateProxySettings(modelRepository);
+        for (Entry<String, ModelRepository> delegate : delegates.entrySet()) {
+            updateProxySettings(delegate.getKey(), delegate.getValue());
         }
     }
 
-    private void updateProxySettings(ModelRepository modelRepository) {
+    private void updateProxySettings(String repositoryUri, ModelRepository modelRepository) {
         if (!proxy.isProxiesEnabled()) {
             modelRepository.unsetProxy();
             return;
         }
         try {
-            URI uri = new URI(prefs.remotes[0]);
+            URI uri = new URI(repositoryUri);
             IProxyData[] entries = proxy.select(uri);
             if (entries.length == 0) {
                 modelRepository.unsetProxy();
