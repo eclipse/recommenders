@@ -26,6 +26,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         s.put("name", SystemUtils.USER_NAME);
         s.put("email", "me@example.org");
         s.put("mode", "ask");
+        s.putBoolean("anonymize stacktraces", false);
+        s.putBoolean("clear messages", false);
     }
 
 }
