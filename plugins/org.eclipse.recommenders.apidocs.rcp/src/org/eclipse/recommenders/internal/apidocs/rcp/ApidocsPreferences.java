@@ -11,6 +11,8 @@
 package org.eclipse.recommenders.internal.apidocs.rcp;
 
 import static java.lang.Integer.parseInt;
+import static org.eclipse.recommenders.internal.apidocs.rcp.LogMessages.*;
+import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -19,7 +21,7 @@ import java.util.List;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.recommenders.apidocs.rcp.ApidocProvider;
-import org.eclipse.recommenders.internal.rcp.RcpPlugin;
+import org.eclipse.recommenders.utils.Logs;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
@@ -58,7 +60,7 @@ public class ApidocsPreferences {
             if (tmp != null) {
                 providerIds.add(tmp);
             } else {
-                RcpPlugin.logWarning(Messages.LOG_WARNING_NO_SUCH_ENTRY, i);
+                Logs.log(NO_SUCH_ENTRY);
             }
         }
         return providerIds;
@@ -69,7 +71,7 @@ public class ApidocsPreferences {
         try {
             keys = node.keys();
         } catch (BackingStoreException e) {
-            RcpPlugin.logError(e, Messages.LOG_ERROR_READ_PREFERENCES, node.absolutePath());
+            log(FAILED_TO_READ_PREFERENCES, e, node);
         }
         return keys;
     }
@@ -79,7 +81,7 @@ public class ApidocsPreferences {
             prefs.clear();
             return true;
         } catch (BackingStoreException e) {
-            RcpPlugin.logError(e, Messages.LOG_ERROR_CLEAR_PREFERENCES, prefs.absolutePath());
+            log(FAILED_TO_CLEAR_PREFERENCES, e, prefs.absolutePath());
             return false;
         }
     }
@@ -130,7 +132,7 @@ public class ApidocsPreferences {
             pluginPreferences.flush();
             return true;
         } catch (BackingStoreException e) {
-            RcpPlugin.logError(e, Messages.LOG_ERROR_SAVE_PREFERENCES);
+            log(FAILED_TO_SAVE_PREFERENCES, e);
             return false;
         }
     }
