@@ -13,6 +13,8 @@ package org.eclipse.recommenders.internal.stacktraces.rcp;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.Stacktraces.createDto;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -27,22 +29,26 @@ import org.eclipse.ui.PlatformUI;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 
 public class LogListener implements ILogListener, IStartup {
 
     Cache<String, String> cache = CacheBuilder.newBuilder().maximumSize(10).build();
-
     IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
     StacktracesRcpPreferences pref = ContextInjectionFactory.make(StacktracesRcpPreferences.class, ctx);
 
+    List<IStatus> errors = Lists.newLinkedList();
+
     @Override
     public void logging(IStatus status, String nouse) {
+
         if (pref.modeIgnore()) {
             return;
         }
         if (!status.matches(IStatus.ERROR)) {
             return;
         }
+        errors.add(status);
 
         if (cache.getIfPresent(status.toString()) != null) {
             // if this / similar error is was sent before, send it right away!

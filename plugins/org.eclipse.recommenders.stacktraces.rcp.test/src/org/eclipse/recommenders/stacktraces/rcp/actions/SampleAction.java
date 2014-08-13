@@ -22,14 +22,20 @@ import org.osgi.framework.FrameworkUtil;
 
 public class SampleAction implements IWorkbenchWindowActionDelegate {
 
+    private static final String component = Character.toString((char) 31);
+    private static final String data = Character.toString((char) 29);
+    private static final String segment = Character.toString((char) 28);
+
     @Override
     public void run(IAction action) {
         ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
         RuntimeException cause = new RuntimeException("cause");
         cause.fillInStackTrace();
-        Exception exception = new RuntimeException("exception message", cause);
+        String invis = "sep:" + component + " data: " + data + " segment: " + segment;
+        Exception exception = new RuntimeException("exception message: component" + invis, cause);
         exception.fillInStackTrace();
-        log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message", exception));
+        log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message: " + invis,
+                exception));
     }
 
     @Override
