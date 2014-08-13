@@ -47,6 +47,7 @@ import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -334,7 +335,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
         }
     }
 
-    private ISnippetRepository findRepoForOriginalSnippet(ISnippet snippet) {
+    private @Nullable ISnippetRepository findRepoForOriginalSnippet(ISnippet snippet) {
         for (ISnippetRepository repo : repos) {
             if (repo.hasSnippet(snippet.getUuid())) {
                 return repo;
