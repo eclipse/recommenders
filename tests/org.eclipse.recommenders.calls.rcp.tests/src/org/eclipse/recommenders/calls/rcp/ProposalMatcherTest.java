@@ -47,6 +47,11 @@ public class ProposalMatcherTest {
     private static IMethodName METHOD_INTS = VmMethodName.get("Lorg/example/Any.method([I)V");
     private static IMethodName METHOD_OBJECTS = VmMethodName.get("Lorg/example/Any.method([Ljava/lang/Object;)V");
 
+    private static IMethodName COMPARE_TO_BOOLEAN = VmMethodName
+            .get("Ljava/lang/Comparable.compareTo(Ljava/lang/Boolean;)I");
+    private static IMethodName COMPARE_TO_OBJECT = VmMethodName
+            .get("Ljava/lang/Comparable.compareTo(Ljava/lang/Object;)I");
+
     private final CharSequence code;
     private final IMethodName method;
     private final boolean matchExpected;
@@ -112,6 +117,9 @@ public class ProposalMatcherTest {
 
         scenarios.add(match(classbody("<T> void method(T[] t) { this.method$ }"), METHOD_OBJECTS));
         scenarios.add(match(classbody("<O extends Object> void method(O[] o) { this.method$ }"), METHOD_OBJECTS));
+
+        scenarios.add(match(classbody("void method(Boolean b) { b.compareTo$ }"), COMPARE_TO_BOOLEAN));
+        scenarios.add(match(classbody("void method(Delayed d) { d.compareTo$ }"), COMPARE_TO_OBJECT));
 
         return scenarios;
     }
