@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Michael Kutschke - initial API and implementation
  ******************************************************************************/
@@ -34,6 +34,7 @@ public class XDSLWriter implements IBayesNetWriter {
 
     }
 
+    @Override
     public void write(BayesNet net) throws IOException {
         StringBuilder bldr = new StringBuilder();
         bldr.append(XML_HEADER);
@@ -41,24 +42,46 @@ public class XDSLWriter implements IBayesNetWriter {
 
         int offset = bldr.length();
         getVariableDefs(bldr, net);
-        XMLUtil.surround(offset, bldr, "nodes");
-        XMLUtil.surround(offset, bldr, "smile", "version", "1.0", ID, net.getName(), "numsamples", "1000",
-                "discsamples", "10000");
+        getGenieExtensions(bldr, net);
+        XMLUtil.surround(offset, bldr, "smile", "version", "1.0", ID, net.getName(), "numsamples", "1000");
 
         out.write(bldr.toString());
         out.flush();
     }
 
-    private void getVariableDefs(StringBuilder bldr, BayesNet net) {
+    private void getGenieExtensions(StringBuilder bldr, BayesNet net) {
+        int offset = bldr.length();
         for (BayesNode node : net.getNodes()) {
-            int offset = bldr.length();
+            int nodeOffset = bldr.length();
+            bldr.append(StringEscapeUtils.escapeXml(node.getName().trim().replaceAll("\\s+", "_")));
+            XMLUtil.surround(nodeOffset, bldr, "name");
+            int posOffset = bldr.length();
+            bldr.append("0 0 100 100");
+            XMLUtil.surround(posOffset, bldr, "position");
+            XMLUtil.emptyTag(bldr, "font", "color", "000000", "name", "Arial", "size", "8");
+            XMLUtil.emptyTag(bldr, "interior", "color", "e5f6f7");
+            XMLUtil.emptyTag(bldr, "outline", "color", "000000");
+            XMLUtil.surround(nodeOffset, bldr, "node", "id",
+                    StringEscapeUtils.escapeXml(node.getName().trim().replaceAll("\\s+", "_")));
+        }
+        XMLUtil.surround(offset, bldr, "genie", "version", "1.0", "name", StringEscapeUtils.escapeXml(net.getName()));
+        XMLUtil.surround(offset, bldr, "extensions");
+
+    }
+
+    private void getVariableDefs(StringBuilder bldr, BayesNet net) {
+        int offset = bldr.length();
+        for (BayesNode node : net.getNodes()) {
+            int nodeOffset = bldr.length();
             encodeStates(bldr, node);
             encodeParents(bldr, node);
             bldr.append('\n');
             encodeProbabilities(bldr, node);
-            XMLUtil.surround(offset, bldr, CPT, ID, node.getName());
+            XMLUtil.surround(nodeOffset, bldr, CPT, ID,
+                    StringEscapeUtils.escapeXml(node.getName().trim().replaceAll("\\s+", "_")));
             bldr.append('\n');
         }
+        XMLUtil.surround(offset, bldr, "nodes");
     }
 
     private void encodeStates(StringBuilder bldr, BayesNode node) {
