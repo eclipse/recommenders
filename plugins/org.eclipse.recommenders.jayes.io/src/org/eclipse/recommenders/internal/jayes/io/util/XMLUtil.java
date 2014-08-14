@@ -10,6 +10,10 @@
  */
 package org.eclipse.recommenders.internal.jayes.io.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
 public class XMLUtil {
 
     private XMLUtil() {
@@ -42,7 +46,7 @@ public class XMLUtil {
 
     /**
      * adds a tab to every line
-     * 
+     *
      * @param text
      * @return
      */
@@ -63,5 +67,21 @@ public class XMLUtil {
         }
 
         stringBuilder.append("/>");
+    }
+
+    public static String escape(String text) {
+        try {
+            return URLEncoder.encode(text, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError(); // can't happen
+        }
+    }
+
+    public static String unescape(String text) {
+        try {
+            return URLDecoder.decode(text, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError(); // can't happen
+        }
     }
 }
