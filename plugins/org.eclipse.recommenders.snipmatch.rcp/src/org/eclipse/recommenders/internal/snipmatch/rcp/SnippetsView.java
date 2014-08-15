@@ -73,7 +73,11 @@ import org.eclipse.recommenders.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.Snippet;
+<<<<<<< HEAD   (75dcf8 [snipmatch] Bug 441539: Rearrange actions in toolbar and con)
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
+=======
+import org.eclipse.recommenders.utils.Nullable;
+>>>>>>> BRANCH (caf69e Merge "[snipmatch] Bug 435860: Assistant window closed if fo)
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -570,6 +574,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
         }
     }
 
+<<<<<<< HEAD   (75dcf8 [snipmatch] Bug 441539: Rearrange actions in toolbar and con)
     private void addToolBar(final Composite parent) {
         IToolBarManager toolBarManager = getViewSite().getActionBars().getToolBarManager();
 
@@ -809,6 +814,9 @@ public class SnippetsView extends ViewPart implements IRcpService {
         }
     }
 
+=======
+    @Nullable
+>>>>>>> BRANCH (caf69e Merge "[snipmatch] Bug 435860: Assistant window closed if fo)
     private ISnippetRepository findRepoForOriginalSnippet(ISnippet snippet) {
         for (ISnippetRepository repo : repos.getRepositories()) {
             if (repo.hasSnippet(snippet.getUuid())) {
@@ -827,10 +835,52 @@ public class SnippetsView extends ViewPart implements IRcpService {
         public ISnippet snippet;
         public SnippetRepositoryConfiguration config;
 
+<<<<<<< HEAD   (75dcf8 [snipmatch] Bug 441539: Rearrange actions in toolbar and con)
         public KnownSnippet(SnippetRepositoryConfiguration config, ISnippet snippet) {
             this.config = config;
             this.snippet = snippet;
         }
+=======
+        IObservableValue selectionValue = singleSelection().observe(viewer);
+        IObservableValue enabledBtnEditValue = enabled().observe(btnEdit);
+        ctx.bindValue(selectionValue, enabledBtnEditValue, simpleStrategy, null);
+
+        UpdateValueStrategy deleteSupportedStrategy = new UpdateValueStrategy();
+
+        deleteSupportedStrategy.setConverter(new IConverter() {
+
+            @Override
+            public Object getFromType() {
+                return Recommendation.class;
+            }
+
+            @Override
+            public Object getToType() {
+                return Boolean.class;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Boolean convert(Object fromObject) {
+                if (fromObject == null) {
+                    return false;
+                }
+                Recommendation<ISnippet> selection = (Recommendation<ISnippet>) fromObject;
+                ISnippet snippet = selection.getProposal();
+                for (ISnippetRepository repo : repos) {
+                    if (repo.isDeleteSupported()) {
+                        if (repo.hasSnippet(snippet.getUuid())) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+        });
+        IObservableValue enabledBtnRemoveValue = enabled().observe(btnRemove);
+        ctx.bindValue(selectionValue, enabledBtnRemoveValue, deleteSupportedStrategy, null);
+>>>>>>> BRANCH (caf69e Merge "[snipmatch] Bug 435860: Assistant window closed if fo)
     }
 
 }
