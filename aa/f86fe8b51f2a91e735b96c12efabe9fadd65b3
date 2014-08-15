@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+1: Andreas Sewe <andreas.sewe@codetrails.com>
+Code-Review+2: Olav Lenz <olav.lenz.core@gmail.com>
+Submitted-by: Olav Lenz <olav.lenz.core@gmail.com>
+Submitted-at: Fri, 15 Aug 2014 08:47:42 -0400
+Reviewed-on: https://git.eclipse.org/r/31745
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/snipmatch-gsoc-2014
