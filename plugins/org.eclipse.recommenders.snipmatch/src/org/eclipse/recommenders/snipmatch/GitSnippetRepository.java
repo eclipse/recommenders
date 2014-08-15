@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
+@SuppressWarnings("restriction")
 public class GitSnippetRepository extends FileSnippetRepository {
 
     private static Logger LOG = LoggerFactory.getLogger(GitSnippetRepository.class);
@@ -123,6 +124,7 @@ public class GitSnippetRepository extends FileSnippetRepository {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private void initializeSnippetsRepo() throws GitAPIException, InvalidRemoteException, TransportException,
             IOException {
         InitCommand init = Git.init();
