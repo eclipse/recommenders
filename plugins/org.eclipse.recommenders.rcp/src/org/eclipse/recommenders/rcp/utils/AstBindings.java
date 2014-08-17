@@ -105,7 +105,7 @@ public class AstBindings {
     /**
      * Converts a method binding to its IMethodName counterpart. Note that type variables filled in by JDT are ignored,
      * i.e., the declaring method is used to find the IMethodName.
-     * 
+     *
      * @param b
      *            the binding to resolve.
      * @see IMethodBinding#getMethodDeclaration()
@@ -149,15 +149,16 @@ public class AstBindings {
         try {
             ref = VmMethodName.get(sb.toString());
         } catch (final Exception e1) {
-            LOG.error("Failed to create IMethodName from binding {}." , e1); //$NON-NLS-1$
+            LOG.error("Failed to create IMethodName from binding {}.", e1); //$NON-NLS-1$
             return absent();
         }
         return Optional.of(ref);
     }
 
-    public static IVariableBinding getVariableBinding(final Name name) {
+    public static Optional<IVariableBinding> getVariableBinding(final Name name) {
         final IBinding b = name.resolveBinding();
-        return (IVariableBinding) (b instanceof IVariableBinding ? b : null);
+        IVariableBinding res = (IVariableBinding) (b instanceof IVariableBinding ? b : null);
+        return fromNullable(res);
     }
 
     public static Optional<IPackageName> toPackageName(IPackageBinding pkg) {
