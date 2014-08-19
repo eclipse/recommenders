@@ -43,38 +43,6 @@ public class CompilerBindingsTest {
     }
 
     @Test
-    public void testCanParseMethodWithOneArgAndPrimitiveReturnType() {
-        final MethodBinding mock = createMethodBinding("Ljava/lang/Object;.equals(Ljava/lang/Object;)Z");
-
-        final Optional<IMethodName> actual = CompilerBindings.toMethodName(mock);
-        assertEquals(VmMethodName.get("Ljava/lang/Object.equals(Ljava/lang/Object;)Z"), actual.get());
-    }
-
-    @Test
-    public void testCanParseMethodWithoutArgsAndReturnType() {
-        final MethodBinding mock = createMethodBinding("Lmy/package/Obj;.method()V");
-
-        final Optional<IMethodName> actual = CompilerBindings.toMethodName(mock);
-        assertEquals(VmMethodName.get("Lmy/package/Obj.method()V"), actual.get());
-    }
-
-    @Test
-    public void testCanParseMethodWithPrimitiveArgsAndSimpleReturnType() {
-        final MethodBinding mock = createMethodBinding("Lsome/Impl;.callee(IJZ)Lmy/arg/Type;");
-
-        final Optional<IMethodName> actual = CompilerBindings.toMethodName(mock);
-        assertEquals(VmMethodName.get("Lsome/Impl.callee(IJZ)Lmy/arg/Type;"), actual.get());
-    }
-
-    @Test
-    public void testCanParseMethodWithPrimitiveAndSimpleTypeArgs() {
-        final MethodBinding mock = createMethodBinding("Land/a/Last;.one(SLArg;C)V");
-
-        final Optional<IMethodName> actual = CompilerBindings.toMethodName(mock);
-        assertEquals(VmMethodName.get("Land/a/Last.one(SLArg;C)V"), actual.get());
-    }
-
-    @Test
     public void testCanParseConstructorWithoutArgs() {
         final MethodBinding mock = createMethodBinding("Ljava/lang/Object;.()V");
 
