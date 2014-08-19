@@ -15,19 +15,9 @@ import static com.google.common.base.Optional.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
-import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.recommenders.utils.names.IMethodName;
@@ -39,17 +29,6 @@ import com.google.common.base.Optional;
 
 @SuppressWarnings("restriction")
 public class CompilerBindings {
-
-    public static Optional<ITypeName> toTypeName(@Nullable Binding b) {
-        if (b instanceof TypeBinding) {
-            return toTypeName((TypeBinding) b);
-        } else if (b instanceof VariableBinding) {
-            TypeBinding type = ((VariableBinding) b).type;
-            return toTypeName(type);
-        } else {
-            return absent();
-        }
-    }
 
     /**
      * TODO nested anonymous types are not resolved correctly. JDT uses line numbers for inner types instead of $1,..,$n
@@ -107,28 +86,33 @@ public class CompilerBindings {
         return fromNullable(res);
     }
 
-    public static Optional<IMethodName> toMethodName(@Nullable final MethodBinding binding) {
+    public static Optional<IMethodName> toMethodName(@Nullable MethodBinding binding) {
         if (binding == null) {
             return absent();
         }
+
         try {
-            final String uniqueKey = String.valueOf(binding.computeUniqueKey());
-            String qualifiedMethodName = StringUtils.substringBefore(uniqueKey, "(").replace(";.", "."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            if (qualifiedMethodName.endsWith(".")) { //$NON-NLS-1$
-                qualifiedMethodName += new String(TypeConstants.INIT);
+            binding = binding.original();
+            ITypeName declaringType = toTypeName(binding.declaringClass).orNull();
+            if (declaringType == null) {
+                return absent();
             }
-            final String[] parameterTypes = Signature.getParameterTypes(uniqueKey);
-            final String returnType = Signature.getReturnType(uniqueKey);
-            final StringBuilder sb = new StringBuilder();
-            sb.append(qualifiedMethodName).append('(');
-            for (final String parameter : parameterTypes) {
-                sb.append(parameter);
+            char[] name = binding.selector;
+            if (name == null) {
+                return absent();
             }
-            sb.append(')').append(returnType);
-            final IMethodName res = VmMethodName.get(sb.toString());
-            return of(res);
+            char[] signature = binding.signature();
+            if (signature == null) {
+                return absent();
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(declaringType.getIdentifier()).append('.');
+            sb.append(name);
+            sb.append(signature);
+            IMethodName result = VmMethodName.get(sb.toString());
+            return Optional.of(result);
         } catch (final RuntimeException e) {
-            // if the signature could not be parsed by JDT (because it is incomplete!):
             return absent();
         }
     }
@@ -136,40 +120,5 @@ public class CompilerBindings {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Optional<ITypeName> toTypeName(final TypeReference type) {
-        return (Optional<ITypeName>) (type == null ? Optional.absent() : toTypeName(type.resolvedType));
-    }
-
-    public static Optional<Binding> getBinding(final ASTNode node) {
-        Binding b = null;
-        if (node instanceof FieldDeclaration) {
-            final FieldDeclaration f = (FieldDeclaration) node;
-            b = f.binding;
-        } else if (node instanceof MethodDeclaration) {
-            final MethodDeclaration d = (MethodDeclaration) node;
-            b = d.binding;
-        } else if (node instanceof LocalDeclaration) {
-            final LocalDeclaration l = (LocalDeclaration) node;
-            b = l.binding;
-        } else if (node instanceof TypeParameter) {
-            final TypeParameter t = (TypeParameter) node;
-            b = t.binding;
-        }
-        return fromNullable(b);
-    }
-
-    public static Optional<String> getVariableName(final Binding node) {
-        if (node == null) {
-            return absent();
-        }
-        switch (node.kind()) {
-        case Binding.FIELD:
-        case Binding.LOCAL:
-            return of(String.valueOf(node.shortReadableName()));
-        }
-        return absent();
     }
 }
