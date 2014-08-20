@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
 import static com.google.common.base.Throwables.propagate;
+import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,16 +47,6 @@ public class StacktracesRcpPreferences {
 
     private static final Logger LOG = LoggerFactory.getLogger(StacktracesRcpPreferences.class);
 
-    private static final String PROP_MODE = "mode";
-
-    private static final String PROP_NAME = "name";
-
-    private static final String PROP_EMAIL = "email";
-
-    private static final String PROP_ANONYMIZE = "anonymize stacktraces";
-
-    private static final String PROP_CLEAR_MESSAGES = "clear messages";
-
     private static final Mode MODE_DEFAULT = Mode.ASK;
 
     @Inject
@@ -67,7 +58,7 @@ public class StacktracesRcpPreferences {
     private String email;
 
     @Inject
-    @Preference("server")
+    @Preference(PROP_SERVER)
     private String server;
 
     @Inject
@@ -77,7 +68,7 @@ public class StacktracesRcpPreferences {
     private Mode mode;
 
     @Inject
-    @Preference(PROP_ANONYMIZE)
+    @Preference(PROP_ANONYMIZE_STACKFRAMES)
     private boolean anonymize;
 
     @Inject
@@ -122,7 +113,7 @@ public class StacktracesRcpPreferences {
     }
 
     public void setAnonymize(boolean anonymize) {
-        putBoolean(PROP_ANONYMIZE, anonymize);
+        putBoolean(PROP_ANONYMIZE_STACKFRAMES, anonymize);
     }
 
     public boolean shouldAnonymize() {
