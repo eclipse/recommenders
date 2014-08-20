@@ -62,14 +62,22 @@ public class StacktracesRcpPreferences {
 
     @Inject
     @Preference(PROP_ANONYMIZE)
-    public String anonymize;
+    public boolean anonymize;
 
     @Inject
     @Preference(PROP_CLEAR_MSG)
-    public String clearMsg;
+    public boolean clearMessages;
 
     public boolean modeSilent() {
         return MODE_SILENT.equals(mode);
+    }
+
+    public boolean anonymize() {
+        return anonymize;
+    }
+
+    public boolean clearMessages() {
+        return clearMessages;
     }
 
     public boolean modeAsk() {
@@ -108,12 +116,12 @@ public class StacktracesRcpPreferences {
         }
     }
 
-    public void setAnonymize(String anonymize) {
+    public void setAnonymize(boolean anonymize) {
         this.anonymize = anonymize;
     }
 
-    public void setClearMsg(String clearMsg) {
-        this.clearMsg = clearMsg;
+    public void setClearMessages(boolean clearMessages) {
+        this.clearMessages = clearMessages;
     }
 
 }

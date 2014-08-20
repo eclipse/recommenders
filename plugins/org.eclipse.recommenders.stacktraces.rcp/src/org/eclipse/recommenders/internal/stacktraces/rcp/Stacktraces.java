@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.recommenders.internal.stacktraces.rcp.StacktraceWizard.WizardPreferences;
 import org.eclipse.recommenders.internal.stacktraces.rcp.dto.Severity;
 import org.eclipse.recommenders.internal.stacktraces.rcp.dto.StackTraceEvent;
 import org.eclipse.recommenders.internal.stacktraces.rcp.dto.ThrowableDto;
@@ -29,7 +30,20 @@ import org.osgi.framework.Constants;
 
 public class Stacktraces {
 
+    private static final String ANONYMIZED_TAG = "HIDDEN";
+
     public static final String PLUGIN_ID = "org.eclipse.recommenders.stacktraces.rcp";
+
+    public static StackTraceEvent createDto(IStatus status, StacktracesRcpPreferences stacktracesPreferences,
+            WizardPreferences wizardPreferences) {
+        StackTraceEvent event = createDto(status, stacktracesPreferences);
+        event.name = wizardPreferences.name;
+        event.email = wizardPreferences.email;
+        if (wizardPreferences.clearMsg) {
+            event = clearMessages(event);
+        }
+        return event;
+    }
 
     public static StackTraceEvent createDto(IStatus status, StacktracesRcpPreferences pref) {
         StackTraceEvent event = new StackTraceEvent();
@@ -59,6 +73,18 @@ public class Stacktraces {
                 exs.add(ThrowableDto.from(t));
             }
             event.chain = toArray(exs, ThrowableDto.class);
+        }
+
+        if (pref.clearMessages()) {
+            event = clearMessages(event);
+        }
+        return event;
+    }
+
+    public static StackTraceEvent clearMessages(StackTraceEvent event) {
+        event.message = ANONYMIZED_TAG;
+        for (ThrowableDto dto : event.chain) {
+            dto.message = ANONYMIZED_TAG;
         }
         return event;
     }
