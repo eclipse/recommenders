@@ -12,6 +12,7 @@ package org.eclipse.recommenders.internal.stacktraces.rcp;
 
 import static org.eclipse.core.runtime.IStatus.WARNING;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.recommenders.utils.Logs.DefaultLogMessage;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -21,7 +22,10 @@ public class LogMessages extends DefaultLogMessage {
     private static int code = 1;
 
     public static final LogMessages NO_INTERNET = new LogMessages(WARNING,
-            "Could not connect to server. Your IP is '{0}'");
+            "Could not connect to server. Your IP is ''{0}''");
+
+    public static final LogMessages FAILED_TO_PARSE_SEND_MODE = new LogMessages(IStatus.ERROR,
+            "Failed to parse send mode ''{0}''. Returning ''{1}'' instead.");
 
     private static Bundle b = FrameworkUtil.getBundle(LogMessages.class);
 
