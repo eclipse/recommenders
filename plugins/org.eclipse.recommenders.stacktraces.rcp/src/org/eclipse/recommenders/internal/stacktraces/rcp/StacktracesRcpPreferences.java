@@ -36,9 +36,9 @@ public class StacktracesRcpPreferences {
 
     private static final String PROP_EMAIL = "email";
 
-    private static final String PROP_ANONYMIZE = "false";
+    private static final String PROP_ANONYMIZE = "anonymize stacktraces";
 
-    private static final String PROP_CLEAR_MSG = "false";
+    private static final String PROP_CLEAR_MESSAGES = "clear messages";
 
     @Inject
     @Preference
@@ -62,14 +62,22 @@ public class StacktracesRcpPreferences {
 
     @Inject
     @Preference(PROP_ANONYMIZE)
-    public String anonymize;
+    public boolean anonymize;
 
     @Inject
-    @Preference(PROP_CLEAR_MSG)
-    public String clearMsg;
+    @Preference(PROP_CLEAR_MESSAGES)
+    public boolean clearMessages;
 
     public boolean modeSilent() {
         return MODE_SILENT.equals(mode);
+    }
+
+    public boolean anonymize() {
+        return anonymize;
+    }
+
+    public boolean clearMessages() {
+        return clearMessages;
     }
 
     public boolean modeAsk() {
@@ -108,12 +116,12 @@ public class StacktracesRcpPreferences {
         }
     }
 
-    public void setAnonymize(String anonymize) {
+    public void setAnonymize(boolean anonymize) {
         this.anonymize = anonymize;
     }
 
-    public void setClearMsg(String clearMsg) {
-        this.clearMsg = clearMsg;
+    public void setClearMessages(boolean clearMessages) {
+        this.clearMessages = clearMessages;
     }
 
 }
