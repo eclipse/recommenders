@@ -15,6 +15,7 @@ import static org.junit.Assert.*;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.recommenders.internal.stacktraces.rcp.dto.StackTraceElementDto;
 import org.eclipse.recommenders.internal.stacktraces.rcp.dto.StackTraceEvent;
 import org.eclipse.recommenders.internal.stacktraces.rcp.dto.ThrowableDto;
 import org.junit.Test;
@@ -22,6 +23,10 @@ import org.junit.Test;
 public class StacktracesTest {
 
     private static String ANONYMIZED_TAG = "HIDDEN";
+
+    private static <T> void assertNotEmpty(T[] values) {
+        assertTrue(values.length > 0);
+    }
 
     public static StackTraceEvent createTestEvent() {
         RuntimeException cause = new RuntimeException("cause");
@@ -38,18 +43,83 @@ public class StacktracesTest {
     @Test
     public void testClearEventMessage() {
         StackTraceEvent event = createTestEvent();
+
         Stacktraces.clearMessages(event);
+
         assertThat(event.message, is(ANONYMIZED_TAG));
     }
 
     @Test
     public void testClearThrowableMessage() {
         StackTraceEvent event = createTestEvent();
+
         Stacktraces.clearMessages(event);
-        assertTrue(event.chain.length > 0);
+
+        assertNotEmpty(event.chain);
         for (ThrowableDto dto : event.chain) {
             assertThat(dto.message, is(ANONYMIZED_TAG));
         }
     }
 
+    @Test
+    public void testAnonymizeThrowableDtoClassname() {
+        ThrowableDto throwable = new ThrowableDto();
+        throwable.classname = "foo.bar.FooBarException";
+
+        Stacktraces.anonymizeThrowable(throwable);
+
+        assertThat(throwable.classname, is(ANONYMIZED_TAG));
+    }
+
+    @Test
+    public void testAnonymizeThrowableDtoWhitelistedClassname() {
+        ThrowableDto throwable = new ThrowableDto();
+        throwable.classname = "java.lang.RuntimeException";
+
+        Stacktraces.anonymizeThrowable(throwable);
+
+        assertThat(throwable.classname, is("java.lang.RuntimeException"));
+    }
+
+    @Test
+    public void testAnonymizeStackTraceElementDtoClassnames() {
+        StackTraceElementDto element = new StackTraceElementDto();
+        element.classname = "foo.bar.SubClass";
+
+        Stacktraces.anonymizeStackTraceElement(element);
+
+        assertThat(element.classname, is(ANONYMIZED_TAG));
+    }
+
+    @Test
+    public void testAnonymizeStackTraceElementDtoWhitelistedClassnames() {
+        StackTraceElementDto element = new StackTraceElementDto();
+        element.classname = "java.lang.String";
+
+        Stacktraces.anonymizeStackTraceElement(element);
+
+        assertThat(element.classname, is("java.lang.String"));
+    }
+
+    @Test
+    public void testAnonymizeStackTraceElementMethodname() {
+        StackTraceElementDto element = new StackTraceElementDto();
+        element.classname = "foo.bar.SubClass";
+        element.methodname = "foo";
+
+        Stacktraces.anonymizeStackTraceElement(element);
+
+        assertThat(element.methodname, is(ANONYMIZED_TAG));
+    }
+
+    @Test
+    public void testAnonymizeStackTraceElementWhitelistedMethodname() {
+        StackTraceElementDto element = new StackTraceElementDto();
+        element.classname = "java.lang.String";
+        element.methodname = "trim";
+
+        Stacktraces.anonymizeStackTraceElement(element);
+
+        assertThat(element.methodname, is("trim"));
+    }
 }
