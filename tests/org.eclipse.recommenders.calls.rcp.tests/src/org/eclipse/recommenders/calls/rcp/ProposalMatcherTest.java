@@ -13,7 +13,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
@@ -47,6 +47,11 @@ public class ProposalMatcherTest {
     private static IMethodName METHOD_INTS = VmMethodName.get("Lorg/example/Any.method([I)V");
     private static IMethodName METHOD_OBJECTS = VmMethodName.get("Lorg/example/Any.method([Ljava/lang/Object;)V");
 
+    private static IMethodName COMPARE_TO_BOOLEAN = VmMethodName
+            .get("Ljava/lang/Comparable.compareTo(Ljava/lang/Boolean;)I");
+    private static IMethodName COMPARE_TO_OBJECT = VmMethodName
+            .get("Ljava/lang/Comparable.compareTo(Ljava/lang/Object;)I");
+
     private final CharSequence code;
     private final IMethodName method;
     private final boolean matchExpected;
@@ -77,7 +82,7 @@ public class ProposalMatcherTest {
         scenarios.add(match(classbody("void method(Collection<? extends Number> c) { this.method$ }"),
                 METHOD_COLLECTION));
         scenarios
-                .add(match(classbody("void method(Collection<? super Number> c) { this.method$ }"), METHOD_COLLECTION));
+        .add(match(classbody("void method(Collection<? super Number> c) { this.method$ }"), METHOD_COLLECTION));
 
         scenarios.add(match(classbody(classname() + "<T>", "void method(T t) { this.method$ }"), METHOD_OBJECT));
         scenarios.add(match(classbody(classname() + "<O extends Object>", "void method(O o) { this.method$ }"),
@@ -113,6 +118,9 @@ public class ProposalMatcherTest {
         scenarios.add(match(classbody("<T> void method(T[] t) { this.method$ }"), METHOD_OBJECTS));
         scenarios.add(match(classbody("<O extends Object> void method(O[] o) { this.method$ }"), METHOD_OBJECTS));
 
+        scenarios.add(match(classbody("void method(Boolean b) { b.compareTo$ }"), COMPARE_TO_BOOLEAN));
+        scenarios.add(match(classbody("void method(Delayed d) { d.compareTo$ }"), COMPARE_TO_OBJECT));
+
         return scenarios;
     }
 
@@ -125,11 +133,12 @@ public class ProposalMatcherTest {
     }
 
     @Test
-    public void testMatch() throws Exception {
+    public void test() throws Exception {
         IRecommendersCompletionContext context = extractProposals(code);
         Collection<CompletionProposal> proposals = context.getProposals().values();
-        Optional<TypeBinding> receiverTypeBinding = context.get(CompletionContextKey.RECEIVER_TYPEBINDING);
-        ProposalMatcher sut = new ProposalMatcher(getOnlyElement(proposals), receiverTypeBinding);
+        Optional<LookupEnvironment> environment = context.get(CompletionContextKey.LOOKUP_ENVIRONMENT);
+
+        ProposalMatcher sut = new ProposalMatcher(getOnlyElement(proposals), environment.orNull());
 
         assertThat(sut.match(method), is(equalTo(matchExpected)));
     }
