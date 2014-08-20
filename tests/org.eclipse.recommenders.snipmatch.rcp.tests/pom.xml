@@ -28,6 +28,29 @@
 						</dependency>
 					</dependencies>
 				</configuration>
+				<executions>
+					<execution>
+						<id>default-test</id>
+						<configuration>
+							<excludes>
+								<exclude>**/*UITest.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>swtbot-test</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<useUIThread>false</useUIThread>
+							<includes>
+								<include>**/*UITest.java</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
