@@ -27,10 +27,11 @@ import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class GitSnippetRepository extends FileSnippetRepository {
 
     private boolean isUpdatePossible() throws IOException {
         if (RepositoryCache.FileKey.isGitRepository(gitFile, FS.DETECTED)) {
-            FileRepository localRepo = new FileRepository(gitFile);
+            Repository localRepo = new FileRepositoryBuilder().setGitDir(gitFile).build();
             for (Ref ref : localRepo.getAllRefs().values()) {
                 if (ref.getObjectId() != null) {
                     return true;
@@ -123,6 +124,7 @@ public class GitSnippetRepository extends FileSnippetRepository {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private void initializeSnippetsRepo() throws GitAPIException, InvalidRemoteException, TransportException,
             IOException {
         InitCommand init = Git.init();
@@ -152,7 +154,11 @@ public class GitSnippetRepository extends FileSnippetRepository {
     private void pullSnippets() throws IOException, InvalidRemoteException, TransportException, GitAPIException,
             CoreException {
         String remoteBranch = "origin/" + FORMAT_VERSION;
+<<<<<<< HEAD   (d89db0 [snipmatch] Bug 441539: Rearrange actions in toolbar and con)
         localRepo = new FileRepository(gitFile);
+=======
+        Repository localRepo = new FileRepositoryBuilder().setGitDir(gitFile).build();
+>>>>>>> BRANCH (55b52e Merge "[core] Bug 442089: Generics support in CompilerBindin)
         Git git = new Git(localRepo);
 
         git.fetch().call();
