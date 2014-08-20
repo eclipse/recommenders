@@ -47,10 +47,9 @@ class JsonPreviewPage extends WizardPage {
         GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
         {
             Composite tableComposite = new Composite(container, SWT.NONE);
-            tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL
-                    | SWT.FULL_SELECTION | SWT.BORDER);
-            GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).span(1, 2).grab(false, true)
-            .applyTo(tableComposite);
+            tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION
+                    | SWT.BORDER);
+            GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).span(1, 2).grab(false, true).applyTo(tableComposite);
             TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
             column.setLabelProvider(new ColumnLabelProvider() {
 
@@ -72,8 +71,8 @@ class JsonPreviewPage extends WizardPage {
                     if (!event.getSelection().isEmpty()) {
                         IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
                         IStatus selected = (IStatus) selection.getFirstElement();
-                        messageText.setText(GsonUtil.serialize(Stacktraces.createDto(selected,
-                                stacktracesPreferences, wizardPreferences)));
+                        messageText.setText(GsonUtil.serialize(Stacktraces.createDto(selected, stacktracesPreferences,
+                                wizardPreferences)));
                     }
                 }
             });

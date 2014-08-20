@@ -158,7 +158,7 @@ class StacktraceSettingsPage extends WizardPage {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
                         BrowserUtils
-                        .openInExternalBrowser("https://docs.google.com/document/d/14vRLXcgSwy0rEbpJArsR_FftOJW1SjWUAmZuzc2O8YI/pub");
+                                .openInExternalBrowser("https://docs.google.com/document/d/14vRLXcgSwy0rEbpJArsR_FftOJW1SjWUAmZuzc2O8YI/pub");
                     }
                 });
             }
@@ -171,7 +171,7 @@ class StacktraceSettingsPage extends WizardPage {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
                         BrowserUtils
-                        .openInExternalBrowser("https://docs.google.com/a/codetrails.com/forms/d/1wd9AzydLv_TMa7ZBXHO7zQIhZjZCJRNMed-6J4fVNsc/viewform");
+                                .openInExternalBrowser("https://docs.google.com/a/codetrails.com/forms/d/1wd9AzydLv_TMa7ZBXHO7zQIhZjZCJRNMed-6J4fVNsc/viewform");
                     }
                 });
             }
