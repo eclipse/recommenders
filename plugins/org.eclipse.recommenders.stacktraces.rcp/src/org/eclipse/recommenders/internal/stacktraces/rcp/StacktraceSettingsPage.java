@@ -144,6 +144,7 @@ class StacktraceSettingsPage extends WizardPage {
         {
             anonymizeStacktracesButton = new Button(container, SWT.CHECK);
             anonymizeStacktracesButton.setText("Anonymize stacktraces");
+            anonymizeStacktracesButton.setSelection(wizardPreferences.anonymize);
             anonymizeStacktracesButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
