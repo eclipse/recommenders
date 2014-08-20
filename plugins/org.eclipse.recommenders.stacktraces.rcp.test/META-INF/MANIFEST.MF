@@ -7,4 +7,9 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.hamcrest;bundle-version="1.1.0",
+ org.junit;bundle-version="4.11.0"
+Import-Package: org.eclipse.recommenders.internal.stacktraces.rcp,
+ org.eclipse.recommenders.internal.stacktraces.rcp.dto,
+ org.junit

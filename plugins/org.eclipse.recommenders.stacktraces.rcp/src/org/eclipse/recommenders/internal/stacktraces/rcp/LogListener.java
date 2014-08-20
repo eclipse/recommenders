@@ -121,8 +121,10 @@ public class LogListener implements ILogListener, IStartup {
                     tmp.email = "[filled on submit]";
                     isDialogOpen = true;
 
-                    int open = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                            new StacktraceWizard(pref, statusList)).open();
+                    StacktraceWizard stacktraceWizard = new StacktraceWizard(pref, statusList);
+                    WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+                            .getShell(), stacktraceWizard);
+                    int open = wizardDialog.open();
                     isDialogOpen = false;
                     if (open != Dialog.OK) {
                         clear();
