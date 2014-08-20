@@ -72,6 +72,14 @@ public class StacktracesRcpPreferences {
         return MODE_SILENT.equals(mode);
     }
 
+    public boolean anonymize() {
+        return "true".equals(anonymize);
+    }
+
+    public boolean clearMsg() {
+        return "true".equals(clearMsg);
+    }
+
     public boolean modeAsk() {
         return MODE_ASK.equals(mode);
     }
