@@ -52,10 +52,13 @@ public class ProposalUtilsTest {
     private static IMethodName INIT = VmMethodName.get("LExample.<init>()V");
     private static IMethodName INIT_OBJECT = VmMethodName.get("LExample.<init>(Ljava/lang/Object;)V");
     private static IMethodName INIT_NUMBER = VmMethodName.get("LExample.<init>(Ljava/lang/Number;)V");
+    private static IMethodName INIT_COLLECTION = VmMethodName.get("LExample.<init>(Ljava/util/Collection;)V");
 
     private static IMethodName NESTED_INIT = VmMethodName.get("LExample$Nested.<init>()V");
     private static IMethodName NESTED_INIT_OBJECT = VmMethodName.get("LExample$Nested.<init>(Ljava/lang/Object;)V");
     private static IMethodName NESTED_INIT_NUMBER = VmMethodName.get("LExample$Nested.<init>(Ljava/lang/Number;)V");
+    private static IMethodName NESTED_INIT_COLLECTION = VmMethodName
+            .get("LExample$Nested.<init>(Ljava/util/Collection;)V");
 
     private static IMethodName COMPARE_TO_BOOLEAN = VmMethodName
             .get("Ljava/lang/Boolean.compareTo(Ljava/lang/Boolean;)I");
@@ -140,6 +143,8 @@ public class ProposalUtilsTest {
         scenarios.add(scenario(classbody("Example<T>", "Example(T t) { this($) }"), INIT_OBJECT));
         scenarios.add(scenario(classbody("Example<T extends Object>", "Example(T t) { this($) }"), INIT_OBJECT));
         scenarios.add(scenario(classbody("Example<N extends Number>", "Example(N n) { this($) }"), INIT_NUMBER));
+        scenarios.add(scenario(classbody("Example<N>", "Example(Collection<? extends N> c) { this($) }"),
+                INIT_COLLECTION));
 
         // Using nested classes to speed up JDT's constructor completion; this avoids timeouts.
         scenarios.add(scenario(classbody("Example", "static class Nested { Nested() { new Example.Nested$ } }"),
@@ -152,12 +157,21 @@ public class ProposalUtilsTest {
         scenarios.add(scenario(
                 classbody("Example", "static class Nested<N extends Number> { Nested(N n) { new Example.Nested$ } }"),
                 NESTED_INIT_NUMBER));
+        scenarios.add(scenario(
+                classbody("Example",
+                        "static class Nested<N> { Nested(Collection<? extends N> c) { new Example.Nested$ } }"),
+                NESTED_INIT_COLLECTION));
 
         scenarios.add(scenario(classbody("Example implements Comparable", "compareTo$"), COMPARE_TO_OBJECT));
         scenarios.add(scenario(classbody("Example implements Comparable<Example>", "compareTo$"), COMPARE_TO_OBJECT));
         scenarios.add(scenario(classbody("Example<T> implements Comparable<T>", "compareTo$"), COMPARE_TO_OBJECT));
         scenarios.add(scenario(classbody("Example<N extends Number> implements Comparable<N>", "compareTo$"),
                 COMPARE_TO_OBJECT));
+
+        scenarios.add(scenario(classbody("Example<T extends Throwable>", "void method() throws T { this.method$ }"),
+                METHOD_VOID));
+        scenarios.add(scenario(classbody("Example", "<T extends Throwable> void method() throws T { this.method$ }"),
+                METHOD_VOID));
 
         return scenarios;
     }
@@ -171,7 +185,6 @@ public class ProposalUtilsTest {
         IRecommendersCompletionContext context = extractProposals(code);
         Collection<CompletionProposal> proposals = context.getProposals().values();
         Optional<LookupEnvironment> environment = context.get(CompletionContextKey.LOOKUP_ENVIRONMENT);
-
         IMethodName actualMethod = ProposalUtils.toMethodName(getOnlyElement(proposals), environment.orNull()).get();
 
         assertThat(actualMethod, is(equalTo(expectedMethod)));
