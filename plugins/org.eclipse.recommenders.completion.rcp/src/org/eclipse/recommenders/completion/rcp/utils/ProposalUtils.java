@@ -21,8 +21,9 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionProposal;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -81,19 +82,20 @@ public class ProposalUtils {
         MethodBinding[] overloads = declaringType.getMethods(methodName);
 
         char[] proposalSignature = getSignature(proposal);
-        for (int i = 0; i < proposalSignature.length; i++) {
-            if (proposalSignature[i] == '.') {
-                proposalSignature[i] = '/';
-            }
-        }
+        char[] strippedProposalSignature = stripTypeParameters(proposalSignature);
+
+        proposalSignature = dotsToSlashes(proposalSignature);
+        strippedProposalSignature = dotsToSlashes(strippedProposalSignature);
 
         for (MethodBinding overload : overloads) {
             char[] signature = overload.genericSignature();
             if (signature == null) {
                 signature = overload.signature();
             }
-
             if (Arrays.equals(proposalSignature, signature)) {
+                return CompilerBindings.toMethodName(overload);
+            }
+            if (Arrays.equals(strippedProposalSignature, signature)) {
                 return CompilerBindings.toMethodName(overload);
             }
         }
@@ -116,6 +118,41 @@ public class ProposalUtils {
         }
     }
 
+    private static char[] stripTypeParameters(char[] proposalSignature) {
+        StringBuilder sb = new StringBuilder();
+
+        // Copy optional type parameters
+        sb.append(proposalSignature, 0, ArrayUtils.indexOf(proposalSignature, Signature.C_PARAM_START));
+
+        sb.append(Signature.C_PARAM_START);
+        char[][] parameterTypes = Signature.getParameterTypes(proposalSignature);
+        for (char[] parameterType : parameterTypes) {
+            sb.append(Signature.getTypeErasure(parameterType));
+        }
+        sb.append(Signature.C_PARAM_END);
+
+        char[] returnType = Signature.getReturnType(proposalSignature);
+        sb.append(Signature.getTypeErasure(returnType));
+
+        char[][] exceptionTypes = Signature.getThrownExceptionTypes(proposalSignature);
+        if (exceptionTypes.length > 0) {
+            sb.append(Signature.C_EXCEPTION_START);
+            for (char[] exceptionType : exceptionTypes) {
+                sb.append(exceptionType);
+            }
+        }
+
+        return sb.toString().toCharArray();
+    }
+
+    private static char[] dotsToSlashes(char[] signature) {
+        char[] result = new char[signature.length];
+        for (int i = 0; i < signature.length; i++) {
+            result[i] = signature[i] == '.' ? '/' : signature[i];
+        }
+        return result;
+    }
+
     private static Optional<ReferenceBinding> getDeclaringType(CompletionProposal proposal, LookupEnvironment env) {
         char[] declarationSignature = proposal.getDeclarationSignature();
         if (declarationSignature[0] != 'L') {
@@ -128,13 +165,8 @@ public class ProposalUtils {
         if (greaterThanIndex == ArrayUtils.INDEX_NOT_FOUND) {
             greaterThanIndex = Integer.MAX_VALUE;
         }
-        String valueOf = String.valueOf(declarationSignature, 1, Math.min(semicolonIndex, greaterThanIndex) - 1);
-
-        String[] split = StringUtils.split(valueOf, '.');
-        char[][] compoundName = new char[split.length][];
-        for (int i = 0; i < compoundName.length; i++) {
-            compoundName[i] = split[i].toCharArray();
-        }
+        char[][] compoundName = CharOperation.splitOn('.', declarationSignature, 1,
+                Math.min(semicolonIndex, greaterThanIndex));
 
         return lookup(env, compoundName);
     }
