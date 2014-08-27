@@ -31,7 +31,7 @@ public class StackTraceElementDto {
 
     @Override
     public String toString() {
-        return classname + "." + methodname + " (line: " + line + ")";
+        return classname + "." + methodname + " (" + classNameWithoutPackage(classname) + ".java:" + line + ")";
     }
 
     @Override
@@ -42,5 +42,9 @@ public class StackTraceElementDto {
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    private static String classNameWithoutPackage(String fullClassName) {
+        return fullClassName.substring(fullClassName.lastIndexOf(".") + 1, fullClassName.length());
     }
 }
