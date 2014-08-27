@@ -24,8 +24,12 @@ public class StackTraceEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public UUID anonymousId;
+    public UUID evendId;
+    public UUID parendId;
+
     public String name;
     public String email;
+    public String comment;
 
     public String pluginId;
     public String pluginVersion;
