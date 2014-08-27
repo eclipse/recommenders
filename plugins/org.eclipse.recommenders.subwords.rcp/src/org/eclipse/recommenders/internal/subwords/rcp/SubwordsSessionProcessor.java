@@ -54,6 +54,8 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("restriction")
 public class SubwordsSessionProcessor extends SessionProcessor {
 
+    private static final int RELEVANCE_PENALTY = 10000;
+
     private final IAstProvider astProvider;
     private final SubwordsRcpPreferences prefs;
 
@@ -191,12 +193,12 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                 }
                 if (startsWithIgnoreCase(matchingArea, prefix)) {
                     proposal.setTag(IS_PREFIX_MATCH, true);
-                    return 1 << 30;
+                    return 0;
                 } else {
                     int score = LCSS.scoreSubsequence(bestSequence);
                     proposal.setTag(IS_PREFIX_MATCH, false);
                     proposal.setTag(SUBWORDS_SCORE, score);
-                    return score;
+                    return score - RELEVANCE_PENALTY;
                 }
             }
         });
