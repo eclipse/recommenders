@@ -48,7 +48,7 @@ public class LogListener implements ILogListener, IStartup {
     private Cache<String, String> cache = CacheBuilder.newBuilder().maximumSize(10).build();
     private IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
     private StacktracesRcpPreferences pref = ContextInjectionFactory.make(StacktracesRcpPreferences.class, ctx);
-
+    private IgnoreStatusChecker ignoreChecker = new IgnoreStatusChecker();
     private IObservableList statusList;
     private volatile boolean isDialogOpen;
 
@@ -67,6 +67,9 @@ public class LogListener implements ILogListener, IStartup {
             return;
         }
         if (!isErrorSeverity(status)) {
+            return;
+        }
+        if (ignoreChecker.isOnIgnoreList(status)) {
             return;
         }
         if (sentSimilarErrorBefore(status)) {
