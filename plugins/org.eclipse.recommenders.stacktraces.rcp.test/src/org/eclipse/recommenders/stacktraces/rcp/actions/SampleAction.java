@@ -37,7 +37,11 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
                     exception.fillInStackTrace();
                     exception.setStackTrace(new StackTraceElement[] { new StackTraceElement("foo.bar.Class",
                             "barMethod", null, 42) });
-                    log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message",
+                    String errorMessage = "some error message";
+                    if (i == 5) {
+                        errorMessage = "xxx";
+                    }
+                    log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces" + i, errorMessage,
                             exception));
                     try {
                         Thread.sleep(750);
