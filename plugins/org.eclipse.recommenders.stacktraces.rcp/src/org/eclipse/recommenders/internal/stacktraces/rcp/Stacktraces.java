@@ -17,6 +17,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.IStatus;
@@ -54,6 +55,7 @@ public class Stacktraces {
     public static StackTraceEvent createDto(IStatus status, StacktracesRcpPreferences pref) {
         StackTraceEvent event = new StackTraceEvent();
         event.anonymousId = AnonymousId.getId();
+        event.eventId = UUID.randomUUID();
         event.name = pref.getName();
         event.email = pref.getEmail();
         event.severity = getSeverity(status);
