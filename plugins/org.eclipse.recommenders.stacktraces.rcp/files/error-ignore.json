@@ -1,0 +1,17 @@
+{
+  "pluginIds": [
+    "org.eclipse.recommenders.stacktraces1",
+    "org.eclipse.recommenders.stacktraces3",
+    "org.eclipse.recommenders.stacktraces6"
+  ],
+  "messagePatterns": [
+    {
+      "pattern": "[x]+",
+      "flags": 0
+    },
+    {
+      "pattern": "\\Qtest message1\\E",
+      "flags": 0
+    }
+  ]
+}
