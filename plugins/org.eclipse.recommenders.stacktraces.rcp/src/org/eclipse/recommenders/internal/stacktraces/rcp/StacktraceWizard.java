@@ -18,6 +18,8 @@ import org.eclipse.recommenders.internal.stacktraces.rcp.StacktracesRcpPreferenc
 
 public class StacktraceWizard extends Wizard {
 
+    public static final String HELP_URL = "https://docs.google.com/document/d/14vRLXcgSwy0rEbpJArsR_FftOJW1SjWUAmZuzc2O8YI/pub";
+
     static class WizardPreferences {
         // wizard should not override preferences if canceled.
         // For this reason the wizard stores its current settings
@@ -49,6 +51,7 @@ public class StacktraceWizard extends Wizard {
         this.wizardPreferences = new WizardPreferences(stacktracesPreferences);
         page1 = new StacktraceSettingsPage(wizardPreferences);
         page2 = new JsonPreviewPage(errors, stacktracesPreferences, wizardPreferences);
+        setHelpAvailable(true);
     }
 
     @Override
