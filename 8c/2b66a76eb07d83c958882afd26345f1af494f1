@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+2: Marcel Bruch <marcel.bruch@codetrails.com>
+Code-Review+1: Andreas Sewe <andreas.sewe@codetrails.com>
+Submitted-by: Marcel Bruch <marcel.bruch@codetrails.com>
+Submitted-at: Wed, 27 Aug 2014 05:04:16 -0400
+Reviewed-on: https://git.eclipse.org/r/32375
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
