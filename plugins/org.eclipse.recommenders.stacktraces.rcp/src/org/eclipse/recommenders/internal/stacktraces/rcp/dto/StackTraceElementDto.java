@@ -33,7 +33,10 @@ public class StackTraceElementDto {
 
     @Override
     public String toString() {
-        return classname + "." + methodname + " (line: " + line + ")";
+        StringBuilder b = new StringBuilder();
+        b.append(classname).append(".").append(methodname);
+        b.append("(").append(filename).append(":").append(line).append(")");
+        return b.toString();
     }
 
     @Override
