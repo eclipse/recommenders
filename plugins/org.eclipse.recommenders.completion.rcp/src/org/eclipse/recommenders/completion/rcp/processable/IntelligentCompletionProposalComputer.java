@@ -125,8 +125,8 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
             }
         } else {
             List<ICompletionProposal> res = Lists.newLinkedList();
-
             registerCompletionListener();
+            fireInitializeContext(crContext);
             crContext.set(ACTIVE_PROCESSORS, ImmutableSet.copyOf(activeProcessors));
             fireStartSession(crContext);
             for (Entry<IJavaCompletionProposal, CompletionProposal> pair : crContext.getProposals().entrySet()) {
@@ -209,6 +209,16 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
     private void unregisterCompletionListener() {
         if (contentAssist != null) {
             contentAssist.removeCompletionListener(this);
+        }
+    }
+
+    protected void fireInitializeContext(IRecommendersCompletionContext crContext) {
+        for (SessionProcessor p : activeProcessors) {
+            try {
+                p.initializeContext(crContext);
+            } catch (Throwable e) {
+                Logs.log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
+            }
         }
     }
 
