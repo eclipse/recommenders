@@ -39,16 +39,6 @@ class RecommendersCompletionContextTest {
     }
 
     @Test
-    def void testArraysAsList() {
-        val code = method('java.util.Arrays.asList(get$)')
-        val sut = exercise(code)
-
-        // this should be Object[]"
-        // TODO testing for existence only ATM
-        assertFalse(sut.expectedTypeNames.empty)
-    }
-
-    @Test
     def void test03() {
         val code = method(
             'String s1 = new String();
@@ -132,35 +122,6 @@ class RecommendersCompletionContextTest {
         '''
         val sut = exercise(code)
         assertEquals(absent(), sut.enclosingElement)
-    }
-
-    @Test
-    def void testExpectedTypesInIf() {
-        val code = method('''if($)''')
-        val expected = exercise(code).expectedTypeNames
-        assertTrue(expected.contains(VmTypeName::BOOLEAN))
-    }
-
-    @Test
-    def void testExpectedTypesInNewFile() {
-        val code = method('''new File($)''')
-        val expected = exercise(code).expectedTypeNames
-        assertTrue(expected.contains(VmTypeName::STRING))
-        assertEquals(3, expected.size)
-    }
-
-    @Test
-    def void testExpectedTypesInNewArrayListString() {
-        val code = method('''List<String> l = new ArrayList<String>($);''')
-        val expected = exercise(code).expectedTypeNames
-        assertTrue(expected.contains(VmTypeName::get("Ljava/util/Collection")))
-    }
-
-    @Test
-    def void testExpectedTypesInListStringAdd() {
-        val code = method('''List<String> l = new ArrayList<String>();l.add($)''')
-        val expected = exercise(code).expectedTypeNames
-        assertTrue(expected.contains(VmTypeName::STRING))
     }
 
     def private assertCompletionNode(IRecommendersCompletionContext sut, Class<?> type) {

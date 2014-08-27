@@ -247,7 +247,7 @@ public class CompletionContextFunctions {
 
                     @Override
                     public void acceptContext(CompletionContext context) {
-                        res.setValue(context.getExpectedTypesKeys());
+                        res.setValue(context.getExpectedTypesSignatures());
                         super.acceptContext(context);
                     }
 
@@ -401,7 +401,7 @@ public class CompletionContextFunctions {
     }
 
     public static class JavaContentAssistInvocationContextFunction implements
-    ICompletionContextFunction<JavaContentAssistInvocationContext> {
+            ICompletionContextFunction<JavaContentAssistInvocationContext> {
 
         @Override
         public JavaContentAssistInvocationContext compute(IRecommendersCompletionContext context,
