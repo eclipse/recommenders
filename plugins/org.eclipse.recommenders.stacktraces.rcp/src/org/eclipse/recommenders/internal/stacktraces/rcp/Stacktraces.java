@@ -55,7 +55,7 @@ public class Stacktraces {
     public static StackTraceEvent createDto(IStatus status, StacktracesRcpPreferences pref) {
         StackTraceEvent event = new StackTraceEvent();
         event.anonymousId = AnonymousId.getId();
-        event.evendId = UUID.randomUUID();
+        event.eventId = UUID.randomUUID();
         event.name = pref.getName();
         event.email = pref.getEmail();
         event.severity = getSeverity(status);

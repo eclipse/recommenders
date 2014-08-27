@@ -10,21 +10,20 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp.dto;
 
-import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
-
 import java.io.Serializable;
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import com.google.common.base.Joiner;
 
 public class StackTraceEvent implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     public UUID anonymousId;
-    public UUID evendId;
+    public UUID eventId;
     public UUID parendId;
 
     public String name;
@@ -50,7 +49,10 @@ public class StackTraceEvent implements Serializable {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
+        StringBuilder b = new StringBuilder();
+        b.append(message).append(" ");
+        b.append(Joiner.on("\n").join(chain));
+        return b.toString();
     }
 
     @Override
