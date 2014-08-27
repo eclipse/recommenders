@@ -31,7 +31,7 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
 
             @Override
             public IStatus run(IProgressMonitor monitor) {
-                for (int i = 0; i < 1; i++) {
+                for (int i = 0; i < 10; i++) {
                     ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
                     RuntimeException cause = new IllegalArgumentException("cause" + i);
                     cause.fillInStackTrace();
@@ -41,6 +41,12 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
                             "barMethod", null, 42) });
                     log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces.rcp",
                             "status error message " + ++counter, exception));
+                    String errorMessage = "some error message";
+                    if (i == 5) {
+                        errorMessage = "xxx";
+                    }
+                    log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces" + i, errorMessage,
+                            exception));
                     try {
                         Thread.sleep(750);
                     } catch (InterruptedException e) {

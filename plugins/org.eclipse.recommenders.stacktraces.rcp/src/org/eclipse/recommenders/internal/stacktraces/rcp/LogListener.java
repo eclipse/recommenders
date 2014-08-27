@@ -50,6 +50,7 @@ public class LogListener implements ILogListener, IStartup {
     private Cache<String, ErrorReport> cache = CacheBuilder.newBuilder().maximumSize(30)
             .expireAfterAccess(10, TimeUnit.MINUTES).build();
     private IObservableList errorReports;
+    private IgnoreStatusChecker ignoreChecker = new IgnoreStatusChecker();
     private volatile boolean isDialogOpen;
 
     private Settings settings;
@@ -73,6 +74,9 @@ public class LogListener implements ILogListener, IStartup {
             return;
         }
         if (ignoreAllLogEvents()) {
+            return;
+        }
+        if (ignoreChecker.isOnIgnoreList(status)) {
             return;
         }
         if (isPaused()) {
