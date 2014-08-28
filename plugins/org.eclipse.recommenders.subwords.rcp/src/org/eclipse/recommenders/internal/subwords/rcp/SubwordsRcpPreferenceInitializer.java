@@ -23,5 +23,6 @@ public class SubwordsRcpPreferenceInitializer extends AbstractPreferenceInitiali
         IEclipsePreferences s = DefaultScope.INSTANCE.getNode(BUNDLE_ID);
         s.putBoolean(PREF_COMPREHENSIVE_SUBWORDS_MATCHING_CONSTRUCTORS, true);
         s.putBoolean(PREF_COMPREHENSIVE_SUBWORDS_MATCHING_TYPES, true);
+        s.putInt(PREF_SUBWORDS_MIN_PREFIX_LENGTH_FOR_TYPES, 2);
     }
 }
