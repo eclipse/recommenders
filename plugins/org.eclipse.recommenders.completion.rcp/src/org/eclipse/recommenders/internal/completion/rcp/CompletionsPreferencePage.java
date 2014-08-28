@@ -31,6 +31,8 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -100,7 +102,7 @@ public class CompletionsPreferencePage extends FieldEditorPreferencePage impleme
 
             tableViewer = getTableControl(parent);
             GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(numColumns - 1, 1).grab(true, false)
-            .applyTo(tableViewer.getTable());
+                    .applyTo(tableViewer.getTable());
             tableViewer.getTable().addSelectionListener(new SelectionAdapter() {
 
                 @Override
@@ -137,6 +139,23 @@ public class CompletionsPreferencePage extends FieldEditorPreferencePage impleme
             });
             ColumnViewerToolTipSupport.enableFor(tableViewer);
             tableViewer.setContentProvider(new ArrayContentProvider());
+
+            tableViewer.addDoubleClickListener(new IDoubleClickListener() {
+
+                @Override
+                public void doubleClick(DoubleClickEvent event) {
+                    if (event.getSelection().isEmpty()) {
+                        return;
+                    }
+                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                    SessionProcessorDescriptor descriptor = cast(selected.getFirstElement());
+                    if (!descriptor.getPreferencePage().isPresent()) {
+                        return;
+                    }
+                    String id = descriptor.getPreferencePage().get();
+                    PreferencesUtil.createPreferenceDialogOn(getShell(), id, null, null);
+                }
+            });
             return tableViewer;
         }
 
