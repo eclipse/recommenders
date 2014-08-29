@@ -94,14 +94,15 @@ public class SnipmatchCompletionEngine {
 
             @Override
             public void hide() {
-                if (isFocussed(searchText) && state != AssistantControlState.ENABLE_HIDE) {
+                if (isFocused(searchText) && state != AssistantControlState.ENABLE_HIDE) {
                     // Ignore
                 } else {
                     super.hide();
+                    selectedProposal = null;
                 }
             }
 
-            private boolean isFocussed(Control control) {
+            private boolean isFocused(Control control) {
                 Control focusControl = Display.getCurrent().getFocusControl();
                 return control.equals(focusControl);
             }
@@ -112,11 +113,13 @@ public class SnipmatchCompletionEngine {
             public void assistSessionEnded(ContentAssistEvent event) {
                 if (searchShell != null) {
                     searchShell.dispose();
+                    selectedProposal = null;
                 }
             }
 
             @Override
             public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
+
                 if (proposal instanceof TemplateProposal) {
                     selectedProposal = (TemplateProposal) proposal;
                 } else {
@@ -190,7 +193,6 @@ public class SnipmatchCompletionEngine {
                     e.doit = false;
                     if (selectedProposal != null) {
                         state = AssistantControlState.ENABLE_HIDE;
-                        assistant.uninstall();
                         if (selectedProposal.isValidFor(ctx.getDocument(), ctx.getInvocationOffset())) {
                             if (selectedProposal instanceof SnippetProposal) {
                                 snippetApplied((SnippetProposal) selectedProposal);
@@ -204,6 +206,7 @@ public class SnipmatchCompletionEngine {
                             }
                         }
                     }
+                    // assistant.uninstall();
                     return;
                 case SWT.TAB:
                     e.doit = false;
@@ -212,10 +215,14 @@ public class SnipmatchCompletionEngine {
 
                 switch (e.keyCode) {
                 case SWT.ARROW_UP:
-                    execute(ContentAssistant.SELECT_PREVIOUS_PROPOSAL_COMMAND_ID);
+                    if (selectedProposal != null) {
+                        execute(ContentAssistant.SELECT_PREVIOUS_PROPOSAL_COMMAND_ID);
+                    }
                     return;
                 case SWT.ARROW_DOWN:
-                    execute(ContentAssistant.SELECT_NEXT_PROPOSAL_COMMAND_ID);
+                    if (selectedProposal != null) {
+                        execute(ContentAssistant.SELECT_NEXT_PROPOSAL_COMMAND_ID);
+                    }
                     return;
                 }
             }
