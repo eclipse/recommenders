@@ -17,6 +17,7 @@ import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.property.Properties;
@@ -171,15 +172,28 @@ public class LogListener implements ILogListener, IStartup {
         }
     }
 
-    private void sendStatus(final IStatus status) {
+    private void sendStatus(IStatus status) {
         if (ignoreAllLogEvents()) {
             // double safety. This is checked before elsewhere. But just to make sure...
             return;
         }
+        sendStatus(status, null);
+    }
 
+    private void sendStatus(final IStatus status, UUID parentId) {
+        if (ignoreAllLogEvents()) {
+            // double safety.
+            return;
+        }
         cache.put(status.toString(), status.toString());
         StackTraceEvent event = createDto(status, pref);
+        event.parentId = parentId;
         new StacktraceUploadJob(event, pref.getServerUri()).schedule();
+        if (status.isMultiStatus()) {
+            for (IStatus child : status.getChildren()) {
+                sendStatus(child, event.eventId);
+            }
+        }
     }
 
     @Override
