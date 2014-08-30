@@ -22,6 +22,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.recommenders.internal.jayes.io.util.XMLUtil;
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.inference.jtree.JunctionTreeAlgorithm;
 import org.eclipse.recommenders.jayes.io.xdsl.XDSLReader;
@@ -91,6 +92,13 @@ public class IOTest {
 
         assertThat(doc.getDocumentElement(), hasXPath("//cpt"));
         assertThat(doc.getDocumentElement(), not(hasXPath("//cpt/cpt")));
+    }
+    
+    @Test
+    public void escapeTest() {
+        String toEscape = "Ljava/beans/BeanInfo.getAdditionalBeanInfo()[Ljava/Fbeans/BeanInfo;";
+        String escaped = "Ljava_2Fbeans_2FBeanInfo_2EgetAdditionalBeanInfo_28_29_5BLjava_2FFbeans_2FBeanInfo_3B";
+        assertEquals(escaped,XMLUtil.escape(toEscape));
     }
 
 }
