@@ -10,6 +10,9 @@
  */
 package org.eclipse.recommenders.internal.jayes.io.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public final class XMLUtil {
 
     private XMLUtil() {
@@ -63,5 +66,31 @@ public final class XMLUtil {
         }
 
         stringBuilder.append("/>");
+    }
+
+    public static String escape(String text) {
+        	String strPattern = "[^a-zA-z0-9]";
+        	Pattern pattern = Pattern.compile(strPattern);
+        	Matcher m = pattern.matcher(text);
+        	StringBuffer buf = new StringBuffer(text.length());
+        	while(m.find()){
+        		String replacement = String.format("_%04x", (int) m.group().charAt(0));
+        		m.appendReplacement(buf, replacement);
+        	}
+        	m.appendTail(buf);
+            return buf.toString();
+    }
+
+    public static String unescape(String text) {
+    	String strPattern = "_(....)";
+    	Pattern pattern = Pattern.compile(strPattern);
+    	Matcher m = pattern.matcher(text);
+    	StringBuffer buf = new StringBuffer(text.length());
+    	while(m.find()){
+    		String replacement = String.valueOf( (char)Integer.parseInt(m.group(1),16));
+    		m.appendReplacement(buf, Matcher.quoteReplacement(replacement));
+    	}
+    	m.appendTail(buf);
+        return buf.toString();
     }
 }
