@@ -129,6 +129,8 @@ public class SnipmatchCompletionEngine {
             }
         });
 
+        String bla = "";
+        bla.substring(0, 0);
         assistant.setShowEmptyList(true);
         assistant.enablePrefixCompletion(true);
         assistant.enableColoredLabels(true);
