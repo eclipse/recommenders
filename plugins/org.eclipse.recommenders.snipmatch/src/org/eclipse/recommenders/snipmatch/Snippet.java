@@ -31,7 +31,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Snippet implements ISnippet {
 
-    public static final String FORMAT_VERSION = "format-4";
+    public static final String FORMAT_VERSION = "format-5";
 
     private transient PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
