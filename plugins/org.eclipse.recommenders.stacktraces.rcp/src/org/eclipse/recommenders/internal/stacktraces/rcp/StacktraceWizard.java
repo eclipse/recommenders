@@ -14,41 +14,18 @@ package org.eclipse.recommenders.internal.stacktraces.rcp;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.recommenders.internal.stacktraces.rcp.StacktracesRcpPreferences.Mode;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 
 public class StacktraceWizard extends Wizard {
 
-    static class WizardPreferences {
-        // wizard should not override preferences if canceled.
-        // For this reason the wizard stores its current settings
-        // and updates the global preferences if finished.
-
-        String name;
-        String email;
-        Mode mode;
-        boolean anonymize;
-        boolean clearMessages;
-
-        public WizardPreferences(StacktracesRcpPreferences stacktracesPreferences) {
-            this.name = stacktracesPreferences.getName();
-            this.email = stacktracesPreferences.getEmail();
-            this.mode = stacktracesPreferences.getMode();
-            this.anonymize = stacktracesPreferences.shouldAnonymizeStackTraceElements();
-            this.clearMessages = stacktracesPreferences.shouldClearMessages();
-        }
-
-    }
-
-    private StacktracesRcpPreferences stacktracesPreferences;
-    private WizardPreferences wizardPreferences;
+    private Settings settings;
     private StacktraceSettingsPage page1;
     private JsonPreviewPage page2;
 
-    public StacktraceWizard(StacktracesRcpPreferences stacktracesPreferences, IObservableList errors) {
-        this.stacktracesPreferences = stacktracesPreferences;
-        this.wizardPreferences = new WizardPreferences(stacktracesPreferences);
-        page1 = new StacktraceSettingsPage(wizardPreferences);
-        page2 = new JsonPreviewPage(errors, stacktracesPreferences, wizardPreferences);
+    public StacktraceWizard(Settings settings, IObservableList errors) {
+        this.settings = settings;
+        page1 = new StacktraceSettingsPage(settings);
+        page2 = new JsonPreviewPage(errors, settings);
         setHelpAvailable(true);
     }
 
@@ -63,15 +40,8 @@ public class StacktraceWizard extends Wizard {
 
     @Override
     public boolean performFinish() {
-        updatePreferences();
+        PreferenceInitializer.saveSettings(settings);
         return true;
     }
 
-    private void updatePreferences() {
-        stacktracesPreferences.setAnonymizeStackframes(wizardPreferences.anonymize);
-        stacktracesPreferences.setClearMessages(wizardPreferences.clearMessages);
-        stacktracesPreferences.setEmail(wizardPreferences.email);
-        stacktracesPreferences.setMode(wizardPreferences.mode);
-        stacktracesPreferences.setName(wizardPreferences.name);
-    }
 }
