@@ -14,7 +14,6 @@ package org.eclipse.recommenders.internal.stacktraces.rcp;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.HELP_URL;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -28,8 +27,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.recommenders.internal.stacktraces.rcp.StacktraceWizard.WizardPreferences;
-import org.eclipse.recommenders.utils.gson.GsonUtil;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
@@ -38,23 +38,20 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-class JsonPreviewPage extends WizardPage {
+class DetailsWizardPage extends WizardPage {
 
     private TableViewer tableViewer;
     private StyledText messageText;
     private IObservableList errors;
-    private StacktracesRcpPreferences stacktracesPreferences;
-    private WizardPreferences wizardPreferences;
+    private Settings settings;
 
     private static final Image ERROR_ICON = PlatformUI.getWorkbench().getSharedImages()
             .getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 
-    protected JsonPreviewPage(IObservableList errors, StacktracesRcpPreferences stacktracesPreferences,
-            WizardPreferences wizardPreferences) {
-        super(JsonPreviewPage.class.getName());
+    protected DetailsWizardPage(IObservableList errors, Settings settings) {
+        super(DetailsWizardPage.class.getName());
         this.errors = errors;
-        this.stacktracesPreferences = stacktracesPreferences;
-        this.wizardPreferences = wizardPreferences;
+        this.settings = settings;
         setTitle(Messages.PREVIEWPAGE_TITLE);
         setDescription(Messages.PREVIEWPAGE_DESC);
     }
@@ -85,8 +82,8 @@ class JsonPreviewPage extends WizardPage {
 
             @Override
             public String getText(Object element) {
-                IStatus event = (IStatus) element;
-                return event.getMessage();
+                ErrorReport event = (ErrorReport) element;
+                return event.getStatus().getMessage();
             }
 
             @Override
@@ -105,9 +102,8 @@ class JsonPreviewPage extends WizardPage {
             public void selectionChanged(SelectionChangedEvent event) {
                 if (!event.getSelection().isEmpty()) {
                     IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
-                    IStatus selected = (IStatus) selection.getFirstElement();
-                    messageText.setText(GsonUtil.serialize(Stacktraces.createDto(selected, stacktracesPreferences,
-                            wizardPreferences)));
+                    ErrorReport selected = (ErrorReport) selection.getFirstElement();
+                    messageText.setText(ErrorReports.toJson(selected, settings, true));
                 }
             }
         });
@@ -140,8 +136,8 @@ class JsonPreviewPage extends WizardPage {
     @Override
     public void setVisible(boolean visible) {
         if (visible && !errors.isEmpty()) {
-            tableViewer.setSelection(StructuredSelection.EMPTY);
-            tableViewer.setSelection(new StructuredSelection(tableViewer.getElementAt(0)), true);
+            StructuredSelection selection = new StructuredSelection(tableViewer.getElementAt(0));
+            tableViewer.setSelection(selection, true);
         }
         super.setVisible(visible);
     }
