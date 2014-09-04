@@ -29,7 +29,7 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
         Job job = new Job("test exceptions") {
             @Override
             public IStatus run(IProgressMonitor monitor) {
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 1; i++) {
                     ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
                     RuntimeException cause = new RuntimeException("cause" + i);
                     cause.fillInStackTrace();
@@ -37,7 +37,7 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
                     exception.fillInStackTrace();
                     exception.setStackTrace(new StackTraceElement[] { new StackTraceElement("foo.bar.Class",
                             "barMethod", null, 42) });
-                    log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message",
+                    log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces.rcp", "some error message",
                             exception));
                     try {
                         Thread.sleep(750);
