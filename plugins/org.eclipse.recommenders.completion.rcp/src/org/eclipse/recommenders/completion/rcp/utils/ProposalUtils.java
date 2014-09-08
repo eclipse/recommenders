@@ -15,8 +15,8 @@ package org.eclipse.recommenders.completion.rcp.utils;
 import static com.google.common.base.Optional.absent;
 import static java.lang.Math.min;
 import static org.eclipse.jdt.core.compiler.CharOperation.splitOn;
+import static org.eclipse.recommenders.internal.completion.rcp.LogMessages.LOG_ERROR_COMPILATION_FAILURE_PREVENTS_PROPOSAL_MATCHING;
 import static org.eclipse.recommenders.utils.Checks.cast;
-import static org.eclipse.recommenders.utils.LogMessages.LOG_WARNING_REFLECTION_FAILED;
 import static org.eclipse.recommenders.utils.Logs.log;
 import static org.eclipse.recommenders.utils.Reflections.getDeclaredField;
 
@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.recommenders.rcp.utils.CompilerBindings;
 import org.eclipse.recommenders.utils.names.IMethodName;
 
@@ -58,7 +59,7 @@ public class ProposalUtils {
                 signature = (char[]) ORIGINAL_SIGNATURE.get(proposal);
             }
         } catch (Exception e) {
-            log(LOG_WARNING_REFLECTION_FAILED, e, ORIGINAL_SIGNATURE);
+            log(org.eclipse.recommenders.utils.LogMessages.LOG_WARNING_REFLECTION_FAILED, e, ORIGINAL_SIGNATURE);
         }
         return signature != null ? signature : proposal.getSignature();
     }
@@ -75,16 +76,22 @@ public class ProposalUtils {
     public static Optional<IMethodName> toMethodName(CompletionProposal proposal, LookupEnvironment env) {
         Preconditions.checkArgument(isKindSupported(proposal));
 
-        ReferenceBinding declaringType = getDeclaringType(proposal, env).orNull();
+        final ReferenceBinding declaringType = getDeclaringType(proposal, env).orNull();
         if (declaringType == null) {
             return absent();
         }
 
-        char[] methodName = proposal.isConstructor() ? INIT : proposal.getName();
-        MethodBinding[] overloads = declaringType.getMethods(methodName);
+        final char[] methodName = proposal.isConstructor() ? INIT : proposal.getName();
+        final MethodBinding[] overloads;
+        try {
+            overloads = declaringType.getMethods(methodName);
+        } catch (AbortCompilation e) {
+            log(LOG_ERROR_COMPILATION_FAILURE_PREVENTS_PROPOSAL_MATCHING, null, proposal);
+            return absent();
+        }
 
-        char[] proposalSignature = getSignature(proposal);
-        char[] strippedProposalSignature = stripTypeParameters(proposalSignature);
+        final char[] proposalSignature = getSignature(proposal);
+        final char[] strippedProposalSignature = stripTypeParameters(proposalSignature);
 
         for (MethodBinding overload : overloads) {
             char[] signature = CompletionEngine.getSignature(overload);
