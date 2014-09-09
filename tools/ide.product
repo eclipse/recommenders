@@ -3,7 +3,6 @@
 
 <product id="org.eclipse.sdk.ide" application="org.eclipse.ui.ide.workbench" useFeatures="true" includeLaunchers="true">
 
-
    <configIni use="default">
    </configIni>
 
@@ -19,7 +18,6 @@
 
    <windowImages/>
 
-
    <launcher>
       <solaris/>
       <win useIco="false">
@@ -27,10 +25,8 @@
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
    </plugins>
@@ -44,6 +40,7 @@
       <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.jgit"/>
       <feature id="org.eclipse.emf.common"/>
+      <feature id="org.eclipse.emf.databinding"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.equinox.p2.core.feature"/>
       <feature id="org.eclipse.equinox.p2.discovery.feature"/>
@@ -54,6 +51,7 @@
       <feature id="org.eclipse.recommenders.rcp.feature"/>
       <feature id="org.eclipse.recommenders.mylyn.rcp.feature"/>
       <feature id="org.eclipse.recommenders.snipmatch.rcp.feature"/>
+      <feature id="org.eclipse.recommenders.stacktraces.rcp.feature"/>
    </features>
 
 
