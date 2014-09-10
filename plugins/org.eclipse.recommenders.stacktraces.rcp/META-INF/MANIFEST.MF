@@ -6,20 +6,21 @@ Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.e4.core.contexts,
- org.eclipse.e4.core.di.extensions,
- org.eclipse.e4.core.di,
- org.eclipse.jface.databinding,
- org.eclipse.core.databinding,
+Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.core.databinding.property,
+ org.eclipse.core.runtime,
+ org.eclipse.e4.core.contexts,
+ org.eclipse.e4.core.di,
+ org.eclipse.e4.core.di.extensions,
+ org.eclipse.jface.databinding,
  org.eclipse.ui,
+ org.eclipse.emf.databinding,
  org.eclipse.emf.ecore,
  org.apache.httpcomponents.httpcore,
  org.apache.httpcomponents.httpclient,
- org.eclipse.recommenders.utils,
  org.eclipse.recommenders.net,
- org.eclipse.emf.databinding
+ org.eclipse.recommenders.stacktraces.model,
+ org.eclipse.recommenders.utils
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  com.google.common.base;version="[15.0.0,16.0.0)",
  com.google.common.cache;version="[15.0.0,16.0.0)",
