@@ -104,7 +104,7 @@ public class ProposalUtilsTest {
         scenarios.add(scenario(classbody("Example", "void method(Collection<Number> c) { this.method$ }"),
                 METHOD_COLLECTION));
         scenarios
-                .add(scenario(classbody("Example", "void method(Collection<?> c) { this.method$ }"), METHOD_COLLECTION));
+        .add(scenario(classbody("Example", "void method(Collection<?> c) { this.method$ }"), METHOD_COLLECTION));
         scenarios.add(scenario(classbody("Example", "void method(Collection<? extends Number> c) { this.method$ }"),
                 METHOD_COLLECTION));
         scenarios.add(scenario(classbody("Example", "void method(Collection<? super Number> c) { this.method$ }"),
@@ -116,8 +116,8 @@ public class ProposalUtilsTest {
         scenarios.add(scenario(classbody("Example<N extends Number>", "void method(N n) { this.method$ }"),
                 METHOD_NUMBER));
         scenarios
-                .add(scenario(classbody("Example<N extends Number & Comparable>", "void method(N n) { this.method$ }"),
-                        METHOD_NUMBER));
+        .add(scenario(classbody("Example<N extends Number & Comparable>", "void method(N n) { this.method$ }"),
+                METHOD_NUMBER));
 
         scenarios.add(scenario(classbody("Example<L extends List<String>>", "void method(L l) { l.set$ }"),
                 SET_INT_STRING));
@@ -153,7 +153,7 @@ public class ProposalUtilsTest {
         scenarios.add(scenario(
                 classbody("Example",
                         "static <N extends Number & Comparable> void method(N n) { Example.<Integer>method$ }"),
-                METHOD_NUMBER));
+                        METHOD_NUMBER));
 
         scenarios.add(scenario(classbody("Example", "<T> void method(T[] t) { this.method$ }"), METHOD_OBJECTS));
         scenarios.add(scenario(classbody("Example", "<O extends Object> void method(O[] o) { this.method$ }"),
@@ -183,7 +183,7 @@ public class ProposalUtilsTest {
         scenarios.add(scenario(
                 classbody("Example",
                         "static class Nested<N> { Nested(Collection<? extends N> c) { new Example.Nested$ } }"),
-                NESTED_INIT_COLLECTION));
+                        NESTED_INIT_COLLECTION));
 
         scenarios.add(scenario(classbody("Example", "class Inner { Inner() { new Example.Inner$ } }"),
                 INNER_INIT_EXAMPLE));
@@ -215,7 +215,7 @@ public class ProposalUtilsTest {
         scenarios.add(scenario(classbody("Example", "int hashCode() { super.hashCode$ }"), OBJECT_HASH_CODE));
 
         scenarios
-                .add(scenario(method("new Object() { int hashCode() { return super.hashCode$ } };"), OBJECT_HASH_CODE));
+        .add(scenario(method("new Object() { int hashCode() { return super.hashCode$ } };"), OBJECT_HASH_CODE));
 
         return scenarios;
     }
@@ -226,7 +226,7 @@ public class ProposalUtilsTest {
 
     @Test
     public void test() throws Exception {
-        IRecommendersCompletionContext context = extractProposals(code);
+        IRecommendersCompletionContext context = createCompletionContext(code);
         Collection<CompletionProposal> proposals = context.getProposals().values();
         Optional<LookupEnvironment> environment = context.get(CompletionContextKey.LOOKUP_ENVIRONMENT);
         IMethodName actualMethod = ProposalUtils.toMethodName(getOnlyElement(proposals), environment.orNull()).get();
@@ -234,14 +234,12 @@ public class ProposalUtilsTest {
         assertThat(actualMethod, is(equalTo(expectedMethod)));
     }
 
-    private IRecommendersCompletionContext extractProposals(CharSequence code) throws CoreException {
+    private IRecommendersCompletionContext createCompletionContext(CharSequence code) throws CoreException {
         JavaProjectFixture fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test");
         Pair<ICompilationUnit, Set<Integer>> struct = fixture.createFileAndParseWithMarkers(code.toString());
         ICompilationUnit cu = struct.getFirst();
         int completionIndex = struct.getSecond().iterator().next();
         JavaContentAssistInvocationContext javaContext = new JavaContentAssistContextMock(cu, completionIndex);
-        IRecommendersCompletionContext recommendersContext = new RecommendersCompletionContext(javaContext,
-                new CachingAstProvider());
-        return recommendersContext;
+        return new RecommendersCompletionContext(javaContext, new CachingAstProvider());
     }
 }

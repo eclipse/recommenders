@@ -246,7 +246,7 @@ public class CompletionContextFunctions {
 
                     @Override
                     public void acceptContext(CompletionContext context) {
-                        res.setValue(context.getExpectedTypesKeys());
+                        res.setValue(context.getExpectedTypesSignatures());
                         super.acceptContext(context);
                     }
 
