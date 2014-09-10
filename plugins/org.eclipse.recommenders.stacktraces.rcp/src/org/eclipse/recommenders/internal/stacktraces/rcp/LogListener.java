@@ -70,7 +70,6 @@ public class LogListener implements ILogListener, IStartup {
             return;
         }
         if (sentSimilarErrorBefore(status)) {
-            sendStatus(ErrorReports.newErrorReport(status, settings));
             return;
         }
         insertDebugStacktraceIfEmpty(status);
