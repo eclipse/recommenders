@@ -12,6 +12,7 @@
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
 import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.newErrorReport;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.Logs.log;
 
@@ -28,7 +29,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.utils.Reflections;
@@ -46,8 +46,8 @@ public class LogListener implements ILogListener, IStartup {
     private static Method SET_EXCEPTION = Reflections.getDeclaredMethod(Status.class, "setException", Throwable.class)
             .orNull();
 
-    private Cache<String, String> cache = CacheBuilder.newBuilder().maximumSize(30)
-            .expireAfterAccess(30, TimeUnit.MINUTES).build();
+    private Cache<String, ErrorReport> cache = CacheBuilder.newBuilder().maximumSize(30)
+            .expireAfterAccess(10, TimeUnit.MINUTES).build();
     private IObservableList errorReports;
     private volatile boolean isDialogOpen;
 
@@ -71,11 +71,12 @@ public class LogListener implements ILogListener, IStartup {
         if (!isErrorSeverity(status) || !isEclipsePluginId(status)) {
             return;
         }
-        if (sentSimilarErrorBefore(status)) {
+        insertDebugStacktraceIfEmpty(status);
+        ErrorReport report = newErrorReport(status, settings);
+        if (sentSimilarErrorBefore(report)) {
             return;
         }
-        insertDebugStacktraceIfEmpty(status);
-        checkAndSend(status);
+        checkAndSend(report);
     }
 
     private void readSettings() {
@@ -104,8 +105,8 @@ public class LogListener implements ILogListener, IStartup {
         return status.matches(IStatus.ERROR);
     }
 
-    private boolean sentSimilarErrorBefore(final IStatus status) {
-        return cache.getIfPresent(status.toString()) != null;
+    private boolean sentSimilarErrorBefore(final ErrorReport report) {
+        return cache.getIfPresent(computeCacheKey(report)) != null;
     }
 
     private boolean isEclipsePluginId(IStatus status) {
@@ -119,13 +120,13 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     @VisibleForTesting
-    protected void checkAndSend(final IStatus status) {
+    protected void checkAndSend(final ErrorReport report) {
         // run on UI-thread to ensure that the observable list is not modified from another thread
         // and that the wizard is created on the UI-thread.
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                errorReports.add(ErrorReports.newErrorReport(status, settings));
+                errorReports.add(report);
                 if (isDialogOpen) {
                     return;
                 }
@@ -152,7 +153,6 @@ public class LogListener implements ILogListener, IStartup {
 
     private void clear() {
         errorReports.clear();
-        cache.invalidateAll();
     }
 
     private void sendList() {
@@ -168,8 +168,13 @@ public class LogListener implements ILogListener, IStartup {
             return;
         }
 
-        cache.put(report.toString(), report.toString());
+        cache.put(computeCacheKey(report), report);
         new UploadJob(report, settings, URI.create(settings.getServerUrl())).schedule();
+    }
+
+    private String computeCacheKey(final ErrorReport report) {
+        String key = report.getStatus().getFingerprint() + report.getStatus().getMessage();
+        return key;
     }
 
     @Override
