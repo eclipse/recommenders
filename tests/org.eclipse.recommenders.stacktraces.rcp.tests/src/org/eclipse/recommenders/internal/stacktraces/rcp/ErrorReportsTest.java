@@ -21,10 +21,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.AnonymizeStacktraceVisitor;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.ThrowableFingerprintComputer;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ModelFactory;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.StackTraceElement;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Throwable;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ErrorReportsTest {
@@ -128,4 +130,35 @@ public class ErrorReportsTest {
         element.accept(new AnonymizeStacktraceVisitor(PREFIX_WHITELIST));
         assertThat(element.getMethodName(), is(WHITELISTED_METHODNAME_2));
     }
+
+    @Test
+    public void testFingerprint() {
+
+        RuntimeException cause = new RuntimeException("cause");
+        cause.fillInStackTrace();
+
+        Exception r1 = new RuntimeException("exception message");
+        r1.fillInStackTrace();
+        Exception r2 = new RuntimeException("exception message", cause);
+        r2.fillInStackTrace();
+
+        IStatus s1 = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message", r1);
+        IStatus s2 = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message", r2);
+
+        settings = ModelFactory.eINSTANCE.createSettings();
+
+        org.eclipse.recommenders.internal.stacktraces.rcp.model.Status noCause = ErrorReports.newStatus(s1, settings);
+        org.eclipse.recommenders.internal.stacktraces.rcp.model.Status withCause = ErrorReports.newStatus(s2, settings);
+
+        ThrowableFingerprintComputer c1 = new ThrowableFingerprintComputer(PREFIX_WHITELIST);
+        noCause.accept(c1);
+        String h1 = c1.hash();
+
+        ThrowableFingerprintComputer c2 = new ThrowableFingerprintComputer(PREFIX_WHITELIST);
+        withCause.accept(c2);
+        String h2 = c2.hash();
+
+        Assert.assertNotEquals(h1, h2);
+    }
+
 }
