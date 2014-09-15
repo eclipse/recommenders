@@ -93,8 +93,9 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
                             .append("Please take a moment to visit the bug and see whether you can provide more details:\n\n")
                             .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
                 } else {
-                    text.append("Your report has been matched against an existing bug report.").append(
-                            "To be kept informed please add yourself to cc list of the bug report.");
+                    text.append("Your report has been matched against an existing bug report. ")
+                            .append("To be kept informed please add yourself to cc list of the bug report:\n\n")
+                            .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
                 }
             } else if (equals(RESOLVED, status) || equals(CLOSED, status)) {
 
