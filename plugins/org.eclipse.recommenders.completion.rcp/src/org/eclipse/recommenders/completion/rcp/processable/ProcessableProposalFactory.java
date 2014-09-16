@@ -64,7 +64,7 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
     private static Class<LazyPackageCompletionProposal> lazyPackageCompletionProposalClass;
     private static Class<GetterSetterCompletionProposal> getterSetterCompletionProposalClass;
     private static Method proposalInfoMethod = Reflections.getDeclaredMethod(AbstractJavaCompletionProposal.class,
-            "getProposalInfo").orNull();
+            "getProposalInfo").orNull(); //$NON-NLS-1$
 
     static {
         // No all versions of JDT offer all kinds of CompletionProposal. Probe using reflection.
