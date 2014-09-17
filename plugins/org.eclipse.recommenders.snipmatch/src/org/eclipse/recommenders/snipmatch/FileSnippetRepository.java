@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.channels.OverlappingFileLockException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -187,6 +188,8 @@ public class FileSnippetRepository implements ISnippetRepository {
         try {
             File[] snippetFiles = snippetsdir.listFiles((FileFilter) new SuffixFileFilter(DOT_JSON));
             doIndex(snippetFiles);
+        } catch (OverlappingFileLockException e) {
+            throw new WrappedOverlappingFileLockException(indexdir, timesOpened, "", e);
         } finally {
             writeLock.unlock();
         }
@@ -501,6 +504,27 @@ public class FileSnippetRepository implements ISnippetRepository {
         @Override
         public float idf(int docFreq, int numDocs) {
             return 1.0f;
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public class WrappedOverlappingFileLockException extends IOException {
+        private final File indexdir;
+        private final int timesOpened;
+
+        public WrappedOverlappingFileLockException(File indexdir, int timesOpened, String message,
+                OverlappingFileLockException cause) {
+            super(message, cause);
+            this.indexdir = indexdir;
+            this.timesOpened = timesOpened;
+        }
+
+        public File getIndexdir() {
+            return indexdir;
+        }
+
+        public int getTimesOpened() {
+            return timesOpened;
         }
     }
 }
