@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+2: Olav Lenz <olav.lenz.core@gmail.com>
+Code-Review+1: Johannes Dorn <johannes.dorn@codetrails.com>
+Submitted-by: Olav Lenz <olav.lenz.core@gmail.com>
+Submitted-at: Wed, 17 Sep 2014 04:32:39 -0400
+Reviewed-on: https://git.eclipse.org/r/33101
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/snipmatch-gsoc-2014
