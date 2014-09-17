@@ -58,6 +58,7 @@ import org.apache.lucene.search.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.IOUtils;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.gson.GsonUtil;
@@ -216,7 +217,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     }
 
     private void indexSnippet(IndexWriter writer, ISnippet snippet, String path) throws CorruptIndexException,
-    IOException {
+            IOException {
         Document doc = new Document();
 
         doc.add(new Field(F_PATH, path, Store.YES, Index.NO));
@@ -255,7 +256,8 @@ public class FileSnippetRepository implements ISnippetRepository {
         readLock.lock();
         try {
             Preconditions.checkState(isOpen());
-            // TODO MB: this is a costly operation that works only well with small repos.
+            // TODO MB: this is a costly operation that works only well with
+            // small repos.
             Set<Recommendation<ISnippet>> res = Sets.newHashSet();
             for (File fSnippet : snippetsdir.listFiles((FileFilter) new SuffixFileFilter(DOT_JSON))) {
                 try {
@@ -300,6 +302,11 @@ public class FileSnippetRepository implements ISnippetRepository {
                 Map<File, Float> snippetFiles = searchSnippetFiles(context, maxResults);
                 for (Entry<File, Float> entry : snippetFiles.entrySet()) {
                     ISnippet snippet = snippetCache.get(entry.getKey());
+
+                    if (!snippetApplicable(context, snippet)) {
+                        continue;
+                    }
+
                     results.add(Recommendation.newRecommendation(snippet, entry.getValue()));
                 }
             } catch (Exception e) {
@@ -309,6 +316,27 @@ public class FileSnippetRepository implements ISnippetRepository {
         } finally {
             readLock.unlock();
         }
+    }
+
+    private boolean snippetApplicable(ISearchContext context, ISnippet snippet) {
+        if (context.getDependencies().isEmpty()) {
+            return true;
+        } else {
+            for (ProjectCoordinate needed : snippet.getNeededDependencies()) {
+                for (ProjectCoordinate available : context.getDependencies()) {
+                    if (areCompatible(needed, available)) {
+                        break;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean areCompatible(ProjectCoordinate pc1, ProjectCoordinate pc2) {
+        return pc1.getArtifactId().equals(pc2.getArtifactId()) && pc1.getGroupId().equals(pc2.getGroupId());
     }
 
     private Map<File, Float> searchSnippetFiles(ISearchContext context, int maxResults) {
@@ -329,7 +357,8 @@ public class FileSnippetRepository implements ISnippetRepository {
             }
             return normalizeValues(results, maxScore);
         } catch (ParseException e) {
-            // While typing, a user can easily create unparsable queries (temporarily)
+            // While typing, a user can easily create unparsable queries
+            // (temporarily)
             log.info("Failed to parse query", e);
         } catch (Exception e) {
             log.error("Exception occurred while searching the snippet index.", e);
@@ -342,7 +371,8 @@ public class FileSnippetRepository implements ISnippetRepository {
     private String createLuceneQuery(ISearchContext context) {
         StringBuilder sb = new StringBuilder();
 
-        // Remove trailing 'OR' & 'NOT' to prevent pairing with location constraint
+        // Remove trailing 'OR' & 'NOT' to prevent pairing with location
+        // constraint
         String userQuery = context.getSearchText().trim();
         userQuery = removeEnd(userQuery, " OR");
         userQuery = removeEnd(userQuery, " NOT");
