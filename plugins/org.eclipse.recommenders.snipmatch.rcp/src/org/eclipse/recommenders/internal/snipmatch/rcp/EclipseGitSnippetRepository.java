@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.recommenders.rcp.IRcpService;
+import org.eclipse.recommenders.snipmatch.FileSnippetRepository.WrappedOverlappingFileLockException;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository.GitNoCurrentFormatBranchException;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository.GitNoFormatBranchException;
@@ -153,6 +154,13 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
                                 }
                             });
 
+                            return Status.CANCEL_STATUS;
+                        } catch (WrappedOverlappingFileLockException e) {
+                            LOG.error("Exception while indexing repository", e); //$NON-NLS-1$
+                            Status status = new Status(IStatus.ERROR, Constants.BUNDLE_ID, MessageFormat.format(
+                                    Messages.ERROR_OVERLAPPING_FILE_LOCK_EXCEPTION, delegate.getRepositoryLocation(),
+                                    e.getIndexdir(), timesOpened, e.getTimesOpened(), e.getMessage()), e);
+                            Platform.getLog(Platform.getBundle(Constants.BUNDLE_ID)).log(status);
                             return Status.CANCEL_STATUS;
                         } catch (IOException e) {
                             LOG.error("Exception while opening repository.", e); //$NON-NLS-1$
