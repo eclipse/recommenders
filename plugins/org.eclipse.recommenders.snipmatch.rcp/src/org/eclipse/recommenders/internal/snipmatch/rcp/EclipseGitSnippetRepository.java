@@ -14,6 +14,7 @@ import static org.eclipse.recommenders.internal.snipmatch.rcp.SnipmatchRcpModule
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.OverlappingFileLockException;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
@@ -159,6 +160,13 @@ public class EclipseGitSnippetRepository implements ISnippetRepository, IRcpServ
                             Status status = new Status(IStatus.ERROR, Constants.BUNDLE_ID, MessageFormat.format(
                                     Messages.ERROR_FAILURE_TO_CLONE_REPOSITORY, delegate.getRepositoryLocation(),
                                     e.getMessage()), e);
+                            Platform.getLog(Platform.getBundle(Constants.BUNDLE_ID)).log(status);
+                            return Status.CANCEL_STATUS;
+                        } catch (OverlappingFileLockException e) {
+                            LOG.error("Exception while indexing repository", e); //$NON-NLS-1$
+                            Status status = new Status(IStatus.ERROR, Constants.BUNDLE_ID, MessageFormat.format(
+                                    Messages.ERROR_OVERLAPPING_FILE_LOCK_EXCEPTION, delegate.getRepositoryLocation(),
+                                    timesOpened, e.getMessage()), e);
                             Platform.getLog(Platform.getBundle(Constants.BUNDLE_ID)).log(status);
                             return Status.CANCEL_STATUS;
                         } finally {

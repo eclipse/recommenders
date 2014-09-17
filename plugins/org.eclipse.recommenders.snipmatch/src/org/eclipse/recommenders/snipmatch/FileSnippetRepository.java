@@ -216,7 +216,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     }
 
     private void indexSnippet(IndexWriter writer, ISnippet snippet, String path) throws CorruptIndexException,
-    IOException {
+            IOException {
         Document doc = new Document();
 
         doc.add(new Field(F_PATH, path, Store.YES, Index.NO));
