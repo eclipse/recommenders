@@ -4,7 +4,7 @@
 	<extension-point id="pageFactories" name="Snippet Editor Page Factory" schema="schema/pageFactories.exsd"/>
 	<extension point="org.eclipse.ui.editors">
 		<editor
-			class="org.eclipse.recommenders.snipmatch.rcp.SnippetEditor"
+			class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.snipmatch.rcp.SnippetEditor"
 			contributorClass="org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditorActionBarContributor"
 			default="false"
 			icon="icons/obj16/editor.png"
@@ -44,6 +44,10 @@
 			category="org.eclipse.recommenders.rcp.preferencePages.root"
 			class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.snipmatch.rcp.SnipmatchPreferencePage"
 			name="%preferencePages.snipmatch.name"/>
+		<page id="org.eclipse.recommenders.snipmatch.rpc.preferences.SnippetEditorPreferencePage"
+			category="org.eclipse.recommenders.snipmatch.rpc.preferences.SnipmatchPreferencePage"
+			class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.snipmatch.rcp.SnippetEditorPreferencePage"
+			name="Snippet Editor"/>
 	</extension>
 	<extension point="org.eclipse.core.runtime.preferences">
 		<initializer class="org.eclipse.recommenders.internal.snipmatch.rcp.PreferenceInitializer"/>

@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -27,21 +29,28 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Constants;
+import org.eclipse.recommenders.internal.snipmatch.rcp.LogMessages;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Messages;
+import org.eclipse.recommenders.internal.snipmatch.rcp.SnipmatchRcpPreferences;
+import org.eclipse.recommenders.internal.snipmatch.rcp.SnippetEditorDiscoveryUtils;
 import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetSourceValidator;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.AbstractFormPart;
 import org.eclipse.ui.forms.IFormPart;
-import org.eclipse.ui.forms.editor.FormEditor;
+import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.IFormPage;
+import org.eclipse.ui.forms.editor.SharedHeaderFormEditor;
+import org.eclipse.ui.forms.widgets.Form;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +58,15 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
-public class SnippetEditor extends FormEditor implements IResourceChangeListener {
+public class SnippetEditor extends SharedHeaderFormEditor implements IResourceChangeListener {
 
     private static Logger LOG = LoggerFactory.getLogger(SnippetEditor.class);
 
-    public SnippetEditor() {
+    private final SnipmatchRcpPreferences preferences;
+
+    @Inject
+    public SnippetEditor(SnipmatchRcpPreferences preferences) {
+        this.preferences = preferences;
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
     }
 
@@ -71,7 +84,7 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
                 addPage(page);
             }
         } catch (PartInitException e) {
-            LOG.error("Exception while adding editor pages.", e); //$NON-NLS-1$
+            Logs.log(LogMessages.ERROR_FAILED_TO_LOAD_EDITOR_PAGE, e);
         }
     }
 
@@ -197,8 +210,33 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
                         ((AbstractFormPart) part).markDirty();
                     }
                 }
-
             }
         }
+    }
+
+    @Override
+    protected void createHeaderContents(IManagedForm headerForm) {
+
+        if (preferences.isEditorExtNotificationEnabled()) {
+            addEditorExtNotification(headerForm);
+        }
+
+        super.createHeaderContents(headerForm);
+    }
+
+    private void addEditorExtNotification(IManagedForm managedForm) {
+        Form form = managedForm.getForm().getForm();
+
+        Action discoverExtensions = new Action(Messages.EDITOR_EXTENSIONS_HEADER_EXT_ACTION) {
+
+            @Override
+            public void run() {
+                SnippetEditorDiscoveryUtils.openDiscoveryDialog();
+            }
+        };
+        discoverExtensions.setToolTipText(Messages.EDITOR_EXTENSIONS_HEADER_EXT_TOOLTIP);
+
+        form.getToolBarManager().add(discoverExtensions);
+        form.getToolBarManager().update(true);
     }
 }
