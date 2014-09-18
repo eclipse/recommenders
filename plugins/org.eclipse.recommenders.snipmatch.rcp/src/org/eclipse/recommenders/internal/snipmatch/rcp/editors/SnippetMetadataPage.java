@@ -14,10 +14,15 @@ package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.core.databinding.beans.BeanProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 import static org.eclipse.jface.fieldassist.FieldDecorationRegistry.DEC_INFORMATION;
-import static org.eclipse.recommenders.snipmatch.Location.*;
+import static org.eclipse.recommenders.snipmatch.Location.FILE;
+import static org.eclipse.recommenders.snipmatch.Location.JAVA;
+import static org.eclipse.recommenders.snipmatch.Location.JAVADOC;
+import static org.eclipse.recommenders.snipmatch.Location.JAVA_STATEMENTS;
+import static org.eclipse.recommenders.snipmatch.Location.JAVA_TYPE_MEMBERS;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -77,6 +82,7 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 import com.google.common.base.Optional;
@@ -94,6 +100,7 @@ public class SnippetMetadataPage extends FormPage {
     private Text txtDescription;
     private ComboViewer comboLocation;
     private Text txtUuid;
+    private Hyperlink linkDiscovery;
 
     private ListViewer listViewerExtraSearchTerms;
     private ListViewer listViewerTags;
@@ -248,7 +255,7 @@ public class SnippetMetadataPage extends FormPage {
                         listViewerExtraSearchTerms.getList(), SWT.TOP | SWT.LEFT);
                 extraSearchTermsDescriptionDecoration.setImage(infoDecoration.getImage());
                 extraSearchTermsDescriptionDecoration
-                .setDescriptionText(Messages.EDITOR_DESCRIPTION_EXTRA_SEARCH_TERMS);
+                        .setDescriptionText(Messages.EDITOR_DESCRIPTION_EXTRA_SEARCH_TERMS);
                 extraSearchTermsDescriptionDecoration.setMarginWidth(1);
 
                 btnContainerExtraSearchTerms = managedForm.getToolkit().createComposite(
@@ -330,7 +337,8 @@ public class SnippetMetadataPage extends FormPage {
                 txtUuid = managedForm.getToolkit().createText(managedForm.getForm().getBody(),
                         snippet.getUuid().toString(), SWT.READ_ONLY);
                 txtUuid.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0)
-                        .create());
+                        .span(2, 1).create());
+
             }
 
             @Override

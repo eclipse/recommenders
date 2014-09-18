@@ -27,7 +27,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.equinox.internal.p2.discovery.Catalog;
+import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
+import org.eclipse.equinox.internal.p2.discovery.compatibility.BundleDiscoveryStrategy;
+import org.eclipse.equinox.internal.p2.discovery.compatibility.RemoteBundleDiscoveryStrategy;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Constants;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Messages;
 import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetSourceValidator;
@@ -40,8 +49,10 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.AbstractFormPart;
 import org.eclipse.ui.forms.IFormPart;
-import org.eclipse.ui.forms.editor.FormEditor;
+import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.IFormPage;
+import org.eclipse.ui.forms.editor.SharedHeaderFormEditor;
+import org.eclipse.ui.forms.widgets.Form;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +60,14 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
-public class SnippetEditor extends FormEditor implements IResourceChangeListener {
+public class SnippetEditor extends SharedHeaderFormEditor implements IResourceChangeListener {
 
     private static Logger LOG = LoggerFactory.getLogger(SnippetEditor.class);
+    /*
+     * TODO:Change this to < http://download.eclipse.org/recommenders/discovery/2.0/snipmatch/directory.xml > before
+     * merging. The link below is only for testing purposes.
+     */
+    private static final String SNIPMATCH_P2_DISCOVERY_URL = "http://download.eclipse.org/recommenders/discovery/2.0/directory.xml";//$NON-NLS-1$
 
     public SnippetEditor() {
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -148,8 +164,8 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
         if (!oldSnippet.getCode().isEmpty() && !snippet.getCode().equals(oldSnippet.getCode())) {
             int status = new MessageDialog(getSite().getShell(), Messages.DIALOG_TITLE_SAVE_SNIPPET, null,
                     Messages.DIALOG_MESSAGE_SAVE_SNIPPET_WITH_MODIFIED_CODE, MessageDialog.QUESTION, new String[] {
-                Messages.DIALOG_OPTION_SAVE, Messages.DIALOG_OPTION_SAVE_AS_NEW,
-                Messages.DIALOG_OPTION_CANCEL }, 0).open();
+                            Messages.DIALOG_OPTION_SAVE, Messages.DIALOG_OPTION_SAVE_AS_NEW,
+                            Messages.DIALOG_OPTION_CANCEL }, 0).open();
 
             if (status == 1) {
                 // Store as new
@@ -200,5 +216,49 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
 
             }
         }
+    }
+
+    @Override
+    protected void createHeaderContents(IManagedForm headerForm) {
+        addExtensionSuggestion(headerForm);
+        super.createHeaderContents(headerForm);
+    }
+
+    private void addExtensionSuggestion(IManagedForm managedForm) {
+
+        Form form = managedForm.getForm().getForm();
+        form.getToolBarManager().add(new Action(Messages.EDITOR_HEADER_SNIPMATCH_EXTENSIONS) {
+
+            @Override
+            public void run() {
+                openDiscoveryDialog();
+                super.run();
+            }
+        });
+
+        form.getToolBarManager().update(true);
+
+    }
+
+    @SuppressWarnings("restriction")
+    private void openDiscoveryDialog() {
+        Catalog catalog = new Catalog();
+        catalog.setEnvironment(DiscoveryCore.createEnvironment());
+        catalog.setVerifyUpdateSiteAvailability(false);
+
+        // look for descriptors from installed bundles
+        catalog.getDiscoveryStrategies().add(new BundleDiscoveryStrategy());
+
+        // look for remote descriptor
+        RemoteBundleDiscoveryStrategy remoteDiscoveryStrategy = new RemoteBundleDiscoveryStrategy();
+        remoteDiscoveryStrategy.setDirectoryUrl(SNIPMATCH_P2_DISCOVERY_URL);
+        catalog.getDiscoveryStrategies().add(remoteDiscoveryStrategy);
+
+        CatalogConfiguration configuration = new CatalogConfiguration();
+        configuration.setShowTagFilter(false);
+
+        DiscoveryWizard wizard = new DiscoveryWizard(catalog, configuration);
+        WizardDialog dialog = new WizardDialog(WorkbenchUtil.getShell(), wizard);
+        dialog.open();
     }
 }

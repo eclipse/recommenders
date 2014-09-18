@@ -50,6 +50,8 @@ public class Messages extends NLS {
     public static String EDITOR_BUTTON_REMOVE_EXTRA_SEARCH_TERM;
     public static String EDITOR_BUTTON_REMOVE_TAGS;
 
+    public static String EDITOR_HEADER_SNIPMATCH_EXTENSIONS;
+
     public static String EDITOR_LABEL_SNIPPET_DESCRIPTION;
     public static String EDITOR_LABEL_SNIPPET_NAME;
     public static String EDITOR_LABEL_SNIPPET_UUID;
