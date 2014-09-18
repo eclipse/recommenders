@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+<extension point="org.eclipse.mylyn.discovery.core.connectorDiscovery">
+    <connectorCategory id="org.eclipse.recommenders.snipmatch.rcp.discovery.category.editor"
+    description="Extensions for the Snippet Editor"
+    name="Snippet Editor Extensions"
+    relevance="10">
+      <icon
+            image48="images/incubation-48.png"/>
+    </connectorCategory>
+  </extension>
+  <extension point="org.eclipse.mylyn.discovery.core.connectorDiscovery">
+   <connectorDescriptor
+          categoryId="org.eclipse.recommenders.snipmatch.rcp.discovery.category.editor"
+          description="Install this feature to add the Templates Xtext editor source page to your Snippet Editor."
+          id="org.eclipse.recommenders.templates.rcp.feature"
+          license="EPL"
+          name="Code Recommenders Template Editor"
+          provider="Eclipse Code Recommenders"
+          siteUrl="http://download.eclipse.org/recommenders.incubator/snipmatch/updates/milestones/">
+       <iu id="org.eclipse.recommenders.templates.rcp.feature.feature.group"/>
+    </connectorDescriptor>
+  </extension>
+</plugin>
