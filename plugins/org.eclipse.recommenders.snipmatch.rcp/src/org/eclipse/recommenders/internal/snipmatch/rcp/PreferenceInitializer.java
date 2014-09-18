@@ -29,5 +29,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(Constants.PREF_SNIPPETS_REPO_FETCH_URL, REPO_FETCH_URL);
         store.setDefault(Constants.PREF_SNIPPETS_REPO_PUSH_URL, REPO_PUSH_URL);
         store.setDefault(Constants.PREF_SNIPPETS_REPO_PUSH_BRANCH, REPO_PUSH_BRANCH);
+        store.setDefault(Constants.PREF_SNIPPET_EDITOR_DISCOVERY, true);
     }
 }
