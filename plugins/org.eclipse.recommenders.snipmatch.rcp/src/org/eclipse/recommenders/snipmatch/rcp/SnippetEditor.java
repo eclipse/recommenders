@@ -29,19 +29,21 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Constants;
+import org.eclipse.recommenders.internal.snipmatch.rcp.LogMessages;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Messages;
 import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetSourceValidator;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.AbstractFormPart;
 import org.eclipse.ui.forms.IFormPart;
-import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
+import org.eclipse.ui.forms.editor.SharedHeaderFormEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
-public class SnippetEditor extends FormEditor implements IResourceChangeListener {
+public class SnippetEditor extends SharedHeaderFormEditor implements IResourceChangeListener {
 
     private static Logger LOG = LoggerFactory.getLogger(SnippetEditor.class);
 
@@ -71,7 +73,7 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
                 addPage(page);
             }
         } catch (PartInitException e) {
-            LOG.error("Exception while adding editor pages.", e); //$NON-NLS-1$
+            Logs.log(LogMessages.ERROR_FAILED_TO_LOAD_EDITOR_PAGE, e);
         }
     }
 
@@ -197,8 +199,8 @@ public class SnippetEditor extends FormEditor implements IResourceChangeListener
                         ((AbstractFormPart) part).markDirty();
                     }
                 }
-
             }
         }
     }
+
 }
