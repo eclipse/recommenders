@@ -75,6 +75,7 @@ public class Messages extends NLS {
     public static String EDITOR_BUTTON_REMOVE_TAGS;
 
     public static String EDITOR_LABEL_SNIPPET_DEPENENCIES;
+    public static String EDITOR_EXTENSIONS_HEADER_EXT_LINK;
 
     public static String EDITOR_LABEL_SNIPPET_DESCRIPTION;
     public static String EDITOR_LABEL_SNIPPET_NAME;
@@ -104,6 +105,7 @@ public class Messages extends NLS {
     public static String LOG_ERROR_SNIPPET_COULD_NOT_BE_EVALUATED;
     public static String LOG_ERROR_SNIPPET_REPLACE_LEADING_WHITESPACE_FAILED;
     public static String LOG_ERROR_CANNOT_COMPUTE_LOCATION;
+    public static String LOG_ERROR_FAILED_TO_LOAD_EDITOR_PAGES;
 
     public static String ERROR_FAILURE_TO_CLONE_REPOSITORY;
     public static String ERROR_NO_FORMAT_BRANCH;
@@ -139,6 +141,8 @@ public class Messages extends NLS {
     public static String PREFPAGE_ERROR_INVALID_REPO_URL;
     public static String PREFPAGE_ERROR_INVALID_BRANCH_PREFIX_FORMAT;
     public static String PREFPAGE_LABEL_REMOTE_SNIPPETS_REPOSITORY;
+    public static String PREFPAGE_EDITOR_EXTENSIONS_LINK;
+    public static String PREFPAGE_EDITOR_EXTENSIONS_ENABLE_NOTIFICATION;
 
     public static String WARNING_CANNOT_APPLY_SNIPPET;
     public static String WARNING_REPOSITION_CURSOR;
