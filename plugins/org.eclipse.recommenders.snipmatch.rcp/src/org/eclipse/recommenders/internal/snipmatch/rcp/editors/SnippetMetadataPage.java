@@ -14,12 +14,18 @@ package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.core.databinding.beans.BeanProperties.value;
-import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.enabled;
+import static org.eclipse.jface.databinding.swt.WidgetProperties.text;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 import static org.eclipse.jface.fieldassist.FieldDecorationRegistry.DEC_INFORMATION;
 import static org.eclipse.recommenders.internal.snipmatch.rcp.JavaEditorSearchContext.resolve;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.SnippetEditorDiscoveryUtils.openDiscoveryDialog;
 import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_JAR;
-import static org.eclipse.recommenders.snipmatch.Location.*;
+import static org.eclipse.recommenders.snipmatch.Location.FILE;
+import static org.eclipse.recommenders.snipmatch.Location.JAVA;
+import static org.eclipse.recommenders.snipmatch.Location.JAVADOC;
+import static org.eclipse.recommenders.snipmatch.Location.JAVA_STATEMENTS;
+import static org.eclipse.recommenders.snipmatch.Location.JAVA_TYPE_MEMBERS;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.Arrays;
@@ -53,6 +59,7 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -68,6 +75,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Messages;
+import org.eclipse.recommenders.internal.snipmatch.rcp.SnipmatchRcpPreferences;
 import org.eclipse.recommenders.internal.snipmatch.rcp.SnippetsView;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.IDependencyListener;
@@ -102,6 +110,9 @@ import org.eclipse.ui.forms.AbstractFormPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
@@ -114,6 +125,8 @@ public class SnippetMetadataPage extends FormPage {
 
     private static final Location[] SNIPMATCH_LOCATIONS = { FILE, JAVA, JAVA_STATEMENTS, JAVA_TYPE_MEMBERS, JAVADOC };
     public static final String TEXT_SNIPPETNAME = "org.eclipse.recommenders.snipmatch.rcp.snippetmetadatapage.snippetname"; //$NON-NLS-1$
+
+    private final SnipmatchRcpPreferences preferences;
 
     private ISnippet snippet;
 
@@ -148,8 +161,9 @@ public class SnippetMetadataPage extends FormPage {
     private final Image decorationImage = FieldDecorationRegistry.getDefault()
             .getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
 
-    public SnippetMetadataPage(FormEditor editor, String id, String title) {
+    public SnippetMetadataPage(FormEditor editor, String id, String title, SnipmatchRcpPreferences prefs) {
         super(editor, id, title);
+        this.preferences = prefs;
     }
 
     @Override
@@ -421,6 +435,20 @@ public class SnippetMetadataPage extends FormPage {
                         snippet.getUuid().toString(), SWT.READ_ONLY);
                 txtUuid.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0)
                         .create());
+
+                if (preferences.isEditorExtNotificationEnabled()) {
+
+                    Form form = managedForm.getForm().getForm();
+                    form.addMessageHyperlinkListener(new HyperlinkAdapter() {
+
+                        @Override
+                        public void linkActivated(HyperlinkEvent e) {
+                            openDiscoveryDialog();
+                        }
+                    });
+                    form.setMessage(Messages.EDITOR_EXTENSIONS_HEADER_EXT_LINK,
+                            IMessageProvider.INFORMATION);
+                }
             }
 
             @Override

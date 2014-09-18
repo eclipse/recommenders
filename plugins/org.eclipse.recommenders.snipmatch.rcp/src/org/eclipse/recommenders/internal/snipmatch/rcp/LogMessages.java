@@ -28,6 +28,8 @@ public class LogMessages extends DefaultLogMessage {
             Messages.LOG_ERROR_SNIPPET_COULD_NOT_BE_EVALUATED);
     public static final LogMessages ERROR_CANNOT_COMPUTE_LOCATION = new LogMessages(ERROR,
             Messages.LOG_ERROR_CANNOT_COMPUTE_LOCATION);
+    public static final LogMessages ERROR_FAILED_TO_LOAD_EDITOR_PAGE = new LogMessages(ERROR,
+            Messages.LOG_ERROR_FAILED_TO_LOAD_EDITOR_PAGES);
 
     static Bundle bundle = Logs.getBundle(LogMessages.class);
 
