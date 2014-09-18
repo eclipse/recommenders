@@ -58,6 +58,13 @@ public class SnipmatchRcpModule extends AbstractModule {
 
     @Provides
     @Singleton
+    public SnippetEditorPreferences provideEditorPrefs(IWorkbench wb) {
+        IEclipseContext context = (IEclipseContext) wb.getService(IEclipseContext.class);
+        return ContextInjectionFactory.make(SnippetEditorPreferences.class, context);
+    }
+
+    @Provides
+    @Singleton
     @Named(SNIPPET_REPOSITORY_BASEDIR)
     public File provideBasedir(IWorkspaceRoot root) {
         File recommendersRoot = new File(root.getLocation().toFile(), ".recommenders"); //$NON-NLS-1$
