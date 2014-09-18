@@ -18,6 +18,8 @@ import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
 import static org.eclipse.jface.databinding.viewers.ViewerProperties.singleSelection;
 import static org.eclipse.jface.fieldassist.FieldDecorationRegistry.DEC_INFORMATION;
 import static org.eclipse.recommenders.snipmatch.Location.*;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.SnippetEditorDiscoveryUtils.openDiscoveryDialog;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.OBJ_JAR;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.Arrays;
@@ -44,6 +46,7 @@ import org.eclipse.core.internal.databinding.property.value.SelfValueProperty;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -89,6 +92,9 @@ import org.eclipse.ui.forms.AbstractFormPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
@@ -424,6 +430,16 @@ public class SnippetMetadataPage extends FormPage {
                         snippet.getUuid().toString(), SWT.READ_ONLY);
                 txtUuid.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0)
                         .create());
+
+                Form form = managedForm.getForm().getForm();
+                form.addMessageHyperlinkListener(new HyperlinkAdapter() {
+
+                    @Override
+                    public void linkActivated(HyperlinkEvent e) {
+                        openDiscoveryDialog();
+                    }
+                });
+                form.setMessage(Messages.EDITOR_EXTENSIONS_HEADER_EXT_LINK, IMessageProvider.INFORMATION);
             }
 
             @Override

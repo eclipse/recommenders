@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
+import javax.inject.Inject;
+
 import org.eclipse.recommenders.snipmatch.rcp.ISnippetEditorPageFactory;
 import org.eclipse.recommenders.snipmatch.rcp.SnippetEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
