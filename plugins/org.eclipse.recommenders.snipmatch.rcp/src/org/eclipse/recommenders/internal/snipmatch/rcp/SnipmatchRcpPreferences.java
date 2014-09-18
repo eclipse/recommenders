@@ -20,6 +20,7 @@ public class SnipmatchRcpPreferences {
     private String fetchUrl;
     private String pushUrl;
     private String pushBranch;
+    private Boolean showEditorNotification;
 
     @Inject
     public void setFetchUrl(@Preference(Constants.PREF_SNIPPETS_REPO_FETCH_URL) String newValue) {
@@ -46,5 +47,14 @@ public class SnipmatchRcpPreferences {
 
     public String getPushBranch() {
         return pushBranch;
+    }
+
+    @Inject
+    public void setShowEditorNotification(@Preference(Constants.PREF_SNIPPET_EDITOR_DISCOVERY) Boolean notification) {
+        this.showEditorNotification = notification;
+    }
+
+    public boolean isEditorExtNotificationEnabled() {
+        return showEditorNotification.booleanValue();
     }
 }
