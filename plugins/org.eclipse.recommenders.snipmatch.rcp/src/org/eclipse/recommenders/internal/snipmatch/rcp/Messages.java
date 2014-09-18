@@ -50,6 +50,9 @@ public class Messages extends NLS {
     public static String EDITOR_BUTTON_REMOVE_EXTRA_SEARCH_TERM;
     public static String EDITOR_BUTTON_REMOVE_TAGS;
 
+    public static String EDITOR_EXTENSIONS_HEADER_EXT_ACTION;
+    public static String EDITOR_EXTENSIONS_HEADER_EXT_TOOLTIP;
+
     public static String EDITOR_LABEL_SNIPPET_DESCRIPTION;
     public static String EDITOR_LABEL_SNIPPET_NAME;
     public static String EDITOR_LABEL_SNIPPET_UUID;
@@ -103,6 +106,9 @@ public class Messages extends NLS {
     public static String PREFPAGE_DESCRIPTION;
     public static String PREFPAGE_ERROR_INVALID_REPO_URL;
     public static String PREFPAGE_ERROR_INVALID_BRANCH_PREFIX_FORMAT;
+    public static String PREFPAGE_EDITOR_EXTENSIONS_LINK;
+    public static String PREFPAGE_EDITOR_EXTENSIONS_ENABLE_NOTIFICATION;
+
 
     public static String WARNING_CANNOT_APPLY_SNIPPET;
     public static String WARNING_REPOSITION_CURSOR;

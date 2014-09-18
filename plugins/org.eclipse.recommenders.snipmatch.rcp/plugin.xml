@@ -44,9 +44,18 @@
 			category="org.eclipse.recommenders.rcp.preferencePages.root"
 			class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.snipmatch.rcp.SnipmatchPreferencePage"
 			name="%preferencePages.snipmatch.name"/>
+  <page
+        category="org.eclipse.recommenders.snipmatch.rpc.preferences.SnipmatchPreferencePage"
+        class="org.eclipse.recommenders.internal.snipmatch.rcp.SnippetEditorPreferencePage"
+        id="org.eclipse.recommenders.snipmatch.rpc.preferences.SnippetEditorPreferencePage"
+        name="Snippet Editor">
+  </page>
 	</extension>
 	<extension point="org.eclipse.core.runtime.preferences">
 		<initializer class="org.eclipse.recommenders.internal.snipmatch.rcp.PreferenceInitializer"/>
+  <initializer
+        class="org.eclipse.recommenders.internal.snipmatch.rcp.SnippetEditorPreferencesInitializer">
+  </initializer>
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler commandId="org.eclipse.recommenders.snipmatch.rcp.commands.completion"
