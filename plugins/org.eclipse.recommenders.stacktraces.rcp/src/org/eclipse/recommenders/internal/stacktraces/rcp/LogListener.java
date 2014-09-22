@@ -66,11 +66,14 @@ public class LogListener implements ILogListener, IStartup {
 
     @Override
     public void logging(final IStatus status, String nouse) {
+        if (!isErrorSeverity(status) || !isEclipsePluginId(status)) {
+            return;
+        }
         readSettings();
         if (ignoreAllLogEvents()) {
             return;
         }
-        if (!isErrorSeverity(status) || !isEclipsePluginId(status)) {
+        if (isPaused()) {
             return;
         }
         insertDebugStacktraceIfEmpty(status);
@@ -80,6 +83,10 @@ public class LogListener implements ILogListener, IStartup {
         }
         putIntoCache(report);
         checkAndSend(report);
+    }
+
+    private boolean isPaused() {
+        return settings.getAction() == SendAction.PAUSE_DAY || settings.getAction() == SendAction.PAUSE_RESTART;
     }
 
     private void readSettings() {
@@ -122,11 +129,11 @@ public class LogListener implements ILogListener, IStartup {
 
     private boolean isEclipsePluginId(IStatus status) {
         String pluginId = status.getPlugin();
-        return startsWithRecommendersOrCodetrails(pluginId);
+        return startsWithEclipseOrCodetrails(pluginId);
     }
 
     // TODO: codetrails id for debugging:
-    private boolean startsWithRecommendersOrCodetrails(String s) {
+    private boolean startsWithEclipseOrCodetrails(String s) {
         return startsWith(s, "org.eclipse.") || startsWith(s, "com.codetrails");
     }
 
@@ -151,8 +158,8 @@ public class LogListener implements ILogListener, IStartup {
                     if (open != Dialog.OK) {
                         clear();
                         return;
-                    } else if (ignoreAllLogEvents()) {
-                        // the user may have chosen to ignore events in the wizard just now. Respect this preference:
+                    } else if (ignoreAllLogEvents() || isPaused()) {
+                        // the user may have chosen to not to send events in the wizard. Respect this preference:
                         return;
                     }
                     sendList();
@@ -175,7 +182,7 @@ public class LogListener implements ILogListener, IStartup {
 
     private void sendStatus(final ErrorReport report) {
         // double safety. This is checked before elsewhere. But just to make sure...
-        if (ignoreAllLogEvents()) {
+        if (ignoreAllLogEvents() || isPaused()) {
             return;
         }
         new UploadJob(report, settings, URI.create(settings.getServerUrl())).schedule();
