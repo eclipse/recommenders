@@ -47,7 +47,7 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
 
     @Override
     protected void configureShell(Shell newShell) {
-        newShell.setText("Thank you!");
+        newShell.setText(Messages.THANKYOUDIALOG_THANK_YOU);
         super.configureShell(newShell);
     }
 
@@ -58,8 +58,8 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
 
     @Override
     protected Control createDialogArea(Composite parent) {
-        setTitle("Thank you!");
-        setMessage("Your report has been received and is now tracked.");
+        setTitle(Messages.THANKYOUDIALOG_THANK_YOU);
+        setMessage(Messages.THANKYOUDIALOG_RECEIVED_AND_TRACKED);
         setTitleImage(TITLE_IMAGE);
 
         Label linetop = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -80,63 +80,72 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
         StringBuilder text = new StringBuilder();
 
         if (state.isCreated()) {
-            text.append("Your report is now tracked at: \n\n    <a>")
-            .append(state.getBugUrl().or("invalid server response")).append("</a>.").append("\n\n")
-            .append("To be kept informed please add yourself to cc list of the bug report.");
+            text.append(Messages.THANKYOUDIALOG_IS_TRACKED_AT)
+                    .append(" \n\n    <a>") //$NON-NLS-1$
+                    .append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE))
+                    .append("</a>.").append("\n\n") //$NON-NLS-1$//$NON-NLS-2$
+                    .append(Messages.THANKYOUDIALOG_PLEASE_ADD_YOURSELF_TO_CC_LIST);
         } else {
             boolean needsinfo = ArrayUtils.contains(state.getKeywords().or(EMPTY_STRINGS), KEYWORD_NEEDINFO);
             String status = state.getStatus().or(UNCONFIRMED);
             if (equals(UNCONFIRMED, status) || equals(NEW, status) || equals(ASSIGNED, status)) {
                 if (needsinfo) {
-                    text.append(
-                            "Your report has been matched against an existing bug report and needs further information. ")
-                            .append("Please take a moment to visit the bug and see whether you can provide more details:\n\n")
-                            .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append(Messages.THANKYOUDIALOG_MATCHED_AGAINST_EXISTING_BUG_NEEDS_FURTHER_INFORMATION)
+                            .append(Messages.THANKYOUDIALOG_VISIT_BUG_PROVIDE_MORE_DETAILS)
+                            .append("\n\n").append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)) //$NON-NLS-1$ //$NON-NLS-2$
+                            .append("</a>."); //$NON-NLS-1$
                 } else {
-                    text.append("Your report has been matched against an existing bug report. ")
-                    .append("To be kept informed please add yourself to cc list of the bug report:\n\n")
-                    .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append(Messages.THANKYOUDIALOG_MATCHED_AGAINST_EXISTING_BUG)
+                            .append(Messages.THANKYOUDIALOG_ADD_TO_CC_LIST)
+                    .append("\n\n").append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)) //$NON-NLS-1$ //$NON-NLS-2$
+                    .append("</a>."); //$NON-NLS-1$
                 }
             } else if (equals(RESOLVED, status) || equals(CLOSED, status)) {
 
                 String resolution = state.getResolved().or(UNKNOWN);
                 if (equals(FIXED, resolution)) {
 
-                    text.append(
-                            "Your error has been marked as 'fixed' already. Visit the bug report for further information:\n\n")
-                            .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append(Messages.THANKYOUDIALOG_MARKED_FIXED)
+                            .append(Messages.THANKYOUDIALOG_VISIT_REPORT_FOR_FURTHER_INFORMATION)
+                            .append("\n\n") //$NON-NLS-1$
+                            .append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)).append("</a>."); //$NON-NLS-1$ //$NON-NLS-2$
                 } else if (equals(DUPLICATE, resolution)) {
-                    text.append(
-                            "Your error has been marked as 'duplicate' of another bug report. Please visit the bug report for further information:\n\n")
-                            .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append(Messages.THANKYOUDIALOG_MARKED_DUPLICATE)
+                            .append(Messages.THANKYOUDIALOG_VISIT_REPORT_FOR_FURTHER_INFORMATION)
+                            .append("\n\n") //$NON-NLS-1$
+                            .append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)).append("</a>."); //$NON-NLS-1$ //$NON-NLS-2$
 
                 } else if (equals(MOVED, resolution)) {
-                    text.append(
-                            "Your error has been marked as 'moved'. Please visit the bug report for further information:\n\n")
-                            .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append(Messages.THANKYOUDIALOG_MARKED_MOVED)
+                            .append(Messages.THANKYOUDIALOG_VISIT_REPORT_FURTHER_INFORMATION)
+                            .append("\n\n") //$NON-NLS-1$
+                            .append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)).append("</a>."); //$NON-NLS-1$ //$NON-NLS-2$
 
                 } else if (equals(WORKSFORME, resolution)) {
-                    text.append(
-                            "The development team was not able to reproduce your error yet. Please take a moment to visit the bug and see whether you can provide more details to help us fixing it:\n\n")
-                            .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append(Messages.THANKYOUDIALOG_NOT_ABLE_TO_REPRODUCE)
+                            .append(Messages.THANKYOUDIALOG_PROVIDE_MORE_INFORMATION)
+                            .append("\n\n").append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)) //$NON-NLS-1$ //$NON-NLS-2$
+                            .append("</a>."); //$NON-NLS-1$
                 } else if (equals(WONTFIX, resolution) || equals(INVALID, resolution)
                         || equals(NOT_ECLIPSE, resolution)) {
-                    text.append(
-                            "The log event you sent has been marked as a 'normal' log message. If you think your report actually is an error, please comment on its bug report:\n\n")
-                            .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append(Messages.THANKYOUDIALOG_MARKED_NORMAL)
+                            .append(Messages.THANKYOUDIALOG_COMMENT_IF_ERROR)
+                            .append("\n\n").append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)) //$NON-NLS-1$ //$NON-NLS-2$
+                            .append("</a>."); //$NON-NLS-1$
                 } else {
-                    text.append(
-                            "The log event you sent has been marked as a '"
-                                    + resolution
-                                    + "'. If you think your report actually is an error, please comment on its bug report:\n\n")
-                                    .append("    <a>").append(state.getBugUrl().or("invalid server response")).append("</a>.");
+                    text.append("The log event you sent has been marked as a '" //$NON-NLS-1$
+                            + resolution + "'. ") //$NON-NLS-1$
+                            .append(Messages.THANKYOUDIALOG_COMMENT_ON_REPORT_IF_ERROR)
+                            .append("\n\n").append("    <a>").append(state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE)) //$NON-NLS-1$ //$NON-NLS-2$
+                            .append("</a>."); //$NON-NLS-1$
                 }
             } else {
-                text.append("Received an unknown server response. PLease raise a bug against the current version of this error reporter.");
+                text.append(Messages.THANKYOUDIALOG_UNKNOWN_RESPONSE_RAISE_BUG_AGAINST_ERROR_REPORTER);
             }
         }
 
-        text.append("\n\nThank you for your help.");
+        text.append("\n\n").append(Messages.THANKYOUDIALOG_NOTE_ADDITIONAL_ACCESS_PERMISSIONS); //$NON-NLS-1$
+        text.append("\n").append(Messages.THANKYOUDIALOG_THANK_YOU_FOR_HELP); //$NON-NLS-1$
 
         Link link = new Link(container, SWT.WRAP);
         link.setText(text.toString());
@@ -147,9 +156,6 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
             }
         });
         GridDataFactory.defaultsFor(link).align(GridData.FILL, GridData.BEGINNING).applyTo(link);
-        // Label separator = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
-        // separator.setLayoutData(GridDataFactory.swtDefaults().align(GridData.FILL, GridData.BEGINNING)
-        // .grab(true, false).create());
         return container;
     }
 
