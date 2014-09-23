@@ -14,10 +14,14 @@ package org.eclipse.recommenders.internal.stacktraces.rcp;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.HELP_URL;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -28,8 +32,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Throwable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -42,10 +46,10 @@ import org.eclipse.ui.PlatformUI;
 
 class DetailsWizardPage extends WizardPage {
 
+    private static final int RIGHT_PADDING = 20;
     private TableViewer tableViewer;
     private StyledText messageText;
     private IObservableList errors;
-    private Settings settings;
     private ErrorReport activeSelection;
 
     private static final Image ERROR_ICON = PlatformUI.getWorkbench().getSharedImages()
@@ -55,7 +59,6 @@ class DetailsWizardPage extends WizardPage {
     protected DetailsWizardPage(IObservableList errors, Settings settings) {
         super(DetailsWizardPage.class.getName());
         this.errors = errors;
-        this.settings = settings;
         setTitle(Messages.PREVIEWPAGE_TITLE);
         setDescription(Messages.PREVIEWPAGE_DESC);
     }
@@ -67,7 +70,7 @@ class DetailsWizardPage extends WizardPage {
 
         Composite tableComposite = createTableComposite(container);
         GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).minSize(150, SWT.DEFAULT).span(1, 3).grab(false, true)
-        .applyTo(tableComposite);
+                .applyTo(tableComposite);
 
         Composite messageComposite = createMessageComposite(container);
         GridDataFactory.fillDefaults().span(2, 2).grab(true, true).applyTo(messageComposite);
@@ -107,9 +110,50 @@ class DetailsWizardPage extends WizardPage {
                 if (!event.getSelection().isEmpty()) {
                     IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
                     activeSelection = (ErrorReport) selection.getFirstElement();
-                    messageText.setText(ErrorReports.toJson(activeSelection, settings, true));
+                    messageText.setText(prettyPrint(activeSelection));
                     String comment = activeSelection.getComment();
                     commentText.setText(comment == null ? "" : comment);
+                }
+            }
+
+            private String prettyPrint(ErrorReport activeSelection) {
+                StringBuilder builder = new StringBuilder();
+                append(activeSelection, builder);
+                return builder.toString();
+            }
+
+            private void append(EObject object, StringBuilder builder) {
+                for (EStructuralFeature feature : object.eClass().getEAllStructuralFeatures()) {
+                    String line = String.format("%-" + RIGHT_PADDING + "s", feature.getName() + ":", RIGHT_PADDING);
+                    builder.append(line);
+                    Object child = object.eGet(feature);
+                    if (child instanceof org.eclipse.recommenders.internal.stacktraces.rcp.model.Throwable) {
+                        appendThrowable((Throwable) child, builder);
+                    } else if (child instanceof EObject) {
+                        builder.append("\n\n");
+                        append((EObject) child, builder);
+                    } else if (child instanceof EObjectContainmentEList) {
+                        builder.append("\n\n");
+                        for (Object obj : (EObjectContainmentEList<?>) child) {
+                            append((EObject) obj, builder);
+                        }
+                    } else {
+                        builder.append(child).append("\n");
+                    }
+                }
+            }
+
+            private void appendThrowable(org.eclipse.recommenders.internal.stacktraces.rcp.model.Throwable throwable,
+                    StringBuilder builder) {
+                builder.append(throwable.getClassName() + ": " + throwable.getMessage() + "\n");
+                for (org.eclipse.recommenders.internal.stacktraces.rcp.model.StackTraceElement element : throwable
+                        .getStackTrace()) {
+                    builder.append("\t at " + element.getClassName() + "." + element.getMethodName() + "("
+                            + element.getFileName() + ":" + element.getLineNumber() + ")\n");
+                }
+                if (throwable.getCause() != null) {
+                    builder.append("Caused by: ");
+                    appendThrowable(throwable.getCause(), builder);
                 }
             }
         });
@@ -124,6 +168,7 @@ class DetailsWizardPage extends WizardPage {
         GridDataFactory.fillDefaults().applyTo(messageLabel);
         messageText = new StyledText(messageComposite, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
         messageText.setEditable(false);
+        messageText.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         GridDataFactory.fillDefaults().minSize(150, 1).hint(300, 300).grab(true, true).applyTo(messageText);
         return messageComposite;
     }
