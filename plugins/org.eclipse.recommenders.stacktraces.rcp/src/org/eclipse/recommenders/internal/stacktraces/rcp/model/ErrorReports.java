@@ -29,12 +29,17 @@ import org.eclipse.recommenders.utils.gson.UuidTypeAdapter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class ErrorReports {
+
+    public static final Set<String> IGNORED_INFIXES = ImmutableSet.copyOf(new String[] {
+            "GeneratedConstructorAccessor", "GeneratedMethodAccessor", "GeneratedSerializationConstructorAccessor",
+            "ByCGLIB$$", "$Proxy" });
 
     public static final class ClearMessagesVisitor extends VisitorImpl {
         @Override
@@ -91,7 +96,14 @@ public class ErrorReports {
             }
             maxframes--;
             if (isWhitelisted(element.getClassName(), whitelist)) {
-                content.append(element.getClassName()).append(element.getMethodName());
+                String className = element.getClassName();
+                for (String infix : IGNORED_INFIXES) {
+                    if (className.contains(infix)) {
+                        className = substringBefore(className, infix);
+                        break;
+                    }
+                }
+                content.append(className).append(element.getMethodName());
             }
         }
 
