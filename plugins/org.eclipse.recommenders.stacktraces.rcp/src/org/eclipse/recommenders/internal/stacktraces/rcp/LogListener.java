@@ -183,7 +183,8 @@ public class LogListener implements ILogListener, IStartup {
         }
     }
 
-    private void sendStatus(final ErrorReport report) {
+    @VisibleForTesting
+    protected void sendStatus(final ErrorReport report) {
         // double safety. This is checked before elsewhere. But just to make sure...
         if (ignoreAllLogEvents() || isPaused()) {
             return;
