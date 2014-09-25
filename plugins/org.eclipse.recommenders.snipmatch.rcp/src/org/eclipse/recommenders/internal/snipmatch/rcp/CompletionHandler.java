@@ -13,7 +13,7 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.recommenders.injection.InjectionService;
@@ -32,16 +32,20 @@ public class CompletionHandler extends AbstractHandler {
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         IEditorPart editor = HandlerUtil.getActiveEditor(event);
-        if (editor instanceof JavaEditor) {
-            JavaEditor ed = (JavaEditor) editor;
-            ISourceViewer viewer = ed.getViewer();
-            int offset = viewer.getSelectedRange().x;
-            JavaContentAssistInvocationContext ctx = new JavaContentAssistInvocationContext(viewer, offset, ed);
-            if (engine == null) {
-                engine = request(SnipmatchCompletionEngine.class);
-            }
-            engine.show(ctx);
+        if (!(editor instanceof CompilationUnitEditor)) {
+            return null;
         }
+        CompilationUnitEditor ed = (CompilationUnitEditor) editor;
+        if (ed.isEditorInputModifiable()) {
+            return null;
+        }
+        ISourceViewer viewer = ed.getViewer();
+        int offset = viewer.getSelectedRange().x;
+        JavaContentAssistInvocationContext ctx = new JavaContentAssistInvocationContext(viewer, offset, ed);
+        if (engine == null) {
+            engine = request(SnipmatchCompletionEngine.class);
+        }
+        engine.show(ctx);
         return null;
     }
 }
