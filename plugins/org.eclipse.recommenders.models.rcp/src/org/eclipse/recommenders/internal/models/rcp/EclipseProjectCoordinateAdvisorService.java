@@ -93,7 +93,7 @@ public class EclipseProjectCoordinateAdvisorService implements IProjectCoordinat
     }
 
     private LoadingCache<DependencyInfo, Optional<ProjectCoordinate>> createCache() {
-        return CacheBuilder.newBuilder().maximumSize(200)
+        return CacheBuilder.newBuilder().maximumSize(2000)
                 .build(new CacheLoader<DependencyInfo, Optional<ProjectCoordinate>>() {
 
                     @Override
