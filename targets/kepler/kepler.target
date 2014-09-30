@@ -1,21 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Target Definition for Eclipse Kepler (4.3)" sequenceNumber="141">
+<?pde version="3.8"?><target name="Target Definition for Eclipse Kepler (4.3)" sequenceNumber="143">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.epp.package.standard.feature.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.emf.ecore.xcore.sdk.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.context.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.commons.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.sdk_feature.feature.group" version="0.0.0"/>
 <!-- Stable repository for Kepler SR2. -->
 <repository location="http://download.eclipse.org/releases/kepler/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.emf.ecore.xcore.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/modeling/emf/emf/updates/milestones/"/>
-</location><location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.xtend.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/milestones/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.aether.api" version="0.0.0"/>
@@ -112,12 +106,12 @@
 <repository location="http://archive.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=5060 -->
-<unit id="com.google.inject.multibindings" version="3.0.0.v201402270930"/>
-<unit id="com.google.inject.multibindings.source" version="3.0.0.v201402270930"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7766 -->
 <unit id="com.google.guava" version="15.0.0.v201403281430"/>
 <unit id="com.google.guava.source" version="15.0.0.v201403281430"/>
+<!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=5060 -->
+<unit id="com.google.inject.multibindings" version="3.0.0.v201402270930"/>
+<unit id="com.google.inject.multibindings.source" version="3.0.0.v201402270930"/>
 <!-- http://dev.eclipse.org/ipzilla/show_bug.cgi?id=8271 -->
 <unit id="org.apache.commons.codec" version="1.6.0.v201305230611"/>
 <unit id="org.apache.commons.codec.source" version="1.6.0.v201305230611"/>
@@ -132,6 +126,12 @@
 <unit id="org.apache.commons.lang3.source" version="3.1.0.v201403281430"/>
 <!-- This location points to the latest recommended build, as not all dependencies are part of the recommended Orbit build for Kepler SR2. -->
 <repository location="http://download.eclipse.org/modeling/emf/cdo/orbit/latest-R"/>
+</location>
+<!-- Needed for the code generated with Xtend 2.7.2 -->
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.xtext.xbase.lib" version="2.7.2.v201409160908"/>
+<unit id="org.eclipse.xtext.xbase.lib.source" version="2.7.2.v201409160908"/>
+<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/maintenance/R201409160908/"/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
