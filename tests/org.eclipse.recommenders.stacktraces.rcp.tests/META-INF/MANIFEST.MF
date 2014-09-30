@@ -13,3 +13,4 @@ Require-Bundle: org.eclipse.ui,
  org.hamcrest,
  org.junit,
  org.mockito
+Import-Package: com.google.common.io

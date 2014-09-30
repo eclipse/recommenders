@@ -8,7 +8,7 @@
  * Contributors:
  *    Daniel Haftstein - initial tests.
  */
-package org.eclipse.recommenders.internal.stacktraces.rcp;
+package org.eclipse.recommenders.internal.stacktraces.rcp.model;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
