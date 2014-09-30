@@ -34,8 +34,11 @@ public class LogMessages extends DefaultLogMessage {
             "The paused interval for error reporting is elapsed, returning to 'ASK'-Mode");
 
     public static final LogMessages SAVE_PREFERENCES_FAILED = new LogMessages(ERROR, "Saving preferences failed");
+    public static final LogMessages SAVE_IGNORE_LIST_FAILED = new LogMessages(ERROR, "Saving ignore settings failed");
+    public static final LogMessages LOAD_IGNORE_LIST_FAILED = new LogMessages(ERROR,
+            "Loading ignore settings failed. Using an empty list as fallback");
 
-    private static Bundle b = FrameworkUtil.getBundle(LogMessages.class);
+    static Bundle BUNDLE = FrameworkUtil.getBundle(LogMessages.class);
 
     public LogMessages(int severity, String message) {
         super(severity, code++, message);
@@ -43,7 +46,7 @@ public class LogMessages extends DefaultLogMessage {
 
     @Override
     public Bundle bundle() {
-        return b;
+        return BUNDLE;
     }
 
 }
