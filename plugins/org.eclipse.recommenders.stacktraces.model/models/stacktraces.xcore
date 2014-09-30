@@ -5,6 +5,9 @@
 package org.eclipse.recommenders.internal.stacktraces.rcp.model
 
 import java.util.UUID
+import java.util.regex.Pattern
+import java.util.Calendar
+
 class ErrorReport {
     UUID anonymousId
     UUID eventId
@@ -123,4 +126,24 @@ enum SendAction{
     PAUSE_RESTART
 }
 
+class IgnoreList{
+    contains IgnoredEntry[] sent
+}
+
+class IgnoredEntry{
+    String fingerprint
+    boolean seen
+    Calendar sentOn
+}
+
+type Calendar wraps Calendar convert { String.valueOf(it.timeInMillis)} create {
+    val timestamp = Calendar.getInstance
+    if(it!=null){
+        timestamp.timeInMillis =  Long.valueOf(it)
+    }
+    return timestamp
+}
+
 type UUID wraps UUID
+
+type Pattern wraps Pattern convert { it.pattern } create {Pattern.compile(it)}
