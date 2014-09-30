@@ -11,10 +11,12 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
+import static org.eclipse.core.runtime.Platform.addLogListener;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.newErrorReport;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.Logs.log;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
@@ -29,11 +31,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.FilterService;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.utils.Reflections;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -54,6 +59,8 @@ public class LogListener implements ILogListener, IStartup {
     private volatile boolean isDialogOpen;
     private Settings settings;
 
+    private FilterService filter;
+
     public LogListener() {
         Display.getDefault().syncExec(new Runnable() {
             @Override
@@ -65,7 +72,31 @@ public class LogListener implements ILogListener, IStartup {
 
     @Override
     public void earlyStartup() {
-        Platform.addLogListener(this);
+        addLogListener(this);
+        loadIgnoreSettings();
+        registerShutdownListener();
+    }
+
+    private void registerShutdownListener() {
+        PlatformUI.getWorkbench().addWorkbenchListener(new IWorkbenchListener() {
+
+            @Override
+            public boolean preShutdown(IWorkbench workbench, boolean forced) {
+                return true;
+            }
+
+            @Override
+            public void postShutdown(IWorkbench workbench) {
+                filter.close();
+            }
+        });
+    }
+
+    private void loadIgnoreSettings() {
+        File state = Platform.getStateLocation(LogMessages.BUNDLE).toFile();
+        File filters = new File(state, "filters.xmi");
+        filter = new FilterService(filters);
+        filter.open();
     }
 
     @Override
@@ -83,9 +114,10 @@ public class LogListener implements ILogListener, IStartup {
         }
         insertDebugStacktraceIfEmpty(status);
         final ErrorReport report = newErrorReport(status, settings);
-        if (settings.isSkipSimilarErrors() && sentSimilarErrorBefore(report)) {
+        if (settings.isSkipSimilarErrors() && (sentSimilarErrorBefore(report) || !filter.shouldSend(report))) {
             return;
         }
+
         addForSending(report);
         if (sendAction == SendAction.ASK) {
             checkAndSendWithDialog(report);
@@ -201,6 +233,7 @@ public class LogListener implements ILogListener, IStartup {
                 || settings.getAction() == SendAction.PAUSE_RESTART) {
             return;
         }
+        filter.sent(report);
         new UploadJob(report, settings, URI.create(settings.getServerUrl())).schedule();
     }
 
