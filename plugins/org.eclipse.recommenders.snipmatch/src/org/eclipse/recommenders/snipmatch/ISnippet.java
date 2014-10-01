@@ -11,14 +11,16 @@
 package org.eclipse.recommenders.snipmatch;
 
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.utils.Uuidable;
 
 public interface ISnippet extends Uuidable {
 
     /**
      * This will be displayed in Snipmatch search.
-     * 
+     *
      * @return a short (approximately 50 characters) description of the snippet. Examples are {@literal "Add Button"} or
      *         {@literal "Iterate over a Collection"}.
      */
@@ -44,4 +46,8 @@ public interface ISnippet extends Uuidable {
      * @return a list of keywords describing the snippet. Typically keywords are synonyms of common search terms.
      */
     List<String> getExtraSearchTerms();
+
+    Location getLocation();
+
+    Set<ProjectCoordinate> getNeededDependencies();
 }

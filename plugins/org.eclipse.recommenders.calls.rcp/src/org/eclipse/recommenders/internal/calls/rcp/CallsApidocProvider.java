@@ -13,7 +13,7 @@ package org.eclipse.recommenders.internal.calls.rcp;
 
 import static com.google.common.collect.Iterables.isEmpty;
 import static java.text.MessageFormat.format;
-import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.PARAM;
+import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.*;
 import static org.eclipse.recommenders.internal.apidocs.rcp.ApidocsViewUtils.*;
 import static org.eclipse.recommenders.rcp.JavaElementSelectionEvent.JavaElementSelectionLocation.METHOD_BODY;
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.resolveMethod;
@@ -45,6 +45,7 @@ import org.eclipse.recommenders.rcp.JavaElementResolver;
 import org.eclipse.recommenders.rcp.JavaElementSelectionEvent;
 import org.eclipse.recommenders.rcp.utils.JdtUtils;
 import org.eclipse.recommenders.utils.Recommendation;
+import org.eclipse.recommenders.utils.Recommendations;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.Names;
 import org.eclipse.recommenders.utils.names.VmMethodName;
@@ -125,12 +126,26 @@ public final class CallsApidocProvider extends ApidocProvider {
                 definingMethod = overrideContext;
             }
 
+            if (kind == DefinitionKind.UNKNOWN) {
+                // if the ast resolver could not find a definition of the
+                // variable, it's a method return value? Ask
+                // the context and try.
+                if (definingMethod == null) {
+                    kind = FIELD;
+                } else if (definingMethod.isInit()) {
+                    kind = DefinitionKind.NEW;
+                } else {
+                    kind = RETURN;
+                }
+            }
+
             model.setObservedOverrideContext(overrideContext);
             model.setObservedDefiningMethod(definingMethod);
             model.setObservedCalls(calls);
             model.setObservedDefinitionKind(kind);
 
-            Iterable<Recommendation<IMethodName>> methodCalls = sortByRelevance(model.recommendCalls());
+            Iterable<Recommendation<IMethodName>> methodCalls = sortByRelevance(Recommendations.filterRelevance(
+                    model.recommendCalls(), 0.01 / 100));
             runSyncInUiThread(new CallRecommendationsRenderer(overrideContext, methodCalls, calls,
                     variable.getElementName(), definingMethod, kind, parent));
         } finally {

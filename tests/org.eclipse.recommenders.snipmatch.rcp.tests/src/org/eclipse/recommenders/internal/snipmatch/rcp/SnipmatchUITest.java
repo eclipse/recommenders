@@ -17,6 +17,8 @@ import org.eclipse.recommenders.rcp.model.SnipmatchRcpModelFactory;
 import org.eclipse.recommenders.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository;
 import org.eclipse.recommenders.snipmatch.ISnippet;
+import org.eclipse.recommenders.snipmatch.Location;
+import org.eclipse.recommenders.snipmatch.SearchContext;
 import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
 import org.eclipse.recommenders.utils.Pair;
@@ -120,7 +122,7 @@ public class SnipmatchUITest {
 
     private static Snippet createSnippet(String name, String description) {
         return new Snippet(UUID.randomUUID(), name, description, Lists.<String>newArrayList(),
-                Lists.<String>newArrayList(), "");
+                Lists.<String>newArrayList(), "", Location.JAVA);
     }
 
     private static GitSnippetRepository createRepositoryMock(SnippetRepositoryConfiguration configuration,
@@ -134,11 +136,12 @@ public class SnipmatchUITest {
         when(mockedRepository.isDeleteSupported()).thenReturn(true);
 
         List<Recommendation<ISnippet>> proposals = Lists.newArrayList();
-        when(mockedRepository.search("")).thenReturn(proposals);
+        when(mockedRepository.search(new SearchContext(""))).thenReturn(proposals);
         for (ISnippet snippet : snippets) {
             final Recommendation<ISnippet> recommendation = Recommendation.newRecommendation(snippet, 0.);
             proposals.add(recommendation);
-            when(mockedRepository.search(snippet.getName())).thenReturn(Lists.newArrayList(recommendation));
+            when(mockedRepository.search(new SearchContext(snippet.getName()))).thenReturn(
+                    Lists.newArrayList(recommendation));
             when(mockedRepository.hasSnippet(snippet.getUuid())).thenReturn(true);
         }
 

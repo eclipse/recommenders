@@ -30,12 +30,17 @@ import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.rcp.model.EclipseGitSnippetRepositoryConfiguration;
 import org.eclipse.recommenders.rcp.model.SnipmatchRcpModelFactory;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository;
+import org.eclipse.recommenders.snipmatch.GitSnippetRepository.GitNoCurrentFormatBranchException;
+import org.eclipse.recommenders.snipmatch.GitSnippetRepository.GitNoFormatBranchException;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository.GitUpdateException;
+import org.eclipse.recommenders.snipmatch.ISearchContext;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
+import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Urls;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,11 +100,52 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
                                     e.getMessage()), e);
                             Platform.getLog(Platform.getBundle(Constants.BUNDLE_ID)).log(status);
                             return Status.OK_STATUS;
+                        } catch (final GitNoCurrentFormatBranchException e) {
+                            changeStateToOpen();
+                            Status status = new Status(IStatus.WARNING, Constants.BUNDLE_ID, MessageFormat.format(
+                                    Messages.WARNING_FAILURE_TO_CHECKOUT_CURRENT_BRANCH, Snippet.FORMAT_VERSION,
+                                    delegate.getRepositoryLocation(), e.getCheckoutVersion(), e.getMessage()), e);
+                            Platform.getLog(Platform.getBundle(Constants.BUNDLE_ID)).log(status);
+
+                            final Display display = Display.getDefault();
+                            display.asyncExec(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    BranchCheckoutFailureDialog dialog = new BranchCheckoutFailureDialog(display
+                                            .getActiveShell(), delegate.getRepositoryLocation(),
+                                            Snippet.FORMAT_VERSION, e.getCheckoutVersion());
+                                    dialog.open();
+                                }
+                            });
+
+                            return Status.OK_STATUS;
+                        } catch (final GitNoFormatBranchException e) {
+                            LOG.error("Exception while opening repository.", e); //$NON-NLS-1$
+                            Status status = new Status(IStatus.ERROR, Constants.BUNDLE_ID, MessageFormat.format(
+                                    Messages.ERROR_NO_FORMAT_BRANCH, Snippet.FORMAT_VERSION,
+                                    delegate.getRepositoryLocation(), e.getMessage()), e);
+                            Platform.getLog(Platform.getBundle(Constants.BUNDLE_ID)).log(status);
+
+                            final Display display = Display.getDefault();
+                            display.asyncExec(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    BranchCheckoutFailureDialog dialog = new BranchCheckoutFailureDialog(display
+                                            .getActiveShell(), delegate.getRepositoryLocation(), Snippet.FORMAT_VERSION);
+                                    dialog.open();
+                                }
+                            });
+
+                            return Status.CANCEL_STATUS;
                         } catch (IOException e) {
                             LOG.error("Exception while opening repository.", e); //$NON-NLS-1$
                             Status status = new Status(IStatus.ERROR, Constants.BUNDLE_ID, MessageFormat.format(
                                     Messages.ERROR_FAILURE_TO_CLONE_REPOSITORY, delegate.getRepositoryLocation(),
-                                    e.getMessage()), e);
+                                    timesOpened, e.getMessage()), e);
                             Platform.getLog(Platform.getBundle(Constants.BUNDLE_ID)).log(status);
                             return Status.CANCEL_STATUS;
                         } finally {
@@ -148,26 +194,26 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
     }
 
     @Override
-    public List<Recommendation<ISnippet>> search(String query) {
+    public List<Recommendation<ISnippet>> search(ISearchContext context) {
         readLock.lock();
         try {
             if (!isOpen() || !delegateOpen) {
                 return Collections.emptyList();
             }
-            return delegate.search(query);
+            return delegate.search(context);
         } finally {
             readLock.unlock();
         }
     }
 
     @Override
-    public List<Recommendation<ISnippet>> search(String query, int maxResults) {
+    public List<Recommendation<ISnippet>> search(ISearchContext context, int maxResults) {
         readLock.lock();
         try {
             if (!isOpen() || !delegateOpen) {
                 return Collections.emptyList();
             }
-            return delegate.search(query, maxResults);
+            return delegate.search(context, maxResults);
         } finally {
             readLock.unlock();
         }

@@ -12,6 +12,7 @@ package org.eclipse.recommenders.internal.calls.rcp;
 
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.Math.max;
 import static java.math.RoundingMode.HALF_EVEN;
 import static java.text.MessageFormat.format;
 import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ENCLOSING_METHOD_FIRST_DECLARATION;
@@ -19,12 +20,12 @@ import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.RE
 import static org.eclipse.recommenders.completion.rcp.processable.Proposals.overlay;
 import static org.eclipse.recommenders.internal.calls.rcp.CallCompletionContextFunctions.*;
 import static org.eclipse.recommenders.rcp.SharedImages.Images.OVR_STAR;
+import static org.eclipse.recommenders.utils.Logs.log;
 import static org.eclipse.recommenders.utils.Recommendations.top;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -36,7 +37,7 @@ import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMessageSend;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnQualifiedNameReference;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.recommenders.calls.ICallModel;
 import org.eclipse.recommenders.calls.ICallModelProvider;
@@ -47,6 +48,7 @@ import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
 import org.eclipse.recommenders.completion.rcp.processable.ProposalProcessorManager;
 import org.eclipse.recommenders.completion.rcp.processable.SessionProcessor;
 import org.eclipse.recommenders.completion.rcp.processable.SimpleProposalProcessor;
+import org.eclipse.recommenders.completion.rcp.utils.ProposalUtils;
 import org.eclipse.recommenders.models.UniqueTypeName;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
@@ -55,37 +57,31 @@ import org.eclipse.recommenders.utils.Recommendations;
 import org.eclipse.recommenders.utils.names.IMethodName;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.math.DoubleMath;
 
-@SuppressWarnings({ "serial", "restriction" })
+@SuppressWarnings({ "restriction" })
 public class CallCompletionSessionProcessor extends SessionProcessor {
 
     private static final CompletionProposal NULL_PROPOSAL = new CompletionProposal();
 
-    private final Set<Class<? extends ASTNode>> supportedCompletionRequests = new HashSet<Class<? extends ASTNode>>() {
-        {
-            add(CompletionOnMemberAccess.class);
-            add(CompletionOnMessageSend.class);
-            add(CompletionOnQualifiedNameReference.class);
-            add(CompletionOnSingleNameReference.class);
-        }
-    };
-    private final ICallModelProvider modelProvider;
+    private final ImmutableSet<Class<? extends ASTNode>> supportedCompletionRequests = ImmutableSet
+            .<Class<? extends ASTNode>>of(CompletionOnMemberAccess.class, CompletionOnMessageSend.class,
+                    CompletionOnQualifiedNameReference.class, CompletionOnSingleNameReference.class);
+
     private final IProjectCoordinateProvider pcProvider;
+    private final ICallModelProvider modelProvider;
+    private CallsRcpPreferences prefs;
+    private ImageDescriptor overlay;
 
     private IRecommendersCompletionContext ctx;
-    private Optional<TypeBinding> receiverTypeBinding;
-
+    private LookupEnvironment env;
+    private Iterable<Recommendation<IMethodName>> recommendations;
     private UniqueTypeName name;
     private ICallModel model;
 
-    private Iterable<Recommendation<IMethodName>> recommendations;
-
-    private CallsRcpPreferences prefs;
-    private ImageDescriptor overlay;
     private HashSet<IMethodName> observedCalls;
 
     private Map<Recommendation<IMethodName>, Integer> recommendationsIndex;
@@ -102,8 +98,15 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
     @Override
     public boolean startSession(final IRecommendersCompletionContext context) {
         ctx = context;
-        receiverTypeBinding = ctx.get(CompletionContextKey.RECEIVER_TYPEBINDING);
+
+        env = ctx.get(CompletionContextKey.LOOKUP_ENVIRONMENT).orNull();
+        if (env == null) {
+            log(LogMessages.LOG_WARNING_MISSING_LOOKUP_ENVIRONMENT);
+            return false;
+        }
+
         recommendations = Lists.newLinkedList();
+
         try {
             return isCompletionRequestSupported() && findReceiverTypeAndModel() && findRecommendations();
         } finally {
@@ -161,7 +164,8 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         if (ctx.getExpectedTypeSignature().isPresent()) {
             recommendations = Recommendations.filterVoid(recommendations);
         }
-        recommendations = top(recommendations, prefs.maxNumberOfProposals, prefs.minProposalProbability / (double) 100);
+        recommendations = top(recommendations, prefs.maxNumberOfProposals,
+                max(prefs.minProposalProbability, 0.01) / 100);
 
         calculateProposalRelevanceBoostMap();
         return !isEmpty(recommendations);
@@ -169,7 +173,6 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
 
     private void calculateProposalRelevanceBoostMap() {
         recommendationsIndex = Maps.newHashMap();
-        int i = prefs.maxNumberOfProposals;
         for (Recommendation<IMethodName> r : recommendations) {
             double rel = r.getRelevance() * 100;
             int score = 0;
@@ -201,8 +204,13 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
         case CompletionProposal.METHOD_REF:
         case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
         case CompletionProposal.METHOD_NAME_REFERENCE:
-            final ProposalMatcher matcher = new ProposalMatcher(coreProposal, receiverTypeBinding);
+            IMethodName proposedMethod = ProposalUtils.toMethodName(coreProposal, env).orNull();
+            if (proposedMethod == null) {
+                log(LogMessages.LOG_ERROR_PROPOSAL_MATCHING_FAILED, coreProposal);
+                return;
+            }
 
+            final ProposalMatcher matcher = new ProposalMatcher(proposedMethod);
             if (prefs.highlightUsedProposals && handleAlreadyUsedProposal(proposal, matcher)) {
                 return;
             }

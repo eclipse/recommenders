@@ -25,8 +25,8 @@ import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.Enclos
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.EnclosingTypeContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ExpectedTypeContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ExpectedTypeNamesContextFunction;
+import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ImportedPackagesFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.InternalCompletionContextFunction;
-import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.JavaContentAssistInvocationContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.LookupEnvironmentContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ReceiverNameContextFunction;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions.ReceiverTypeBindingContextFunction;
@@ -62,7 +62,6 @@ public class CompletionRcpModule extends AbstractModule {
         functions.addBinding(IS_COMPLETION_ON_TYPE).to(CompletionOnTypeContextFunction.class);
         functions.addBinding(INTERNAL_COMPLETIONCONTEXT).to(InternalCompletionContextFunction.class);
         functions.addBinding(JAVA_PROPOSALS).to(InternalCompletionContextFunction.class);
-        functions.addBinding(JAVA_CONTENTASSIST_CONTEXT).to(JavaContentAssistInvocationContextFunction.class);
         functions.addBinding(LOOKUP_ENVIRONMENT).to(LookupEnvironmentContextFunction.class);
         functions.addBinding(RECEIVER_TYPEBINDING).to(ReceiverTypeBindingContextFunction.class);
         functions.addBinding(RECEIVER_NAME).to(ReceiverNameContextFunction.class);
@@ -70,6 +69,8 @@ public class CompletionRcpModule extends AbstractModule {
         functions.addBinding(VISIBLE_FIELDS).to(VisibleFieldsContextFunction.class);
         functions.addBinding(VISIBLE_LOCALS).to(VisibleLocalsContextFunction.class);
         functions.addBinding(SESSION_ID).to(SessionIdFunction.class);
+        functions.addBinding(IMPORTED_PACKAGES).to(ImportedPackagesFunction.class);
+
     }
 
     @Provides

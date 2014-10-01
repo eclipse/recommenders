@@ -5,14 +5,15 @@
 	<parent>
 		<groupId>org.eclipse.recommenders</groupId>
 		<artifactId>org.eclipse.recommenders</artifactId>
-		<version>2.1.7-SNAPSHOT</version>
+		<version>2.1.10-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>features</artifactId>
 	<packaging>pom</packaging>
 	<name>Features</name>
 	<modules>
-		<module>org.eclipse.recommenders.3rd.feature</module>
+        <module>org.eclipse.recommenders.3rd.feature</module>
+        <module>org.eclipse.recommenders.devel.feature</module>
 		<module>org.eclipse.recommenders.jayes.feature</module>
 		<module>org.eclipse.recommenders.mylyn.rcp.feature</module>
 		<module>org.eclipse.recommenders.rcp.feature</module>

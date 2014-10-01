@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.completion.rcp.processable;
 
+import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ACTIVE_PROCESSORS;
 import static org.eclipse.recommenders.completion.rcp.processable.ProcessableProposalFactory.create;
 import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.*;
 import static org.eclipse.recommenders.internal.completion.rcp.Constants.*;
@@ -26,7 +27,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
@@ -53,18 +53,15 @@ import org.eclipse.recommenders.internal.completion.rcp.EnableCompletionProposal
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.utils.Logs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 @SuppressWarnings({ "restriction", "rawtypes" })
 public class IntelligentCompletionProposalComputer extends JavaAllCompletionProposalComputer implements
 ICompletionListener, ICompletionListenerExtension2 {
-
-    private static final Logger LOG = LoggerFactory.getLogger(IntelligentCompletionProposalComputer.class);
 
     private final CompletionRcpPreferences preferences;
     private final IAstProvider astProvider;
@@ -96,8 +93,8 @@ ICompletionListener, ICompletionListenerExtension2 {
         for (SessionProcessorDescriptor d : preferences.getEnabledSessionProcessors()) {
             try {
                 processors.add(d.getProcessor());
-            } catch (CoreException e) {
-                LOG.error("Failed to create session processor", e); //$NON-NLS-1$
+            } catch (Throwable e) {
+                log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, d.getId());
             }
         }
         activeProcessors.clear();
@@ -128,9 +125,9 @@ ICompletionListener, ICompletionListenerExtension2 {
             }
         } else {
             List<ICompletionProposal> res = Lists.newLinkedList();
-
             registerCompletionListener();
-
+            crContext.set(ACTIVE_PROCESSORS, ImmutableSet.copyOf(activeProcessors));
+            fireInitializeContext(crContext);
             fireStartSession(crContext);
             for (Entry<IJavaCompletionProposal, CompletionProposal> pair : crContext.getProposals().entrySet()) {
                 IJavaCompletionProposal jdtProposal = create(pair.getValue(), pair.getKey(), jdtContext,
@@ -215,6 +212,16 @@ ICompletionListener, ICompletionListenerExtension2 {
         }
     }
 
+    protected void fireInitializeContext(IRecommendersCompletionContext crContext) {
+        for (SessionProcessor p : activeProcessors) {
+            try {
+                p.initializeContext(crContext);
+            } catch (Throwable e) {
+                Logs.log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
+            }
+        }
+    }
+
     protected void fireStartSession(IRecommendersCompletionContext crContext) {
         for (Iterator<SessionProcessor> it = activeProcessors.iterator(); it.hasNext();) {
             SessionProcessor p = it.next();
@@ -223,7 +230,7 @@ ICompletionListener, ICompletionListenerExtension2 {
                 if (!interested) {
                     it.remove();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 Logs.log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
             }
         }
@@ -234,7 +241,7 @@ ICompletionListener, ICompletionListenerExtension2 {
             try {
                 proposal.getRelevance();
                 p.process(proposal);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
             }
         }
@@ -245,7 +252,7 @@ ICompletionListener, ICompletionListenerExtension2 {
         for (SessionProcessor p : activeProcessors) {
             try {
                 p.endSession(proposals);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
             }
         }
@@ -255,7 +262,7 @@ ICompletionListener, ICompletionListenerExtension2 {
         for (SessionProcessor p : activeProcessors) {
             try {
                 p.aboutToShow(proposals);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
             }
         }
@@ -265,7 +272,7 @@ ICompletionListener, ICompletionListenerExtension2 {
         for (SessionProcessor p : activeProcessors) {
             try {
                 p.aboutToClose();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
             }
         }
@@ -290,7 +297,7 @@ ICompletionListener, ICompletionListenerExtension2 {
         for (SessionProcessor p : activeProcessors) {
             try {
                 p.selected(proposal);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
             }
         }
@@ -301,7 +308,7 @@ ICompletionListener, ICompletionListenerExtension2 {
         for (SessionProcessor p : activeProcessors) {
             try {
                 p.applied(proposal);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log(LOG_ERROR_SESSION_PROCESSOR_FAILED, e, p.getClass());
             }
         }
