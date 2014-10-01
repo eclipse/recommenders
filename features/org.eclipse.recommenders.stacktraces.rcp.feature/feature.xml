@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.recommenders.stacktraces.rcp.feature"
       label="%label"
-      version="2.1.7.qualifier"
+      version="2.1.10.qualifier"
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -18,6 +18,13 @@
    <license url="%licenseURL">
       %license
    </license>
+
+   <plugin
+         id="org.eclipse.recommenders.stacktraces.model"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="org.eclipse.recommenders.stacktraces.rcp"

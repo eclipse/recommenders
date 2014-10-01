@@ -11,11 +11,13 @@
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
 import static org.apache.commons.lang3.SystemUtils.LINE_SEPARATOR;
-import static org.eclipse.recommenders.internal.snipmatch.rcp.LogMessages.SNIPPET_REPLACE_LEADING_WHITESPACE_FAILED;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.LogMessages.ERROR_SNIPPET_REPLACE_LEADING_WHITESPACE_FAILED;
 import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -33,8 +35,14 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.recommenders.injection.InjectionService;
+import org.eclipse.recommenders.internal.models.rcp.ProjectCoordinateProvider;
+import org.eclipse.recommenders.models.ProjectCoordinate;
+import org.eclipse.recommenders.snipmatch.Location;
+import org.eclipse.recommenders.snipmatch.Snippet;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -46,17 +54,29 @@ public class SnippetBuilder {
     private final ITextSelection textSelection;
 
     private Set<String> imports;
+    private Set<ProjectCoordinate> dependencies;
     private HashMap<IVariableBinding, String> vars;
     private HashMap<String, Integer> lastVarIndex;
     private StringBuilder sb;
+    private ProjectCoordinateProvider pcAdvisor;
 
     public SnippetBuilder(CompilationUnit ast, IDocument doc, ITextSelection textSelection) {
+        pcAdvisor = InjectionService.getInstance().requestInstance(ProjectCoordinateProvider.class);
+
+        this.dependencies = Sets.newHashSet();
         this.ast = ast;
         this.doc = doc;
         this.textSelection = textSelection;
     }
 
-    public String build() {
+    public Snippet build(String name, String description) {
+        String code = createCode();
+        List<String> keywords = Lists.<String>newArrayList();
+        List<String> tags = Lists.<String>newArrayList();
+        return new Snippet(UUID.randomUUID(), name, description, keywords, tags, code, Location.NONE, dependencies);
+    }
+
+    private String createCode() {
         final int start = textSelection.getOffset();
         final int length = textSelection.getLength();
         final char[] text = textSelection.getText().toCharArray();
@@ -71,8 +91,10 @@ public class SnippetBuilder {
 
         outer: for (int i = 0; i < text.length; i++) {
             char ch = text[i];
-            // every non-identifier character can be copied right away. This is necessary since the NodeFinder sometimes
-            // associates a whitespace with a previous AST node (not exactly understood yet).
+            // every non-identifier character can be copied right away. This is
+            // necessary since the NodeFinder sometimes
+            // associates a whitespace with a previous AST node (not exactly
+            // understood yet).
             if (!Character.isJavaIdentifierPart(ch)) {
                 sb.append(ch);
                 continue outer;
@@ -105,9 +127,9 @@ public class SnippetBuilder {
                             sb.append(name.getIdentifier());
                         } else {
                             if (vb.isField()) {
-                                appendVarReference(uniqueVariableName, vb, "field");
+                                appendVarReference(uniqueVariableName, vb, "field"); //$NON-NLS-1$
                             } else {
-                                appendVarReference(uniqueVariableName, vb, "var");
+                                appendVarReference(uniqueVariableName, vb, "var"); //$NON-NLS-1$
                             }
                         }
                         i += name.getLength() - 1;
@@ -118,7 +140,7 @@ public class SnippetBuilder {
             sb.append(ch);
         }
 
-        sb.append("\n");
+        sb.append('\n');
         appendImports();
         appendCursor();
         replaceLeadingWhitespaces();
@@ -186,47 +208,48 @@ public class SnippetBuilder {
 
     private void appendNewName(String name, IVariableBinding vb) {
         ITypeBinding type = vb.getType();
-        sb.append("${").append(name).append(":").append("newName").append("(");
+        sb.append('$').append('{').append(name).append(':').append("newName").append('('); //$NON-NLS-1$
         if (type.isArray()) {
-            sb.append("'").append(type.getErasure().getQualifiedName()).append("'");
+            sb.append('\'').append(type.getErasure().getQualifiedName()).append('\'');
         } else {
             sb.append(type.getErasure().getQualifiedName());
         }
-        sb.append(")").append("}");
+        sb.append(')').append('}');
 
         addImport(type);
     }
 
     private StringBuilder appendTemplateVariableReference(String name) {
-        return sb.append("${").append(name).append("}");
+        return sb.append('$').append('{').append(name).append('}');
     }
 
     private void appendVarReference(String name, IVariableBinding vb, String kind) {
         ITypeBinding type = vb.getType();
-        sb.append("${").append(name).append(":").append(kind).append("(");
+        sb.append('$').append('{').append(name).append(':').append(kind).append('(');
         if (type.isArray()) {
-            sb.append("'").append(type.getErasure().getQualifiedName()).append("'");
+            sb.append('\'').append(type.getErasure().getQualifiedName()).append('\'');
         } else {
             sb.append(type.getErasure().getQualifiedName());
         }
-        sb.append(")").append("}");
+        sb.append(')').append('}');
 
         addImport(type);
     }
 
     private void appendImports() {
         if (!imports.isEmpty()) {
-            String joinedTypes = Joiner.on(", ").join(imports);
-            sb.append("${:import(").append(joinedTypes).append(")}");
+            String joinedTypes = Joiner.on(", ").join(imports); //$NON-NLS-1$
+            sb.append("${:import(").append(joinedTypes).append(")}"); //$NON-NLS-1$ //$NON-NLS-2$
         }
     }
 
     private void appendCursor() {
-        sb.append("${cursor}");
+        sb.append("${cursor}"); //$NON-NLS-1$
     }
 
     private void addImport(ITypeBinding type) {
-        // need importable types only. Get the component type if it's an array type
+        // need importable types only. Get the component type if it's an array
+        // type
         if (type.isArray()) {
             addImport(type.getComponentType());
             return;
@@ -234,16 +257,23 @@ public class SnippetBuilder {
         if (type.isPrimitive()) {
             return;
         }
-        if (type.getPackage().getName().equals("java.lang")) {
+        if (type.getPackage().getName().equals("java.lang")) { //$NON-NLS-1$
             return;
         }
         String name = type.getErasure().getQualifiedName();
         imports.add(name);
+
+        ProjectCoordinate opc = pcAdvisor.resolve(type).orNull();
+        if (opc != null) {
+            dependencies.add(new ProjectCoordinate(opc.getGroupId(), opc.getArtifactId(), "0.0.0")); //$NON-NLS-1$
+        }
+
     }
 
     private void replaceLeadingWhitespaces() {
         try {
-            // fetch the selection's starting line from the editor document to determine the number of leading
+            // fetch the selection's starting line from the editor document to
+            // determine the number of leading
             // whitespace characters to remove from the snippet:
             int startLineIndex = textSelection.getStartLine();
             int startLineBeginOffset = doc.getLineOffset(startLineIndex);
@@ -259,15 +289,16 @@ public class SnippetBuilder {
             }
             String wsPrefix = line.substring(0, index);
 
-            // rewrite the buffer and try to remove the leading whitespace. This is a simple heuristic only...
-            String[] code = sb.toString().split("\\r?\\n");
+            // rewrite the buffer and try to remove the leading whitespace. This
+            // is a simple heuristic only...
+            String[] code = sb.toString().split("\\r?\\n"); //$NON-NLS-1$
             sb.setLength(0);
             for (String l : code) {
                 String clean = StringUtils.removeStart(l, wsPrefix);
                 sb.append(clean).append(LINE_SEPARATOR);
             }
         } catch (BadLocationException e) {
-            log(SNIPPET_REPLACE_LEADING_WHITESPACE_FAILED, e);
+            log(ERROR_SNIPPET_REPLACE_LEADING_WHITESPACE_FAILED, e);
         }
     }
 }

@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.recommenders.3rd.feature"
       label="%label"
-      version="2.1.7.qualifier"
+      version="2.1.10.qualifier"
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -144,7 +144,7 @@
          id="org.apache.lucene.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.5.0.v20120725-1805"
          unpack="false"/>
 
    <plugin
@@ -212,6 +212,27 @@
 
    <plugin
          id="org.slf4j.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.xtext.xbase.lib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.emf.ecore.xcore.lib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.emf.databinding"
          download-size="0"
          install-size="0"
          version="0.0.0"

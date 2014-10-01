@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.eclipse.recommenders</groupId>
 		<artifactId>repositories</artifactId>
-		<version>2.1.7-SNAPSHOT</version>
+		<version>2.1.10-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>incubators</artifactId>
@@ -35,7 +35,7 @@
 						</goals>
 						<phase>prepare-package</phase>
 						<configuration>
-							<appArgLine>-application org.eclipse.ant.core.antRunner</appArgLine>
+							<appArgLine>-application org.eclipse.ant.core.antRunner -data ${project.build.directory}/antrunner-workspace</appArgLine>
 							<dependencies>
 								<dependency>
 									<artifactId>org.eclipse.ant.launching</artifactId>

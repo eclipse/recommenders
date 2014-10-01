@@ -15,9 +15,6 @@ import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.EDITOR_I
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.ui.handlers.HandlerUtil.getActiveWorkbenchWindow;
 
-import java.util.List;
-import java.util.UUID;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -28,9 +25,9 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditor;
-import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditorInput;
 import org.eclipse.recommenders.snipmatch.Snippet;
+import org.eclipse.recommenders.snipmatch.rcp.SnippetEditor;
+import org.eclipse.recommenders.snipmatch.rcp.SnippetEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -38,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 
 @SuppressWarnings("restriction")
 public class CreateSnippetHandler extends AbstractHandler {
@@ -65,11 +61,7 @@ public class CreateSnippetHandler extends AbstractHandler {
         IDocument doc = viewer.getDocument();
         ITextSelection textSelection = cast(viewer.getSelectionProvider().getSelection());
 
-        String code = new SnippetBuilder(ast, doc, textSelection).build();
-
-        List<String> keywords = Lists.<String>newArrayList();
-        List<String> tags = Lists.<String>newArrayList();
-        return new Snippet(UUID.randomUUID(), "<new snippet>", "<enter description>", keywords, tags, code);
+        return new SnippetBuilder(ast, doc, textSelection).build("<new snippet>", "<enter description>"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private void openSnippetInEditor(Snippet snippet) {
@@ -78,7 +70,7 @@ public class CreateSnippetHandler extends AbstractHandler {
         try {
             SnippetEditorInput input = new SnippetEditorInput(snippet);
             SnippetEditor ed = cast(page.openEditor(input, EDITOR_ID));
-            ed.setDirty(true);
+            ed.markDirtyUponSnippetCreation();
         } catch (PartInitException e) {
             LOG.error(Messages.ERROR_WHILE_OPENING_EDITOR, e);
             openError(HandlerUtil.getActiveShell(event), Messages.ERROR_NO_EDITABLE_REPO_FOUND,

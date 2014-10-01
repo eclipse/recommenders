@@ -8,19 +8,27 @@
  * Contributors:
  *    Madhuranga Lakjeewa - initial API and implementation.
  *    Olav Lenz - change data structure of snippet
+ *    Stefan Prisca - add property change support
  */
 package org.eclipse.recommenders.snipmatch;
 
+import static org.eclipse.recommenders.snipmatch.Location.FILE;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.eclipse.recommenders.models.ProjectCoordinate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -28,7 +36,9 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Snippet implements ISnippet {
 
-    public static final String FORMAT_VERSION = "format-3";
+    public static final String FORMAT_VERSION = "format-5";
+
+    private transient PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     @SerializedName("uuid")
     private UUID uuid;
@@ -42,23 +52,38 @@ public class Snippet implements ISnippet {
     private List<String> tags = Lists.newArrayList();
     @SerializedName("code")
     private String code;
+    @SerializedName("location")
+    private Location location = FILE;
+    @SerializedName("dependencies")
+    private Set<ProjectCoordinate> neededDependencies = Sets.newHashSet();
 
-    public Snippet(UUID uuid, String name, String description, List<String> extraSearchTerms, List<String> tags, String code) {
+    public Snippet(UUID uuid, String name, String description, List<String> extraSearchTerms, List<String> tags,
+            String code, Location location) {
+        this(uuid, name, description, extraSearchTerms, tags, code, location, Sets.<ProjectCoordinate>newHashSet());
+    }
+
+    public Snippet(UUID uuid, String name, String description, List<String> extraSearchTerms, List<String> tags,
+            String code, Location location, Set<ProjectCoordinate> neededDependencies) {
         ensureIsNotNull(uuid);
         ensureIsNotNull(name);
         ensureIsNotNull(description);
         ensureIsNotNull(extraSearchTerms);
         ensureIsNotNull(tags);
         ensureIsNotNull(code);
+        ensureIsNotNull(location);
+        ensureIsNotNull(neededDependencies);
         this.uuid = uuid;
         this.name = name;
         this.description = description;
         this.extraSearchTerms = extraSearchTerms;
         this.tags = tags;
         this.code = code;
+        this.location = location;
+        this.neededDependencies = neededDependencies;
     }
 
     protected Snippet() {
+        this.location = FILE;
     }
 
     @Override
@@ -91,24 +116,46 @@ public class Snippet implements ISnippet {
         return description;
     }
 
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+
+    @Override
+    public Set<ProjectCoordinate> getNeededDependencies() {
+        return ImmutableSet.copyOf(neededDependencies);
+    }
+
     public void setCode(String code) {
-        this.code = code;
+        firePropertyChange("code", this.code, this.code = code);
     }
 
     public void setName(String name) {
-        this.name = name;
+        firePropertyChange("name", this.name, this.name = name);
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        firePropertyChange("description", this.description, this.description = description);
+    }
+
+    public void setNeededDependencies(Set<ProjectCoordinate> neededDependencies) {
+        firePropertyChange("dependencies", this.neededDependencies, this.neededDependencies = neededDependencies);
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public void setExtraSearchTerms(List<String> extraSearchTerms) {
+        firePropertyChange("extraSearchTerms", this.extraSearchTerms, extraSearchTerms);
         this.extraSearchTerms.clear();
         this.extraSearchTerms.addAll(extraSearchTerms);
+
     }
 
     public void setTags(List<String> tags) {
+
+        firePropertyChange("tags", this.tags, tags);
         this.tags.clear();
         this.tags.addAll(tags);
     }
@@ -129,6 +176,19 @@ public class Snippet implements ISnippet {
 
     public static Snippet copy(ISnippet snippet) {
         return new Snippet(snippet.getUuid(), snippet.getName(), snippet.getDescription(), Lists.newArrayList(snippet
-                .getExtraSearchTerms()), Lists.newArrayList(snippet.getTags()), snippet.getCode());
+                .getExtraSearchTerms()), Lists.newArrayList(snippet.getTags()), snippet.getCode(),
+                snippet.getLocation() != null ? snippet.getLocation() : FILE, snippet.getNeededDependencies());
+    }
+
+    public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(propertyName, listener);
+    }
+
+    public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(propertyName, listener);
+    }
+
+    protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+        changeSupport.firePropertyChange(propertyName, oldValue, newValue);
     }
 }

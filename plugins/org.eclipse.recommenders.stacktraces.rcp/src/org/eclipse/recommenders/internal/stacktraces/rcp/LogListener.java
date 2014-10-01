@@ -11,20 +11,27 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
-import static org.apache.commons.lang3.StringUtils.startsWith;
-import static org.eclipse.recommenders.internal.stacktraces.rcp.Stacktraces.createDto;
+import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.newErrorReport;
 import static org.eclipse.recommenders.utils.Checks.cast;
+import static org.eclipse.recommenders.utils.Logs.log;
+
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.recommenders.internal.stacktraces.rcp.dto.StackTraceEvent;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
+import org.eclipse.recommenders.utils.Reflections;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
@@ -36,134 +43,173 @@ import com.google.common.collect.Lists;
 
 public class LogListener implements ILogListener, IStartup {
 
-    private Cache<String, String> cache = CacheBuilder.newBuilder().maximumSize(10).build();
-    private IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-    private StacktracesRcpPreferences pref = ContextInjectionFactory.make(StacktracesRcpPreferences.class, ctx);
+    private static final String STAND_IN_MESSAGE = "Stand-In Stacktrace supplied by Eclipse Stacktraces & Error Reporting Tool";
 
-    private IObservableList statusList;
+    private static Method SET_EXCEPTION = Reflections.getDeclaredMethod(Status.class, "setException", Throwable.class)
+            .orNull();
+
+    private Cache<String, ErrorReport> cache = CacheBuilder.newBuilder().maximumSize(30)
+            .expireAfterAccess(10, TimeUnit.MINUTES).build();
+    private IObservableList errorReports;
     private volatile boolean isDialogOpen;
+    private Settings settings;
 
     public LogListener() {
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                statusList = Properties.selfList(IStatus.class).observe(Lists.newArrayList());
+                errorReports = Properties.selfList(ErrorReport.class).observe(Lists.newArrayList());
             }
         });
     }
 
     @Override
+    public void earlyStartup() {
+        Platform.addLogListener(this);
+    }
+
+    @Override
     public void logging(final IStatus status, String nouse) {
-        if (ignoreAllLogEvents()) {
-            return;
-        }
         if (!isErrorSeverity(status)) {
             return;
         }
-        if (sentSimilarErrorBefore(status)) {
-            sendStatus(status);
+        settings = readSettings();
+        if (!hasPluginIdWhitelistedPrefix(status, settings.getWhitelistedPluginIds())) {
             return;
         }
-        if (hasEclipsePluginId(status) || hasEclipseClassInStackFrames(status)) {
-            checkAndSend(status);
+        SendAction sendAction = settings.getAction();
+        if (!isSendingAllowedOnAction(sendAction)) {
             return;
         }
-    }
-
-    private boolean ignoreAllLogEvents() {
-        return pref.modeIgnore();
+        insertDebugStacktraceIfEmpty(status);
+        final ErrorReport report = newErrorReport(status, settings);
+        if (settings.isSkipSimilarErrors() && sentSimilarErrorBefore(report)) {
+            return;
+        }
+        addForSending(report);
+        if (sendAction == SendAction.ASK) {
+            checkAndSendWithDialog(report);
+        } else if (sendAction == SendAction.SILENT) {
+            sendAndClear();
+        }
     }
 
     private boolean isErrorSeverity(final IStatus status) {
         return status.matches(IStatus.ERROR);
     }
 
-    private boolean sentSimilarErrorBefore(final IStatus status) {
-        return cache.getIfPresent(status.toString()) != null;
+    @VisibleForTesting
+    protected Settings readSettings() {
+        return PreferenceInitializer.readSettings();
     }
 
-    private boolean hasEclipsePluginId(IStatus status) {
+    private static boolean hasPluginIdWhitelistedPrefix(IStatus status, List<String> whitelistedIdPrefixes) {
         String pluginId = status.getPlugin();
-        return startsWithRecommendersOrCodetrails(pluginId);
-    }
-
-    private boolean startsWithRecommendersOrCodetrails(String s) {
-        return startsWith(s, "org.eclipse.") || startsWith(s, "com.codetrails");
-    }
-
-    private boolean hasEclipseClassInStackFrames(IStatus status) {
-        Throwable ex = status.getException();
-        if (ex != null) {
-            for (StackTraceElement ste : ex.getStackTrace()) {
-                if (startsWithRecommendersOrCodetrails(ste.getClassName())) {
-                    return true;
-                }
+        for (String id : whitelistedIdPrefixes) {
+            if (pluginId.startsWith(id)) {
+                return true;
             }
         }
         return false;
     }
 
+    private boolean isSendingAllowedOnAction(SendAction sendAction) {
+        return sendAction == SendAction.ASK || sendAction == SendAction.SILENT;
+    }
+
+    private static void insertDebugStacktraceIfEmpty(final IStatus status) {
+        // TODO this code should probably go elsewhere later.
+        if (status.getException() == null && status instanceof Status && SET_EXCEPTION != null) {
+            Throwable syntetic = new RuntimeException(STAND_IN_MESSAGE);
+            syntetic.fillInStackTrace();
+            try {
+                SET_EXCEPTION.invoke(status, syntetic);
+            } catch (Exception e) {
+                log(LogMessages.LOG_WARNING_REFLECTION_FAILED, e, SET_EXCEPTION);
+            }
+        }
+    }
+
+    private boolean sentSimilarErrorBefore(final ErrorReport report) {
+        return cache.getIfPresent(computeCacheKey(report)) != null;
+    }
+
+    private String computeCacheKey(final ErrorReport report) {
+        return report.getStatus().getFingerprint();
+    }
+
+    private void addForSending(final ErrorReport report) {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                errorReports.add(report);
+            }
+        });
+        cache.put(computeCacheKey(report), report);
+    }
+
     @VisibleForTesting
-    protected void checkAndSend(final IStatus status) {
+    protected void checkAndSendWithDialog(final ErrorReport report) {
         // run on UI-thread to ensure that the observable list is not modified from another thread
         // and that the wizard is created on the UI-thread.
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                statusList.add(status);
                 if (isDialogOpen) {
                     return;
                 }
-                if (pref.modeAsk()) {
-                    StackTraceEvent tmp = createDto(status, pref);
-                    // TODO set name and email?
-                    tmp.name = "[filled on submit]";
-                    tmp.email = "[filled on submit]";
-                    isDialogOpen = true;
-
-                    int open = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                            new StacktraceWizard(pref, statusList)).open();
-                    isDialogOpen = false;
-                    if (open != Dialog.OK) {
-                        clear();
-                        return;
-                    } else if (ignoreAllLogEvents()) {
-                        // the user may have chosen to ignore events in the wizard just now. Respect this preference:
-                        return;
-                    }
-                    sendList();
+                isDialogOpen = true;
+                ErrorReportWizard stacktraceWizard = new ErrorReportWizard(settings, errorReports);
+                WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+                        .getShell(), stacktraceWizard);
+                int open = wizardDialog.open();
+                isDialogOpen = false;
+                if (open != Dialog.OK) {
                     clear();
+                    return;
+                } else if (settings.getAction() == SendAction.IGNORE || settings.getAction() == SendAction.PAUSE_DAY
+                        || settings.getAction() == SendAction.PAUSE_RESTART) {
+                    // the user may have chosen to not to send events in the wizard. Respect this preference:
+                    return;
+                }
+                sendAndClear();
+            }
+        });
+    }
+
+    private void sendAndClear() {
+        sendList();
+        clear();
+    }
+
+    private void sendList() {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                for (Object entry : errorReports) {
+                    ErrorReport report = cast(entry);
+                    sendStatus(report);
                 }
             }
         });
     }
 
-    private void clear() {
-        statusList.clear();
-        cache.invalidateAll();
-    }
-
-    private void sendList() {
-        for (Object entry : statusList) {
-            IStatus status = cast(entry);
-            sendStatus(status);
-        }
-    }
-
-    private void sendStatus(final IStatus status) {
-        if (ignoreAllLogEvents()) {
-            // double safety. This is checked before elsewhere. But just to make sure...
+    @VisibleForTesting
+    protected void sendStatus(final ErrorReport report) {
+        // double safety. This is checked before elsewhere. But just to make sure...
+        if (settings.getAction() == SendAction.IGNORE || settings.getAction() == SendAction.PAUSE_DAY
+                || settings.getAction() == SendAction.PAUSE_RESTART) {
             return;
         }
-
-        cache.put(status.toString(), status.toString());
-        StackTraceEvent event = createDto(status, pref);
-        // System.out.println(event);
-        new StacktraceUploadJob(event, pref.getServerUri()).schedule();
+        new UploadJob(report, settings, URI.create(settings.getServerUrl())).schedule();
     }
 
-    @Override
-    public void earlyStartup() {
-        Platform.addLogListener(this);
+    private void clear() {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                errorReports.clear();
+            }
+        });
     }
 }

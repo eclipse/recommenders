@@ -17,6 +17,7 @@ import static org.eclipse.recommenders.internal.completion.rcp.LogMessages.LOG_E
 import static org.eclipse.recommenders.rcp.utils.JdtUtils.findFirstDeclaration;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.Logs.log;
+import static org.eclipse.recommenders.utils.Reflections.getDeclaredField;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -40,6 +41,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
 import org.eclipse.jdt.internal.codeassist.InternalExtendedCompletionContext;
@@ -49,7 +56,6 @@ import org.eclipse.jdt.internal.codeassist.complete.CompletionOnQualifiedAllocat
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnQualifiedNameReference;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -57,7 +63,6 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.compiler.util.ObjectVector;
@@ -66,16 +71,19 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.recommenders.completion.rcp.processable.ProposalCollectingCompletionRequestor;
 import org.eclipse.recommenders.rcp.utils.ASTNodeUtils;
+import org.eclipse.recommenders.rcp.utils.AstBindings;
 import org.eclipse.recommenders.rcp.utils.JdtUtils;
 import org.eclipse.recommenders.rcp.utils.TimeDelimitedProgressMonitor;
+import org.eclipse.recommenders.utils.names.IPackageName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-@SuppressWarnings({ "restriction", "rawtypes", "deprecation" })
+@SuppressWarnings({ "restriction", "rawtypes" })
 public class CompletionContextFunctions {
 
     public static Map<CompletionContextKey, ICompletionContextFunction> defaultFunctions() {
@@ -91,7 +99,6 @@ public class CompletionContextFunctions {
         res.put(EXPECTED_TYPENAMES, new ExpectedTypeNamesContextFunction());
         res.put(INTERNAL_COMPLETIONCONTEXT, new InternalCompletionContextFunction());
         res.put(JAVA_PROPOSALS, new InternalCompletionContextFunction());
-        res.put(JAVA_CONTENTASSIST_CONTEXT, new JavaContentAssistInvocationContextFunction());
         res.put(LOOKUP_ENVIRONMENT, new LookupEnvironmentContextFunction());
         res.put(RECEIVER_TYPEBINDING, new ReceiverTypeBindingContextFunction());
         res.put(RECEIVER_NAME, new ReceiverNameContextFunction());
@@ -99,6 +106,7 @@ public class CompletionContextFunctions {
         res.put(VISIBLE_FIELDS, new VisibleFieldsContextFunction());
         res.put(VISIBLE_LOCALS, new VisibleLocalsContextFunction());
         res.put(SESSION_ID, new SessionIdFunction());
+        res.put(IMPORTED_PACKAGES, new ImportedPackagesFunction());
         return res;
     }
 
@@ -391,18 +399,6 @@ public class CompletionContextFunctions {
         }
     }
 
-    public static class JavaContentAssistInvocationContextFunction implements
-    ICompletionContextFunction<JavaContentAssistInvocationContext> {
-
-        @Override
-        public JavaContentAssistInvocationContext compute(IRecommendersCompletionContext context,
-                CompletionContextKey<JavaContentAssistInvocationContext> key) {
-            JavaContentAssistInvocationContext res = context.getJavaContext();
-            context.set(key, res);
-            return res;
-        }
-    }
-
     public static class CompletionPrefixContextFunction implements ICompletionContextFunction<String> {
 
         @Override
@@ -502,39 +498,31 @@ public class CompletionContextFunctions {
 
     public static class LookupEnvironmentContextFunction implements ICompletionContextFunction<LookupEnvironment> {
 
-        private static Field fExtendedContext;
-        private static Field fLookupEnvironment;
-
-        static {
-            try {
-                Class<InternalCompletionContext> clazzCtx = InternalCompletionContext.class;
-                fExtendedContext = clazzCtx.getDeclaredField("extendedContext"); //$NON-NLS-1$
-                fExtendedContext.setAccessible(true);
-
-                Class<InternalExtendedCompletionContext> clazzExt = InternalExtendedCompletionContext.class;
-                fLookupEnvironment = clazzExt.getDeclaredField("lookupEnvironment"); //$NON-NLS-1$
-                fLookupEnvironment.setAccessible(true);
-            } catch (Exception e) {
-                LOG.error("Cannot access InternalExtendedCompletionContext.LookupEnvironment by reflection.", e); //$NON-NLS-1$
-            }
-        }
+        private static final Field EXTENDED_CONTEXT = getDeclaredField(InternalCompletionContext.class,
+                "extendedContext").orNull(); //$NON-NLS-1$
+        private static final Field LOOKUP_ENVIRONMENT = getDeclaredField(InternalExtendedCompletionContext.class,
+                "lookupEnvironment").orNull(); //$NON-NLS-1$
 
         @Override
         public LookupEnvironment compute(IRecommendersCompletionContext context,
                 CompletionContextKey<LookupEnvironment> key) {
-            LookupEnvironment env = null;
+            if (EXTENDED_CONTEXT == null || LOOKUP_ENVIRONMENT == null) {
+                return null;
+            }
+
             try {
                 InternalCompletionContext ctx = context.get(CompletionContextKey.INTERNAL_COMPLETIONCONTEXT, null);
-                InternalExtendedCompletionContext extCtx = cast(fExtendedContext.get(ctx));
+                InternalExtendedCompletionContext extCtx = cast(EXTENDED_CONTEXT.get(ctx));
                 if (extCtx == null) {
                     return null;
                 }
-                env = cast(fLookupEnvironment.get(extCtx));
+                LookupEnvironment env = cast(LOOKUP_ENVIRONMENT.get(extCtx));
+                context.set(key, env);
+                return env;
             } catch (Exception e) {
                 LOG.error("Cannot access LookupEnvironment by reflection.", e); //$NON-NLS-1$
+                return null;
             }
-            context.set(key, env);
-            return env;
         }
     }
 
@@ -548,53 +536,53 @@ public class CompletionContextFunctions {
         }
     }
 
-    public static class E37ContextInitializerCompletionContextFunction implements ICompletionContextFunction<Void> {
-
-        private static Field fAssistScope;
-        private static Field fAssistNode;
-        private static Field fAssistNodeParent;
-        private static Field fCompilationUnitDeclaration;
-        private static Field fExtendedContext;
-        static {
-            try {
-                Class<InternalCompletionContext> clazzCtx = InternalCompletionContext.class;
-                fExtendedContext = clazzCtx.getDeclaredField("extendedContext"); //$NON-NLS-1$
-                fExtendedContext.setAccessible(true);
-
-                Class<InternalExtendedCompletionContext> clazzExt = InternalExtendedCompletionContext.class;
-                fAssistScope = clazzExt.getDeclaredField("assistScope"); //$NON-NLS-1$
-                fAssistScope.setAccessible(true);
-                fAssistNode = clazzExt.getDeclaredField("assistNode"); //$NON-NLS-1$
-                fAssistNode.setAccessible(true);
-                fAssistNodeParent = clazzExt.getDeclaredField("assistNodeParent"); //$NON-NLS-1$
-                fAssistNodeParent.setAccessible(true);
-                fCompilationUnitDeclaration = clazzExt.getDeclaredField("compilationUnitDeclaration"); //$NON-NLS-1$
-                fCompilationUnitDeclaration.setAccessible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    public static class ImportedPackagesFunction implements ICompletionContextFunction<Set<IPackageName>> {
 
         @Override
-        public Void compute(IRecommendersCompletionContext context, CompletionContextKey<Void> key) {
-            try {
-                InternalCompletionContext ctx = context.get(INTERNAL_COMPLETIONCONTEXT, null);
-                InternalExtendedCompletionContext extContext = cast(fExtendedContext.get(ctx));
-                if (extContext == null) {
-                    return null;
+        @SuppressWarnings("unchecked")
+        public Set<IPackageName> compute(IRecommendersCompletionContext context,
+                CompletionContextKey<Set<IPackageName>> key) {
+            CompilationUnit ast = context.getAST();
+            List<ImportDeclaration> imports = ast.imports();
+            Set<IPackageName> res = Sets.newHashSet();
+            for (ImportDeclaration decl : imports) {
+                IBinding b = decl.resolveBinding();
+                if (b == null) {
+                    continue;
                 }
-                ASTNode assistNode = cast(fAssistNode.get(extContext));
-                context.set(ASSIST_NODE, assistNode);
-                ASTNode assistNodeParent = cast(fAssistNodeParent.get(extContext));
-                context.set(ASSIST_NODE_PARENT, assistNodeParent);
-                Scope assistScope = cast(fAssistScope.get(extContext));
-                context.set(ASSIST_SCOPE, assistScope);
-                CompilationUnitDeclaration cuDeclaration = cast(fCompilationUnitDeclaration.get(extContext));
-                context.set(CCTX_COMPILATION_UNIT_DECLARATION, cuDeclaration);
-            } catch (Exception e) {
-                LOG.error("Reflection initalizer failed.", e); //$NON-NLS-1$
+                switch (b.getKind()) {
+                case IBinding.TYPE: {
+                    ITypeName type = AstBindings.toTypeName((ITypeBinding) b).orNull();
+                    if (type != null) {
+                        res.add(type.getPackage());
+                    }
+                    break;
+                }
+                case IBinding.PACKAGE: {
+                    IPackageName pkg = AstBindings.toPackageName((IPackageBinding) b).orNull();
+                    if (pkg != null) {
+                        res.add(pkg);
+                    }
+                    break;
+                }
+                case IBinding.METHOD: {
+                    ITypeName type = AstBindings.toTypeName(((IMethodBinding) b).getDeclaringClass()).orNull();
+                    if (type != null) {
+                        res.add(type.getPackage());
+                    }
+                    break;
+                }
+                case IBinding.VARIABLE: {
+                    ITypeName type = AstBindings.toTypeName(((IVariableBinding) b).getDeclaringClass()).orNull();
+                    if (type != null) {
+                        res.add(type.getPackage());
+                    }
+                    break;
+                }
+                }
             }
-            return null;
+            context.set(key, res);
+            return res;
         }
     }
 }
