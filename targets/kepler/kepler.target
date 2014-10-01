@@ -2,7 +2,21 @@
 <?pde version="3.8"?><target name="Target Definition for Eclipse Kepler (4.3)" sequenceNumber="142">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<<<<<<< HEAD   (6fbe47 [releng] Remove stacktraces.model .project from version cont)
 <unit id="org.eclipse.epp.package.standard.feature.feature.group" version="0.0.0"/>
+=======
+<unit id="org.eclipse.swtbot.junit4_x" version="0.0.0"/>
+<unit id="org.eclipse.swtbot.eclipse.core" version="0.0.0"/>
+<unit id="org.eclipse.swtbot.eclipse.finder" version="0.0.0"/>
+<repository location="http://download.eclipse.org/technology/swtbot/releases/latest/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.sdk.ide" version="0.0.0"/>
+<unit id="org.eclipse.emf.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.equinox.p2.discovery.feature.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.jgit.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.jgit.source.feature.group" version="0.0.0"/>
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 <unit id="org.eclipse.mylyn.context.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.commons.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.sdk_feature.feature.group" version="0.0.0"/>
@@ -10,15 +24,23 @@
 <repository location="http://download.eclipse.org/releases/kepler/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<<<<<<< HEAD   (6fbe47 [releng] Remove stacktraces.model .project from version cont)
 <unit id="org.eclipse.xtend.sdk.feature.group" version="0.0.0"/>
 <repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/maintenance/R201409160908/"/>
+=======
+<unit id="org.eclipse.xtext.xbase.feature.group" version="2.5.4.v201404100756"/>
+<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/maintenance/releases/"/>
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<<<<<<< HEAD   (6fbe47 [releng] Remove stacktraces.model .project from version cont)
 <unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.emf.ecore.xcore.sdk.feature.group" version="0.0.0"/>
 <repository location="http://download.eclipse.org/modeling/emf/emf/updates/releases/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+=======
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 <unit id="org.eclipse.aether.api" version="0.0.0"/>
 <unit id="org.eclipse.aether.api.source" version="0.0.0"/>
 <unit id="org.eclipse.aether.connector.basic" version="0.0.0"/>
@@ -46,7 +68,11 @@
 </location>
 <!-- List of source bundles needs to be maintained manually; includeSources="true" not supported yet. -->
 <!-- See https://bugs.eclipse.org/bugs/show_bug.cgi?id=411664 -->
+<<<<<<< HEAD   (6fbe47 [releng] Remove stacktraces.model .project from version cont)
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+=======
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 <!-- http://dev.eclipse.org/ipzilla/show_bug.cgi?id=8272 -->
 <unit id="ch.qos.logback.classic" version="1.0.7.v20121108-1250"/>
 <unit id="ch.qos.logback.classic.source" version="1.0.7.v20121108-1250"/>
@@ -112,7 +138,14 @@
 <!-- This location points to the recommended Orbit build for Kepler SR2. -->
 <repository location="http://archive.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
 </location>
+<<<<<<< HEAD   (6fbe47 [releng] Remove stacktraces.model .project from version cont)
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+=======
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
+<!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=5060 -->
+<unit id="com.google.inject.multibindings" version="3.0.0.v201402270930"/>
+<unit id="com.google.inject.multibindings.source" version="3.0.0.v201402270930"/>
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7766 -->
 <unit id="com.google.guava" version="15.0.0.v201403281430"/>
 <unit id="com.google.guava.source" version="15.0.0.v201403281430"/>

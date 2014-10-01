@@ -68,10 +68,14 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Messages;
+<<<<<<< HEAD   (6fbe47 [releng] Remove stacktraces.model .project from version cont)
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.IDependencyListener;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.rcp.SharedImages;
+=======
+import org.eclipse.recommenders.internal.snipmatch.rcp.SnippetsView;
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
 import org.eclipse.recommenders.rcp.utils.Selections;
 import org.eclipse.recommenders.snipmatch.ISnippet;
@@ -110,6 +114,8 @@ import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
 public class SnippetMetadataPage extends FormPage {
+
+    public static final String TEXT_SNIPPETNAME = "org.eclipse.recommenders.snipmatch.rcp.snippetmetadatapage.snippetname";
 
     private static final Location[] SNIPMATCH_LOCATIONS = { FILE, JAVA, JAVA_STATEMENTS, JAVA_TYPE_MEMBERS, JAVADOC };
 
@@ -162,6 +168,22 @@ public class SnippetMetadataPage extends FormPage {
 
         contentsPart = new AbstractFormPart() {
 
+<<<<<<< HEAD   (6fbe47 [releng] Remove stacktraces.model .project from version cont)
+=======
+        int horizontalIndent = decorationImage.getBounds().width + 2;
+
+        txtName = managedForm.getToolkit().createText(managedForm.getForm().getBody(), null, SWT.NONE);
+        txtName.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+                .indent(horizontalIndent, 0).create());
+        txtName.setData(SnippetsView.SWT_ID, TEXT_SNIPPETNAME);
+
+        final ControlDecoration decor = new ControlDecoration(txtName, SWT.LEFT);
+        decor.setDescriptionText(Messages.ERROR_SNIPPET_NAME_CAN_NOT_BE_EMPTY);
+        decor.setImage(decorationImage);
+        decor.setMarginWidth(1);
+
+        txtName.addModifyListener(new ModifyListener() {
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
             @Override
             public void initialize(IManagedForm managedForm) {
                 super.initialize(managedForm);
