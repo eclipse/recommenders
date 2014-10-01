@@ -72,6 +72,7 @@ import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.IDependencyListener;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.rcp.SharedImages;
+import org.eclipse.recommenders.internal.snipmatch.rcp.SnippetsView;
 import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
 import org.eclipse.recommenders.rcp.utils.Selections;
 import org.eclipse.recommenders.snipmatch.ISnippet;
@@ -112,6 +113,7 @@ import com.google.common.collect.Sets;
 public class SnippetMetadataPage extends FormPage {
 
     private static final Location[] SNIPMATCH_LOCATIONS = { FILE, JAVA, JAVA_STATEMENTS, JAVA_TYPE_MEMBERS, JAVADOC };
+    public static final String TEXT_SNIPPETNAME = "org.eclipse.recommenders.snipmatch.rcp.snippetmetadatapage.snippetname";
 
     private ISnippet snippet;
 
@@ -236,7 +238,7 @@ public class SnippetMetadataPage extends FormPage {
                 });
                 comboLocation.getCombo().setLayoutData(
                         GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
-                        .indent(horizontalIndent, 0).create());
+                                .indent(horizontalIndent, 0).create());
 
                 final ControlDecoration locationErrorDecoration = new ControlDecoration(comboLocation.getCombo(),
                         SWT.LEFT);
@@ -281,7 +283,7 @@ public class SnippetMetadataPage extends FormPage {
                         listViewerExtraSearchTerms.getList(), SWT.TOP | SWT.LEFT);
                 extraSearchTermsDescriptionDecoration.setImage(infoDecoration.getImage());
                 extraSearchTermsDescriptionDecoration
-                .setDescriptionText(Messages.EDITOR_DESCRIPTION_EXTRA_SEARCH_TERMS);
+                        .setDescriptionText(Messages.EDITOR_DESCRIPTION_EXTRA_SEARCH_TERMS);
                 extraSearchTermsDescriptionDecoration.setMarginWidth(1);
 
                 btnContainerExtraSearchTerms = managedForm.getToolkit().createComposite(
@@ -481,41 +483,7 @@ public class SnippetMetadataPage extends FormPage {
 
         @Override
         protected Control createContents(Composite parent) {
-            Control control = super.createContents(parent);
-
-            // final Text text = cast(getPatternControl());
-            //
-            // final IInputValidator validator = new IInputValidator() {
-            //
-            // @Override
-            // public String isValid(String newText) {
-            // if (isNullOrEmpty(newText)) {
-            //                        return ""; //$NON-NLS-1$
-            // }
-            // ProjectCoordinate pc = ProjectCoordinate.valueOf(newText);
-            // if (snippet.getNeededDependencies().contains(pc)) {
-            // return Messages.DIALOG_VALIDATOR_DEPENDENCY_ALREADY_ADDED;
-            // }
-            //
-            // return null;
-            // }
-            // };
-            //
-            // text.addModifyListener(new ModifyListener() {
-            //
-            // @Override
-            // public void modifyText(ModifyEvent e) {
-            // if (getResult().length == 0) {
-            // if (validator.isValid(text.getText()) != null) {
-            // getOkButton().setEnabled(true);
-            // } else {
-            // getOkButton().setEnabled(false);
-            // }
-            // }
-            // }
-            // });
-
-            return control;
+            return super.createContents(parent);
         }
 
         private Collection<ProjectCoordinate> changeVersionsToZero(Set<ProjectCoordinate> resolved) {
