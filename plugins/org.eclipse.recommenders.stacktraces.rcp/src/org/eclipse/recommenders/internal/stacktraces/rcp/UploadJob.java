@@ -55,6 +55,9 @@ public class UploadJob extends Job {
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
+        if (true) {
+            return new Status(Status.INFO, PLUGIN_ID, "foo");
+        }
         monitor.beginTask(Messages.UPLOADJOB_TASKNAME, 1);
         try {
             String body = ErrorReports.toJson(event, settings, false);
