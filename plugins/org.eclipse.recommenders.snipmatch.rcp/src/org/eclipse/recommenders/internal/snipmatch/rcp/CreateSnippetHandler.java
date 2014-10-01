@@ -61,7 +61,7 @@ public class CreateSnippetHandler extends AbstractHandler {
         IDocument doc = viewer.getDocument();
         ITextSelection textSelection = cast(viewer.getSelectionProvider().getSelection());
 
-        return new SnippetBuilder(ast, doc, textSelection).build("<new snippet>", "<enter description>"); //$NON-NLS-1$ //$NON-NLS-2$
+        return new SnippetBuilder(ast, doc, textSelection).build("", ""); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private void openSnippetInEditor(Snippet snippet) {
