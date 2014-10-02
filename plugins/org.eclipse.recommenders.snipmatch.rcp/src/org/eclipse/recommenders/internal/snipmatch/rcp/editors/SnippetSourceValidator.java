@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.internal.snipmatch.rcp.editors;
 
 import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.SNIPMATCH_CONTEXT_ID;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Messages.DIALOG_MESSAGE_BAD_LOCATION_EXCEPTION;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jface.text.Document;
@@ -32,7 +33,7 @@ public class SnippetSourceValidator {
         try {
             context.evaluate(template);
         } catch (Exception e) {
-            return e.getMessage();
+            return e.getMessage() != null ? e.getMessage() : DIALOG_MESSAGE_BAD_LOCATION_EXCEPTION;
         }
         return VALID_SNIPPET;
     }
