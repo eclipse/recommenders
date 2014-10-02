@@ -2,6 +2,12 @@
 <?pde version="3.8"?><target name="Target Definition for Eclipse Luna (4.4)" sequenceNumber="143">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.swtbot.junit4_x" version="0.0.0"/>
+<unit id="org.eclipse.swtbot.eclipse.core" version="0.0.0"/>
+<unit id="org.eclipse.swtbot.eclipse.finder" version="0.0.0"/>
+<repository location="http://download.eclipse.org/technology/swtbot/releases/latest/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.e4.rcp.source.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.e4.rcp.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.ecf.core.feature.feature.group" version="0.0.0"/>
@@ -37,6 +43,7 @@
 <repository location="http://download.eclipse.org/egit/updates-3.4/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.emf.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.context.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.commons.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.mylyn.sdk_feature.feature.group" version="0.0.0"/>
