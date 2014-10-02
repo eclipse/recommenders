@@ -15,9 +15,14 @@ import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.EDITOR_I
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.ui.handlers.HandlerUtil.getActiveWorkbenchWindow;
 
+<<<<<<< HEAD   (b1f7f2 Merge "[docs] Bug 445349: Improve contributor guide")
 import java.util.Set;
 
 import javax.inject.Inject;
+=======
+import java.util.List;
+import java.util.UUID;
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -29,7 +34,12 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
+<<<<<<< HEAD   (b1f7f2 Merge "[docs] Bug 445349: Improve contributor guide")
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
+=======
+import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditor;
+import org.eclipse.recommenders.internal.snipmatch.rcp.editors.SnippetEditorInput;
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
 import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.recommenders.snipmatch.rcp.SnippetEditor;
 import org.eclipse.recommenders.snipmatch.rcp.SnippetEditorInput;
@@ -46,14 +56,12 @@ public class CreateSnippetHandler extends AbstractHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreateSnippetHandler.class);
 
+<<<<<<< HEAD   (b1f7f2 Merge "[docs] Bug 445349: Improve contributor guide")
     private Set<ISnippetRepository> repos;
 
+=======
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
     private ExecutionEvent event;
-
-    @Inject
-    public CreateSnippetHandler(Set<ISnippetRepository> repos) {
-        this.repos = repos;
-    }
 
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -77,6 +85,7 @@ public class CreateSnippetHandler extends AbstractHandler {
     }
 
     private void openSnippetInEditor(Snippet snippet) {
+<<<<<<< HEAD   (b1f7f2 Merge "[docs] Bug 445349: Improve contributor guide")
         for (ISnippetRepository r : repos) {
             if (r.isImportSupported()) {
                 try {
@@ -91,9 +100,19 @@ public class CreateSnippetHandler extends AbstractHandler {
                     LOG.error(Messages.ERROR_WHILE_OPENING_EDITOR, e);
                 }
             }
+=======
+        IWorkbenchPage page = getActiveWorkbenchWindow(event).getActivePage();
+
+        try {
+            SnippetEditorInput input = new SnippetEditorInput(snippet);
+            SnippetEditor ed = cast(page.openEditor(input, EDITOR_ID));
+            ed.setDirty(true);
+        } catch (PartInitException e) {
+            LOG.error(Messages.ERROR_WHILE_OPENING_EDITOR, e);
+            openError(HandlerUtil.getActiveShell(event), Messages.ERROR_NO_EDITABLE_REPO_FOUND,
+                    Messages.ERROR_NO_EDITABLE_REPO_FOUND_HINT);
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
         }
-        openError(HandlerUtil.getActiveShell(event), Messages.ERROR_NO_EDITABLE_REPO_FOUND,
-                Messages.ERROR_NO_EDITABLE_REPO_FOUND_HINT);
     }
 
 }
