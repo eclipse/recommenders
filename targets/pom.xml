@@ -17,4 +17,32 @@
 		<module>luna</module>
 		<module>mars</module>
 	</modules>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- To update all flattened target platform defintions: -->
+				<!-- mvn org.jboss.tools.tycho-plugins:target-platform-utils:flatten-target -pl :juno,:kepler,:luna,:mars -->
+				<!-- To mirror all target platforms (normally run on HIPP): -->
+				<!-- mvn org.jboss.tools.tycho-plugins:target-platform-utils:mirror-target-to-repo -pl :juno,:kepler,:luna,:mars -->
+				<plugin>
+					<groupId>org.jboss.tools.tycho-plugins</groupId>
+					<artifactId>target-platform-utils</artifactId>
+					<version>${tychoVersion}</version>
+					<executions>
+						<execution>
+							<id>default-cli</id>
+							<configuration>
+								<!-- flatten-target -->
+								<sourceTargetFile>${project.artifactId}-original.target</sourceTargetFile>
+								<outputFile>${project.artifactId}.target</outputFile>
+								<targetRepositoryUrl>file:/Users/sewe/Desktop/${project.artifactId}.target.repo</targetRepositoryUrl>
+								<!-- mirror-target-to-repo -->
+								<includeSources>true</includeSources>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>

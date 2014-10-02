@@ -76,6 +76,11 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</pluginRepository>
+		<pluginRepository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Repository Group</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
+		</pluginRepository>
 	</pluginRepositories>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -313,6 +318,11 @@
 					<version>1.1.1</version>
 				</plugin>
 				<!-- Other plugins -->
+				<plugin>
+					<groupId>org.jboss.tools.tycho-plugins</groupId>
+					<artifactId>target-platform-utils</artifactId>
+					<version>${tychoVersion}</version>
+				</plugin>
 				<plugin>
 					<groupId>com.mycila.maven-license-plugin</groupId>
 					<artifactId>maven-license-plugin</artifactId>
