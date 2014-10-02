@@ -15,7 +15,6 @@ import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -52,15 +51,21 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("restriction")
 public class SnipmatchContentAssistProcessor implements IContentAssistProcessor {
 
+<<<<<<< HEAD   (b1f7f2 Merge "[docs] Bug 445349: Improve contributor guide")
     private final Set<ISnippetRepository> repos;
     private final TemplateContextType snipmatchContextType;
+=======
+    private final Repositories repos;
+
+    private final TemplateContextType contextType;
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
     private final Image image;
 
     private JavaContentAssistInvocationContext ctx;
     private String terms;
 
     @Inject
-    public SnipmatchContentAssistProcessor(Set<ISnippetRepository> repos, SharedImages images) {
+    public SnipmatchContentAssistProcessor(Repositories repos, SharedImages images) {
         this.repos = repos;
         snipmatchContextType = SnipmatchTemplateContextType.getInstance();
         image = images.getImage(SharedImages.Images.OBJ_BULLET_BLUE);
@@ -85,8 +90,13 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
 
         LinkedList<ICompletionProposal> proposals = Lists.newLinkedList();
         List<Recommendation<ISnippet>> recommendations = Lists.newArrayList();
+<<<<<<< HEAD   (b1f7f2 Merge "[docs] Bug 445349: Improve contributor guide")
         for (ISnippetRepository repo : repos) {
             recommendations.addAll(repo.search(context));
+=======
+        for (ISnippetRepository repo : repos.getRepositories()) {
+            recommendations.addAll(repo.search(terms));
+>>>>>>> BRANCH (c268cb [snipmatch] SWTBot Tests for Snippets View)
         }
         ICompilationUnit cu = ctx.getCompilationUnit();
         IEditorPart editor = EditorUtility.isOpenInEditor(cu);
