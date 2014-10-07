@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.*;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.io.File;
@@ -18,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -86,17 +89,21 @@ public class RepositoryConfigurations {
     protected static List<SnippetRepositoryConfiguration> fetchDefaultConfigurations() {
         List<SnippetRepositoryConfiguration> defaultConfigurations = Lists.newArrayList();
 
-        Registry instance = EPackage.Registry.INSTANCE;
-        for (String key : instance.keySet()) {
+        Registry registry = EPackage.Registry.INSTANCE;
+
+        IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
+                EXT_POINT_DEFAULT_CONFIGURATIONS);
+        for (IConfigurationElement element : elements) {
+            String key = element.getAttribute(EXT_POINT_DEFAULT_CONFIGURATIONS_ATTRIBUTE_KEY);
             try {
-                EPackage ePackage = instance.getEPackage(key);
+                EPackage ePackage = registry.getEPackage(key);
                 if (ePackage == null) {
                     continue;
                 }
                 List<EClass> subtypes = searchSubtypes(ePackage,
                         SnipmatchModelPackage.Literals.DEFAULT_SNIPPET_REPOSITORY_CONFIGURATION_PROVIDER);
                 for (EClass eClass : subtypes) {
-                    DefaultSnippetRepositoryConfigurationProvider configurationProvider = cast(instance
+                    DefaultSnippetRepositoryConfigurationProvider configurationProvider = cast(registry
                             .getEFactory(key).create(eClass));
 
                     defaultConfigurations.addAll(configurationProvider.getDefaultConfiguration());
