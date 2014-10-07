@@ -25,6 +25,7 @@ import javax.inject.Named;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -61,6 +62,8 @@ import com.google.common.eventbus.Subscribe;
 
 public class DependencyOverviewView extends ViewPart {
 
+    private static final String LOCAL = "-LOCAL";
+
     private final EventBus bus;
     private final IDependencyListener dependencyListener;
     private final IProjectCoordinateProvider pcProvider;
@@ -69,6 +72,7 @@ public class DependencyOverviewView extends ViewPart {
     private final SharedImages images;
     private final List<String> modelClassifiers;
     private TreeViewer treeViewer;
+    private TreeViewerJob job;
 
     @Inject
     public DependencyOverviewView(final EventBus workspaceBus, final IDependencyListener dependencyListener,
@@ -84,6 +88,7 @@ public class DependencyOverviewView extends ViewPart {
         this.modelClassifiers = Lists.newArrayList(modelClassifiers);
         Collections.sort(this.modelClassifiers);
         bus.register(this);
+        job = new TreeViewerJob();
     }
 
     @Override
@@ -167,6 +172,7 @@ public class DependencyOverviewView extends ViewPart {
     private void updateContent() {
         List<Project> projects = createModel();
         treeViewer.setInput(projects);
+        new RefreshProjectsJob(projects).schedule();
     }
 
     private List<Project> createModel() {
@@ -201,6 +207,8 @@ public class DependencyOverviewView extends ViewPart {
 
         List<Dependency> dependencies;
         DependencyInfo info;
+        ProjectCoordinate coordinate;
+        boolean resolved = false;
 
         public Project(DependencyInfo projectDependencyInfo) {
             info = projectDependencyInfo;
@@ -216,6 +224,7 @@ public class DependencyOverviewView extends ViewPart {
 
         public DependencyInfo info;
         public Project parent;
+        public ProjectCoordinate coordinate;
 
         public Dependency(DependencyInfo dependencyInfo, Project parent) {
             info = dependencyInfo;
@@ -256,21 +265,32 @@ public class DependencyOverviewView extends ViewPart {
                     return ((Dependency) element).info.getFile().getName();
                 }
             case 1:
+                if (element instanceof Project) {
+                    Project project = (Project) element;
+                    return project.coordinate == null ? null : project.coordinate.toString() + LOCAL;
+                }
                 if (element instanceof Dependency) {
                     Dependency dependency = (Dependency) element;
-                    ProjectCoordinate pc = pcProvider.resolve(dependency.info).orNull();
-                    return pc == null ? null : pc.toString();
+                    if (!dependency.parent.resolved) {
+                        dependency.parent.resolved = true;
+                        new RefreshProjectDependenciesJob(dependency.parent).schedule();
+                    }
+                    return dependency.coordinate == null ? null : dependency.coordinate.toString();
                 }
             default:
                 if (element instanceof Dependency) {
-                    return findModelCoordinateVersion((Dependency) element, modelClassifiers.get(columnIndex - 2));
+                    return findModelCoordinateVersion(((Dependency) element).coordinate,
+                            modelClassifiers.get(columnIndex - 2));
+                }
+                if (element instanceof Project) {
+                    return findModelCoordinateVersion(((Project) element).coordinate,
+                            modelClassifiers.get(columnIndex - 2));
                 }
             }
             return null;
         }
 
-        private String findModelCoordinateVersion(Dependency dependency, String modelType) {
-            ProjectCoordinate pc = pcProvider.resolve(dependency.info).orNull();
+        private String findModelCoordinateVersion(ProjectCoordinate pc, String modelType) {
             if (pc != null) {
                 ModelCoordinate mc = modelIndex.suggest(pc, modelType).orNull();
                 return mc == null ? "" : mc.getVersion(); //$NON-NLS-1$
@@ -290,6 +310,58 @@ public class DependencyOverviewView extends ViewPart {
                 return null;
             }
         }
+    }
+
+    private final class TreeViewerJob extends UIJob {
+
+        public TreeViewerJob() {
+            super(Messages.JOB_REFRESHING_DEPENDENCY_OVERVIEW_VIEW);
+        }
+
+        @Override
+        public IStatus runInUIThread(IProgressMonitor monitor) {
+            treeViewer.refresh();
+            return Status.OK_STATUS;
+        }
+    }
+
+    private final class RefreshProjectsJob extends Job {
+
+        private final List<Project> projects;
+
+        public RefreshProjectsJob(List<Project> projects) {
+            super(Messages.JOB_REFRESHING_DEPENDENCY_OVERVIEW_VIEW);
+            this.projects = projects;
+        }
+
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+            for (Project p : projects) {
+                p.coordinate = pcProvider.resolve(p.info).orNull();
+            }
+            job.schedule();
+            return Status.OK_STATUS;
+        }
+    }
+
+    private final class RefreshProjectDependenciesJob extends Job {
+
+        private final Project project;
+
+        public RefreshProjectDependenciesJob(Project project) {
+            super(Messages.JOB_REFRESHING_DEPENDENCY_OVERVIEW_VIEW);
+            this.project = project;
+        }
+
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+            for (Dependency d : project.dependencies) {
+                d.coordinate = pcProvider.resolve(d.info).orNull();
+            }
+            job.schedule();
+            return Status.OK_STATUS;
+        }
+
     }
 
     public static final class ContentProvider extends ArrayContentProvider implements ITreeContentProvider {
