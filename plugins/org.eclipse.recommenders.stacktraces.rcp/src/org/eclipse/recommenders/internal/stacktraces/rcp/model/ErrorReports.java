@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.ecore.EAttribute;
@@ -289,6 +290,13 @@ public class ErrorReports {
         List<Status> mChildren = mStatus.getChildren();
         for (IStatus child : status.getChildren()) {
             mChildren.add(newStatus(child, settings));
+        }
+        if (status.getException() instanceof CoreException) {
+            CoreException coreException = (CoreException) status.getException();
+            IStatus coreExceptionStatus = coreException.getStatus();
+            if (coreExceptionStatus != null) {
+                mChildren.add(newStatus(coreExceptionStatus, settings));
+            }
         }
 
         if (status.getException() != null) {
