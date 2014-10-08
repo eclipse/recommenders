@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ModelPackage;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
@@ -121,9 +122,12 @@ class SettingsWizardPage extends WizardPage {
         {
             btnAnonymizeStacktraces = new Button(container, SWT.CHECK);
             btnAnonymizeStacktraces.setText(Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES);
-
+            DefaultToolTip anonymizeStacktracesToolTip = new DefaultToolTip(btnAnonymizeStacktraces);
+            anonymizeStacktracesToolTip.setText(anonymizeStacktracesToolTipText());
             btnClearMessages = new Button(container, SWT.CHECK);
             btnClearMessages.setText(Messages.FIELD_LABEL_ANONYMIZE_MESSAGES);
+            DefaultToolTip clearMessagesToolTip = new DefaultToolTip(btnClearMessages);
+            clearMessagesToolTip.setText(clearMessagesToolTipText());
         }
         {
             Composite feedback = new Composite(container, SWT.NONE);
@@ -156,6 +160,28 @@ class SettingsWizardPage extends WizardPage {
         }
         setControl(container);
         createDataBindingContext();
+    }
+
+    private String anonymizeStacktracesToolTipText() {
+        String text = "This will clear any private package- and classnames\n\n";
+        text += "[ ] anonymize stacktraces\n";
+        text += "\tCaused by: java.lang.RuntimeException: Any message\n";
+        text += "\t\tat your.package.Class.method(Class.java:42)\n\n";
+        text += "[x] anonymize stacktraces\n";
+        text += "\tCaused by: java.lang.RuntimeException: Any message\n";
+        text += "\t\tat HIDDEN.HIDDEN(HIDDEN:42)";
+        return text;
+    }
+
+    private String clearMessagesToolTipText() {
+        String text = "This will remove all String-messages\n\n";
+        text += "[ ] clear messages\n";
+        text += "\tCaused by: java.lang.RuntimeException: \"Any private message\"\n";
+        text += "\t\tat your.package.Class.method(Class.java:42)\n\n";
+        text += "[x] clear messages\n";
+        text += "\tCaused by: java.lang.RuntimeException: HIDDEN\n";
+        text += "\t\tat your.package.Class.method(Class.java:42)";
+        return text;
     }
 
     private DataBindingContext createDataBindingContext() {
