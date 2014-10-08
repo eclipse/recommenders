@@ -85,12 +85,14 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
             String message = MessageFormat.format(Messages.THANKYOUDIALOG_TRACKED_PLEASE_ADD_TO_CC, getBugURL());
             text.append(message);
         } else {
-            boolean needsinfo = ArrayUtils.contains(state.getKeywords().or(EMPTY_STRINGS), KEYWORD_NEEDINFO);
             String status = state.getStatus().or(UNCONFIRMED);
             if (equals(UNCONFIRMED, status) || equals(NEW, status) || equals(ASSIGNED, status)) {
+                boolean needsinfo = ArrayUtils.contains(state.getKeywords().or(EMPTY_STRINGS), KEYWORD_NEEDINFO);
                 if (needsinfo) {
                     text.append(MessageFormat.format(Messages.THANKYOUDIALOG_MATCHED_NEED_FURTHER_INFORMATION,
                             getBugURL()));
+                    text.append(MessageFormat.format(Messages.THANKYOUDIALOG_FURTHER_INFORMATION, state
+                            .getInformation().or(Messages.THANKYOUDIALOG_NO_FURTHER_INFORMATIONS)));
                 } else {
                     text.append(MessageFormat.format(Messages.THANKYOUDIALOG_MATCHED_PLEASE_ADD_TO_CC, getBugURL()));
                 }
