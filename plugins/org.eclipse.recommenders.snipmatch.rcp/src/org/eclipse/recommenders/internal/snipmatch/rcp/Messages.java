@@ -57,7 +57,6 @@ public class Messages extends NLS {
     public static String DIALOG_TITLE_INVALID_SNIPPET_LOCATION;
     public static String DIALOG_TITLE_SAVE_SNIPPET;
 
-    public static String DIALOG_TITLE_SELECT_DEPENDENCY;
     public static String DIALOG_TITLE_ERROR_SNIPPET_SOURCE_INVALID;
     public static String DIALOG_TITLE_BRANCH_CHECKOUT_FAILURE;
 
