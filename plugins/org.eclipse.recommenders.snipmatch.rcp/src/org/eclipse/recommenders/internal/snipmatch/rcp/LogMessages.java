@@ -10,7 +10,7 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
-import static org.eclipse.core.runtime.IStatus.ERROR;
+import static org.eclipse.core.runtime.IStatus.*;
 
 import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.Logs.DefaultLogMessage;
@@ -28,6 +28,8 @@ public class LogMessages extends DefaultLogMessage {
             Messages.LOG_ERROR_SNIPPET_COULD_NOT_BE_EVALUATED);
     public static final LogMessages ERROR_CANNOT_COMPUTE_LOCATION = new LogMessages(ERROR,
             Messages.LOG_ERROR_CANNOT_COMPUTE_LOCATION);
+    public static final LogMessages WARNING_DEFAULT_GIT_REPO_URL_DUPLICATE = new LogMessages(WARNING,
+            Messages.LOG_WARNING_DEFAULT_GIT_REPO_URL_DUPLICATE);
 
     static Bundle bundle = Logs.getBundle(LogMessages.class);
 
