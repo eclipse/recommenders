@@ -121,9 +121,11 @@ class SettingsWizardPage extends WizardPage {
         {
             btnAnonymizeStacktraces = new Button(container, SWT.CHECK);
             btnAnonymizeStacktraces.setText(Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES);
+            btnAnonymizeStacktraces.setToolTipText(anonymizeStacktracesToolTipText());
 
             btnClearMessages = new Button(container, SWT.CHECK);
             btnClearMessages.setText(Messages.FIELD_LABEL_ANONYMIZE_MESSAGES);
+            btnClearMessages.setToolTipText(clearMessagesToolTipText());
         }
         {
             Composite feedback = new Composite(container, SWT.NONE);
@@ -156,6 +158,30 @@ class SettingsWizardPage extends WizardPage {
         }
         setControl(container);
         createDataBindingContext();
+    }
+
+    private String anonymizeStacktracesToolTipText() {
+        String text = "This will clear any private package- and classnames\n";
+        text += "Example:\n";
+        text += "Caused by: java.lang.RuntimeException: Any message\n";
+        text += "at your.package.Class.method(Class.java:42)";
+        text += "would be changed into:\n";
+        text += "Caused by: java.lang.RuntimeException: Any message";
+        text += "at HIDDEN.HIDDEN(HIDDEN:42)";
+        // TODO pretty formatting and note why information is useful
+        return text;
+    }
+
+    private String clearMessagesToolTipText() {
+        String text = "This will clear any String-messages in the logged error\n";
+        text += "Example:\n";
+        text += "Caused by: java.lang.RuntimeException: Your exception message with data you don't want to share\n";
+        text += "at your.package.Class.method(Class.java:42)";
+        text += "would be changed into:\n";
+        text += "Caused by: java.lang.RuntimeException: HIDDEN";
+        text += "at your.package.Class.method(Class.java:42)";
+        // TODO pretty formatting and note why information is useful
+        return text;
     }
 
     private DataBindingContext createDataBindingContext() {
