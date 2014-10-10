@@ -24,11 +24,23 @@ class CodeBuilder {
         classbody(classname, classbody);
     }
 
+    def static classbodyWithAdditionalImports(CharSequence imports, CharSequence classbody) {
+        classbodyWithAdditionalImports(imports, classname, classbody);
+    }
+
     def static classbody(CharSequence classname, CharSequence classbody) {
         classDeclaration('''public class «classname» ''', classbody)
     }
 
+    def static classbodyWithAdditionalImports(CharSequence imports, CharSequence classname, CharSequence classbody) {
+        classDeclarationWithAdditionalImports(imports, '''public class «classname» ''', classbody)
+    }
+
     def static classDeclaration(CharSequence declaration, CharSequence body) {
+        classDeclarationWithAdditionalImports("", declaration, body);
+    }
+
+    def static classDeclarationWithAdditionalImports(CharSequence imports, CharSequence declaration, CharSequence body) {
         '''
             import java.lang.reflect.*;
             import java.lang.annotation.*;
@@ -40,6 +52,7 @@ class CodeBuilder {
             import java.util.concurrent.atomic.*;
             import javax.annotation.*;
             import javax.xml.ws.Action;
+            «imports»
             «declaration» {
             	«body»
             }
@@ -110,7 +123,7 @@ class CodeBuilder {
     }
 
     def static method(CharSequence methodbody) {
-        classbody(
+        methodWithAdditionalImports("",
             '''
             public void __test() throws Exception {
             	«methodbody»
@@ -119,6 +132,14 @@ class CodeBuilder {
 
     def static method(CharSequence classname, CharSequence methodbody) {
         classbody(classname,
+            '''
+            public void __test() throws Exception {
+            	«methodbody»
+            }''')
+    }
+
+    def static methodWithAdditionalImports(CharSequence imports, CharSequence methodbody) {
+        classbodyWithAdditionalImports(imports,
             '''
             public void __test() throws Exception {
             	«methodbody»
