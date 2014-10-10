@@ -38,6 +38,26 @@ class CreateSnippetHandlerTest {
     }
 
     /*
+     * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=442519
+     */
+    @Test
+    def void testNecessaryStaticImports() {
+        code = CodeBuilder::methodWithAdditionalImports("import static java.util.Collections.*;",
+            '''
+                $List l = EMPTY_LIST;$
+            ''')
+        exercise()
+
+        assertEquals(
+            '''
+                List ${l:newName(java.util.List)} = EMPTY_LIST;
+                ${:import(java.util.List)}${:importStatic(java.util.Collections.EMPTY_LIST)}${cursor}
+            '''.toString,
+            actual.code
+        )
+    }
+
+    /*
      * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439984
      */
     @Test
