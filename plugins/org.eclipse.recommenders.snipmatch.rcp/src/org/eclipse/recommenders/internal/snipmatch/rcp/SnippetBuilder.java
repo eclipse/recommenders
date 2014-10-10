@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -54,6 +55,7 @@ public class SnippetBuilder {
     private final ITextSelection textSelection;
 
     private Set<String> imports;
+    private Set<String> staticImports;
     private Set<ProjectCoordinate> dependencies;
     private HashMap<IVariableBinding, String> vars;
     private HashMap<String, Integer> lastVarIndex;
@@ -85,6 +87,7 @@ public class SnippetBuilder {
         final Selection selection = Selection.createFromStartLength(start, length);
 
         imports = Sets.newTreeSet();
+        staticImports = Sets.newTreeSet();
         vars = Maps.newHashMap();
         lastVarIndex = Maps.newHashMap();
         sb = new StringBuilder();
@@ -125,12 +128,15 @@ public class SnippetBuilder {
                             appendTemplateVariableReference(uniqueVariableName);
                         } else if (isQualified(name)) {
                             sb.append(name.getIdentifier());
-                        } else {
-                            if (vb.isField()) {
-                                appendVarReference(uniqueVariableName, vb, "field"); //$NON-NLS-1$
+                        } else if (vb.isField()) {
+                            if (Modifier.isStatic(b.getModifiers())) {
+                                sb.append(name.getIdentifier());
+                                addStaticImport(vb);
                             } else {
-                                appendVarReference(uniqueVariableName, vb, "var"); //$NON-NLS-1$
+                                appendVarReference(uniqueVariableName, vb, "field"); //$NON-NLS-1$
                             }
+                        } else {
+                            appendVarReference(uniqueVariableName, vb, "var"); //$NON-NLS-1$
                         }
                         i += name.getLength() - 1;
                         continue outer;
@@ -241,6 +247,11 @@ public class SnippetBuilder {
             String joinedTypes = Joiner.on(", ").join(imports); //$NON-NLS-1$
             sb.append("${:import(").append(joinedTypes).append(")}"); //$NON-NLS-1$ //$NON-NLS-2$
         }
+
+        if (!staticImports.isEmpty()) {
+            String joinedMembers = Joiner.on(", ").join(staticImports); //$NON-NLS-1$
+            sb.append("${:importStatic(").append(joinedMembers).append(")}"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
     }
 
     private void appendCursor() {
@@ -248,8 +259,7 @@ public class SnippetBuilder {
     }
 
     private void addImport(ITypeBinding type) {
-        // need importable types only. Get the component type if it's an array
-        // type
+        // need importable types only. Get the component type if it's an array type
         if (type.isArray()) {
             addImport(type.getComponentType());
             return;
@@ -267,7 +277,21 @@ public class SnippetBuilder {
         if (opc != null) {
             dependencies.add(new ProjectCoordinate(opc.getGroupId(), opc.getArtifactId(), "0.0.0")); //$NON-NLS-1$
         }
+    }
 
+    private void addStaticImport(IVariableBinding binding) {
+        ITypeBinding declaringClass = binding.getDeclaringClass();
+        if (declaringClass == null) {
+            return;
+        }
+
+        String name = declaringClass.getErasure().getQualifiedName();
+        staticImports.add(name + "." + binding.getName());
+
+        ProjectCoordinate opc = pcAdvisor.resolve(declaringClass).orNull();
+        if (opc != null) {
+            dependencies.add(new ProjectCoordinate(opc.getGroupId(), opc.getArtifactId(), "0.0.0")); //$NON-NLS-1$
+        }
     }
 
     private void replaceLeadingWhitespaces() {
