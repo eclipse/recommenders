@@ -20,6 +20,7 @@ import static org.eclipse.recommenders.internal.subwords.rcp.LogMessages.EXCEPTI
 import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -64,6 +65,7 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
     // Negative value ensures subsequence matches have a lower relevance than standard JDT or template proposals
     private static final int SUBWORDS_RANGE_START = -10000;
+    private static final int SUBWORDS_ARGUMENTS_RANGE_START = -11000;
 
     private static Field CORE_CONTEXT = Reflections.getDeclaredField(JavaContentAssistInvocationContext.class,
             "fCoreContext").orNull(); //$NON-NLS-1$
@@ -159,7 +161,7 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         for (Entry<IJavaCompletionProposal, CompletionProposal> entry : newProposals.entrySet()) {
             IJavaCompletionProposal p = entry.getKey();
             String displayString = p.getDisplayString();
-            String completion = CompletionContexts.getPrefixMatchingArea(displayString);
+            String completion = CompletionContexts.getMatchingArea(displayString);
             if (!sortkeys.contains(displayString) && containsSubsequence(completion, crContext.getPrefix())) {
                 baseProposals.put(p, entry.getValue());
                 sortkeys.add(displayString);
@@ -193,7 +195,8 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         proposal.getProposalProcessorManager().addProcessor(new ProposalProcessor() {
 
             int[] bestSequence = new int[0];
-            String matchingArea = CompletionContexts.getPrefixMatchingArea(proposal.getDisplayString());
+            String matchingArea = CompletionContexts.getMatchingArea(proposal.getDisplayString());
+            List<String> matchingAreas = CompletionContexts.getMatchingAreas(proposal.getDisplayString());
             String prefix;
 
             @Override
@@ -206,8 +209,36 @@ public class SubwordsSessionProcessor extends SessionProcessor {
             @Override
             public void modifyDisplayString(StyledString displayString) {
                 for (int index : bestSequence) {
-                    displayString.setStyle(index, 1, StyledString.COUNTER_STYLER);
+                    int offset = getOffset(index);
+                    displayString.setStyle(index + offset, 1, StyledString.COUNTER_STYLER);
                 }
+            }
+
+            private int getOffset(int index) {
+                int matchingAreaIndex = 0;
+                int length = 0;
+                for (String subArea : matchingAreas) {
+                    length += subArea.length();
+                    if (index < length) {
+                        break;
+                    }
+                    matchingAreaIndex++;
+                }
+                int offset = 0;
+                if (matchingAreaIndex > 0) {
+                    offset += 1;
+                }
+                if (matchingAreaIndex > 1) {
+                    offset += 1;
+                }
+                if (matchingAreaIndex > 2) {
+                    if (matchingAreaIndex % 2 == 1) {
+                        offset += (matchingAreaIndex - 1) / 2 * 2;
+                    } else {
+                        offset += (matchingAreaIndex - 1) / 2 * 3;
+                    }
+                }
+                return offset;
             }
 
             @Override
@@ -227,8 +258,19 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                     int score = LCSS.scoreSubsequence(bestSequence);
                     proposal.setTag(IS_PREFIX_MATCH, false);
                     proposal.setTag(SUBWORDS_SCORE, score);
-                    return score + SUBWORDS_RANGE_START;
+                    if (matchInFirstArea()) {
+                        return score + SUBWORDS_RANGE_START;
+                    } else {
+                        return score + SUBWORDS_ARGUMENTS_RANGE_START;
+                    }
                 }
+            }
+
+            private boolean matchInFirstArea() {
+                if (bestSequence.length == 0 || matchingAreas.isEmpty()) {
+                    return true;
+                }
+                return bestSequence[0] < matchingAreas.get(0).length();
             }
         });
     }

@@ -15,6 +15,8 @@ import static com.google.common.base.Throwables.propagate;
 import static java.lang.Character.isJavaIdentifierPart;
 import static org.eclipse.recommenders.utils.Checks.*;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
@@ -32,6 +34,7 @@ import org.eclipse.ui.IEditorPart;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 @Beta
 @SuppressWarnings("restriction")
@@ -42,13 +45,13 @@ public class CompletionContexts {
      * match a user-entered prefix and the completion, i.e., 'ArrayList' without brackets in this case.
      * <p>
      * Examples:
-     * 
+     *
      * <pre>
      * add(Object o) --> add
      * ArrayList(Collection c) --> ArrayList
      * org.eclipse.other --> org.eclipse.other
      * </pre>
-     * 
+     *
      */
     public static String getPrefixMatchingArea(String displayString) {
         int end = displayString.length();
@@ -60,6 +63,47 @@ public class CompletionContexts {
             }
         }
         return displayString.substring(0, end);
+    }
+
+    public static String getMatchingArea(String displayString) {
+        StringBuilder sb = new StringBuilder();
+        boolean newWord = false;
+        for (int i = 0; i < displayString.length(); i++) {
+            char c = displayString.charAt(i);
+            if (isJavaIdentifierPart(c) || c == '.') {
+                if (newWord) {
+                    c = Character.toUpperCase(c);
+                    newWord = false;
+                }
+                sb.append(c);
+            } else {
+                if (c == ')') {
+                    break;
+                }
+                newWord = true;
+            }
+        }
+        return sb.toString();
+    }
+
+    public static List<String> getMatchingAreas(String displayString) {
+        List<String> result = Lists.newArrayList();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < displayString.length(); i++) {
+            char c = displayString.charAt(i);
+            if (isJavaIdentifierPart(c) || c == '.') {
+                sb.append(c);
+            } else {
+                if (sb.length() > 0) {
+                    result.add(sb.toString());
+                    sb = new StringBuilder();
+                }
+                if (c == ')') {
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     public static final String JDT_ALL_CATEGORY = "org.eclipse.jdt.ui.javaAllProposalCategory"; //$NON-NLS-1$
