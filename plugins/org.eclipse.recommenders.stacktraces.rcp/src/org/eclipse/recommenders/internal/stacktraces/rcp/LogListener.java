@@ -15,10 +15,17 @@ import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorRepor
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.Logs.log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.property.Properties;
@@ -37,8 +44,6 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
 public class LogListener implements ILogListener, IStartup {
@@ -47,25 +52,29 @@ public class LogListener implements ILogListener, IStartup {
 
     private static Method SET_EXCEPTION = Reflections.getDeclaredMethod(Status.class, "setException", Throwable.class)
             .orNull();
+    private static String fileNameAndLocation = "errorRepors.txt";
+    private static String tempFileNameAndLocation = "tempErrorRepors.txt";
+    private static int maxErrorAgeInDays = 10;
 
-    private Cache<String, ErrorReport> cache = CacheBuilder.newBuilder().maximumSize(30)
-            .expireAfterAccess(10, TimeUnit.MINUTES).build();
     private IObservableList errorReports;
-    private volatile boolean isDialogOpen;
-    private Settings settings;
+    private volatile boolean isDialogOpen; 
+    private Settings settings;  
+    private ArrayList<String> tempErrorReportCache; 
 
     public LogListener() {
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
                 errorReports = Properties.selfList(ErrorReport.class).observe(Lists.newArrayList());
+                tempErrorReportCache = new ArrayList<String>();
+                populateTempCacheFromFile(); 
             }
         });
     }
 
     @Override
     public void earlyStartup() {
-        Platform.addLogListener(this);
+        Platform.addLogListener(this); 
     }
 
     @Override
@@ -86,6 +95,8 @@ public class LogListener implements ILogListener, IStartup {
         if (settings.isSkipSimilarErrors() && sentSimilarErrorBefore(report)) {
             return;
         }
+        // Note that if settings.isSkipSimilarErrors() is false and sentSimilarErrorBefore(report) is true
+        // then the error report may exist in the ArrayList tempErrorReportCache
         addForSending(report);
         if (sendAction == SendAction.ASK) {
             checkAndSendWithDialog(report);
@@ -131,7 +142,7 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     private boolean sentSimilarErrorBefore(final ErrorReport report) {
-        return cache.getIfPresent(computeCacheKey(report)) != null;
+        return tempErrorReportCache.contains(computeCacheKey(report));
     }
 
     private String computeCacheKey(final ErrorReport report) {
@@ -145,7 +156,85 @@ public class LogListener implements ILogListener, IStartup {
                 errorReports.add(report);
             }
         });
-        cache.put(computeCacheKey(report), report);
+        // according to the logic of the logging() method, it is possible to
+        // reach the addForSending() method if the Error has been previously logged
+        if (!sentSimilarErrorBefore(report)) {
+            tempErrorReportCache.add(computeCacheKey(report));
+            writeErrorReportToFile(computeCacheKey(report));
+        }
+    }
+
+    private void writeErrorReportToFile(String report) {
+        try {
+            // Serialize data object to the end of the file
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileNameAndLocation, true));
+
+            // include the date
+            out.writeObject(new GregorianCalendar());
+
+            // write the object
+            out.writeObject(report);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+        }
+    }
+
+    // populate the tempErrorReportCache from the file and create a new file excluding any
+    // errors which are sufficiently old
+    private void populateTempCacheFromFile() {
+        try {
+            FileInputStream fin = new FileInputStream(fileNameAndLocation);
+            ObjectInputStream in = new ObjectInputStream(fin);
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(tempFileNameAndLocation));
+
+            // get the current time
+            GregorianCalendar currentTime = new GregorianCalendar();
+            GregorianCalendar archivedTime;
+            String archivedError;
+
+            while (fin.available() > 0) {
+                // get the next date and string
+                archivedTime = (GregorianCalendar) in.readObject();
+                archivedError = (String) in.readObject();
+                // if not too old, add to the cache and write to a new file
+                if (errorDateNotTooOld(currentTime, archivedTime)) {
+                    tempErrorReportCache.add((String) in.readObject());
+                    out.writeObject(archivedTime);
+                    out.writeObject(archivedError);
+                }
+            }
+            in.close();
+            fin.close();
+            out.flush();
+            out.close();
+
+            // delete the old file and rename the temp file with the deleted file's name
+            File file = new File(fileNameAndLocation);
+            file.delete();
+            file = new File(tempFileNameAndLocation);
+            file.renameTo(new File(fileNameAndLocation));
+
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private boolean errorDateNotTooOld(GregorianCalendar c1, GregorianCalendar c2) {
+        long span, numberOfAllowedMS;
+        numberOfAllowedMS = 1000 * 60 * 60 * 24 * maxErrorAgeInDays;
+
+        if (c1.getTimeInMillis() > c2.getTimeInMillis()) {
+            span = c1.getTimeInMillis() - c2.getTimeInMillis();
+        } else {
+            span = c2.getTimeInMillis() - c1.getTimeInMillis();
+        }
+
+        return span < numberOfAllowedMS;
     }
 
     @VisibleForTesting
