@@ -49,13 +49,16 @@ public class Messages extends NLS {
     public static String DIALOG_TITLE_CHANGE_CONFIGURATION_NAME;
     public static String DIALOG_TITLE_ENTER_NEW_KEYWORD;
     public static String DIALOG_TITLE_ENTER_NEW_TAG;
+    public static String DIALOG_TITLE_ERROR_SNIPPET_SOURCE_INVALID;
     public static String DIALOG_TITLE_ERROR_WHILE_STORING_SNIPPET;
     public static String DIALOG_TITLE_INAVLID_SNIPPET_NAME;
     public static String DIALOG_TITLE_INVALID_SNIPPET_LOCATION;
     public static String DIALOG_TITLE_SAVE_SNIPPET;
 
-    public static String DIALOG_TITLE_ERROR_SNIPPET_SOURCE_INVALID;
     public static String DIALOG_TITLE_BRANCH_CHECKOUT_FAILURE;
+
+    public static String DIALOG_TITLE_SELECT_DEPENDENCY;
+    public static String DIALOG_MESSAGE_SELECT_DEPENDENCY;
 
     public static String DIALOG_VALIDATOR_DEPENDENCY_ALREADY_ADDED;
 
@@ -140,7 +143,8 @@ public class Messages extends NLS {
     public static String WARNING_FAILURE_TO_UPDATE_REPOSITORY;
     public static String WARNING_FAILURE_TO_CHECKOUT_CURRENT_BRANCH;
 
-    public static String WIZARD_GIT_REPOSITORY_DESCRIPTION;
+    public static String WIZARD_GIT_REPOSITORY_ADD_DESCRIPTION;
+    public static String WIZARD_GIT_REPOSITORY_EDIT_DESCRIPTION;
     public static String WIZARD_GIT_REPOSITORY_ERROR_EMPTY_BRANCH_PREFIX;
     public static String WIZARD_GIT_REPOSITORY_ERROR_EMPTY_FETCH_URL;
     public static String WIZARD_GIT_REPOSITORY_ERROR_EMPTY_NAME;

@@ -50,7 +50,7 @@ public class ProjectCoordinateSelectionDialog extends FilteredItemsSelectionDial
 
     public ProjectCoordinateSelectionDialog(Shell shell) {
         super(shell, true);
-        setTitle(DIALOG_TITLE_SELECT_DEPENDENCY);
+        setTitle(DIALOG_TITLE_SELECT_PROJECT_COORDINATE);
 
         this.images = InjectionService.getInstance().requestInstance(SharedImages.class);
         this.dependencyListener = InjectionService.getInstance().requestInstance(IDependencyListener.class);
