@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -20,12 +21,23 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.eclipse.core.internal.resources.Workspace;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.egit.core.internal.job.JobUtil;
+import org.eclipse.egit.core.op.ResetOperation;
+import org.eclipse.egit.ui.UIPreferences;
+import org.eclipse.egit.ui.internal.commit.CommitUI;
 import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Repositories.SnippetRepositoryConfigurationChangedEvent;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository;
@@ -44,14 +56,18 @@ import org.eclipse.recommenders.snipmatch.rcp.model.EclipseGitSnippetRepositoryC
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Urls;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.name.Names;
 
+@SuppressWarnings("restriction")
 public class EclipseGitSnippetRepository implements ISnippetRepository {
 
     private static Logger LOG = LoggerFactory.getLogger(EclipseGitSnippetRepository.class);
@@ -59,7 +75,7 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
     private final EventBus bus;
 
     private volatile int timesOpened;
-    private ISnippetRepository delegate;
+    private GitSnippetRepository delegate;
     private volatile boolean delegateOpen;
 
     private final Lock readLock;
@@ -339,5 +355,45 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
         } finally {
             writeLock.unlock();
         }
+    }
+
+    @Override
+    public boolean share(Collection<UUID> uuids) {
+        Workspace ws = (Workspace) ResourcesPlugin.getWorkspace();
+        List<IResource> resources = Lists.newArrayList();
+        for (UUID uuid : uuids) {
+            File snippetFile = delegate.getSnippetFile(uuid);
+            if (snippetFile == null) {
+                continue;
+            }
+            IPath location = new Path(snippetFile.getAbsolutePath());
+            IResource file = ws.newResource(location, IResource.FILE);
+            resources.add(file);
+        }
+        IResource[] res = resources.toArray(new IResource[resources.size()]);
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+
+        // TODO This is a workaround for CommitUI shortcomings. See Bug 447236
+        IPreferenceStore preferenceStore = org.eclipse.egit.ui.Activator.getDefault().getPreferenceStore();
+        boolean includeUntrackedPreference = preferenceStore.getBoolean(UIPreferences.COMMIT_DIALOG_INCLUDE_UNTRACKED);
+        try {
+            preferenceStore.setValue(UIPreferences.COMMIT_DIALOG_INCLUDE_UNTRACKED, true);
+
+            CommitUI commitUI = new CommitUI(shell, delegate.getGitRepo(), res, false);
+            if (!commitUI.commit()) {
+                return false;
+            }
+            ResetOperation reset = new ResetOperation(delegate.getGitRepo(), "origin/" + Snippet.FORMAT_VERSION,
+                    ResetType.MIXED);
+            JobUtil.scheduleUserWorkspaceJob(reset, "reset", ws);
+            return true;
+        } finally {
+            preferenceStore.setValue(UIPreferences.COMMIT_DIALOG_INCLUDE_UNTRACKED, includeUntrackedPreference);
+        }
+    }
+
+    @Override
+    public boolean isSharingSupported() {
+        return true;
     }
 }
