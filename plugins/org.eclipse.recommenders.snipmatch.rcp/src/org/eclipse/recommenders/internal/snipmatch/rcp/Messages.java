@@ -122,10 +122,12 @@ public class Messages extends NLS {
     public static String SNIPPETS_VIEW_MENUITEM_REFRESH;
     public static String SNIPPETS_VIEW_MENUITEM_REMOVE_REPOSITORY;
     public static String SNIPPETS_VIEW_MENUITEM_REMOVE_SNIPPET;
+    public static String SNIPPETS_VIEW_MENUITEM_SHARE_SNIPPET;
 
     public static String JOB_OPENING_SNIPPET_REPOSITORY;
     public static String JOB_RECONNECTING_SNIPPET_REPOSITORY;
     public static String JOB_REFRESHING_SNIPPETS_VIEW;
+    public static String JOB_RESETTING_GIT_REPOSITORY;
 
     public static String PREFPAGE_BUTTON_EDIT;
     public static String PREFPAGE_BUTTON_NEW;
@@ -159,11 +161,12 @@ public class Messages extends NLS {
     public static String WIZARD_GIT_REPOSITORY_TITLE;
     public static String WIZARD_GIT_REPOSITORY_WINDOW_TITLE;
 
-    public static String LOG_ERROR_LOADING_DEFAULT_REPO_CONFIGURATION;
-    public static String LOG_ERROR_STORING_DEFAULT_REPO_CONFIGURATION;
-    public static String LOG_ERROR_LOADING_REPO_CONFIGURATION;
-
+    public static String LOG_ERROR_CREATING_INDEX_HEAD_DIFF;
     public static String LOG_ERROR_LOADING_DEFAULT_GIT_REPO_CONFIGURATION;
+    public static String LOG_ERROR_LOADING_DEFAULT_REPO_CONFIGURATION;
+    public static String LOG_ERROR_LOADING_REPO_CONFIGURATION;
+    public static String LOG_ERROR_STORING_DEFAULT_REPO_CONFIGURATION;
+
     public static String LOG_WARNING_DEFAULT_GIT_REPO_URL_DUPLICATE;
 
     public static String WIZARD_TYPE_SELECTION_DESCRIPTION;

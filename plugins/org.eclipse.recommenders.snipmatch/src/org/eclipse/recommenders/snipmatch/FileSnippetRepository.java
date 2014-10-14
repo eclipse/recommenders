@@ -582,4 +582,24 @@ public class FileSnippetRepository implements ISnippetRepository {
             writeLock.unlock();
         }
     }
+
+    @Override
+    public boolean share(Collection<UUID> uuids) {
+        return false;
+    }
+
+    @Override
+    public boolean isSharingSupported() {
+        return false;
+    }
+
+    public File getSnippetFile(UUID uuid) {
+        readLock.lock();
+        try {
+            File file = new File(snippetsdir, uuid.toString() + DOT_JSON);
+            return file.exists() ? file : null;
+        } finally {
+            readLock.unlock();
+        }
+    }
 }
