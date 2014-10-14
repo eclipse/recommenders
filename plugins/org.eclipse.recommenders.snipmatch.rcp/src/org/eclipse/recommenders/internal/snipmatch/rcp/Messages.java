@@ -122,6 +122,7 @@ public class Messages extends NLS {
     public static String SNIPPETS_VIEW_MENUITEM_REFRESH;
     public static String SNIPPETS_VIEW_MENUITEM_REMOVE_REPOSITORY;
     public static String SNIPPETS_VIEW_MENUITEM_REMOVE_SNIPPET;
+    public static String SNIPPETS_VIEW_MENUITEM_SHARE_SNIPPET;
 
     public static String JOB_OPENING_SNIPPET_REPOSITORY;
     public static String JOB_RECONNECTING_SNIPPET_REPOSITORY;

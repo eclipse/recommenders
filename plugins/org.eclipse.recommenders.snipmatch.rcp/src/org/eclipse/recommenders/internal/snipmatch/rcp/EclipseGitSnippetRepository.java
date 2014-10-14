@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -339,5 +340,15 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
         } finally {
             writeLock.unlock();
         }
+    }
+
+    @Override
+    public boolean share(Collection<UUID> uuids) {
+        return false; // TODO implement sharing
+    }
+
+    @Override
+    public boolean isSharingSupported() {
+        return true;
     }
 }

@@ -582,4 +582,14 @@ public class FileSnippetRepository implements ISnippetRepository {
             writeLock.unlock();
         }
     }
+
+    @Override
+    public boolean share(Collection<UUID> uuids) {
+        return false;
+    }
+
+    @Override
+    public boolean isSharingSupported() {
+        return false;
+    }
 }
