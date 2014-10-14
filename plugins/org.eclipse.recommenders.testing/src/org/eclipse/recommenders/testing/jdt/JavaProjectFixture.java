@@ -371,7 +371,7 @@ public class JavaProjectFixture {
         int attempts = 0;
         while (!file.exists()) {
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 // Do nothing
             }
