@@ -47,7 +47,7 @@
 	</distributionManagement>
 	<properties>
 		<recommenders-version>2.1.11-SNAPSHOT</recommenders-version>
-		<javaVersion>1.6</javaVersion>
+		<javaVersion>1.7</javaVersion>
 		<tychoVersion>0.21.0</tychoVersion>
 		<!-- Use HTTP, as it provides the most firewall-friendly access to the Git repository. -->
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/recommenders/org.eclipse.recommenders.git</tycho.scmUrl>
@@ -369,8 +369,7 @@
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
-							<artifactId>java16</artifactId>
-							<!-- Pre-1.6u18 signature -->
+							<artifactId>java17</artifactId>
 							<version>1.0</version>
 						</signature>
 					</configuration>
