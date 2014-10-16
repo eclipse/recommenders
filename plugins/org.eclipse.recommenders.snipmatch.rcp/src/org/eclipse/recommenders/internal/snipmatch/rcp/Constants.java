@@ -23,6 +23,8 @@ public class Constants {
     public static final String PREF_SEARCH_RESULTS_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchResultBackgroundColor"; //$NON-NLS-1$
     public static final String PREF_SEARCH_BOX_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchboxbackground"; //$NON-NLS-1$
 
+    public static final String PREF_DELETED_REPOSITORY_CONFIGURATION_IDS = "org.eclipse.recommenders.snipmatch.rcp.deletedrepositoryconfigurationids"; //$NON-NLS-1$
+
     public static final String SNIPMATCH_CONTEXT_ID = "Snipmatch-Java-Context"; //$NON-NLS-1$
 
     public static final String EXT_POINT_PAGE_FACTORIES = "org.eclipse.recommenders.snipmatch.rcp.pageFactories"; //$NON-NLS-1$
@@ -40,6 +42,7 @@ public class Constants {
     public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_NAME = "name"; //$NON-NLS-1$
     public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_DESCRIPTION = "description"; //$NON-NLS-1$
     public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_ENABLED = "enabled"; //$NON-NLS-1$
+    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_ID = "id"; //$NON-NLS-1$
     public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_URL = "url"; //$NON-NLS-1$
     public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_PUSH_URL = "pushUrl"; //$NON-NLS-1$
     public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_PUSH_BRANCH_PREFIX = "pushBranchPrefix"; //$NON-NLS-1$

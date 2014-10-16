@@ -12,12 +12,17 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 import javax.inject.Singleton;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.FontRegistry;
+import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
 import org.eclipse.recommenders.snipmatch.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PartInitException;
@@ -26,6 +31,7 @@ import org.eclipse.ui.themes.IThemeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -77,12 +83,38 @@ public class SnipmatchRcpModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public SnippetRepositoryConfigurations provideRepositoryConfigurations(@Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile) {
-        SnippetRepositoryConfigurations configurations = RepositoryConfigurations.loadConfigurations(repositoryConfigurationFile);
-        if (configurations.getRepos().isEmpty()) {
-            configurations.getRepos().addAll(RepositoryConfigurations.fetchDefaultConfigurations());
-        }
+    public SnippetRepositoryConfigurations provideRepositoryConfigurations(
+            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile, SnipmatchRcpPreferences prefs) {
+        SnippetRepositoryConfigurations configurations = RepositoryConfigurations
+                .loadConfigurations(repositoryConfigurationFile);
+
+        configurations = RepositoryConfigurations.updateDefaultConfigurations(configurations);
+
+        configurations = filterAlreadyDeletedConfigurations(prefs.getDeletedRepositoryConfigurationIds(), configurations);
+
+        RepositoryConfigurations.storeConfigurations(configurations, repositoryConfigurationFile);
+
         return configurations;
+    }
+
+    private static SnippetRepositoryConfigurations filterAlreadyDeletedConfigurations(
+            Set<String> deletedRepositoryConfigurationIds, SnippetRepositoryConfigurations configurations) {
+        List<SnippetRepositoryConfiguration> toDelete = Lists.newArrayList();
+        for (SnippetRepositoryConfiguration config : configurations.getRepos()) {
+            if (deletedRepositoryConfigurationIds.contains(config.getId())) {
+                toDelete.add(config);
+            }
+        }
+        configurations.getRepos().removeAll(toDelete);
+
+        return configurations;
+    }
+
+    @Provides
+    @Singleton
+    public SnipmatchRcpPreferences provide(IWorkbench wb) {
+        IEclipseContext context = (IEclipseContext) wb.getService(IEclipseContext.class);
+        return ContextInjectionFactory.make(SnipmatchRcpPreferences.class, context);
     }
 
     @Provides

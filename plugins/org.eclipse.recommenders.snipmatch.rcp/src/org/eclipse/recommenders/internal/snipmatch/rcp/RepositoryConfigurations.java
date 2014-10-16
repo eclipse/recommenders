@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -82,8 +84,10 @@ public class RepositoryConfigurations {
         }
     }
 
-    protected static List<SnippetRepositoryConfiguration> fetchDefaultConfigurations() {
-        List<SnippetRepositoryConfiguration> defaultConfigurations = Lists.newArrayList();
+    protected static SnippetRepositoryConfigurations updateDefaultConfigurations(
+            SnippetRepositoryConfigurations configurations) {
+        EList<SnippetRepositoryConfiguration> configs = new BasicEList<SnippetRepositoryConfiguration>(
+                configurations.getRepos());
 
         IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
                 EXT_POINT_REGISTERED_EMF_PACKAGE);
@@ -102,33 +106,17 @@ public class RepositoryConfigurations {
                 for (EClass eClass : subtypes) {
                     DefaultSnippetRepositoryConfigurationProvider configurationProvider = cast(EPackage.Registry.INSTANCE
                             .getEFactory(uri).create(eClass));
-                    defaultConfigurations.addAll(configurationProvider.getDefaultConfiguration());
+                    configs = configurationProvider.updateConfigurations(configs);
                 }
             } catch (Exception e) {
                 Logs.log(LogMessages.ERROR_LOADING_DEFAULT_REPO_CONFIGURATION, e);
             }
         }
 
-        int id = fetchHighestUsedId(defaultConfigurations) + 1;
+        configurations.getRepos().clear();
+        configurations.getRepos().addAll(configs);
 
-        for (SnippetRepositoryConfiguration config : defaultConfigurations) {
-            if (config.getId() == -1) {
-                config.setId(id);
-                id++;
-            }
-        }
-
-        return defaultConfigurations;
-    }
-
-    public static int fetchHighestUsedId(List<SnippetRepositoryConfiguration> defaultConfigurations) {
-        int id = 0;
-        for (SnippetRepositoryConfiguration config : defaultConfigurations) {
-            if (config.getId() > id) {
-                id = config.getId();
-            }
-        }
-        return id;
+        return configurations;
     }
 
     private static List<EClass> searchSubtypes(EPackage ePackage, EClass eClass) {
@@ -144,6 +132,13 @@ public class RepositoryConfigurations {
             }
         }
         return subTypes;
+    }
+
+    public static List<SnippetRepositoryConfiguration> fetchDefaultConfigurations() {
+        SnippetRepositoryConfigurations configurations = SnipmatchRcpModelFactory.eINSTANCE
+                .createSnippetRepositoryConfigurations();
+        configurations = updateDefaultConfigurations(configurations);
+        return configurations.getRepos();
     }
 
 }

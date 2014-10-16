@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.internal.snipmatch.rcp.Repositories.SnippetRepositoryConfigurationChangedEvent;
 import org.eclipse.recommenders.snipmatch.GitSnippetRepository;
@@ -67,8 +68,8 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
 
     private volatile Job openJob = null;
 
-    public EclipseGitSnippetRepository(int id, File basedir, String remoteUri, String pushUrl, String pushBranchPrefix,
-            EventBus bus) {
+    public EclipseGitSnippetRepository(String id, File basedir, String remoteUri, String pushUrl,
+            String pushBranchPrefix, EventBus bus) {
         this.bus = bus;
 
         delegate = new GitSnippetRepository(id, new File(basedir, Urls.mangle(remoteUri)), remoteUri, pushUrl,
@@ -243,7 +244,7 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
     }
 
     @Override
-    public int getId() {
+    public String getId() {
         readLock.lock();
         try {
             return delegate.getId();
@@ -317,10 +318,39 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
                 config.getPushBranchPrefix(), bus);
     }
 
-    public static BasicEList<SnippetRepositoryConfiguration> getDefaultConfiguration() {
+    public static BasicEList<SnippetRepositoryConfiguration> updateConfigurations(
+            EList<SnippetRepositoryConfiguration> configurations) {
+
         BasicEList<SnippetRepositoryConfiguration> result = new BasicEList<SnippetRepositoryConfiguration>();
-        result.addAll(DefaultGitSnippetRepositoryConfigurations.fetchDefaultConfigurations());
+
+        List<EclipseGitSnippetRepositoryConfiguration> defaultConfigurations = DefaultGitSnippetRepositoryConfigurations
+                .fetchDefaultConfigurations();
+
+        for (SnippetRepositoryConfiguration defaultConfig : defaultConfigurations) {
+            EclipseGitSnippetRepositoryConfiguration oldConfig = findConfigWithId(defaultConfig.getId(), configurations);
+            SnippetRepositoryConfiguration newConfig = merge(oldConfig, defaultConfig);
+            result.add(newConfig);
+        }
+
         return result;
+    }
+
+    private static SnippetRepositoryConfiguration merge(EclipseGitSnippetRepositoryConfiguration oldConfig,
+            SnippetRepositoryConfiguration defaultConfig) {
+        if (oldConfig != null) {
+            defaultConfig.setName(oldConfig.getName());
+        }
+        return defaultConfig;
+    }
+
+    private static EclipseGitSnippetRepositoryConfiguration findConfigWithId(String id,
+            EList<SnippetRepositoryConfiguration> configurations) {
+        for (SnippetRepositoryConfiguration config : configurations) {
+            if (config.getId().equals(id) && config instanceof EclipseGitSnippetRepositoryConfiguration) {
+                return (EclipseGitSnippetRepositoryConfiguration) config;
+            }
+        }
+        return null;
     }
 
     @Override

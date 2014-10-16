@@ -18,7 +18,9 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference snipmatchrcp.ecore#//SnippetRepositoryConfigurations/repos"/>
     </genClasses>
     <genClasses ecoreClass="snipmatchrcp.ecore#//DefaultEclipseGitSnippetRepositoryConfiguration">
-      <genOperations ecoreOperation="snipmatchrcp.ecore#//DefaultEclipseGitSnippetRepositoryConfiguration/getDefaultConfiguration"/>
+      <genOperations ecoreOperation="snipmatchrcp.ecore#//DefaultEclipseGitSnippetRepositoryConfiguration/updateConfigurations">
+        <genParameters ecoreParameter="snipmatchrcp.ecore#//DefaultEclipseGitSnippetRepositoryConfiguration/updateConfigurations/configurations"/>
+      </genOperations>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

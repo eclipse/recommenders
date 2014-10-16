@@ -16,6 +16,7 @@ import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
+import java.util.UUID;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -52,7 +53,13 @@ public class GitBasedRepositoryConfigurationWizard extends AbstractSnippetReposi
 
     @Override
     public boolean performFinish() {
+        String id = UUID.randomUUID().toString();
+        if (configuration != null) {
+            id = configuration.getId();
+        }
+
         configuration = SnipmatchRcpModelFactory.eINSTANCE.createEclipseGitSnippetRepositoryConfiguration();
+        configuration.setId(id);
         configuration.setName(page.txtName.getText());
         configuration.setUrl(page.txtFetchUri.getText());
         configuration.setPushUrl(page.txtPushUri.getText());

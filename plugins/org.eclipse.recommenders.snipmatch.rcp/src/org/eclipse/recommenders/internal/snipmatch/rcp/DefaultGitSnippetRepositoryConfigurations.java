@@ -34,6 +34,7 @@ public class DefaultGitSnippetRepositoryConfigurations {
                 EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS);
         for (IConfigurationElement element : elements) {
             try {
+                String id = element.getAttribute(EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_ID);
                 String name = element.getAttribute(EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_NAME);
                 String description = element
                         .getAttribute(EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_DESCRIPTION);
@@ -48,7 +49,7 @@ public class DefaultGitSnippetRepositoryConfigurations {
                 String pushBranchPrefix = element
                         .getAttribute(EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_PUSH_BRANCH_PREFIX);
 
-                defaultConfigurations.add(createConfiguration(name, description, enabled, url, pushUrl,
+                defaultConfigurations.add(createConfiguration(id, name, description, enabled, url, pushUrl,
                         pushBranchPrefix));
                 addedUrls.add(url);
             } catch (Exception e) {
@@ -59,11 +60,12 @@ public class DefaultGitSnippetRepositoryConfigurations {
         return defaultConfigurations;
     }
 
-    private static EclipseGitSnippetRepositoryConfiguration createConfiguration(String name, String description,
-            boolean enabled, String url, String pushUrl, String pushBranchPrefix) {
+    private static EclipseGitSnippetRepositoryConfiguration createConfiguration(String id, String name,
+            String description, boolean enabled, String url, String pushUrl, String pushBranchPrefix) {
         EclipseGitSnippetRepositoryConfiguration configuration = SnipmatchRcpModelFactory.eINSTANCE
                 .createEclipseGitSnippetRepositoryConfiguration();
 
+        configuration.setId(id);
         configuration.setName(name);
         configuration.setDescription(description);
         configuration.setEnabled(enabled);

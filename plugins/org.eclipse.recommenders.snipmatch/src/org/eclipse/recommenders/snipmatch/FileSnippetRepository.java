@@ -112,7 +112,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     private final Lock readLock;
     private final Lock writeLock;
 
-    private final int id;
+    private final String id;
     private final File snippetsdir;
     private final File indexdir;
     private final String repoUrl;
@@ -135,7 +135,7 @@ public class FileSnippetRepository implements ISnippetRepository {
                 }
             });
 
-    public FileSnippetRepository(int id, File basedir) {
+    public FileSnippetRepository(String id, File basedir) {
         Preconditions.checkArgument(CACHE_SIZE > MAX_SEARCH_RESULTS,
                 "The cache size needs to be larger than the maximum number of search results.");
         this.id = id;
@@ -482,7 +482,7 @@ public class FileSnippetRepository implements ISnippetRepository {
     }
 
     @Override
-    public int getId() {
+    public String getId() {
         return id;
     }
 

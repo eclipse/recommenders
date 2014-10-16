@@ -71,9 +71,9 @@ public class Repositories implements IRcpService, Openable, Closeable {
         return repositories;
     }
 
-    public Optional<ISnippetRepository> getRepository(int id) {
+    public Optional<ISnippetRepository> getRepository(String id) {
         for (ISnippetRepository repo : repositories) {
-            if (repo.getId() == id) {
+            if (repo.getId().equals(id)) {
                 return of(repo);
             }
         }

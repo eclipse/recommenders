@@ -21,7 +21,9 @@
       <genOperations ecoreOperation="snipmatch.ecore#//SnippetRepositoryConfiguration/createRepositoryInstance"/>
     </genClasses>
     <genClasses image="false" ecoreClass="snipmatch.ecore#//DefaultSnippetRepositoryConfigurationProvider">
-      <genOperations ecoreOperation="snipmatch.ecore#//DefaultSnippetRepositoryConfigurationProvider/getDefaultConfiguration"/>
+      <genOperations ecoreOperation="snipmatch.ecore#//DefaultSnippetRepositoryConfigurationProvider/updateConfigurations">
+        <genParameters ecoreParameter="snipmatch.ecore#//DefaultSnippetRepositoryConfigurationProvider/updateConfigurations/configurations"/>
+      </genOperations>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

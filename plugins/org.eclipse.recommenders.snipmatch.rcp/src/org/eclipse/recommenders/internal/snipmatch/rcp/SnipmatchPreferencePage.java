@@ -19,6 +19,8 @@ import static org.eclipse.recommenders.utils.Checks.cast;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -58,6 +60,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -69,12 +72,14 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
     private final SnippetRepositoryConfigurations configuration;
     private boolean dirty;
     private final File repositoryConfigurationFile;
+    private final SnipmatchRcpPreferences prefs;
 
     @Inject
     public SnipmatchPreferencePage(EventBus bus, Repositories repos, SnippetRepositoryConfigurations configuration,
-            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile) {
+            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile, SnipmatchRcpPreferences prefs) {
         super(GRID);
         setDescription(Messages.PREFPAGE_DESCRIPTION);
+        this.prefs = prefs;
         this.bus = bus;
         this.repos = repos;
         this.configuration = configuration;
@@ -233,6 +238,10 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                 }
             }
 
+            Set<String> deletedConfigs = Sets.newHashSet(prefs.getDeletedRepositoryConfigurationIds());
+            deletedConfigs.add(configuration.getId());
+            SnipmatchRcpPreferences.store(deletedConfigs);
+
             configurations.remove(configuration);
             updateTableContent(configurations);
             dirty = true;
@@ -278,7 +287,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                 if (dialog.open() == Window.OK) {
                     List<SnippetRepositoryConfiguration> configurations = getTableInput();
                     SnippetRepositoryConfiguration newConfiguration = newWizard.getConfiguration();
-                    newConfiguration.setId(RepositoryConfigurations.fetchHighestUsedId(configurations) + 1);
+                    newConfiguration.setId(UUID.randomUUID().toString());
                     configurations.add(newConfiguration);
                     updateTableContent(configurations);
                     dirty = true;
@@ -354,6 +363,8 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
 
         @Override
         protected void doLoadDefault() {
+            SnipmatchPreferencePage.this.getPreferenceStore().setValue(
+                    Constants.PREF_DELETED_REPOSITORY_CONFIGURATION_IDS, ""); //$NON-NLS-1$
             updateTableContent(RepositoryConfigurations.fetchDefaultConfigurations());
             dirty = true;
         }

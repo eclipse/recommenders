@@ -11,11 +11,22 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.fromNullable;
 import static java.text.MessageFormat.format;
 import static org.eclipse.recommenders.internal.snipmatch.rcp.SnipmatchRcpModule.REPOSITORY_CONFIGURATION_FILE;
-import static org.eclipse.recommenders.rcp.SharedImages.Images.*;
-import static org.eclipse.recommenders.utils.Checks.*;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_ADD_REPOSITORY;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_ADD_SNIPPET;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_COLLAPSE_ALL;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_EDIT_REPOSITORY;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_EDIT_SNIPPET;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_EXPAND_ALL;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_REFRESH;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_REMOVE_REPOSITORY;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_REMOVE_REPOSITORY_DISABLED;
+import static org.eclipse.recommenders.rcp.SharedImages.Images.ELCL_REMOVE_SNIPPET;
+import static org.eclipse.recommenders.utils.Checks.cast;
+import static org.eclipse.recommenders.utils.Checks.ensureIsTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -129,6 +140,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
     private SharedImages images;
 
     private final Repositories repos;
+    private final SnipmatchRcpPreferences prefs;
     private final SnippetRepositoryConfigurations configs;
     private final File repositoryConfigurationFile;
     private final EventBus bus;
@@ -161,8 +173,9 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
     @Inject
     public SnippetsView(Repositories repos, SharedImages images, SnippetRepositoryConfigurations configs, EventBus bus,
-            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile) {
+            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile, SnipmatchRcpPreferences prefs) {
         this.repos = repos;
+        this.prefs = prefs;
         this.configs = configs;
         this.images = images;
         this.bus = bus;
@@ -418,7 +431,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             WizardDialog dialog = new WizardDialog(tree.getShell(), newWizard);
             if (dialog.open() == Window.OK) {
                 SnippetRepositoryConfiguration newConfiguration = newWizard.getConfiguration();
-                newConfiguration.setId(RepositoryConfigurations.fetchHighestUsedId(configs.getRepos()) + 1);
+                newConfiguration.setId(UUID.randomUUID().toString());
                 configs.getRepos().add(newConfiguration);
                 RepositoryConfigurations.storeConfigurations(configs, repositoryConfigurationFile);
                 bus.post(new Repositories.SnippetRepositoryConfigurationChangedEvent());
@@ -453,6 +466,12 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
             configs.getRepos().remove(config);
         }
+
+        Set<String> deletedConfigs = Sets.newHashSet(prefs.getDeletedRepositoryConfigurationIds());
+        for (SnippetRepositoryConfiguration config : configurations) {
+            deletedConfigs.add(config.getId());
+        }
+        SnipmatchRcpPreferences.store(deletedConfigs);
 
         RepositoryConfigurations.storeConfigurations(configs, repositoryConfigurationFile);
         bus.post(new Repositories.SnippetRepositoryConfigurationChangedEvent());
