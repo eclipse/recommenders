@@ -177,6 +177,7 @@ public class Messages extends NLS {
 
     public static String TABLE_CELL_SUFFIX_SNIPPETS;
     public static String TABLE_COLUMN_TITLE_SNIPPETS;
+    public static String TABLE_REPOSITORY_DISABLED;
 
     public static String TOOLBAR_TOOLTIP_COLLAPSE_ALL;
     public static String TOOLBAR_TOOLTIP_EXPAND_ALL;

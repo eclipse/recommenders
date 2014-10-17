@@ -110,6 +110,6 @@
 	<extension point="org.eclipse.recommenders.snipmatch.rcp.registeredEmfPackages">
 		<registeredEmfPackages
 			uri="org.eclipse.recommenders.snipmatch.rcp">
-	</registeredEmfPackages>
+		</registeredEmfPackages>
 	</extension>
 </plugin>
