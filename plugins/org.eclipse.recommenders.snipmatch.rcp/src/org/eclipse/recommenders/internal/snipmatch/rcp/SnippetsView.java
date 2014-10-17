@@ -403,11 +403,13 @@ public class SnippetsView extends ViewPart implements IRcpService {
         boolean editSnippetEnabled = false;
         boolean shareSnippetEnabled = false;
 
-        if (selectionContainsOnlyOneElementOf(SnippetRepositoryConfiguration.class)) {
+        if (selectionContainsOnlyOneElementOf(SnippetRepositoryConfiguration.class)
+                && !selectionContainsDefaultConfigurations()) {
             editRepoEnabled = true;
         }
 
-        if (selectionConsistsOnlyElementsOf(SnippetRepositoryConfiguration.class)) {
+        if (selectionConsistsOnlyElementsOf(SnippetRepositoryConfiguration.class)
+                && !selectionContainsDefaultConfigurations()) {
             removeRepoEnabled = true;
         }
 
@@ -427,6 +429,16 @@ public class SnippetsView extends ViewPart implements IRcpService {
         shareSnippetAction.setEnabled(shareSnippetEnabled);
     }
 
+    private boolean selectionContainsDefaultConfigurations() {
+        List<SnippetRepositoryConfiguration> configs = castSelection();
+        for (SnippetRepositoryConfiguration config : configs) {
+            if (config.isDefaultConfiguration()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void addRepo() {
         List<WizardDescriptor> availableWizards = WizardDescriptors.loadAvailableWizards();
         if (!availableWizards.isEmpty()) {
@@ -434,7 +446,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             WizardDialog dialog = new WizardDialog(tree.getShell(), newWizard);
             if (dialog.open() == Window.OK) {
                 SnippetRepositoryConfiguration newConfiguration = newWizard.getConfiguration();
-                newConfiguration.setId(RepositoryConfigurations.fetchHighestUsedId(configs.getRepos()) + 1);
+                newConfiguration.setId(UUID.randomUUID().toString());
                 configs.getRepos().add(newConfiguration);
                 RepositoryConfigurations.storeConfigurations(configs, repositoryConfigurationFile);
                 bus.post(new Repositories.SnippetRepositoryConfigurationChangedEvent());
@@ -751,10 +763,10 @@ public class SnippetsView extends ViewPart implements IRcpService {
         if (!selectionConsistsOnlyElementsOf(KnownSnippet.class)) {
             return false;
         }
-        Set<Integer> configIds = Sets.newHashSet();
+        Set<String> configIds = Sets.newHashSet();
         for (Object element : selection) {
             KnownSnippet snippet = (KnownSnippet) element;
-            int configId = snippet.config.getId();
+            String configId = snippet.config.getId();
             configIds.add(configId);
             if (configIds.size() > 1) {
                 return false;
