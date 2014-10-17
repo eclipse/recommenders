@@ -18,6 +18,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.recommenders.internal.stacktraces.rcp.UploadNotificationPopup;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.osgi.framework.FrameworkUtil;
@@ -31,6 +36,28 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
 
             @Override
             public IStatus run(IProgressMonitor monitor) {
+                Display.getDefault().syncExec(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        // TODO this should go to UploadJob as soon as it is finished (including the shell for
+                        // positioning)
+                        Shell display = Display.getCurrent().getActiveShell();
+                        Shell shell = new Shell(display);
+                        Rectangle bounds = display.getBounds();
+                        shell.setLocation(bounds.width - UploadNotificationPopup.WIDTH / 2, bounds.height
+                                - UploadNotificationPopup.HEIGHT / 2);
+                        shell.setSize(0, 0);
+                        shell.open();
+                        shell.setVisible(false);
+                        Window dialog = new UploadNotificationPopup(shell, "Any message");
+                        dialog.open();
+                    }
+                });
+
+                if (true) {
+                    return Status.OK_STATUS;
+                }
                 for (int i = 0; i < 1; i++) {
                     ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
                     RuntimeException cause = new IllegalArgumentException("cause" + i);
