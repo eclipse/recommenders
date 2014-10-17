@@ -91,25 +91,32 @@
 				mnemonic="S"/>
 		</menuContribution>
 	</extension>
-	<extension point="org.eclipse.recommenders.snipmatch.rcp.configurationwizards">
-		<configurationwizard
-        name="%wizards.git-based-repo.name"
-        wizard="org.eclipse.recommenders.internal.snipmatch.rcp.GitBasedRepositoryConfigurationWizard">
-		</configurationwizard>
-	</extension>
 	<extension point="org.eclipse.recommenders.snipmatch.rcp.defaultGitSnippetRepositoryConfigurations">
 		<defaultGitSnippetRepositoryConfiguration
 			description="%defaultGitSnippetRepositorConfigurations.recommenders.description"
-			enabled="true"
+			id="org.eclipse.recommenders.snipmatch.repository"
 			name="%defaultGitSnippetRepositorConfigurations.recommenders.name"
 			pushBranchPrefix="refs/for"
 			pushUrl="https://git.eclipse.org/r/recommenders/org.eclipse.recommenders.snipmatch.snippets.git"
 			url="http://git.eclipse.org/gitroot/recommenders/org.eclipse.recommenders.snipmatch.snippets.git">
 		</defaultGitSnippetRepositoryConfiguration>
 	</extension>
+	<extension point="org.eclipse.recommenders.snipmatch.rcp.configurationwizards">
+		<configurationwizard
+			name="%wizards.git-based-repo.name"
+			wizard="org.eclipse.recommenders.internal.snipmatch.rcp.GitBasedRepositoryConfigurationWizard">
+		</configurationwizard>
+	</extension>
 	<extension point="org.eclipse.recommenders.snipmatch.rcp.registeredEmfPackages">
 		<registeredEmfPackages
 			uri="org.eclipse.recommenders.snipmatch.rcp">
 		</registeredEmfPackages>
+	</extension>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<!-- @generated snipmatchrcp -->
+		<package
+			uri="org.eclipse.recommenders.snipmatch.rcp"
+			class="org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelPackage"
+			genModel="model/snipmatchrcp.genmodel"/>
 	</extension>
 </plugin>
