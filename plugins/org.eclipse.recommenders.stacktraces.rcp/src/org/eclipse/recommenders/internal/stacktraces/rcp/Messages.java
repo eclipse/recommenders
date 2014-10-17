@@ -56,9 +56,11 @@ public class Messages extends NLS {
     public static String THANKYOUDIALOG_THANK_YOU;
     public static String THANKYOUDIALOG_THANK_YOU_FOR_HELP;
     public static String THANKYOUDIALOG_TRACKED_PLEASE_ADD_TO_CC;
+    public static String UPLOADJOB_ALREADY_FIXED_UPDATE;
     public static String UPLOADJOB_BAD_RESPONSE;
     public static String UPLOADJOB_FAILED_WITH_EXCEPTION;
     public static String UPLOADJOB_NAME;
+    public static String UPLOADJOB_NEED_FURTHER_INFORMATION;
     public static String UPLOADJOB_TASKNAME;
     public static String UPLOADJOB_THANK_YOU;
     static {
