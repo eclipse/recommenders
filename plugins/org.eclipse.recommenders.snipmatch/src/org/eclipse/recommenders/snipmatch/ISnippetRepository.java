@@ -42,7 +42,7 @@ public interface ISnippetRepository extends Openable, Closeable {
      */
     List<Recommendation<ISnippet>> search(ISearchContext context, int maxResults);
 
-    int getId();
+    String getId();
 
     String getRepositoryLocation();
 
