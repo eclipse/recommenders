@@ -392,11 +392,13 @@ public class SnippetsView extends ViewPart implements IRcpService {
         boolean removeSnippetEnabled = false;
         boolean editSnippetEnabled = false;
 
-        if (selectionContainsOnlyOneElementOf(SnippetRepositoryConfiguration.class)) {
+        if (selectionContainsOnlyOneElementOf(SnippetRepositoryConfiguration.class)
+                && !selectionContainsDefaultConfigurations()) {
             editRepoEnabled = true;
         }
 
-        if (selectionConsistsOnlyElementsOf(SnippetRepositoryConfiguration.class)) {
+        if (selectionConsistsOnlyElementsOf(SnippetRepositoryConfiguration.class)
+                && !selectionContainsDefaultConfigurations()) {
             removeRepoEnabled = true;
         }
 
@@ -411,6 +413,15 @@ public class SnippetsView extends ViewPart implements IRcpService {
         editSnippetAction.setEnabled(editSnippetEnabled);
     }
 
+    private boolean selectionContainsDefaultConfigurations() {
+        List<SnippetRepositoryConfiguration> configs = castSelection();
+        boolean defaultConfig = false;
+        for (SnippetRepositoryConfiguration config : configs) {
+            defaultConfig |= config.isDefaultConfiguration();
+        }
+        return defaultConfig;
+    }
+
     private void addRepo() {
         List<WizardDescriptor> availableWizards = WizardDescriptors.loadAvailableWizards();
         if (!availableWizards.isEmpty()) {
@@ -418,7 +429,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
             WizardDialog dialog = new WizardDialog(tree.getShell(), newWizard);
             if (dialog.open() == Window.OK) {
                 SnippetRepositoryConfiguration newConfiguration = newWizard.getConfiguration();
-                newConfiguration.setId(RepositoryConfigurations.fetchHighestUsedId(configs.getRepos()) + 1);
+                newConfiguration.setId(UUID.randomUUID().toString());
                 configs.getRepos().add(newConfiguration);
                 RepositoryConfigurations.storeConfigurations(configs, repositoryConfigurationFile);
                 bus.post(new Repositories.SnippetRepositoryConfigurationChangedEvent());
