@@ -67,8 +67,8 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
 
     private volatile Job openJob = null;
 
-    public EclipseGitSnippetRepository(int id, File basedir, String remoteUri, String pushUrl, String pushBranchPrefix,
-            EventBus bus) {
+    public EclipseGitSnippetRepository(String id, File basedir, String remoteUri, String pushUrl,
+            String pushBranchPrefix, EventBus bus) {
         this.bus = bus;
 
         delegate = new GitSnippetRepository(id, new File(basedir, Urls.mangle(remoteUri)), remoteUri, pushUrl,
@@ -243,7 +243,7 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
     }
 
     @Override
-    public int getId() {
+    public String getId() {
         readLock.lock();
         try {
             return delegate.getId();

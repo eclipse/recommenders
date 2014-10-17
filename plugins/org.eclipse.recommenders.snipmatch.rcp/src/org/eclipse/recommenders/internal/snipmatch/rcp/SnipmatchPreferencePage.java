@@ -19,6 +19,7 @@ import static org.eclipse.recommenders.utils.Checks.cast;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -49,6 +50,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -64,17 +66,20 @@ import com.google.inject.name.Named;
 
 public class SnipmatchPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+    private final SnipmatchRcpPreferences prefs;
     private final EventBus bus;
     private final Repositories repos;
     private final SnippetRepositoryConfigurations configuration;
-    private boolean dirty;
     private final File repositoryConfigurationFile;
+
+    private boolean dirty;
 
     @Inject
     public SnipmatchPreferencePage(EventBus bus, Repositories repos, SnippetRepositoryConfigurations configuration,
-            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile) {
+            @Named(REPOSITORY_CONFIGURATION_FILE) File repositoryConfigurationFile, SnipmatchRcpPreferences prefs) {
         super(GRID);
         setDescription(Messages.PREFPAGE_DESCRIPTION);
+        this.prefs = prefs;
         this.bus = bus;
         this.repos = repos;
         this.configuration = configuration;
@@ -145,7 +150,9 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                     }
 
                     SnippetRepositoryConfiguration selectedConfiguration = cast(item.getData());
-                    editConfiguration(selectedConfiguration);
+                    if (!selectedConfiguration.isDefaultConfiguration()) {
+                        editConfiguration(selectedConfiguration);
+                    }
                     updateButtonStatus();
                 }
             });
@@ -157,9 +164,12 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
 
         private void updateButtonStatus() {
             boolean selected = tableViewer.getTable().getSelectionIndex() != -1;
-            boolean editableType = getSelectedConfiguration() instanceof EclipseGitSnippetRepositoryConfiguration;
-            editButton.setEnabled(selected && editableType);
-            removeButton.setEnabled(selected);
+            SnippetRepositoryConfiguration selectedConfiguration = getSelectedConfiguration();
+            boolean defaultConfiguration = selectedConfiguration != null
+                    && selectedConfiguration.isDefaultConfiguration();
+            boolean editableType = selectedConfiguration instanceof EclipseGitSnippetRepositoryConfiguration;
+            editButton.setEnabled(selected && editableType && !defaultConfiguration);
+            removeButton.setEnabled(selected && !defaultConfiguration);
         }
 
         private Composite getButtonControl(Composite parent) {
@@ -278,7 +288,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                 if (dialog.open() == Window.OK) {
                     List<SnippetRepositoryConfiguration> configurations = getTableInput();
                     SnippetRepositoryConfiguration newConfiguration = newWizard.getConfiguration();
-                    newConfiguration.setId(RepositoryConfigurations.fetchHighestUsedId(configurations) + 1);
+                    newConfiguration.setId(UUID.randomUUID().toString());
                     configurations.add(newConfiguration);
                     updateTableContent(configurations);
                     dirty = true;
@@ -337,12 +347,20 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
                             if (oldConfigurations != null && oldConfigurations.contains(input)) {
                                 return tableViewer.getChecked(input);
                             }
-                            return input.isEnabled();
+                            return prefs.isRepositoryEnabled(input);
                         }
 
                     });
 
             tableViewer.setInput(configurations);
+            for (TableItem item : tableViewer.getTable().getItems()) {
+                if (item.getData() instanceof SnippetRepositoryConfiguration) {
+                    SnippetRepositoryConfiguration config = cast(item.getData());
+                    if (config.isDefaultConfiguration()) {
+                        item.setForeground(0, Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+                    }
+                }
+            }
             tableViewer.setCheckedElements(checkedConfigurations.toArray());
         }
 
@@ -366,7 +384,7 @@ public class SnipmatchPreferencePage extends FieldEditorPreferencePage implement
             List<SnippetRepositoryConfiguration> oldconfigs = getTableInput();
             List<SnippetRepositoryConfiguration> newConfigs = Lists.newArrayList();
             for (SnippetRepositoryConfiguration config : oldconfigs) {
-                config.setEnabled(tableViewer.getChecked(config));
+                prefs.setRepositoryEnabled(config, tableViewer.getChecked(config));
                 newConfigs.add(config);
             }
 
