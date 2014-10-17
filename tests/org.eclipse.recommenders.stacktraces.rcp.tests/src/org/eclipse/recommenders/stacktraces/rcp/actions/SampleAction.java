@@ -17,7 +17,12 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.recommenders.internal.stacktraces.rcp.UploadNotificationDialog;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.osgi.framework.FrameworkUtil;
@@ -31,6 +36,29 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
 
             @Override
             public IStatus run(IProgressMonitor monitor) {
+                Display.getDefault().syncExec(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        // TODO this should go to UploadJob as soon as it is finished (including the shell for
+                        // positioning)
+                        Shell display = Display.getCurrent().getActiveShell();
+                        Shell shell = new Shell(display);
+                        shell.setVisible(false);
+                        Rectangle bounds = display.getBounds();
+                        shell.setLocation(bounds.width - UploadNotificationDialog.WIDTH / 2, bounds.height - UploadNotificationDialog.HEIGHT
+                                / 2);
+                        shell.setSize(0, 0);
+                        shell.open();
+                        Dialog dialog = new UploadNotificationDialog(shell);
+                        dialog.open();
+                        shell.dispose();
+                    }
+                });
+
+                if (true) {
+                    return Status.OK_STATUS;
+                }
                 for (int i = 0; i < 1; i++) {
                     ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
                     RuntimeException cause = new IllegalArgumentException("cause" + i);
