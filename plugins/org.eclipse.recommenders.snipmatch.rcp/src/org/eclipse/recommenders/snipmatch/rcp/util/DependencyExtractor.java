@@ -8,7 +8,7 @@
  * Contributors:
  *    Andreas Sewe - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.snipmatch.rcp;
+package org.eclipse.recommenders.snipmatch.rcp.util;
 
 import java.util.Set;
 
@@ -32,10 +32,10 @@ public class DependencyExtractor {
     private final Set<ProjectCoordinate> dependencies;
     private final CompilationUnit ast;
     private final ITextSelection textSelection;
-    private final IProjectCoordinateProvider pcProdivder;
+    private final IProjectCoordinateProvider pcProvider;
 
     public DependencyExtractor(CompilationUnit ast, ITextSelection textSelection, IProjectCoordinateProvider pcProvider) {
-        this.pcProdivder = pcProvider;
+        this.pcProvider = pcProvider;
         this.dependencies = Sets.newHashSet();
         this.ast = ast;
         this.textSelection = textSelection;
@@ -49,17 +49,21 @@ public class DependencyExtractor {
 
             @Override
             public boolean visit(SimpleName simpleName) {
-                IBinding binding = simpleName.resolveBinding();
-                if (binding == null) {
-                    return super.visit(simpleName);
-                }
-                switch (binding.getKind()) {
-                case IBinding.TYPE:
-                    processVariableBinding((ITypeBinding) binding);
-                    break;
-                case IBinding.VARIABLE:
-                    processVariableBinding((IVariableBinding) binding);
-                    break;
+                if (simpleName.getStartPosition() >= start
+                        && simpleName.getStartPosition() + simpleName.getLength() <= start + length
+                        && simpleName.getStartPosition() < start + length) {
+                    IBinding binding = simpleName.resolveBinding();
+                    if (binding == null) {
+                        return super.visit(simpleName);
+                    }
+                    switch (binding.getKind()) {
+                    case IBinding.TYPE:
+                        processVariableBinding((ITypeBinding) binding);
+                        break;
+                    case IBinding.VARIABLE:
+                        processVariableBinding((IVariableBinding) binding);
+                        break;
+                    }
                 }
                 return super.visit(simpleName);
             }
@@ -68,7 +72,7 @@ public class DependencyExtractor {
                 if (binding == null) {
                     return;
                 }
-                ProjectCoordinate pc = pcProdivder.resolve(binding).orNull();
+                ProjectCoordinate pc = pcProvider.resolve(binding).orNull();
                 if (pc == null) {
                     return;
                 }
@@ -79,7 +83,7 @@ public class DependencyExtractor {
                 if (binding == null) {
                     return;
                 }
-                processVariableBinding(binding.getDeclaringClass());
+                processVariableBinding(binding.getType());
             }
         });
         return dependencies;
