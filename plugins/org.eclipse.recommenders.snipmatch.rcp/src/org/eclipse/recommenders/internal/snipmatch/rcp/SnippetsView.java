@@ -393,7 +393,8 @@ public class SnippetsView extends ViewPart implements IRcpService {
         boolean editSnippetEnabled = false;
 
         if (selectionContainsOnlyOneElementOf(SnippetRepositoryConfiguration.class)) {
-            editRepoEnabled = true;
+            SnippetRepositoryConfiguration selectedConfig = (SnippetRepositoryConfiguration) selection.get(0);
+            editRepoEnabled = WizardDescriptors.isWizardAvailable(selectedConfig);
         }
 
         if (selectionConsistsOnlyElementsOf(SnippetRepositoryConfiguration.class)) {
