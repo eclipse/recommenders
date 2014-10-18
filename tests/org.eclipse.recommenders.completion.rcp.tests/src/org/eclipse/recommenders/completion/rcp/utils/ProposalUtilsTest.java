@@ -237,6 +237,9 @@ public class ProposalUtilsTest {
     private IRecommendersCompletionContext extractProposals(CharSequence code) throws CoreException {
         JavaProjectFixture fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test");
         Pair<ICompilationUnit, Set<Integer>> struct = fixture.createFileAndParseWithMarkers(code.toString());
+        while (struct.getFirst() == null) {
+            struct = fixture.createFileAndParseWithMarkers(code.toString());
+        }
         ICompilationUnit cu = struct.getFirst();
         int completionIndex = struct.getSecond().iterator().next();
         JavaContentAssistInvocationContext javaContext = new JavaContentAssistContextMock(cu, completionIndex);

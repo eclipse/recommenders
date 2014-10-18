@@ -188,7 +188,10 @@ class RecommendersCompletionContextTest {
 
     def exercise(CharSequence code) {
         val fixture = new JavaProjectFixture(ResourcesPlugin::getWorkspace(), "test")
-        val struct = fixture.createFileAndParseWithMarkers(code.toString)
+        var struct = fixture.createFileAndParseWithMarkers(code.toString)
+        while (struct.first == null) {
+            struct = fixture.createFileAndParseWithMarkers(code.toString());
+        }
         val cu = struct.first;
         val completionIndex = struct.second.head
         val ctx = new JavaContentAssistContextMock(cu, completionIndex)

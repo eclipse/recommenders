@@ -67,6 +67,9 @@ public class ReceiverTypeOfStaticMethodCallsTest {
     private IRecommendersCompletionContext exercise(CharSequence code) throws CoreException {
         JavaProjectFixture fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test");
         Pair<ICompilationUnit, Set<Integer>> struct = fixture.createFileAndParseWithMarkers(code.toString());
+        while (struct.getFirst() == null) {
+            struct = fixture.createFileAndParseWithMarkers(code.toString());
+        }
         ICompilationUnit cu = struct.getFirst();
         int completionIndex = struct.getSecond().iterator().next();
         JavaContentAssistInvocationContext ctx = new JavaContentAssistContextMock(cu, completionIndex);

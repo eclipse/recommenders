@@ -215,7 +215,10 @@ class JavaElementResolverTest {
     }
 
     def IMethod getMethod(CharSequence code) {
-        val struct = fixture.createFileAndParseWithMarkers(code)
+        var struct = fixture.createFileAndParseWithMarkers(code)
+        while (struct.first == null) {
+            struct = fixture.createFileAndParseWithMarkers(code.toString());
+        }
         val cu = struct.first;
         val pos = struct.second.head;
         val selected = cu.codeSelect(pos, 0)

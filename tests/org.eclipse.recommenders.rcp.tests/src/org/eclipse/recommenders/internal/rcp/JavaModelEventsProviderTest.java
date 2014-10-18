@@ -52,6 +52,9 @@ public class JavaModelEventsProviderTest {
         project.open(null);
 
         Pair<ICompilationUnit, Set<Integer>> m = f.createFileAndParseWithMarkers("public class C {}");
+        while (m.getFirst() == null) {
+            m = f.createFileAndParseWithMarkers("public class C {}");
+        }
         ICompilationUnit cu = m.getFirst();
 
         cu.getBuffer().append("// COMMENT");
