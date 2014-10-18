@@ -120,7 +120,10 @@ class JavaElementSelectionsResolutionTest {
 
     def void exerciseAndVerify(CharSequence code, List<String> expected) {
         val fixture = new JavaProjectFixture(ResourcesPlugin::getWorkspace(), "test")
-        val struct = fixture.createFileAndParseWithMarkers(code)
+        var struct = fixture.createFileAndParseWithMarkers(code)
+        while (struct.first == null) {
+            struct = fixture.createFileAndParseWithMarkers(code.toString());
+        }
         val cu = struct.first;
         if (cu == null) {
             fail("cu is not allowed to be null!")

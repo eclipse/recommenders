@@ -20,7 +20,7 @@ import static org.eclipse.recommenders.calls.ICallModel.DefinitionKind.*
 
 class CallCompletionAstAnalyzerTest {
 
-    static val fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test")
+    static val FIXTURE = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), "test")
     CharSequence code
 
     MockedIntelligentCompletionProposalComputer<CallCompletionSessionProcessor> computer
@@ -670,7 +670,10 @@ class CallCompletionAstAnalyzerTest {
     }
 
     def void exercise() {
-        val struct = fixture.createFileAndParseWithMarkers(code)
+        var struct = FIXTURE.createFileAndParseWithMarkers(code)
+        while (struct.first == null) {
+            struct = FIXTURE.createFileAndParseWithMarkers(code)
+        }
         val cu = struct.first;
         cu.becomeWorkingCopy(null)
 

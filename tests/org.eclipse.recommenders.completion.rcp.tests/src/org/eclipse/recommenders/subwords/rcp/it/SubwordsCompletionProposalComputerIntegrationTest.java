@@ -113,8 +113,8 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
         scenarios.add(scenario("Exact Prefix match", classbody("BbbXyzBbb", "public void method() { Bbb$ }"),
                 COMPREHENSIVE, MIN_PREFIX_MATCH_RELEVANCE, MAX_PREFIX_MATCH_RELEVANCE, "BbbXyzBbb"));
 
-        scenarios.add(scenario("Camel case match", method("ArrayList arrayList; aL$"),
-                COMPREHENSIVE, MIN_PREFIX_MATCH_RELEVANCE, MAX_PREFIX_MATCH_RELEVANCE, "arrayList"));
+        scenarios.add(scenario("Camel case match", method("ArrayList arrayList; aL$"), COMPREHENSIVE,
+                MIN_PREFIX_MATCH_RELEVANCE, MAX_PREFIX_MATCH_RELEVANCE, "arrayList"));
 
         return scenarios;
     }
@@ -164,6 +164,9 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
     private List<IJavaCompletionProposal> exercise(CharSequence code, SubwordsRcpPreferences preferences)
             throws CoreException {
         Pair<ICompilationUnit, Set<Integer>> struct = fixture.createFileAndParseWithMarkers(code.toString());
+        while (struct.getFirst() == null) {
+            struct = fixture.createFileAndParseWithMarkers(code.toString());
+        }
         ICompilationUnit cu = struct.getFirst();
         JavaUI.openInEditor(cu);
 
