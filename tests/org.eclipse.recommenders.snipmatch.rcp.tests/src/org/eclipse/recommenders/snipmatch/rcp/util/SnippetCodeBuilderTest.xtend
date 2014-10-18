@@ -584,7 +584,10 @@ class SnippetCodeBuilderTest {
     }
 
     def exercise(CharSequence code) {
-        val struct = FIXTURE.createFileAndParseWithMarkers(code)
+        var struct = FIXTURE.createFileAndParseWithMarkers(code)
+        while (struct.first == null) {
+            struct = FIXTURE.createFileAndParseWithMarkers(code)
+        }
         val cu = struct.first;
         val start = struct.second.head;
         val end = struct.second.last;

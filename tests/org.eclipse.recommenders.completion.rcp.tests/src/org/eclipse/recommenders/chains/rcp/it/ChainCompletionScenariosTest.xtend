@@ -24,17 +24,20 @@ import static org.junit.Assert.*
 @SuppressWarnings("unchecked")
 class ChainCompletionScenariosTest {
 
-    static JavaProjectFixture fixture = new JavaProjectFixture(ResourcesPlugin::getWorkspace(), "test")
+    static JavaProjectFixture FIXTURE = new JavaProjectFixture(ResourcesPlugin::getWorkspace(), "test")
 
     @Before
     def void before() {
-        fixture.clear
+        FIXTURE.clear
     }
 
     @Test
     def void smokeTestScenarios() {
         for (scenario : scenarios) {
-            val struct = fixture.createFileAndParseWithMarkers(scenario)
+            var struct = FIXTURE.createFileAndParseWithMarkers(scenario)
+            while (struct.first == null) {
+                struct = FIXTURE.createFileAndParseWithMarkers(scenario)
+            }
             val cu = struct.first;
 
             for (completionIndex : struct.second) {
@@ -1128,7 +1131,10 @@ class ChainCompletionScenariosTest {
     }
 
     def exercise(CharSequence code, List<? extends List<String>> expected) {
-        val struct = fixture.createFileAndParseWithMarkers(code.toString)
+        var struct = FIXTURE.createFileAndParseWithMarkers(code)
+        while (struct.first == null) {
+            struct = FIXTURE.createFileAndParseWithMarkers(code)
+        }
         val cu = struct.first;
         val completionIndex = struct.second.head
         val ctx = new JavaContentAssistContextMock(cu, completionIndex)
@@ -1149,7 +1155,7 @@ class ChainCompletionScenariosTest {
     }
 
     def compile(CharSequence code) {
-        fixture.createFileAndParseWithMarkers(code)
+        FIXTURE.createFileAndParseWithMarkers(code)
     }
 
     def l(String spaceSeparatedElementNames) {

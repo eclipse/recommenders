@@ -403,7 +403,10 @@ class CompletionSmokeTest {
         val preferences = mock(CompletionRcpPreferences)
         when(preferences.getEnabledSessionProcessors).thenReturn(ImmutableSet.of(sessionProcessor))
 
-        val struct = fixture.createFileAndParseWithMarkers(scenario)
+        var struct = fixture.createFileAndParseWithMarkers(scenario)
+        while (struct.first == null) {
+            struct = fixture.createFileAndParseWithMarkers(scenario);
+        }
         val cu = struct.first;
         cu.becomeWorkingCopy(null)
 
