@@ -144,6 +144,8 @@ public class SnippetMetadataPage extends FormPage {
         FormToolkit toolkit = managedForm.getToolkit();
         ScrolledForm form = managedForm.getForm();
         form.setText(Messages.EDITOR_TITLE_METADATA);
+        EditorUtils.addHelpActionToForm(form);
+
         Composite body = form.getBody();
         toolkit.decorateFormHeading(form.getForm());
         toolkit.paintBordersFor(body);
