@@ -91,12 +91,19 @@ public class JavaModelEventsService implements IElementChangedListener {
 
     private boolean isProjectChangedEvent(final IJavaElementDelta delta) {
         final IJavaElement changedElement = delta.getElement();
-        final IJavaProject javaProject = delta.getElement().getJavaProject();
+        if (changedElement == null) {
+            return false;
+        }
+        final IJavaProject javaProject = changedElement.getJavaProject();
         return javaProject != null && changedElement == javaProject;
     }
 
     private void processProjectChangedEvent(final IJavaElementDelta delta) {
-        final IJavaProject javaProject = cast(delta.getElement());
+        IJavaElement element = delta.getElement();
+        if (element == null) {
+            return;
+        }
+        final IJavaProject javaProject = cast(element);
         if (isProjectOpenedEvent(delta)) {
             fireProjectOpenedEvent(javaProject);
         } else if (isProjectClosedEvent(delta)) {
@@ -129,7 +136,11 @@ public class JavaModelEventsService implements IElementChangedListener {
     }
 
     private void processCompilationUnitChangedEvent(final IJavaElementDelta delta) {
-        final ICompilationUnit cu = cast(delta.getElement());
+        IJavaElement element = delta.getElement();
+        if (element == null) {
+            return;
+        }
+        final ICompilationUnit cu = cast(element);
         switch (delta.getKind()) {
         case IJavaElementDelta.ADDED:
             fireCompilationUnitAddedEvent(cu);
@@ -195,11 +206,18 @@ public class JavaModelEventsService implements IElementChangedListener {
     }
 
     private void fireJarPackageFragementRootAddedEvent(final IJavaElementDelta delta) {
-        bus.post(new JarPackageFragmentRootAdded((JarPackageFragmentRoot) delta.getElement()));
+        IJavaElement element = delta.getElement();
+        if (element == null) {
+            bus.post(new JarPackageFragmentRootAdded((JarPackageFragmentRoot) element));
+        }
     }
 
     private void fireJarPackageFragementRootRemoved(final IJavaElementDelta delta) {
-        bus.post(new JarPackageFragmentRootRemoved((JarPackageFragmentRoot) delta.getElement()));
+        IJavaElement element = delta.getElement();
+        if (element == null) {
+            return;
+        }
+        bus.post(new JarPackageFragmentRootRemoved((JarPackageFragmentRoot) element));
     }
 
     private Set<IProject> getAllOpenProjects() {
