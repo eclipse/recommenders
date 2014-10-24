@@ -11,8 +11,8 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
-import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.SYSPROP_SKIP_REPORTS;
-import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.newErrorReport;
+import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.SYSPROP_REPORT_ON_TESTS;
+import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.*;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.net.URI;
@@ -40,6 +40,7 @@ import com.google.common.collect.Lists;
 
 public class LogListener implements ILogListener, IStartup {
 
+    private static final List<String> TESTFRAMEWORKS_BLACKLIST = Lists.newArrayList("org.junit", "org.mockito");
     private Cache<String, ErrorReport> cache = CacheBuilder.newBuilder().maximumSize(30)
             .expireAfterAccess(10, TimeUnit.MINUTES).build();
     private IObservableList errorReports;
@@ -64,7 +65,7 @@ public class LogListener implements ILogListener, IStartup {
     @Override
     public void logging(final IStatus status, String nouse) {
 
-        if (skipSendingReports() || !isErrorSeverity(status)) {
+        if (!isErrorSeverity(status)) {
             return;
         }
         settings = readSettings();
@@ -80,6 +81,12 @@ public class LogListener implements ILogListener, IStartup {
         if (settings.isSkipSimilarErrors() && sentSimilarErrorBefore(report)) {
             return;
         }
+        if (!areAllBundlesWhitelisted(report, settings)) {
+            return;
+        }
+        if (!reportOnTests() && containsBlacklistedClasses(report, TESTFRAMEWORKS_BLACKLIST)) {
+            return;
+        }
         addForSending(report);
         if (sendAction == SendAction.ASK) {
             checkAndSendWithDialog(report);
@@ -88,8 +95,8 @@ public class LogListener implements ILogListener, IStartup {
         }
     }
 
-    private boolean skipSendingReports() {
-        return Boolean.getBoolean(SYSPROP_SKIP_REPORTS);
+    private boolean reportOnTests() {
+        return Boolean.getBoolean(SYSPROP_REPORT_ON_TESTS);
     }
 
     private boolean isErrorSeverity(final IStatus status) {
