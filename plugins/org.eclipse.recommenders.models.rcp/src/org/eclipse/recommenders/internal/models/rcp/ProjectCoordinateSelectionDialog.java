@@ -164,10 +164,15 @@ public class ProjectCoordinateSelectionDialog extends FilteredItemsSelectionDial
         ImmutableSet<DependencyInfo> dependencies = dependencyListener.getDependencies();
         monitor.beginTask(Messages.DIALOG_RESOLVING_DEPENDENCIES, dependencies.size());
         try {
+            Set<String> addedLabels = Sets.newHashSet();
             for (DependencyInfo dependencyInfo : dependencies) {
                 ProjectCoordinate pc = pcAdvisor.resolve(dependencyInfo).orNull();
                 if (pc != null) {
-                    contentProvider.add(pc, itemsFilter);
+                    String label = createLabelForProjectCoordinate(pc);
+                    if (!addedLabels.contains(label)) {
+                        addedLabels.add(label);
+                        contentProvider.add(pc, itemsFilter);
+                    }
                 }
                 monitor.worked(1);
             }
