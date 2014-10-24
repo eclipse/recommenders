@@ -120,6 +120,27 @@ public class ErrorReports {
         }
     }
 
+    public static class CheckAllStacktraceElementsWhitelistedVisitor extends VisitorImpl {
+        private List<String> whitelist;
+        private boolean valid = true;
+
+        public CheckAllStacktraceElementsWhitelistedVisitor(List<String> whitelist) {
+            this.whitelist = whitelist;
+        }
+
+        @Override
+        public void visit(StackTraceElement element) {
+            if (!isWhitelisted(element.getClassName(), whitelist)) {
+                System.out.println(element.getClassName());
+                valid = false;
+            }
+        }
+
+        public boolean isValid() {
+            return valid;
+        }
+    }
+
     public static class PrettyPrintVisitor extends VisitorImpl {
         private static final int RIGHT_PADDING = 20;
         public StringBuilder builder = new StringBuilder();
@@ -310,6 +331,13 @@ public class ErrorReports {
         mStatus.setFingerprint(fingerprint.hash());
 
         return mStatus;
+    }
+
+    public static boolean isStacktraceWhitelisted(ErrorReport report, Settings settings) {
+        CheckAllStacktraceElementsWhitelistedVisitor checkVisitor = new CheckAllStacktraceElementsWhitelistedVisitor(
+                settings.getWhitelistedPackages());
+        report.accept(checkVisitor);
+        return checkVisitor.isValid();
     }
 
     private static String removeSourceFileContents(String message) {

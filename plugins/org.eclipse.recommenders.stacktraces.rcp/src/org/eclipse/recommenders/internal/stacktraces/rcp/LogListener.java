@@ -12,7 +12,7 @@
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
 import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.SYSPROP_SKIP_REPORTS;
-import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.newErrorReport;
+import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.*;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.net.URI;
@@ -78,6 +78,9 @@ public class LogListener implements ILogListener, IStartup {
         stacktraceProvider.insertStandInStacktraceIfEmpty(status);
         final ErrorReport report = newErrorReport(status, settings);
         if (settings.isSkipSimilarErrors() && sentSimilarErrorBefore(report)) {
+            return;
+        }
+        if (!isStacktraceWhitelisted(report, settings)) {
             return;
         }
         addForSending(report);

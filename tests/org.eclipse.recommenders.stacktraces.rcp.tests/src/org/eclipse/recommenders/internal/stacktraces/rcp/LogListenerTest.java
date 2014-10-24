@@ -66,6 +66,7 @@ public class LogListenerTest {
         doNothing().when(sut).checkAndSendWithDialog(Mockito.any(ErrorReport.class));
         // safety: do not send errors during tests
         doNothing().when(sut).sendStatus(Mockito.any(ErrorReport.class));
+        // allow tests to override settings in the spy
         Mockito.when(sut.readSettings()).thenAnswer(new Answer<Settings>() {
             @Override
             public Settings answer(InvocationOnMock invocation) throws Throwable {
@@ -73,6 +74,15 @@ public class LogListenerTest {
                 if (settingsOverrider != null) {
                     settingsOverrider.override(settings);
                 }
+                /*
+                 * Some tests cover the stand-in-stacktrace which generates a stacktrace if no exception is added to an
+                 * error-log. In the default-case, the logged errors occur in plugin-code, which is expected to be
+                 * whitelisted. In this tests the stand-in-stacktrace will cover junit and mockito-packages, which are
+                 * not whitelisted by default (and should not, to avoid error reporting in third-party-testcases). For
+                 * this reason the packages are only whitelisted for the error-reporting testcases.
+                 */
+                settings.getWhitelistedPackages().add("org.junit");
+                settings.getWhitelistedPackages().add("org.mockito");
                 return settings;
             }
         });
@@ -97,12 +107,7 @@ public class LogListenerTest {
 
     @Test
     public void testInsertDebugStacktraceOnSilentMode() {
-        settingsOverrider = new SettingsOverrider() {
-            @Override
-            public void override(Settings settings) {
-                settings.setAction(SendAction.SILENT);
-            }
-        };
+        settingsOverrider = new SendActionSettingsOverrider(SILENT);
         Status empty = new Status(IStatus.ERROR, TEST_PLUGIN_ID, "has no stacktrace");
         Assert.assertThat(empty.getException(), nullValue());
 
@@ -114,12 +119,7 @@ public class LogListenerTest {
 
     @Test
     public void testNoInsertDebugStacktraceOnIgnoreMode() {
-        settingsOverrider = new SettingsOverrider() {
-            @Override
-            public void override(Settings settings) {
-                settings.setAction(SendAction.IGNORE);
-            }
-        };
+        settingsOverrider = new SendActionSettingsOverrider(IGNORE);
         Status empty = new Status(IStatus.ERROR, TEST_PLUGIN_ID, "has no stacktrace");
         Assert.assertThat(empty.getException(), nullValue());
 
@@ -130,12 +130,7 @@ public class LogListenerTest {
 
     @Test
     public void testNoInsertDebugStacktraceOnPauseDayMode() {
-        settingsOverrider = new SettingsOverrider() {
-            @Override
-            public void override(Settings settings) {
-                settings.setAction(SendAction.PAUSE_DAY);
-            }
-        };
+        settingsOverrider = new SendActionSettingsOverrider(PAUSE_DAY);
         Status empty = new Status(IStatus.ERROR, TEST_PLUGIN_ID, "has no stacktrace");
         Assert.assertThat(empty.getException(), nullValue());
 
@@ -146,12 +141,7 @@ public class LogListenerTest {
 
     @Test
     public void testNoInsertDebugStacktraceOnPauseRestartMode() {
-        settingsOverrider = new SettingsOverrider() {
-            @Override
-            public void override(Settings settings) {
-                settings.setAction(SendAction.PAUSE_RESTART);
-            }
-        };
+        settingsOverrider = new SendActionSettingsOverrider(SendAction.PAUSE_RESTART);
         Status empty = new Status(IStatus.ERROR, TEST_PLUGIN_ID, "has no stacktrace");
         Assert.assertThat(empty.getException(), nullValue());
 
@@ -369,5 +359,20 @@ public class LogListenerTest {
         ArgumentCaptor<ErrorReport> captor = ArgumentCaptor.forClass(ErrorReport.class);
         verify(sut).sendStatus(captor.capture());
         Assert.assertEquals("source file contents removed", captor.getValue().getStatus().getMessage());
+    }
+
+    @Test
+    public void testNoReportIfStacktraceContainsNoWhitelistedClasses() {
+        settingsOverrider = new SendActionSettingsOverrider(SILENT);
+        Exception exception = new Exception();
+        exception.setStackTrace(new StackTraceElement[] {
+                new StackTraceElement(TEST_PLUGIN_ID + ".AnyClass", "anyMethod", "AnyClass.java", -1),
+                new StackTraceElement("definitly.not.whitelisted.package" + ".AnyOtherClass", "anyOtherMethod",
+                        "AnyOtherClass.java", -1) });
+        Status status = new Status(IStatus.ERROR, TEST_PLUGIN_ID, "test message", exception);
+
+        sut.logging(status, "");
+
+        verify(sut, never()).sendStatus(Mockito.any(ErrorReport.class));
     }
 }
