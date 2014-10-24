@@ -60,14 +60,14 @@ public class ErrorReports {
 
         @Override
         public void visit(Throwable throwable) {
-            if (!isWhitelisted(throwable.getClassName(), whitelist)) {
+            if (!isPrefixContainedInList(throwable.getClassName(), whitelist)) {
                 throwable.setClassName(HIDDEN);
             }
         }
 
         @Override
         public void visit(StackTraceElement element) {
-            if (!isWhitelisted(element.getClassName(), whitelist)) {
+            if (!isPrefixContainedInList(element.getClassName(), whitelist)) {
                 element.setClassName(HIDDEN);
                 element.setMethodName(HIDDEN);
                 element.setFileName(HIDDEN);
@@ -93,14 +93,14 @@ public class ErrorReports {
                 return;
             }
             maxframes--;
-            if (isWhitelisted(element.getClassName(), whitelist)) {
+            if (isPrefixContainedInList(element.getClassName(), whitelist)) {
                 content.append(element.getClassName()).append(element.getMethodName());
             }
         }
 
         @Override
         public void visit(Throwable throwable) {
-            if (isWhitelisted(throwable.getClassName(), whitelist)) {
+            if (isPrefixContainedInList(throwable.getClassName(), whitelist)) {
                 content.append(throwable.getClassName());
             }
         }
@@ -118,6 +118,50 @@ public class ErrorReports {
             String pkg = replace(substringBeforeLast(element.getClassName(), "."), ".internal.", ".");
             packages.add(pkg);
         }
+    }
+
+    public static class ValidateAllPresentBundlesWhitelistedVisitor extends VisitorImpl {
+        private List<String> whitelist;
+        private boolean valid = true;
+
+        public ValidateAllPresentBundlesWhitelistedVisitor(List<String> whitelist) {
+            this.whitelist = whitelist;
+        }
+
+        @Override
+        public void visit(org.eclipse.recommenders.internal.stacktraces.rcp.model.Bundle bundle) {
+            super.visit(bundle);
+            if (!isPrefixContainedInList(bundle.getName(), whitelist)) {
+                valid = false;
+            }
+        }
+
+        public boolean isValid() {
+            return valid;
+        }
+    }
+
+    public static class ValidateNoBlacklistedClassesInStackframesVisitor extends VisitorImpl {
+
+        private List<String> blacklist;
+        private boolean containsBlacklisted = false;
+
+        public ValidateNoBlacklistedClassesInStackframesVisitor(List<String> blacklist) {
+            this.blacklist = blacklist;
+        }
+
+        @Override
+        public void visit(StackTraceElement element) {
+            super.visit(element);
+            if (isPrefixContainedInList(element.getClassName(), blacklist)) {
+                containsBlacklisted = true;
+            }
+        }
+
+        public boolean containsBlacklisted() {
+            return containsBlacklisted;
+        }
+
     }
 
     public static class PrettyPrintVisitor extends VisitorImpl {
@@ -187,7 +231,7 @@ public class ErrorReports {
 
     }
 
-    static boolean isWhitelisted(String className, List<String> whitelist) {
+    static boolean isPrefixContainedInList(String className, List<String> whitelist) {
         for (String whiteListedPrefix : whitelist) {
             if (className.startsWith(whiteListedPrefix)) {
                 return true;
@@ -310,6 +354,20 @@ public class ErrorReports {
         mStatus.setFingerprint(fingerprint.hash());
 
         return mStatus;
+    }
+
+    public static boolean areAllBundlesWhitelisted(ErrorReport report, Settings settings) {
+        ValidateAllPresentBundlesWhitelistedVisitor checkVisitor = new ValidateAllPresentBundlesWhitelistedVisitor(
+                settings.getWhitelistedPluginIds());
+        report.accept(checkVisitor);
+        return checkVisitor.isValid();
+    }
+
+    public static boolean containsBlacklistedClasses(ErrorReport report, List<String> blacklistedPrefixes) {
+        ValidateNoBlacklistedClassesInStackframesVisitor checkVisitor = new ValidateNoBlacklistedClassesInStackframesVisitor(
+                blacklistedPrefixes);
+        report.accept(checkVisitor);
+        return checkVisitor.containsBlacklisted();
     }
 
     private static String removeSourceFileContents(String message) {
