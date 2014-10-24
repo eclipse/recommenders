@@ -39,8 +39,6 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Caret;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -57,11 +55,6 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("restriction")
 public class SnipmatchCompletionEngine {
 
-    private static enum AssistantControlState {
-        KEEP_OPEN,
-        ENABLE_HIDE
-    }
-
     private static final int SEARCH_BOX_WIDTH = 273;
 
     private final SnipmatchContentAssistProcessor processor;
@@ -74,7 +67,6 @@ public class SnipmatchCompletionEngine {
     private JavaContentAssistInvocationContext context;
     private TemplateProposal selectedProposal;
     private StyledText searchText;
-    private AssistantControlState state;
 
     @Inject
     public SnipmatchCompletionEngine(SnipmatchContentAssistProcessor processor, EventBus bus,
@@ -91,17 +83,8 @@ public class SnipmatchCompletionEngine {
 
             @Override
             public void hide() {
-                if (isFocused(searchText) && state != AssistantControlState.ENABLE_HIDE) {
-                    // Ignore
-                } else {
-                    super.hide();
-                    selectedProposal = null;
-                }
-            }
-
-            private boolean isFocused(Control control) {
-                Control focusControl = Display.getCurrent().getFocusControl();
-                return control.equals(focusControl);
+                super.hide();
+                selectedProposal = null;
             }
         };
         assistant.addCompletionListener(new ICompletionListener() {
@@ -146,7 +129,6 @@ public class SnipmatchCompletionEngine {
         this.context = context;
         processor.setContext(context);
         assistant.install(context.getViewer());
-        state = AssistantControlState.KEEP_OPEN;
         createSearchPopup();
     }
 
@@ -159,7 +141,6 @@ public class SnipmatchCompletionEngine {
             @Override
             public void handleEvent(Event e) {
                 if (e.detail == SWT.TRAVERSE_ESCAPE) {
-                    state = AssistantControlState.ENABLE_HIDE;
                     assistant.uninstall();
                 }
             }
@@ -173,7 +154,6 @@ public class SnipmatchCompletionEngine {
             @Override
             public void focusLost(FocusEvent e) {
                 if (!assistant.hasProposalPopupFocus()) {
-                    state = AssistantControlState.ENABLE_HIDE;
                     searchShell.dispose();
                     assistant.uninstall();
                 }
@@ -183,26 +163,26 @@ public class SnipmatchCompletionEngine {
 
             @Override
             public void verifyKey(VerifyEvent e) {
+                TemplateProposal appliedProposal = selectedProposal;
                 switch (e.character) {
                 case SWT.CR:
                     e.doit = false;
-                    if (selectedProposal != null) {
-                        state = AssistantControlState.ENABLE_HIDE;
-                        if (selectedProposal.isValidFor(context.getDocument(), context.getInvocationOffset())) {
-                            if (selectedProposal instanceof SnippetProposal) {
-                                snippetApplied((SnippetProposal) selectedProposal);
+                    if (appliedProposal != null) {
+                        assistant.uninstall();
+                        if (appliedProposal.isValidFor(context.getDocument(), context.getInvocationOffset())) {
+                            if (appliedProposal instanceof SnippetProposal) {
+                                snippetApplied((SnippetProposal) appliedProposal);
                             }
-                            selectedProposal.apply(context.getViewer(), (char) 0, SWT.NONE,
+                            appliedProposal.apply(context.getViewer(), (char) 0, SWT.NONE,
                                     context.getInvocationOffset());
 
-                            Point selection = selectedProposal.getSelection(context.getDocument());
+                            Point selection = appliedProposal.getSelection(context.getDocument());
                             if (selection != null) {
                                 context.getViewer().setSelectedRange(selection.x, selection.y);
                                 context.getViewer().revealRange(selection.x, selection.y);
                             }
                         }
                     }
-                    assistant.uninstall();
                     return;
                 case SWT.TAB:
                     e.doit = false;
@@ -210,7 +190,7 @@ public class SnipmatchCompletionEngine {
                 }
 
                 // there is no navigation to support if no proposal is selected:
-                if (selectedProposal == null) {
+                if (appliedProposal == null) {
                     return;
                 }
                 // but if there is, let's navigate...
