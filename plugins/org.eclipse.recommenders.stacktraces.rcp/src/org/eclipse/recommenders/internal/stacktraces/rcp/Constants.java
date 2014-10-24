@@ -19,10 +19,10 @@ public final class Constants {
     static final String PLUGIN_ID = "org.eclipse.recommenders.stacktraces.rcp";
 
     /**
-     * Specifying '-Dorg.eclipse.recommenders.stacktraces.rcp.skipReports=true' as vmarg in eclipse launch
-     * configurations lets the log listener skip automated error reporting.
+     * Specifying '-Dorg.eclipse.recommenders.stacktraces.rcp.reportOnTests=true' as vmarg in eclipse launch
+     * configurations lets the log listener handle automated error reporting in tests.
      */
-    static final String SYSPROP_SKIP_REPORTS = PLUGIN_ID + ".skipReports";
+    static final String SYSPROP_REPORT_ON_TESTS = PLUGIN_ID + ".reportOnTests";
 
     static final String PROP_NAME = "name";
     static final String PROP_EMAIL = "email";
