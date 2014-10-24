@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+1: Olav Lenz <olav.lenz.core@gmail.com>
+Code-Review+2: Johannes Dorn <johannes.dorn@codetrails.com>
+Submitted-by: Johannes Dorn <johannes.dorn@codetrails.com>
+Submitted-at: Fri, 24 Oct 2014 10:35:42 -0400
+Reviewed-on: https://git.eclipse.org/r/35446
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
