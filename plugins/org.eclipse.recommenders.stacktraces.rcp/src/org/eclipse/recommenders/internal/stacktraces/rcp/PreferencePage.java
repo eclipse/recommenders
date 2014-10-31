@@ -49,7 +49,6 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
                 getFieldEditorParent()));
         addField(new BooleanFieldEditor(PROP_ANONYMIZE_STACKTRACES, Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES,
                 getFieldEditorParent()));
-
         addField(new BooleanFieldEditor(PROP_ANONYMIZE_MESSAGES, Messages.FIELD_LABEL_ANONYMIZE_MESSAGES,
                 getFieldEditorParent()));
         addField(new BooleanFieldEditor(PROP_SKIP_SIMILAR_ERRORS, Messages.FIELD_LABEL_SKIP_SIMILAR_ERRORS,
@@ -93,7 +92,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
     private static String descriptionForMode(SendAction mode) {
         switch (mode) {
         case ASK:
-            return Messages.FIELD_LABEL_ACTION_REPORT_ASK;
+            return Messages.PREFERENCE_PAGE_ASK_LABEL;
         case IGNORE:
             return Messages.FIELD_LABEL_ACTION_REPORT_NEVER;
         case SILENT:
