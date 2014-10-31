@@ -19,11 +19,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 
-public class UploadNotificationPopup extends AbstractNotificationPopup {
+public class ReportNotificationPopup extends AbstractNotificationPopup {
 
     private String message;
 
-    public UploadNotificationPopup(String link) {
+    public ReportNotificationPopup(String link) {
         super(getDisplay());
         setFadingEnabled(true);
         setDelayClose(2000);
@@ -46,7 +46,7 @@ public class UploadNotificationPopup extends AbstractNotificationPopup {
 
     @Override
     protected String getPopupShellTitle() {
-        return "Error Reports Notification";
+        return "Error Report Notification";
     }
 
     public static Display getDisplay() {
