@@ -48,7 +48,7 @@ public class Messages extends NLS {
     public static String THANKYOUDIALOG_MARKED_UNKNOWN;
     public static String THANKYOUDIALOG_MATCHED_NEED_FURTHER_INFORMATION;
     public static String THANKYOUDIALOG_MATCHED_PLEASE_ADD_TO_CC;
-    public static String THANKYOUDIALOG_NO_FURTHER_INFORMATIONS;
+    public static String THANKYOUDIALOG_NO_FURTHER_INFORMATION;
     public static String THANKYOUDIALOG_NOT_ABLE_TO_REPRODUCE_PLEASE_VISIT;
     public static String THANKYOUDIALOG_PLEASE_NOTE_ADDITIONAL_PERMISSIONS;
     public static String THANKYOUDIALOG_RECEIVED_AND_TRACKED;
@@ -56,7 +56,7 @@ public class Messages extends NLS {
     public static String THANKYOUDIALOG_THANK_YOU;
     public static String THANKYOUDIALOG_THANK_YOU_FOR_HELP;
     public static String THANKYOUDIALOG_TRACKED_PLEASE_ADD_TO_CC;
-    public static String THANKYOUDIALOG_ADDITIONAL_INFORMATIONS;
+    public static String THANKYOUDIALOG_ADDITIONAL_INFORMATION;
     public static String TOOLTIP_ANONYMIZE_STACKTRACES;
     public static String TOOLTIP_CLEAR_MESSAGES;
     public static String TOOLTIP_SKIP_SIMILAR;
