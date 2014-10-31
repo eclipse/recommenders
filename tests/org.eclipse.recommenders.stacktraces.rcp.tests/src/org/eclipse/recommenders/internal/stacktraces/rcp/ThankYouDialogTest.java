@@ -29,7 +29,7 @@ public class ThankYouDialogTest {
     private static final String BUG_URL = "http://bug/bug42";
     private static final String BUG_INFORMATION = "Bug information";
 
-    private static String MESSAGE_INFO = Messages.THANKYOUDIALOG_ADDITIONAL_INFORMATIONS + BUG_INFORMATION;
+    private static String MESSAGE_INFO = Messages.THANKYOUDIALOG_ADDITIONAL_INFORMATION + BUG_INFORMATION;
 
     private static String MESSAGE_END = Messages.THANKYOUDIALOG_PLEASE_NOTE_ADDITIONAL_PERMISSIONS
             + Messages.THANKYOUDIALOG_THANK_YOU_FOR_HELP;
@@ -117,7 +117,7 @@ public class ThankYouDialogTest {
             BUG_URL)
             + Messages.THANKYOUDIALOG_MATCHED_NEED_FURTHER_INFORMATION
             + MessageFormat.format(Messages.THANKYOUDIALOG_FURTHER_INFORMATION,
-                    Messages.THANKYOUDIALOG_NO_FURTHER_INFORMATIONS) + MESSAGE_END;
+                    Messages.THANKYOUDIALOG_NO_FURTHER_INFORMATION) + MESSAGE_END;
 
     private ReportState state;
     private String expectedMessage;

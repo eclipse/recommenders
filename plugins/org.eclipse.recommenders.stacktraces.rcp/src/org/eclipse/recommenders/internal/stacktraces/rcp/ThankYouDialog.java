@@ -133,7 +133,7 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
         }
 
         if (state.getInformation().isPresent()) {
-            text.append(Messages.THANKYOUDIALOG_ADDITIONAL_INFORMATIONS);
+            text.append(Messages.THANKYOUDIALOG_ADDITIONAL_INFORMATION);
             text.append(state.getInformation().get());
         }
 
@@ -141,7 +141,7 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
         if (needsinfo) {
             text.append(Messages.THANKYOUDIALOG_MATCHED_NEED_FURTHER_INFORMATION);
             text.append(MessageFormat.format(Messages.THANKYOUDIALOG_FURTHER_INFORMATION,
-                    state.getInformation().or(Messages.THANKYOUDIALOG_NO_FURTHER_INFORMATIONS)));
+                    state.getInformation().or(Messages.THANKYOUDIALOG_NO_FURTHER_INFORMATION)));
         }
 
         text.append(Messages.THANKYOUDIALOG_PLEASE_NOTE_ADDITIONAL_PERMISSIONS);
