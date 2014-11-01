@@ -13,43 +13,49 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 /**
  * Constant definitions for plug-in preferences, IDs and other constants.
  * <p>
- * Note that UI strings should go into a messages files rather than into this file.
+ * Note that UI strings should go into a messages files rather than into this
+ * file.
  */
 public final class Constants {
 
-    private Constants() {
-        throw new IllegalStateException("Not meant to be instantiated"); //$NON-NLS-1$
-    }
+	private Constants() {
+		throw new IllegalStateException("Not meant to be instantiated"); //$NON-NLS-1$
+	}
 
-    public static final String BUNDLE_ID = "org.eclipse.recommenders.snipmatch.rcp"; //$NON-NLS-1$
-    public static final String EDITOR_ID = "org.eclipse.recommenders.snipmatch.rcp.editors.snippet"; //$NON-NLS-1$
+	public static final String BUNDLE_ID = "org.eclipse.recommenders.snipmatch.rcp"; //$NON-NLS-1$
+	public static final String EDITOR_ID = "org.eclipse.recommenders.snipmatch.rcp.editors.snippet"; //$NON-NLS-1$
 
-    public static final String HELP_URL = "http://www.eclipse.org/recommenders/manual/#snippet-editing-sharing";
+	public static final String HELP_URL = "http://www.eclipse.org/recommenders/manual/#snippet-editing-sharing";
 
-    public static final String PREF_SEARCH_RESULTS_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchResultBackgroundColor"; //$NON-NLS-1$
-    public static final String PREF_SEARCH_BOX_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchboxbackground"; //$NON-NLS-1$
-    public static final String PREF_DISABLED_REPOSITORY_CONFIGURATIONS = "org.eclipse.recommenders.snipmatch.rcp.disabledrepositoryconfigurations"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_RESULTS_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchResultBackgroundColor"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_BOX_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchboxbackground"; //$NON-NLS-1$
+	public static final String PREF_DISABLED_REPOSITORY_CONFIGURATIONS = "org.eclipse.recommenders.snipmatch.rcp.disabledrepositoryconfigurations"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_PLACEHOLDER_FONT = "org.eclipse.recommenders.snipmatch.rcp.searchPlaceholderFont"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_PLACEHOLDER_TEXT_COLOR = "org.eclipse.recommenders.snipmatch.rcp.searchPlaceholderTextColor"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_TEXT_FONT = "org.eclipse.recommenders.snipmatch.rcp.searchTextFont"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_TEXT_COLOR = "org.eclipse.recommenders.snipmatch.rcp.searchTextColor"; //$NON-NLS-1$
+	public static final String PREF_SNIPPET_EDITOR_DISCOVERY = "org.eclipse.recommenders.snipmatch.rcp.editor.discovery"; //$NON-NLS-1$
 
-    public static final String PREF_SNIPPET_EDITOR_DISCOVERY = "org.eclipse.recommenders.snipmatch.rcp.editor.discovery"; //$NON-NLS-1$
+	public static final String SEARCH_PLACEHOLDER_TEXT = " Snipmatch search..."; //$NON-NLS-1$
 
-    public static final String SNIPMATCH_CONTEXT_ID = "Snipmatch-Java-Context"; //$NON-NLS-1$
+	public static final String SNIPMATCH_CONTEXT_ID = "Snipmatch-Java-Context"; //$NON-NLS-1$
 
-    public static final String EXT_POINT_PAGE_FACTORIES = "org.eclipse.recommenders.snipmatch.rcp.pageFactories"; //$NON-NLS-1$
-    public static final String EXT_POINT_DEFAULT_CONFIGURATIONS = "org.eclipse.recommenders.snipmatch.rcp.defaultConfigurations"; //$NON-NLS-1$
+	public static final String EXT_POINT_PAGE_FACTORIES = "org.eclipse.recommenders.snipmatch.rcp.pageFactories"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_CONFIGURATIONS = "org.eclipse.recommenders.snipmatch.rcp.defaultConfigurations"; //$NON-NLS-1$
 
-    public static final String WIZBAN_ADD_REPOSITORY = "icons/wizban/add_repository.png"; //$NON-NLS-1$
-    public static final String WIZBAN_ADD_GIT_REPOSITORY = "icons/wizban/add_git_repository.png"; //$NON-NLS-1$
-    public static final String WIZBAN_EDIT_REPOSITORY = "icons/wizban/edit_repository.png"; //$NON-NLS-1$
-    public static final String WIZBAN_EDIT_GIT_REPOSITORY = "icons/wizban/edit_git_repository.png"; //$NON-NLS-1$
+	public static final String WIZBAN_ADD_REPOSITORY = "icons/wizban/add_repository.png"; //$NON-NLS-1$
+	public static final String WIZBAN_ADD_GIT_REPOSITORY = "icons/wizban/add_git_repository.png"; //$NON-NLS-1$
+	public static final String WIZBAN_EDIT_REPOSITORY = "icons/wizban/edit_repository.png"; //$NON-NLS-1$
+	public static final String WIZBAN_EDIT_GIT_REPOSITORY = "icons/wizban/edit_git_repository.png"; //$NON-NLS-1$
 
-    public static final String EXT_POINT_REGISTERED_EMF_PACKAGE = "org.eclipse.recommenders.snipmatch.rcp.registeredEmfPackages"; //$NON-NLS-1$
-    public static final String EXT_POINT_REGISTERED_EMF_PACKAGE_URI = "uri"; //$NON-NLS-1$
+	public static final String EXT_POINT_REGISTERED_EMF_PACKAGE = "org.eclipse.recommenders.snipmatch.rcp.registeredEmfPackages"; //$NON-NLS-1$
+	public static final String EXT_POINT_REGISTERED_EMF_PACKAGE_URI = "uri"; //$NON-NLS-1$
 
-    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS = "org.eclipse.recommenders.snipmatch.rcp.defaultGitSnippetRepositoryConfigurations"; //$NON-NLS-1$
-    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_DESCRIPTION = "description"; //$NON-NLS-1$
-    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_ID = "id"; //$NON-NLS-1$
-    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_NAME = "name"; //$NON-NLS-1$
-    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_PUSH_URL = "pushUrl"; //$NON-NLS-1$
-    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_PUSH_BRANCH_PREFIX = "pushBranchPrefix"; //$NON-NLS-1$
-    public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_URL = "url"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS = "org.eclipse.recommenders.snipmatch.rcp.defaultGitSnippetRepositoryConfigurations"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_DESCRIPTION = "description"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_ID = "id"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_NAME = "name"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_PUSH_URL = "pushUrl"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_PUSH_BRANCH_PREFIX = "pushBranchPrefix"; //$NON-NLS-1$
+	public static final String EXT_POINT_DEFAULT_GIT_SNIPPET_REPOSITORY_CONFIGURATIONS_URL = "url"; //$NON-NLS-1$
 }
