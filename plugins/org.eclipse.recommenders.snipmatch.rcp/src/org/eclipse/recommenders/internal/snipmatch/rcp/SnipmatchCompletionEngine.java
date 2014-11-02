@@ -12,6 +12,11 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 
 import static org.eclipse.jface.text.IDocument.DEFAULT_CONTENT_TYPE;
 import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.PREF_SEARCH_BOX_BACKGROUND;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.PREF_SEARCH_PLACEHOLDER_FONT;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.PREF_SEARCH_PLACEHOLDER_TEXT_COLOR;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.PREF_SEARCH_TEXT_COLOR;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.PREF_SEARCH_TEXT_FONT;
+import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.SEARCH_PLACEHOLDER_TEXT;
 
 import javax.inject.Inject;
 
@@ -51,15 +56,14 @@ import com.google.common.eventbus.EventBus;
 /**
  * Snipmatch snippet completion engine.
  * <p>
- * Makes use of JFace content assist infrastructure - but in a bit unusual way. The event handling is probably calling
- * for trouble later.
+ * Makes use of JFace content assist infrastructure - but in a bit unusual way.
+ * The event handling is probably calling for trouble later.
  */
 @SuppressWarnings("restriction")
 public class SnipmatchCompletionEngine {
 
     private static enum AssistantControlState {
-        KEEP_OPEN,
-        ENABLE_HIDE
+        KEEP_OPEN, ENABLE_HIDE
     }
 
     private static final int SEARCH_BOX_WIDTH = 273;
@@ -166,8 +170,11 @@ public class SnipmatchCompletionEngine {
         });
 
         searchText = new StyledText(searchShell, SWT.SINGLE);
-        searchText.setFont(fontRegistry.get("org.eclipse.recommenders.snipmatch.rcp.searchTextFont")); //$NON-NLS-1$
+        searchText.setFont(fontRegistry.get(PREF_SEARCH_PLACEHOLDER_FONT)); //$NON-NLS-1$
         searchText.setBackground(colorRegistry.get(PREF_SEARCH_BOX_BACKGROUND));
+        searchText.setForeground(colorRegistry.get(PREF_SEARCH_PLACEHOLDER_TEXT_COLOR));
+        searchText.setText(SEARCH_PLACEHOLDER_TEXT);
+
         searchText.addFocusListener(new FocusAdapter() {
 
             @Override
@@ -179,10 +186,21 @@ public class SnipmatchCompletionEngine {
                 }
             }
         });
+
         searchText.addVerifyKeyListener(new VerifyKeyListener() {
+
+            boolean isFirstModification = true;
 
             @Override
             public void verifyKey(VerifyEvent e) {
+
+                if (isFirstModification) {
+                    isFirstModification = false;
+                    searchText.setFont(fontRegistry.get(PREF_SEARCH_TEXT_FONT));
+                    searchText.setForeground(colorRegistry.get(PREF_SEARCH_TEXT_COLOR));
+                    searchText.setText("");
+                }
+
                 TemplateProposal appliedProposal = selectedProposal;
                 switch (e.character) {
                 case SWT.CR:
@@ -238,8 +256,19 @@ public class SnipmatchCompletionEngine {
         });
         searchText.addModifyListener(new ModifyListener() {
 
+            boolean isFirstModification = true;
+
             @Override
             public void modifyText(ModifyEvent e) {
+                /*
+                 * The search place holder text is replaced with empty string at
+                 * the VerifyKeyListener. Therefore that empty replacement is
+                 * captured here as the first modification.
+                 */
+                if (isFirstModification) {
+                    isFirstModification = false;
+                    return;
+                }
                 String query = searchText.getText().trim();
                 processor.setTerms(query);
                 assistant.showPossibleCompletions();

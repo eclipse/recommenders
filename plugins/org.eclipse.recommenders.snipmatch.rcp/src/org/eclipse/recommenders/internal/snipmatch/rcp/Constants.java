@@ -13,7 +13,8 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 /**
  * Constant definitions for plug-in preferences, IDs and other constants.
  * <p>
- * Note that UI strings should go into a messages files rather than into this file.
+ * Note that UI strings should go into a messages files rather than into this
+ * file.
  */
 public final class Constants {
 
@@ -29,8 +30,13 @@ public final class Constants {
     public static final String PREF_SEARCH_RESULTS_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchResultBackgroundColor"; //$NON-NLS-1$
     public static final String PREF_SEARCH_BOX_BACKGROUND = "org.eclipse.recommenders.snipmatch.rcp.searchboxbackground"; //$NON-NLS-1$
     public static final String PREF_DISABLED_REPOSITORY_CONFIGURATIONS = "org.eclipse.recommenders.snipmatch.rcp.disabledrepositoryconfigurations"; //$NON-NLS-1$
-
+    public static final String PREF_SEARCH_PLACEHOLDER_FONT = "org.eclipse.recommenders.snipmatch.rcp.searchPlaceholderFont"; //$NON-NLS-1$
+    public static final String PREF_SEARCH_PLACEHOLDER_TEXT_COLOR = "org.eclipse.recommenders.snipmatch.rcp.searchPlaceholderTextColor"; //$NON-NLS-1$
+    public static final String PREF_SEARCH_TEXT_FONT = "org.eclipse.recommenders.snipmatch.rcp.searchTextFont"; //$NON-NLS-1$
+    public static final String PREF_SEARCH_TEXT_COLOR = "org.eclipse.recommenders.snipmatch.rcp.searchTextColor"; //$NON-NLS-1$
     public static final String PREF_SNIPPET_EDITOR_DISCOVERY = "org.eclipse.recommenders.snipmatch.rcp.editor.discovery"; //$NON-NLS-1$
+
+    public static final String SEARCH_PLACEHOLDER_TEXT = " Snipmatch search..."; //$NON-NLS-1$
 
     public static final String SNIPMATCH_CONTEXT_ID = "Snipmatch-Java-Context"; //$NON-NLS-1$
 
