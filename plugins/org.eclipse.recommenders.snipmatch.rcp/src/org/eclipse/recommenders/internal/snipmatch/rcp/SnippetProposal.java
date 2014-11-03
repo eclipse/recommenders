@@ -42,18 +42,23 @@ import com.google.common.collect.Ordering;
 public class SnippetProposal extends TemplateProposal implements ICompletionProposalExtension6 {
 
     private final ISnippet snippet;
+    private final int repositoryRelevance;
     private TemplateContext context;
     private Boolean valid = null;
 
-    public static SnippetProposal newSnippetProposal(Recommendation<ISnippet> recommendation, Template template,
-            TemplateContext context, IRegion region, Image image) throws BadLocationException, TemplateException {
+    public static SnippetProposal newSnippetProposal(Recommendation<ISnippet> recommendation, int repositoryRelevance,
+            Template template, TemplateContext context, IRegion region, Image image) throws BadLocationException,
+            TemplateException {
         int relevance = (int) (recommendation.getRelevance() * 100);
-        return new SnippetProposal(recommendation.getProposal(), relevance, template, context, region, image);
+        return new SnippetProposal(recommendation.getProposal(), relevance, repositoryRelevance, template, context,
+                region, image);
     }
 
-    private SnippetProposal(ISnippet snippet, int relevance, Template template, TemplateContext context,
-            IRegion region, Image image) {
+    private SnippetProposal(ISnippet snippet, int relevance, int repositoryRelevance, Template template,
+            TemplateContext context, IRegion region, Image image) {
         super(template, context, region, image, relevance);
+
+        this.repositoryRelevance = repositoryRelevance;
         this.context = context;
         this.snippet = snippet;
     }
@@ -143,5 +148,9 @@ public class SnippetProposal extends TemplateProposal implements ICompletionProp
 
     public ISnippet getSnippet() {
         return snippet;
+    }
+
+    public int getRepositoryRelevance() {
+        return repositoryRelevance;
     }
 }
