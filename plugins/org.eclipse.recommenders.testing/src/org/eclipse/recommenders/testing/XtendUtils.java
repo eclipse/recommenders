@@ -17,7 +17,12 @@ import org.eclipse.xtext.xbase.lib.Pair;
 
 import com.google.common.collect.Lists;
 
-public class XtendUtils {
+public final class XtendUtils {
+
+    private XtendUtils() {
+        throw new IllegalStateException("Not meant to be instantiated");
+    }
+
     public static final <K> List<K> newListWithFrequency(final Pair<K, Integer>... initial) {
         final ArrayList<K> result = Lists.newArrayList();
         for (final Pair<K, Integer> p : initial) {

@@ -36,7 +36,11 @@ import org.eclipse.recommenders.utils.names.VmTypeName;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-public class AstBindings {
+public final class AstBindings {
+
+    private AstBindings() {
+        throw new IllegalStateException("Not meant to be instantiated");
+    }
 
     public static Optional<ITypeName> toTypeName(ITypeBinding b) {
         if (b == null) {
