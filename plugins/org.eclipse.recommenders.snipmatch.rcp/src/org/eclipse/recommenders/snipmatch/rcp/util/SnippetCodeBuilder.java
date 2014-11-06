@@ -55,6 +55,7 @@ public class SnippetCodeBuilder {
     private final CompilationUnit ast;
     private final IDocument doc;
     private final ITextSelection textSelection;
+    private final Selection selection;
 
     private final Set<String> imports = Sets.newTreeSet();
     private final Set<String> importStatics = Sets.newTreeSet();
@@ -70,6 +71,7 @@ public class SnippetCodeBuilder {
         this.ast = ast;
         this.doc = doc;
         this.textSelection = textSelection;
+        this.selection = Selection.createFromStartLength(textSelection.getOffset(), textSelection.getLength());
     }
 
     public String build() {
@@ -82,7 +84,6 @@ public class SnippetCodeBuilder {
         final char[] chars = text.toCharArray();
 
         final ASTNode enclosingNode = NodeFinder.perform(ast, start, length);
-        final Selection selection = Selection.createFromStartLength(start, length);
 
         outer: for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
@@ -114,7 +115,7 @@ public class SnippetCodeBuilder {
                     case IBinding.VARIABLE:
                         IVariableBinding vb = (IVariableBinding) b;
                         String uniqueVariableName = generateUniqueVariableName(vb,
-                                StringUtils.replace(name.toString(), "$", ""));
+                                StringUtils.remove(name.toString(), '$'));
                         if (isDeclaration(name)) {
                             appendNewName(uniqueVariableName, vb);
                         } else if (isDeclaredInSelection(vb, selection)) {
@@ -165,6 +166,14 @@ public class SnippetCodeBuilder {
     }
 
     private boolean isDeclaredInSelection(@Nonnull IVariableBinding binding, @Nonnull Selection selection) {
+        ASTNode declaringNode = ast.findDeclaringNode(binding);
+        if (declaringNode == null) {
+            return false; // Declared in different compilation unit
+        }
+        return selection.covers(declaringNode);
+    }
+
+    private boolean isDeclaredInSelection(@Nonnull ITypeBinding binding, @Nonnull Selection selection) {
         ASTNode declaringNode = ast.findDeclaringNode(binding);
         if (declaringNode == null) {
             return false; // Declared in different compilation unit
@@ -264,6 +273,10 @@ public class SnippetCodeBuilder {
             return; // Either a primitive or some generics-related binding (e.g., a type variable)
         }
         if (packageBinding.getName().equals("java.lang")) { //$NON-NLS-1$
+            return;
+        }
+
+        if (isDeclaredInSelection(binding, selection)) {
             return;
         }
         String name = binding.getErasure().getQualifiedName();
