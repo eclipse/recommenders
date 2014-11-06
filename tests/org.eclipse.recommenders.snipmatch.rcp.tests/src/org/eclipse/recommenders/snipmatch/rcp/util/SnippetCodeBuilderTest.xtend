@@ -594,9 +594,137 @@ class SnippetCodeBuilderTest {
             actual
         )
     }
+    
+    @Test
+    def void testDollarString() {
+        val code = CodeBuilder::method(
+            '''
+                %"Cost: $20"%
+            '''
+        )
+        
+        val actual = exercise(code, "%")
+        
+        assertEquals(
+            '''
+                "Cost: $$20"
+                ${cursor}
+            '''.toString, actual)
+    }
+    
+    @Test
+    def void testDollarVariable() {
+        val code = CodeBuilder::method(
+            '''
+                %String text$str = "";%
+            '''
+        )
+        
+        val actual = exercise(code, "%")
+        
+        assertEquals(
+            '''
+                String ${textstr:newName(java.lang.String)} = "";
+                ${cursor}
+            '''.toString, actual)
+    }
+    
+    @Test
+    def void testDollarVariableMethodCall() {
+        val code = CodeBuilder::method(
+            '''
+                String text$str = "";
+                %text$str.length();%
+            '''
+        )
+        
+        val actual = exercise(code, "%")
+        
+        assertEquals(
+            '''
+                ${textstr:var(java.lang.String)}.length();
+                ${cursor}
+            '''.toString, actual)
+    }
+    
+    @Test
+    def void testDollarDollarVariableMethodArgument() {
+        val code = CodeBuilder::method(
+            '''
+                %void method(String text$str) { }%
+            '''
+        )
+        
+        val actual = exercise(code, "%")
+        
+        assertEquals(
+            '''
+                void method(String ${textstr:newName(java.lang.String)}) { }
+                ${cursor}
+            '''.toString, actual)
+    }
+    
+    @Test
+    def void testDollarTwoDollarVariable() {
+        val code = CodeBuilder::method(
+            '''
+                String text$str1 = "";
+                String text$str2 = "hello";
+                %text$str1 = text$str2;%
+            '''
+        )
+        
+        val actual = exercise(code, "%")
+        
+        assertEquals(
+            '''
+                ${textstr1:var(java.lang.String)} = ${teststr2:var(java.lang.String)};
+                ${cursor}
+            '''.toString, actual)
+    }
+    
+    @Test
+    def void testVariableWithTwoAdjacentDollars() {
+        val code = CodeBuilder::method(
+            '''
+                %String text$$str = "";%
+            '''
+        )
+        
+        val actual = exercise(code, "%")
+        
+        assertEquals(
+            '''
+                String ${textstr:newName(java.lang.String)} = "";
+                ${cursor}
+            '''.toString, actual)
+    }
+    
+    @Test
+    def void testTwoDollarString() {
+        val code = CodeBuilder::method(
+            '''
+                %"Cost: $$20"%
+            '''
+        )
+        
+        val actual = exercise(code, "%")
+        
+        assertEquals(
+            '''
+                "Cost: $$$$20"
+                ${cursor}
+            '''.toString, actual)
+    }
+    
 
     def exercise(CharSequence code) {
         val struct = FIXTURE.createFileAndParseWithMarkers(code);
+        return exercise(struct.first, struct.second.head, struct.second.last);
+    }
+    
+    def exercise(CharSequence code, String marker) {
+        val struct = FIXTURE.createFileAndParseWithMarkers(code, marker);
         return exercise(struct.first, struct.second.head, struct.second.last);
     }
 
