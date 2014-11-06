@@ -8,7 +8,7 @@
  * Contributors:
  *    Johannes Dorn - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.snipmatch.rcp;
+package org.eclipse.recommenders.snipmatch.rcp;
 
 import java.util.Set;
 
@@ -20,6 +20,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.internal.models.rcp.Dependencies;
+import org.eclipse.recommenders.internal.snipmatch.rcp.LogMessages;
 import org.eclipse.recommenders.models.DependencyInfo;
 import org.eclipse.recommenders.models.IDependencyListener;
 import org.eclipse.recommenders.models.ProjectCoordinate;

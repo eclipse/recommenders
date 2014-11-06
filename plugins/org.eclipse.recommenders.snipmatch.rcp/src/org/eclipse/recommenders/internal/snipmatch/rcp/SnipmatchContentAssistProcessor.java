@@ -40,6 +40,7 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
+import org.eclipse.recommenders.snipmatch.rcp.JavaEditorSearchContext;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
