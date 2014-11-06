@@ -663,7 +663,7 @@ class SnippetCodeBuilderTest {
                 ${cursor}
             '''.toString, actual)
     }
- 
+
     @Test
     def void testDollarDollarVariableMethodArgument() {
         val code = CodeBuilder::method(
@@ -733,6 +733,44 @@ class SnippetCodeBuilderTest {
             '''
                 String ${textstr:newName(java.lang.String)} = "";
                 ${cursor}
+            '''.toString, actual)
+    }
+
+    @Test
+    def void testEmptyClass() {
+        val code = CodeBuilder::method(
+            '''
+                $public class Test { }$
+            '''
+        )
+
+        val actual = exercise(code)
+
+        assertEquals(
+            '''
+                public class Test { }
+                ${cursor}
+            '''.toString, actual)
+    }
+
+    @Test
+    def void testClass() {
+        val code = CodeBuilder::method(
+            '''
+                $public class Test {
+                    List myList;
+                }$
+            '''
+        )
+
+        val actual = exercise(code)
+
+        assertEquals(
+            '''
+                public class Test {
+                    List ${myList:newName(java.util.List)};
+                }
+                ${import:import(java.util.List)}${cursor}
             '''.toString, actual)
     }
 

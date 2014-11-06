@@ -114,7 +114,7 @@ public class SnippetCodeBuilder {
                     case IBinding.VARIABLE:
                         IVariableBinding vb = (IVariableBinding) b;
                         String uniqueVariableName = generateUniqueVariableName(vb,
-                                StringUtils.replace(name.toString(), "$", ""));
+                                StringUtils.remove(name.toString(), '$'));
                         if (isDeclaration(name)) {
                             appendNewName(uniqueVariableName, vb);
                         } else if (isDeclaredInSelection(vb, selection)) {
@@ -165,6 +165,14 @@ public class SnippetCodeBuilder {
     }
 
     private boolean isDeclaredInSelection(@Nonnull IVariableBinding binding, @Nonnull Selection selection) {
+        ASTNode declaringNode = ast.findDeclaringNode(binding);
+        if (declaringNode == null) {
+            return false; // Declared in different compilation unit
+        }
+        return selection.covers(declaringNode);
+    }
+
+    private boolean isDeclaredInSelection(@Nonnull ITypeBinding binding, @Nonnull Selection selection) {
         ASTNode declaringNode = ast.findDeclaringNode(binding);
         if (declaringNode == null) {
             return false; // Declared in different compilation unit
@@ -264,6 +272,11 @@ public class SnippetCodeBuilder {
             return; // Either a primitive or some generics-related binding (e.g., a type variable)
         }
         if (packageBinding.getName().equals("java.lang")) { //$NON-NLS-1$
+            return;
+        }
+        int start = textSelection.getOffset();
+        int length = textSelection.getLength();
+        if (binding.isClass() && isDeclaredInSelection(binding, Selection.createFromStartLength(start, length))) {
             return;
         }
         String name = binding.getErasure().getQualifiedName();

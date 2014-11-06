@@ -17,6 +17,7 @@ import static org.eclipse.recommenders.internal.stacktraces.rcp.ReportState.*;
 import static org.eclipse.recommenders.net.Proxies.proxy;
 
 import java.net.URI;
+import java.text.MessageFormat;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,13 +80,12 @@ public class UploadJob extends Job {
                     new ThankYouDialog(activeShell, state).open();
                 }
             });
-            if (FIXED.equals(state.getResolved().orNull())) {
-                String message = format(Messages.UPLOADJOB_ALREADY_FIXED_UPDATE,
-                        state.getInformation().or("The error you reported has been fixed."),
-                        state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE));
+            if (ArrayUtils.contains(state.getKeywords().or(EMPTY_STRINGS), KEYWORD_NEEDINFO)) {
+                String message = MessageFormat.format(Messages.UPLOADJOB_NEED_FURTHER_INFORMATION, state.getBugUrl()
+                        .or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE));
                 openPopup(message);
-            } else if (ArrayUtils.contains(state.getKeywords().or(EMPTY_STRINGS), KEYWORD_NEEDINFO)) {
-                String message = format(Messages.UPLOADJOB_NEED_FURTHER_INFORMATION,
+            } else if (FIXED.equals(state.getStatus().orNull())) {
+                String message = MessageFormat.format(Messages.UPLOADJOB_ALREADY_FIXED_UPDATE,
                         state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE));
                 openPopup(message);
             }
