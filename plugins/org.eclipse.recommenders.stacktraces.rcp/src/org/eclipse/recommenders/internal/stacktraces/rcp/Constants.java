@@ -31,6 +31,7 @@ public final class Constants {
      * configurations lets the log listener skip automated error reporting.
      */
     static final String SYSPROP_SKIP_REPORTS = PLUGIN_ID + ".skipReports";
+    static final String SYSPROP_ECLIPSE_BUILD_ID = "eclipse.buildId";
 
     static final String PROP_NAME = "name";
     static final String PROP_EMAIL = "email";
@@ -79,67 +80,67 @@ public final class Constants {
     // Filter settings for known child-stacktraces of a multistatus
     public static final List<StatusFilterSetting> MULTISTATUS_CHILD_STACKTRACES_FILTER_SETTINGS = ImmutableList
             .of(
-            // at java.lang.Object.wait(Object.java:-2)
-            // at java.lang.Object.wait(Object.java:502)
-            // at org.eclipse.osgi.framework.eventmgr.EventManager$EventThread.getNextEvent(EventManager.java:400)
-            // at org.eclipse.osgi.framework.eventmgr.EventManager$EventThread.run(EventManager.java:336)
-            new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object", "java.lang.Object",
-                    "org.eclipse.osgi.framework.eventmgr.EventManager",
-                    "org.eclipse.osgi.framework.eventmgr.EventManager"),
-            // at java.lang.Object.wait(Object.java:-2)
-            // at org.eclipse.core.internal.jobs.WorkerPool.sleep(WorkerPool.java:188)
-            // at org.eclipse.core.internal.jobs.WorkerPool.startJob(WorkerPool.java:220)
-            // at org.eclipse.core.internal.jobs.Worker.run(Worker.java:52)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
-                            "org.eclipse.core.internal.jobs.WorkerPool", "org.eclipse.core.internal.jobs.WorkerPool",
-                            "org.eclipse.core.internal.jobs.Worker"),
                     // at java.lang.Object.wait(Object.java:-2)
                     // at java.lang.Object.wait(Object.java:502)
-                    // at org.eclipse.jdt.internal.core.search.processing.JobManager.run(JobManager.java:382)
-                    // at java.lang.Thread.run(Thread.java:745)
+                    // at org.eclipse.osgi.framework.eventmgr.EventManager$EventThread.getNextEvent(EventManager.java:400)
+                    // at org.eclipse.osgi.framework.eventmgr.EventManager$EventThread.run(EventManager.java:336)
                     new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object", "java.lang.Object",
-                            "org.eclipse.jdt.internal.core.search.processing.JobManager", "java.lang.Thread"),
-                    // at org.eclipse.pde.internal.core.PluginModelManager.initializeTable(PluginModelManager.java:496)
-                    // at org.eclipse.pde.internal.core.PluginModelManager.targetReloaded(PluginModelManager.java:473)
-                    // at
-                    // org.eclipse.pde.internal.core.RequiredPluginsInitializer$1.run(RequiredPluginsInitializer.java:34)
-                    // at org.eclipse.core.internal.jobs.Worker.run(Worker.java:55)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring",
-                            "org.eclipse.pde.internal.core.PluginModelManager",
-                            "org.eclipse.pde.internal.core.PluginModelManager",
-                            "org.eclipse.pde.internal.core.RequiredPluginsInitializer",
-                            "org.eclipse.core.internal.jobs.Worker"),
-                    // at java.lang.Object.wait(Object.java:-2)
-                    // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:142)
-                    // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:158)
-                    // at
-                    // org.eclipse.emf.common.util.CommonUtil$1ReferenceClearingQueuePollingThread.run(CommonUtil.java:70)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
-                            "java.lang.ref.ReferenceQueue", "java.lang.ref.ReferenceQueue",
-                            "org.eclipse.emf.common.util.CommonUtil"),
-                    // at java.lang.Object.wait(Object.java:-2)
-                    // at org.eclipse.core.internal.jobs.InternalWorker.run(InternalWorker.java:59)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
-                            "org.eclipse.core.internal.jobs.InternalWorker"),
-                    // at java.lang.Object.wait(Object.java:-2)
-                    // at org.eclipse.equinox.internal.util.impl.tpt.timer.TimerImpl.run(TimerImpl.java:141)
-                    // at java.lang.Thread.run(Thread.java:745)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
-                            "org.eclipse.equinox.internal.util.impl.tpt.timer.TimerImpl", "java.lang.Thread"),
-                    // at java.lang.Object.wait(Object.java:-2)
-                    // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:142)
-                    // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:158)
-                    // at java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:209)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
-                            "java.lang.ref.ReferenceQueue", "java.lang.ref.ReferenceQueue", "java.lang.ref.Finalizer"),
-                    // at java.lang.Object.wait(Object.java:-2)
-                    // at java.lang.Object.wait(Object.java:502)
-                    // at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:157)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object", "java.lang.Object",
-                            "java.lang.ref.Reference$ReferenceHandler"),
-                    // at java.lang.Object.wait(Object.java:-2)
-                    // at java.lang.Object.wait(Object.java:502)
-                    // at org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor.run(Executor.java:106)
-                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object", "java.lang.Object",
-                            "org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor"));
+                            "org.eclipse.osgi.framework.eventmgr.EventManager",
+                            "org.eclipse.osgi.framework.eventmgr.EventManager"),
+                            // at java.lang.Object.wait(Object.java:-2)
+                            // at org.eclipse.core.internal.jobs.WorkerPool.sleep(WorkerPool.java:188)
+                            // at org.eclipse.core.internal.jobs.WorkerPool.startJob(WorkerPool.java:220)
+                            // at org.eclipse.core.internal.jobs.Worker.run(Worker.java:52)
+                            new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
+                                    "org.eclipse.core.internal.jobs.WorkerPool", "org.eclipse.core.internal.jobs.WorkerPool",
+                                    "org.eclipse.core.internal.jobs.Worker"),
+                                    // at java.lang.Object.wait(Object.java:-2)
+                                    // at java.lang.Object.wait(Object.java:502)
+                                    // at org.eclipse.jdt.internal.core.search.processing.JobManager.run(JobManager.java:382)
+                                    // at java.lang.Thread.run(Thread.java:745)
+                                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object", "java.lang.Object",
+                                            "org.eclipse.jdt.internal.core.search.processing.JobManager", "java.lang.Thread"),
+                                            // at org.eclipse.pde.internal.core.PluginModelManager.initializeTable(PluginModelManager.java:496)
+                                            // at org.eclipse.pde.internal.core.PluginModelManager.targetReloaded(PluginModelManager.java:473)
+                                            // at
+                                            // org.eclipse.pde.internal.core.RequiredPluginsInitializer$1.run(RequiredPluginsInitializer.java:34)
+                                            // at org.eclipse.core.internal.jobs.Worker.run(Worker.java:55)
+                                            new StatusFilterSetting("org.eclipse.ui.monitoring",
+                                                    "org.eclipse.pde.internal.core.PluginModelManager",
+                                                    "org.eclipse.pde.internal.core.PluginModelManager",
+                                                    "org.eclipse.pde.internal.core.RequiredPluginsInitializer",
+                                                    "org.eclipse.core.internal.jobs.Worker"),
+                                                    // at java.lang.Object.wait(Object.java:-2)
+                                                    // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:142)
+                                                    // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:158)
+                                                    // at
+                                                    // org.eclipse.emf.common.util.CommonUtil$1ReferenceClearingQueuePollingThread.run(CommonUtil.java:70)
+                                                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
+                                                            "java.lang.ref.ReferenceQueue", "java.lang.ref.ReferenceQueue",
+                                                            "org.eclipse.emf.common.util.CommonUtil"),
+                                                            // at java.lang.Object.wait(Object.java:-2)
+                                                            // at org.eclipse.core.internal.jobs.InternalWorker.run(InternalWorker.java:59)
+                                                            new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
+                                                                    "org.eclipse.core.internal.jobs.InternalWorker"),
+                                                                    // at java.lang.Object.wait(Object.java:-2)
+                                                                    // at org.eclipse.equinox.internal.util.impl.tpt.timer.TimerImpl.run(TimerImpl.java:141)
+                                                                    // at java.lang.Thread.run(Thread.java:745)
+                                                                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
+                                                                            "org.eclipse.equinox.internal.util.impl.tpt.timer.TimerImpl", "java.lang.Thread"),
+                                                                            // at java.lang.Object.wait(Object.java:-2)
+                                                                            // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:142)
+                                                                            // at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:158)
+                                                                            // at java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:209)
+                                                                            new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object",
+                                                                                    "java.lang.ref.ReferenceQueue", "java.lang.ref.ReferenceQueue", "java.lang.ref.Finalizer"),
+                                                                                    // at java.lang.Object.wait(Object.java:-2)
+                                                                                    // at java.lang.Object.wait(Object.java:502)
+                                                                                    // at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:157)
+                                                                                    new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object", "java.lang.Object",
+                                                                                            "java.lang.ref.Reference$ReferenceHandler"),
+                                                                                            // at java.lang.Object.wait(Object.java:-2)
+                                                                                            // at java.lang.Object.wait(Object.java:502)
+                                                                                            // at org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor.run(Executor.java:106)
+                                                                                            new StatusFilterSetting("org.eclipse.ui.monitoring", "java.lang.Object", "java.lang.Object",
+                                                                                                    "org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor"));
 }
