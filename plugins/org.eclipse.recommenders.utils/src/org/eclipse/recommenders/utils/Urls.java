@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 
 public final class Urls {
@@ -41,6 +42,27 @@ public final class Urls {
         } catch (URISyntaxException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+    public static Optional<URI> parseURI(String uriString) {
+        try {
+            return Optional.of(new URI(uriString));
+        } catch (URISyntaxException e) {
+            return Optional.absent();
+        }
+    }
+
+    public static boolean isUriProtocolSupported(URI uri, String... schemes) {
+        try {
+            for (String protocol : schemes) {
+                if (protocol.toLowerCase().equals(uri.getScheme().toLowerCase())) {
+                    return true;
+                }
+            }
+        } catch (NullPointerException e) {
+        }
+
+        return false;
     }
 
     private Urls() {
