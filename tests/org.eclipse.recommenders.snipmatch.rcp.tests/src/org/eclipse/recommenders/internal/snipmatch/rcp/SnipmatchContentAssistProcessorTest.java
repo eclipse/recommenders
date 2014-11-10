@@ -132,7 +132,7 @@ public class SnipmatchContentAssistProcessorTest {
 
         verify(repo).search(argThat(context(SEARCH_TERM, Location.FILE, NO_PROJECT_COORDINATES)));
         assertThat(result, hasItem(proposal("snippet", 0, NO_SELECTION)));
-        assertThat(result.size(), is(1));
+        assertThat(result.size(), is(2));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class SnipmatchContentAssistProcessorTest {
         verify(repo2).search(argThat(context(SEARCH_TERM, Location.FILE, NO_PROJECT_COORDINATES)));
         assertThat(result, hasItem(proposal("snippet1", 0, NO_SELECTION)));
         assertThat(result, hasItem(proposal("snippet2", 1, NO_SELECTION)));
-        assertThat(result.size(), is(2));
+        assertThat(result.size(), is(4));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class SnipmatchContentAssistProcessorTest {
         verify(repo1).search(argThat(context(SEARCH_TERM, Location.FILE, NO_PROJECT_COORDINATES)));
         verify(repo2).search(argThat(context(SEARCH_TERM, Location.FILE, NO_PROJECT_COORDINATES)));
         assertThat(result, hasItem(proposal("snippet2", 1, NO_SELECTION)));
-        assertThat(result.size(), is(1));
+        assertThat(result.size(), is(2));
     }
 
     @Test
@@ -182,7 +182,7 @@ public class SnipmatchContentAssistProcessorTest {
 
         verify(repo).search(argThat(context(SEARCH_TERM, Location.FILE, NO_PROJECT_COORDINATES)));
         assertThat(result, hasItem(proposal("snippet", 0, "cu")));
-        assertThat(result.size(), is(1));
+        assertThat(result.size(), is(2));
     }
 
     @Test
@@ -199,7 +199,7 @@ public class SnipmatchContentAssistProcessorTest {
 
         verify(repo).search(argThat(context(SEARCH_TERM, Location.JAVADOC, PROJECT_COORDINATES)));
         assertThat(result, hasItem(proposal("snippet", 0, NO_SELECTION)));
-        assertThat(result.size(), is(1));
+        assertThat(result.size(), is(2));
     }
 
     private ISnippetRepository mockRepository(int priority, String searchTerm, Location location,
