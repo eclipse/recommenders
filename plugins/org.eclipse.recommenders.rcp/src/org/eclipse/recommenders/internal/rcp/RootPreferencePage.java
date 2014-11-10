@@ -12,10 +12,18 @@
 package org.eclipse.recommenders.internal.rcp;
 
 import java.text.MessageFormat;
+import java.util.Dictionary;
 
 import javax.inject.Inject;
 
+import org.eclipse.equinox.internal.p2.discovery.Catalog;
+import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
+import org.eclipse.equinox.internal.p2.discovery.compatibility.RemoteBundleDiscoveryStrategy;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.Images;
 import org.eclipse.recommenders.rcp.utils.BrowserUtils;
@@ -33,6 +41,8 @@ public class RootPreferencePage extends org.eclipse.jface.preference.PreferenceP
 
     private SharedImages images;
 
+    private static final String DISCOVERY_URL = "http://download.eclipse.org/recommenders/discovery/2.0/completion/directory.xml"; //$NON-NLS-1$
+
     @Inject
     public RootPreferencePage(SharedImages images) {
         this.images = images;
@@ -49,33 +59,64 @@ public class RootPreferencePage extends org.eclipse.jface.preference.PreferenceP
         Composite content = new Composite(parent, SWT.NONE);
         GridLayoutFactory.fillDefaults().numColumns(2).applyTo(content);
 
-        createLink(content, Messages.PREFPAGE_LABEL_HOMEPAGE, Images.OBJ_HOMEPAGE, Messages.PREFPAGE_LINK_HOMEPAGE,
-                "http://www.eclipse.org/recommenders/"); //$NON-NLS-1$
+        createBrowserLink(content, Messages.PREFPAGE_LABEL_HOMEPAGE, Images.OBJ_HOMEPAGE,
+                Messages.PREFPAGE_LINK_HOMEPAGE, "http://www.eclipse.org/recommenders/"); //$NON-NLS-1$
 
-        createLink(content, Messages.PREFPAGE_LABEL_MANUAL, Images.OBJ_CONTAINER, Messages.PREFPAGE_LINK_MANUAL,
+        createBrowserLink(content, Messages.PREFPAGE_LABEL_MANUAL, Images.OBJ_CONTAINER, Messages.PREFPAGE_LINK_MANUAL,
                 "http://www.eclipse.org/recommenders/manual/"); //$NON-NLS-1$
 
-        createLink(content, Messages.PREFPAGE_LABEL_FAVORITE, Images.OBJ_FAVORITE_STAR,
+        createBrowserLink(content, Messages.PREFPAGE_LABEL_FAVORITE, Images.OBJ_FAVORITE_STAR,
                 Messages.PREFPAGE_LINK_FAVORITE, "http://marketplace.eclipse.org/content/eclipse-code-recommenders"); //$NON-NLS-1$
 
-        createLink(content, Messages.PREFPAGE_LABEL_TWITTER, Images.OBJ_BIRD_BLUE, Messages.PREFPAGE_LINK_TWITTER,
-                "http://twitter.com/recommenders"); //$NON-NLS-1$
+        createBrowserLink(content, Messages.PREFPAGE_LABEL_TWITTER, Images.OBJ_BIRD_BLUE,
+                Messages.PREFPAGE_LINK_TWITTER, "http://twitter.com/recommenders"); //$NON-NLS-1$
+
+        Link extensionLink = createLink(content, Messages.PREFPAGE_LABEL_EXTENSIONS, Images.OBJ_LIGHTBULB,
+                Messages.PREFPAGE_LINK_EXTENSIONS, ""); //$NON-NLS-1$
+        extensionLink.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Catalog catalog = new Catalog();
+                Dictionary<Object, Object> env = DiscoveryCore.createEnvironment();
+                catalog.setEnvironment(env);
+                catalog.setVerifyUpdateSiteAvailability(false);
+
+                // add strategy for retrieving remote catalog
+
+                // look for remote descriptor
+                RemoteBundleDiscoveryStrategy remoteDiscoveryStrategy = new RemoteBundleDiscoveryStrategy();
+                remoteDiscoveryStrategy.setDirectoryUrl(DISCOVERY_URL);
+                catalog.getDiscoveryStrategies().add(remoteDiscoveryStrategy);
+
+                CatalogConfiguration configuration = new CatalogConfiguration();
+                configuration.setShowTagFilter(false);
+
+                DiscoveryWizard wizard = new DiscoveryWizard(catalog, configuration);
+                WizardDialog dialog = new WizardDialog(WorkbenchUtil.getShell(), wizard);
+                dialog.open();
+            }
+        });
 
         return new Composite(parent, SWT.NONE);
     }
 
-    private void createLink(Composite content, String description, Images icon, String urlLabel, String url) {
-        CLabel label = new CLabel(content, SWT.BEGINNING);
-        label.setText(description);
-        label.setImage(images.getImage(icon));
-
-        Link link = new Link(content, SWT.BEGINNING);
-        link.setText(MessageFormat.format(urlLabel, url));
+    private void createBrowserLink(Composite content, String description, Images icon, String urlLabel, String url) {
+        Link link = createLink(content, description, icon, urlLabel, url);
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 BrowserUtils.openInExternalBrowser(event.text);
             }
         });
+    }
+
+    private Link createLink(Composite content, String description, Images icon, String urlLabel, String url) {
+        CLabel label = new CLabel(content, SWT.BEGINNING);
+        label.setText(description);
+        label.setImage(images.getImage(icon));
+
+        Link link = new Link(content, SWT.BEGINNING);
+        link.setText(MessageFormat.format(urlLabel, url));
+        return link;
     }
 }
