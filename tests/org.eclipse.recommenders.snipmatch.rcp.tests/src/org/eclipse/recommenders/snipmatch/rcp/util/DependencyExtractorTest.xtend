@@ -45,15 +45,14 @@ class DependencyExtractorTest {
     @Before
     def void setup() {
         pcProvider = Mockito.mock(typeof(IProjectCoordinateProvider));
-        when(pcProvider.resolve(argThat(new TypeMatcher("System")))).thenReturn(Optional.of(JRE_1_7_0));
-        when(pcProvider.resolve(argThat(new TypeMatcher("PrintStream")))).thenReturn(Optional.of(JRE_1_7_0));
-        when(pcProvider.resolve(argThat(new TypeMatcher("Object")))).thenReturn(Optional.of(JRE_1_7_0));
-        when(pcProvider.resolve(argThat(new TypeMatcher("Foo")))).thenReturn(Optional.of(FOO_1_0_0));
-        when(pcProvider.resolve(argThat(new TypeMatcher("Bar")))).thenReturn(Optional.absent());
+        when(pcProvider.resolve(argThat(hasBindingWithName("System")))).thenReturn(Optional.of(JRE_1_7_0));
+        when(pcProvider.resolve(argThat(hasBindingWithName("PrintStream")))).thenReturn(Optional.of(JRE_1_7_0));
+        when(pcProvider.resolve(argThat(hasBindingWithName("Object")))).thenReturn(Optional.of(JRE_1_7_0));
+        when(pcProvider.resolve(argThat(hasBindingWithName("Foo")))).thenReturn(Optional.of(FOO_1_0_0));
+        when(pcProvider.resolve(argThat(hasBindingWithName("Bar")))).thenReturn(Optional.absent());
     }
 
     private def Matcher<ITypeBinding> hasBindingWithName(String name) {
-        System.out.println("Has Binding with name: " + name);
         return both(is(instanceOf(ITypeBinding))).and(hasProperty("name", equalTo(name)))
     }
 
