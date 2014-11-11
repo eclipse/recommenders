@@ -240,7 +240,7 @@ public class SnippetCodeBuilder {
             String uniqueName = generateUniqueVariableName(null, name);
             String joinedImports = Joiner.on(", ").join(imports); //$NON-NLS-1$
             sb.append('$').append('{').append(uniqueName).append(':').append(name).append('(').append(joinedImports)
-            .append(')').append('}');
+                    .append(')').append('}');
         }
     }
 
@@ -258,9 +258,13 @@ public class SnippetCodeBuilder {
         if (packageBinding == null) {
             return; // Either a primitive or some generics-related binding (e.g., a type variable)
         }
+        if (packageBinding.isUnnamed()) {
+            return;
+        }
         if (packageBinding.getName().equals("java.lang")) { //$NON-NLS-1$
             return;
         }
+
         String name = binding.getErasure().getQualifiedName();
         imports.add(name);
     }
@@ -269,6 +273,12 @@ public class SnippetCodeBuilder {
         ITypeBinding declaringClass = binding.getDeclaringClass();
         if (declaringClass == null) {
             return;
+        }
+
+        if (declaringClass.getPackage() != null) {
+            if (declaringClass.getPackage().isUnnamed()) {
+                return;
+            }
         }
 
         String name = declaringClass.getErasure().getQualifiedName();
