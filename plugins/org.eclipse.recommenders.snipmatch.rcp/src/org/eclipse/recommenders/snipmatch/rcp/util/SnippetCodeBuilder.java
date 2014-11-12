@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -30,7 +31,6 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jface.text.BadLocationException;
@@ -92,13 +92,11 @@ public class SnippetCodeBuilder {
 
         outer: for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
-            // every non-identifier character can be copied right away. This is
-            // necessary since the NodeFinder sometimes
-            // associates a whitespace with a previous AST node (not exactly
-            // understood yet).
+            // every non-identifier character can be copied right away. This is necessary since the NodeFinder sometimes
+            // associates a whitespace with a previous AST node (not exactly understood yet).
             if (!Character.isJavaIdentifierPart(c)) {
                 sb.append(c);
-                continue outer;
+                continue;
             }
 
             NodeFinder nodeFinder = new NodeFinder(enclosingNode, start + i, 0);
@@ -115,6 +113,11 @@ public class SnippetCodeBuilder {
                     case IBinding.TYPE:
                         ITypeBinding tb = (ITypeBinding) b;
                         appendTypeBinding(name, tb);
+                        i += name.getLength() - 1;
+                        continue outer;
+                    case IBinding.METHOD:
+                        IMethodBinding mb = (IMethodBinding) b;
+                        appendMethodBinding(name, mb);
                         i += name.getLength() - 1;
                         continue outer;
                     case IBinding.VARIABLE:
@@ -159,11 +162,9 @@ public class SnippetCodeBuilder {
     }
 
     private boolean isDeclaration(@Nonnull SimpleName name) {
-        StructuralPropertyDescriptor locationInParent = name.getLocationInParent();
-
-        if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY) {
+        if (VariableDeclarationFragment.NAME_PROPERTY.equals(name.getLocationInParent())) {
             return true;
-        } else if (locationInParent == SingleVariableDeclaration.NAME_PROPERTY) {
+        } else if (SingleVariableDeclaration.NAME_PROPERTY.equals(name.getLocationInParent())) {
             return true;
         } else {
             return false;
@@ -186,9 +187,8 @@ public class SnippetCodeBuilder {
         return selection.covers(declaringNode);
     }
 
-    private boolean isQualified(@Nonnull SimpleName node) {
-        StructuralPropertyDescriptor locationInParent = node.getLocationInParent();
-        if (locationInParent == QualifiedName.NAME_PROPERTY) {
+    private boolean isQualified(@Nonnull SimpleName name) {
+        if (QualifiedName.NAME_PROPERTY.equals(name.getLocationInParent())) {
             return true;
         } else {
             return false;
@@ -219,9 +219,14 @@ public class SnippetCodeBuilder {
         }
     }
 
-    private void appendTypeBinding(@Nonnull SimpleName name, @Nonnull ITypeBinding tb) {
+    private void appendTypeBinding(@Nonnull SimpleName name, @Nonnull ITypeBinding binding) {
         sb.append(name);
-        addImport(tb);
+        addImport(binding);
+    }
+
+    private void appendMethodBinding(@Nonnull SimpleName name, @Nonnull IMethodBinding binding) {
+        sb.append(name);
+        addStaticImport(binding);
     }
 
     private void appendNewName(@Nonnull String name, @Nonnull IVariableBinding binding) {
@@ -290,8 +295,15 @@ public class SnippetCodeBuilder {
         imports.add(name);
     }
 
+    private void addStaticImport(@Nonnull IMethodBinding binding) {
+        addStaticImport(binding.getDeclaringClass(), binding.getName());
+    }
+
     private void addStaticImport(@Nonnull IVariableBinding binding) {
-        ITypeBinding declaringClass = binding.getDeclaringClass();
+        addStaticImport(binding.getDeclaringClass(), binding.getName());
+    }
+
+    private void addStaticImport(@Nullable ITypeBinding declaringClass, String member) {
         if (declaringClass == null) {
             return;
         }
@@ -299,7 +311,7 @@ public class SnippetCodeBuilder {
             return;
         }
         String name = declaringClass.getErasure().getQualifiedName();
-        importStatics.add(name + "." + binding.getName());
+        importStatics.add(name + "." + member);
     }
 
     private void replaceLeadingWhitespaces() {
