@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Target Definition for Eclipse Luna (4.4)" sequenceNumber="149">
+<?pde version="3.8"?><target name="Target Definition for Eclipse Luna (4.4)" sequenceNumber="150">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.e4.rcp.feature.group" version="0.0.0"/>
@@ -171,8 +171,8 @@
 <unit id="org.eclipse.swtbot.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.swtbot.eclipse.feature.group" version="0.0.0"/>
 <unit id="org.apache.log4j" version="0.0.0"/>
-<unit id="org.hamcrest.core" version="0.0.0"/>
-<unit id="org.hamcrest.library" version="0.0.0"/>
+<unit id="org.hamcrest.core" version="1.3.0.v201303031735"/>
+<unit id="org.hamcrest.library" version="1.3.0.v201305281000"/>
 <repository location="http://download.eclipse.org/technology/swtbot/releases/latest/"/>
 </location>
 </locations>
