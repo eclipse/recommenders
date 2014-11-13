@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -188,7 +189,11 @@ public class SnippetCodeBuilder {
     }
 
     private boolean isQualified(@Nonnull SimpleName name) {
+        System.out.println(QualifiedName.NAME_PROPERTY);
+        System.out.println(name.getLocationInParent());
         if (QualifiedName.NAME_PROPERTY.equals(name.getLocationInParent())) {
+            // if ("ChildProperty[org.eclipse.jdt.core.dom.MethodInvocation,name]".equals(name.getLocationInParent()
+            // .toString())) {
             return true;
         } else {
             return false;
@@ -221,12 +226,19 @@ public class SnippetCodeBuilder {
 
     private void appendTypeBinding(@Nonnull SimpleName name, @Nonnull ITypeBinding binding) {
         sb.append(name);
-        addImport(binding);
+        if (!isQualified(name)) {
+            addImport(binding);
+        }
     }
 
     private void appendMethodBinding(@Nonnull SimpleName name, @Nonnull IMethodBinding binding) {
         sb.append(name);
-        addStaticImport(binding);
+        if (MethodInvocation.NAME_PROPERTY.equals(name.getLocationInParent())) {
+            if (!isQualified(name) && Modifier.isStatic(binding.getModifiers())) {
+                addStaticImport(binding.getDeclaringClass(), binding.getName());
+            }
+        }
+
     }
 
     private void appendNewName(@Nonnull String name, @Nonnull IVariableBinding binding) {
@@ -238,8 +250,6 @@ public class SnippetCodeBuilder {
             sb.append(type.getErasure().getQualifiedName());
         }
         sb.append(')').append('}');
-
-        addImport(type);
     }
 
     private StringBuilder appendTemplateVariableReference(@Nonnull String name) {
@@ -255,8 +265,6 @@ public class SnippetCodeBuilder {
             sb.append(type.getErasure().getQualifiedName());
         }
         sb.append(')').append('}');
-
-        addImport(type);
     }
 
     private void appendImportVariable(@Nonnull String name, @Nonnull Collection<String> imports) {
@@ -291,12 +299,16 @@ public class SnippetCodeBuilder {
         if (packageBinding.getName().equals("java.lang")) { //$NON-NLS-1$
             return;
         }
+
         String name = binding.getErasure().getQualifiedName();
+
         imports.add(name);
     }
 
     private void addStaticImport(@Nonnull IMethodBinding binding) {
+        // if (!Modifier.isStatic(binding.getModifiers())) {
         addStaticImport(binding.getDeclaringClass(), binding.getName());
+        // }
     }
 
     private void addStaticImport(@Nonnull IVariableBinding binding) {
