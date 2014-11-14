@@ -14,26 +14,41 @@ import java.text.MessageFormat;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-public class RepositoryProposal implements ICompletionProposal {
+public class RepositoryProposal implements ICompletionProposal, ICompletionProposalExtension6 {
 
     private final String name;
     private final int matches;
     private final int repositoryPriority;
+    private final Image image;
 
-    public RepositoryProposal(SnippetRepositoryConfiguration newRepository, int repositoryPriority, int matches) {
+    public RepositoryProposal(SnippetRepositoryConfiguration newRepository, int repositoryPriority, int matches,
+            Image image) {
         this.name = newRepository.getName();
         this.matches = matches;
         this.repositoryPriority = repositoryPriority;
+        this.image = image;
+    }
+
+    @Override
+    public StyledString getStyledDisplayString() {
+        StyledString styledString = new StyledString();
+        styledString.append(name, StyledString.DECORATIONS_STYLER);
+        styledString.append(" "); //$NON-NLS-1$
+        styledString.append(MessageFormat.format(Messages.COMPLETION_ENGINE_REPOSITORY_MATCHES, name, matches),
+                StyledString.COUNTER_STYLER);
+        return styledString;
     }
 
     @Override
     public String getDisplayString() {
-        return MessageFormat.format(Messages.COMPLETION_ENGINE_REPOSITORY_MATCHES, name, matches);
+        return getStyledDisplayString().toString();
     }
 
     public String getName() {
@@ -49,12 +64,12 @@ public class RepositoryProposal implements ICompletionProposal {
     }
 
     @Override
-    public Point getSelection(IDocument document) {
-        return null;
+    public Image getImage() {
+        return image;
     }
 
     @Override
-    public Image getImage() {
+    public Point getSelection(IDocument document) {
         return null;
     }
 

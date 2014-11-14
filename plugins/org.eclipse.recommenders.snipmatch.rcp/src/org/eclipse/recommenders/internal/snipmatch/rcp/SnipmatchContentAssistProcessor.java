@@ -58,7 +58,8 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
     private final SnippetRepositoryConfigurations configs;
     private final IProjectCoordinateProvider pcProvider;
     private final IDependencyListener dependencyListener;
-    private final Image image;
+    private final Image snippetImage;
+    private final Image repositoryImage;
     private final TemplateContextType snipmatchContextType;
 
     private JavaContentAssistInvocationContext context;
@@ -71,7 +72,8 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
         this.configs = configs;
         this.dependencyListener = dependencyListener;
         this.pcProvider = pcProvider;
-        image = images.getImage(SharedImages.Images.OBJ_BULLET_BLUE);
+        snippetImage = images.getImage(SharedImages.Images.OBJ_BULLET_BLUE);
+        repositoryImage = images.getImage(SharedImages.Images.OBJ_REPOSITORY);
         snipmatchContextType = SnipmatchTemplateContextType.getInstance();
     }
 
@@ -130,7 +132,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
                 List<Recommendation<ISnippet>> recommendations = repo.get().search(searchContext);
                 if (!recommendations.isEmpty()) {
                     proposals.add(new RepositoryProposal(sortedConfigs.get(repositoryPriority), repositoryPriority,
-                            recommendations.size()));
+                            recommendations.size(), repositoryImage));
                     for (Recommendation<ISnippet> recommendation : recommendations) {
                         ISnippet snippet = recommendation.getProposal();
 
@@ -139,7 +141,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
 
                         try {
                             proposals.add(SnippetProposal.newSnippetProposal(recommendation, repositoryPriority,
-                                    template, javaContext, region, image));
+                                    template, javaContext, region, snippetImage));
                         } catch (Exception e) {
                             log(LogMessages.ERROR_CREATING_SNIPPET_PROPOSAL_FAILED, e);
                         }
