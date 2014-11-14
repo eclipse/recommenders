@@ -22,8 +22,8 @@ public class Messages extends NLS {
     public static String FIELD_LABEL_ACTION_REPORT_PAUSE_DAY;
     public static String FIELD_LABEL_ACTION_REPORT_PAUSE_RESTART;
     public static String FIELD_LABEL_SKIP_SIMILAR_ERRORS;
-    public static String FIELD_LABEL_ANONYMIZE_STACKTRACES;
-    public static String FIELD_LABEL_ANONYMIZE_MESSAGES;
+    public static String FIELD_LABEL_STACKTRACES;
+    public static String FIELD_LABEL_MESSAGES;
     public static String FIELD_LABEL_NAME;
     public static String FIELD_DESC_NAME;
     public static String FIELD_MESSAGE_NAME;
@@ -58,8 +58,8 @@ public class Messages extends NLS {
     public static String THANKYOUDIALOG_THANK_YOU_FOR_HELP;
     public static String THANKYOUDIALOG_NEW;
     public static String THANKYOUDIALOG_ADDITIONAL_INFORMATION;
-    public static String TOOLTIP_ANONYMIZE_STACKTRACES;
-    public static String TOOLTIP_CLEAR_MESSAGES;
+    public static String TOOLTIP_MAKE_STACKTRACE_ANONYMOUS;
+    public static String TOOLTIP_MAKE_MESSAGES_ANONYMOUS;
     public static String TOOLTIP_SKIP_SIMILAR;
     public static String UPLOADJOB_ALREADY_FIXED_UPDATE;
     public static String UPLOADJOB_BAD_RESPONSE;

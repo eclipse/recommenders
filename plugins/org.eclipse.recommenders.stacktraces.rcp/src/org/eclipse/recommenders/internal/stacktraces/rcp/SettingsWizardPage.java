@@ -121,13 +121,13 @@ class SettingsWizardPage extends WizardPage {
         }
         {
             btnAnonymizeStacktraces = new Button(container, SWT.CHECK);
-            btnAnonymizeStacktraces.setText(Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES);
+            btnAnonymizeStacktraces.setText(Messages.FIELD_LABEL_STACKTRACES);
             DefaultToolTip anonymizeStacktracesToolTip = new DefaultToolTip(btnAnonymizeStacktraces);
-            anonymizeStacktracesToolTip.setText(Messages.TOOLTIP_ANONYMIZE_STACKTRACES);
+            anonymizeStacktracesToolTip.setText(Messages.TOOLTIP_MAKE_STACKTRACE_ANONYMOUS);
             btnClearMessages = new Button(container, SWT.CHECK);
-            btnClearMessages.setText(Messages.FIELD_LABEL_ANONYMIZE_MESSAGES);
+            btnClearMessages.setText(Messages.FIELD_LABEL_MESSAGES);
             DefaultToolTip clearMessagesToolTip = new DefaultToolTip(btnClearMessages);
-            clearMessagesToolTip.setText(Messages.TOOLTIP_CLEAR_MESSAGES);
+            clearMessagesToolTip.setText(Messages.TOOLTIP_MAKE_MESSAGES_ANONYMOUS);
         }
         {
             Composite feedback = new Composite(container, SWT.NONE);
