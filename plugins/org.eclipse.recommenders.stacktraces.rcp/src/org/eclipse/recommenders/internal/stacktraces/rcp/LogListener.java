@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
@@ -179,10 +178,9 @@ public class LogListener implements ILogListener, IStartup {
                     return;
                 }
                 isDialogOpen = true;
-                ErrorReportWizard stacktraceWizard = new ErrorReportWizard(settings, errorReports);
-                WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-                        .getShell(), stacktraceWizard);
-                int open = wizardDialog.open();
+                ErrorReportWizard stacktraceWizard = new ErrorReportWizard(PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell(), settings, errorReports);
+                int open = stacktraceWizard.open();
                 isDialogOpen = false;
                 if (open != Dialog.OK) {
                     clear();
