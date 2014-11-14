@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
@@ -61,6 +62,28 @@ public class LogListener implements ILogListener, IStartup {
     @Override
     public void earlyStartup() {
         Platform.addLogListener(this);
+        settings = readSettings();
+        boolean configured = settings.isConfigured();
+        if (!configured && !isRuntimeEclipse()) {
+            firstConfiguration();
+        }
+    }
+
+    private void firstConfiguration() {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                ConfigurationDialog configurationDialog = new ConfigurationDialog(PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell(), settings);
+                configurationDialog.setBlockOnOpen(true);
+                int status = configurationDialog.open();
+                if (status == Window.CANCEL) {
+                    settings.setAction(SendAction.IGNORE);
+                }
+                settings.setConfigured(true);
+                PreferenceInitializer.saveSettings(settings);
+            }
+        });
     }
 
     @Override
