@@ -53,14 +53,14 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
                 Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES, getFieldEditorParent());
         DefaultToolTip anonymizeStacktracesToolTip = new DefaultToolTip(
                 anonymizeStacktracesFieldEditor.getDescriptionControl(getFieldEditorParent()));
-        anonymizeStacktracesToolTip.setText(Messages.TOOLTIP_ANONYMIZE_STACKTRACES);
+        anonymizeStacktracesToolTip.setText(Messages.TOOLTIP_MAKE_STACKTRACE_ANONYMOUS);
         addField(anonymizeStacktracesFieldEditor);
 
         BooleanFieldEditor clearMessagesFieldEditor = new BooleanFieldEditor(PROP_ANONYMIZE_MESSAGES,
                 Messages.FIELD_LABEL_ANONYMIZE_MESSAGES, getFieldEditorParent());
         DefaultToolTip clearMessagesToolTip = new DefaultToolTip(
                 clearMessagesFieldEditor.getDescriptionControl(getFieldEditorParent()));
-        clearMessagesToolTip.setText(Messages.TOOLTIP_CLEAR_MESSAGES);
+        clearMessagesToolTip.setText(Messages.TOOLTIP_MAKE_MESSAGES_ANONYMOUS);
         addField(clearMessagesFieldEditor);
 
         BooleanFieldEditor skipSimilarErrorsFieldEditor = new BooleanFieldEditor(PROP_SKIP_SIMILAR_ERRORS,

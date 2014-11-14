@@ -18,8 +18,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.recommenders.internal.stacktraces.rcp.ConfigurationDialog;
+import org.eclipse.recommenders.internal.stacktraces.rcp.PreferenceInitializer;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.FrameworkUtil;
 
 public class LogErrorsAction implements IWorkbenchWindowActionDelegate {
@@ -32,6 +36,21 @@ public class LogErrorsAction implements IWorkbenchWindowActionDelegate {
             @Override
             public IStatus run(IProgressMonitor monitor) {
                 System.setProperty("eclipse.buildId", "unit-tests");
+//                Display.getDefault().syncExec(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        ConfigurationDialog wizard = new ConfigurationDialog(PlatformUI.getWorkbench()
+//                                .getActiveWorkbenchWindow().getShell(), PreferenceInitializer.readSettings());
+//                        wizard.setBlockOnOpen(true);
+//                        wizard.open();
+//
+//                    }
+//                });
+//
+//                if (true) {
+//                    return Status.OK_STATUS;
+//                }
                 for (int i = 0; i < 1; i++) {
                     ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
                     RuntimeException cause = new IllegalArgumentException("cause" + i);
