@@ -25,12 +25,12 @@ import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
 
@@ -66,10 +66,13 @@ public class LogListener implements ILogListener, IStartup {
     @Override
     public void logging(final IStatus status, String nouse) {
         try {
-            if (skipSendingReports() || !isErrorSeverity(status) || isRuntimeEclipse()) {
+            if (!isReportingAllowedInEnvironment() || !isErrorSeverity(status)) {
                 return;
             }
             settings = readSettings();
+            if (!settings.isConfigured()) {
+                firstConfiguration();
+            }
             if (!hasPluginIdWhitelistedPrefix(status, settings.getWhitelistedPluginIds())) {
                 return;
             }
@@ -93,16 +96,20 @@ public class LogListener implements ILogListener, IStartup {
         }
     }
 
+    private boolean isReportingAllowedInEnvironment() {
+        return !skipSendingReports() && !isRuntimeEclipse();
+    }
+
     private boolean skipSendingReports() {
         return Boolean.getBoolean(SYSPROP_SKIP_REPORTS);
     }
 
-    private boolean isErrorSeverity(final IStatus status) {
-        return status.matches(IStatus.ERROR);
-    }
-
     private boolean isRuntimeEclipse() {
         return null == System.getProperty(SYSPROP_ECLIPSE_BUILD_ID);
+    }
+
+    private boolean isErrorSeverity(final IStatus status) {
+        return status.matches(IStatus.ERROR);
     }
 
     @VisibleForTesting
@@ -126,6 +133,17 @@ public class LogListener implements ILogListener, IStartup {
 
     private boolean sentSimilarErrorBefore(final ErrorReport report) {
         return cache.getIfPresent(computeCacheKey(report)) != null;
+    }
+
+    private void firstConfiguration() {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+                Configurator.ConfigureWithDialog(settings, shell);
+                PreferenceInitializer.saveSettings(settings);
+            }
+        });
     }
 
     private String computeCacheKey(final ErrorReport report) {
@@ -160,23 +178,20 @@ public class LogListener implements ILogListener, IStartup {
                 }
                 try {
                     isDialogOpen = true;
-                    ErrorReportWizard stacktraceWizard = new ErrorReportWizard(settings, errorReports);
-                    WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-                            .getShell(), stacktraceWizard);
-                    int open = wizardDialog.open();
+                    Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+                    ErrorReportDialog reportDialog = new ErrorReportDialog(shell, settings, errorReports);
+                    int open = reportDialog.open();
                     isDialogOpen = false;
                     if (open != Dialog.OK) {
                         clear();
                         return;
-                    } else if (settings.getAction() == SendAction.IGNORE
-                            || settings.getAction() == SendAction.PAUSE_DAY
-                            || settings.getAction() == SendAction.PAUSE_RESTART) {
+                    } else if (settings.getAction() == SendAction.IGNORE) {
                         // the user may have chosen to not to send events in the wizard. Respect this preference:
                         return;
                     }
                 } finally {
-                    // we may receive an exception in the dialog. In that case we'd never show up again. Thus we always
-                    // need to set this to false afterwards.
+                    // we may receive an exception in the dialog. In that case we'd never show up again. Thus we
+                    // always need to set this to false afterwards.
                     isDialogOpen = false;
                 }
                 sendAndClear();
@@ -204,8 +219,7 @@ public class LogListener implements ILogListener, IStartup {
     @VisibleForTesting
     protected void sendStatus(final ErrorReport report) {
         // double safety. This is checked before elsewhere. But just to make sure...
-        if (settings.getAction() == SendAction.IGNORE || settings.getAction() == SendAction.PAUSE_DAY
-                || settings.getAction() == SendAction.PAUSE_RESTART) {
+        if (settings.getAction() == SendAction.IGNORE) {
             return;
         }
         new UploadJob(report, settings, URI.create(settings.getServerUrl())).schedule();
