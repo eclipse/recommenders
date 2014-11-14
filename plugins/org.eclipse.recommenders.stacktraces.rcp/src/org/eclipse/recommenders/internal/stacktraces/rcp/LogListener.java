@@ -61,6 +61,15 @@ public class LogListener implements ILogListener, IStartup {
     @Override
     public void earlyStartup() {
         Platform.addLogListener(this);
+        settings = readSettings();
+        boolean configured = false; // TODO use setting
+        if (!configured) {
+            ConfigurationWizard configurationWizard = new ConfigurationWizard(settings);
+            WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+                    .getShell(), configurationWizard);
+            wizardDialog.setBlockOnOpen(true);
+            wizardDialog.open();
+        }
     }
 
     @Override
