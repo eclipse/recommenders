@@ -18,8 +18,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.recommenders.internal.stacktraces.rcp.ConfigurationDialog;
+import org.eclipse.recommenders.internal.stacktraces.rcp.PreferenceInitializer;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.FrameworkUtil;
 
 public class SampleAction implements IWorkbenchWindowActionDelegate {
@@ -31,19 +35,21 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
 
             @Override
             public IStatus run(IProgressMonitor monitor) {
-                // Display.getDefault().syncExec(new Runnable() {
-                // @Override
-                // public void run() {
-                //
-                // UploadNotificationPopup dialog = new UploadNotificationPopup(
-                // "The Error is already fixed at\n<a>https://bugs.eclipse.org/bugs/show_bug.cgi?id=447713</a>\nYou might need to run an update.");
-                // dialog.open();
-                // }
-                // });
-                //
-                // if (true) {
-                // return Status.OK_STATUS;
-                // }
+                Display.getDefault().syncExec(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        ConfigurationDialog wizard = new ConfigurationDialog(PlatformUI.getWorkbench()
+                                .getActiveWorkbenchWindow().getShell(), PreferenceInitializer.readSettings());
+                        wizard.setBlockOnOpen(true);
+                        wizard.open();
+
+                    }
+                });
+
+                if (true) {
+                    return Status.OK_STATUS;
+                }
                 for (int i = 0; i < 1; i++) {
                     ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
                     RuntimeException cause = new IllegalArgumentException("cause" + i);
