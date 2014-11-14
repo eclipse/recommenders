@@ -40,6 +40,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         s.put(PROP_NAME, "");
         s.put(PROP_EMAIL, "");
         s.putBoolean(PROP_SKIP_SIMILAR_ERRORS, true);
+        s.putBoolean(PROP_CONFIGURED, false);
         s.put(PROP_WHITELISTED_PLUGINS, Constants.WHITELISTED_PLUGINS);
         s.put(PROP_WHITELISTED_PACKAGES, Constants.WHITELISTED_PACKAGES);
         s.put(PROP_SEND_ACTION, SendAction.ASK.name());
@@ -50,6 +51,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     public static Settings readSettings() {
         ScopedPreferenceStore s = new ScopedPreferenceStore(InstanceScope.INSTANCE, PLUGIN_ID);
         Settings settings = ModelFactory.eINSTANCE.createSettings();
+        settings.setConfigured(s.getBoolean(PROP_CONFIGURED));
         settings.setName(s.getString(PROP_NAME));
         settings.setEmail(s.getString(PROP_EMAIL));
         settings.setSkipSimilarErrors(s.getBoolean(PROP_SKIP_SIMILAR_ERRORS));
@@ -66,6 +68,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         //
         // XXX: server url and whitelist attributes are not persisted! They shoudn't be changed
         ScopedPreferenceStore s = new ScopedPreferenceStore(InstanceScope.INSTANCE, PLUGIN_ID);
+        s.setValue(PROP_CONFIGURED, settings.isConfigured());
         s.setValue(PROP_NAME, settings.getName());
         s.setValue(PROP_EMAIL, settings.getEmail());
         s.setValue(PROP_SKIP_SIMILAR_ERRORS, settings.isSkipSimilarErrors());

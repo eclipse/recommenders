@@ -24,6 +24,7 @@ Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  org.apache.http;version="[4.2.0,5.0.0)",
  org.apache.http.client.fluent;version="[4.2.0,5.0.0)",
  org.apache.http.entity;version="[4.2.0,5.0.0)",
- org.apache.http.util;version="[4.2.0,5.0.0)"
+ org.apache.http.util;version="[4.2.0,5.0.0)",
+ org.eclipse.recommenders.rcp.utils
 Export-Package: org.eclipse.recommenders.internal.stacktraces.rcp;x-in
  ternal:=true

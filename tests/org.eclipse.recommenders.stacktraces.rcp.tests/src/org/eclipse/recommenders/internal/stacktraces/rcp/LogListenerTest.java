@@ -67,8 +67,8 @@ public class LogListenerTest {
         System.setProperty(SYSPROP_ECLIPSE_BUILD_ID, "unit-tests");
 
         sut = spy(new LogListener());
-        doNothing().when(sut).checkAndSendWithDialog(Mockito.any(ErrorReport.class));
         // safety: do not send errors during tests
+        doNothing().when(sut).checkAndSendWithDialog(Mockito.any(ErrorReport.class));
         doNothing().when(sut).sendStatus(Mockito.any(ErrorReport.class));
         Mockito.when(sut.readSettings()).thenAnswer(new Answer<Settings>() {
             @Override
@@ -77,6 +77,8 @@ public class LogListenerTest {
                 if (settingsOverrider != null) {
                     settingsOverrider.override(settings);
                 }
+                // don't open initial config dialog
+                settings.setConfigured(true);
                 return settings;
             }
         });
