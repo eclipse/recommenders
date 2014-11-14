@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.core.databinding.property,
  org.eclipse.recommenders.net,
  org.eclipse.recommenders.stacktraces.model,
  org.eclipse.recommenders.utils;bundle-version="2.1.9",
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.ui.forms
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  com.google.common.base;version="[15.0.0,16.0.0)",
  com.google.common.cache;version="[15.0.0,16.0.0)",
@@ -24,6 +25,7 @@ Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  org.apache.http;version="[4.2.0,5.0.0)",
  org.apache.http.client.fluent;version="[4.2.0,5.0.0)",
  org.apache.http.entity;version="[4.2.0,5.0.0)",
- org.apache.http.util;version="[4.2.0,5.0.0)"
+ org.apache.http.util;version="[4.2.0,5.0.0)",
+ org.eclipse.recommenders.rcp.utils
 Export-Package: org.eclipse.recommenders.internal.stacktraces.rcp;x-in
  ternal:=true
