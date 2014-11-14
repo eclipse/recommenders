@@ -26,12 +26,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
 
@@ -179,10 +179,11 @@ public class LogListener implements ILogListener, IStartup {
                     return;
                 }
                 isDialogOpen = true;
-                ErrorReportWizard stacktraceWizard = new ErrorReportWizard(settings, errorReports);
-                WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-                        .getShell(), stacktraceWizard);
-                int open = wizardDialog.open();
+                Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+                // ExceptionDisplayDialog d = new ExceptionDisplayDialog(shell, new Exception());
+                // d.open();
+                ErrorReportDialog stacktraceWizard = new ErrorReportDialog(shell, settings, errorReports);
+                int open = stacktraceWizard.open();
                 isDialogOpen = false;
                 if (open != Dialog.OK) {
                     clear();
