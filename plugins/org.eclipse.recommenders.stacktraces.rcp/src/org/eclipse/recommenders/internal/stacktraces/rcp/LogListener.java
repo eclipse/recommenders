@@ -25,12 +25,13 @@ import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
 
@@ -66,10 +67,14 @@ public class LogListener implements ILogListener, IStartup {
     @Override
     public void logging(final IStatus status, String nouse) {
         try {
-            if (skipSendingReports() || !isErrorSeverity(status) || isRuntimeEclipse()) {
+            if (!isReportingAllowedInEnvironment() || !isErrorSeverity(status)) {
                 return;
             }
             settings = readSettings();
+
+            if (!settings.isConfigured()) {
+                firstConfiguration();
+            }
             if (!hasPluginIdWhitelistedPrefix(status, settings.getWhitelistedPluginIds())) {
                 return;
             }
@@ -93,16 +98,20 @@ public class LogListener implements ILogListener, IStartup {
         }
     }
 
+    private boolean isReportingAllowedInEnvironment() {
+        return !skipSendingReports() && !isRuntimeEclipse();
+    }
+
     private boolean skipSendingReports() {
         return Boolean.getBoolean(SYSPROP_SKIP_REPORTS);
     }
 
-    private boolean isErrorSeverity(final IStatus status) {
-        return status.matches(IStatus.ERROR);
-    }
-
     private boolean isRuntimeEclipse() {
         return null == System.getProperty(SYSPROP_ECLIPSE_BUILD_ID);
+    }
+
+    private boolean isErrorSeverity(final IStatus status) {
+        return status.matches(IStatus.ERROR);
     }
 
     @VisibleForTesting
@@ -126,6 +135,38 @@ public class LogListener implements ILogListener, IStartup {
 
     private boolean sentSimilarErrorBefore(final ErrorReport report) {
         return cache.getIfPresent(computeCacheKey(report)) != null;
+    }
+
+    private void firstConfiguration() {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                ConfigurationDialog configurationDialog = new ConfigurationDialog(PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell(), settings);
+                configurationDialog.setBlockOnOpen(true);
+                int status = configurationDialog.open();
+
+                switch (status) {
+                case Window.OK: {
+                    settings.setConfigured(true);
+                    break;
+                }
+                case Window.CANCEL: {
+                    settings.setAction(SendAction.IGNORE);
+                    settings.setConfigured(true);
+                    break;
+                }
+                case ConfigurationDialog.ESC_CANCEL: {
+                    settings.setAction(SendAction.PAUSE_RESTART);
+                    settings.setConfigured(false);
+                    break;
+                }
+                default:
+                    ;
+                }
+                PreferenceInitializer.saveSettings(settings);
+            }
+        });
     }
 
     private String computeCacheKey(final ErrorReport report) {
@@ -153,10 +194,11 @@ public class LogListener implements ILogListener, IStartup {
                     return;
                 }
                 isDialogOpen = true;
-                ErrorReportWizard stacktraceWizard = new ErrorReportWizard(settings, errorReports);
-                WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-                        .getShell(), stacktraceWizard);
-                int open = wizardDialog.open();
+                Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+                // ExceptionDisplayDialog d = new ExceptionDisplayDialog(shell, new Exception());
+                // d.open();
+                ErrorReportDialog stacktraceWizard = new ErrorReportDialog(shell, settings, errorReports);
+                int open = stacktraceWizard.open();
                 isDialogOpen = false;
                 if (open != Dialog.OK) {
                     clear();
@@ -164,6 +206,7 @@ public class LogListener implements ILogListener, IStartup {
                 } else if (settings.getAction() == SendAction.IGNORE || settings.getAction() == SendAction.PAUSE_DAY
                         || settings.getAction() == SendAction.PAUSE_RESTART) {
                     // the user may have chosen to not to send events in the wizard. Respect this preference:
+                    clear();
                     return;
                 }
                 sendAndClear();
