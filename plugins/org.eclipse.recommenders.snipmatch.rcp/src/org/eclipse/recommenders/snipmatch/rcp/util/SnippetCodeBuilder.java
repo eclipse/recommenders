@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.snipmatch.rcp.util;
 
+import static org.apache.commons.lang3.StringUtils.remove;
 import static org.apache.commons.lang3.SystemUtils.LINE_SEPARATOR;
 import static org.eclipse.recommenders.internal.snipmatch.rcp.LogMessages.ERROR_SNIPPET_REPLACE_LEADING_WHITESPACE_FAILED;
 import static org.eclipse.recommenders.utils.Logs.log;
@@ -85,7 +86,7 @@ public class SnippetCodeBuilder {
         final int length = textSelection.getLength();
         final String text = textSelection.getText();
         if (text == null) {
-            return "";
+            return ""; //$NON-NLS-1$
         }
         final char[] chars = text.toCharArray();
 
@@ -112,34 +113,37 @@ public class SnippetCodeBuilder {
                     }
                     switch (b.getKind()) {
                     case IBinding.TYPE:
-                        ITypeBinding tb = (ITypeBinding) b;
-                        appendTypeBinding(name, tb);
+                        sb.append(name);
+                        if (!isQualified(name) && !isDeclaredInSelection(b)) {
+                            rememberImport((ITypeBinding) b);
+                        }
                         i += name.getLength() - 1;
                         continue outer;
                     case IBinding.METHOD:
-                        IMethodBinding mb = (IMethodBinding) b;
-                        appendMethodBinding(name, mb);
+                        sb.append(name);
+                        if (isUnqualifiedMethodInvocation(name) && isStatic(b) && !isDeclaredInSelection(b)) {
+                            rememberStaticImport((IMethodBinding) b);
+                        }
                         i += name.getLength() - 1;
                         continue outer;
                     case IBinding.VARIABLE:
                         IVariableBinding vb = (IVariableBinding) b;
-                        String uniqueVariableName = generateUniqueVariableName(vb,
-                                StringUtils.remove(name.toString(), '$'));
+                        String uniqueVariableName = generateUniqueVariableName(vb, remove(name.toString(), '$'));
                         if (isDeclaration(name)) {
-                            appendNewName(uniqueVariableName, vb);
-                        } else if (isDeclaredInSelection(vb, selection)) {
-                            appendTemplateVariableReference(uniqueVariableName);
+                            appendNewNameVariable(uniqueVariableName, vb);
+                        } else if (isDeclaredInSelection(vb)) {
+                            appendVariableReference(uniqueVariableName);
                         } else if (isQualified(name)) {
-                            sb.append(name.getIdentifier());
+                            sb.append(name);
                         } else if (vb.isField()) {
-                            if (Modifier.isStatic(b.getModifiers())) {
-                                sb.append(name.getIdentifier());
-                                addStaticImport(vb);
+                            if (isStatic(vb)) {
+                                sb.append(name);
+                                rememberStaticImport(vb);
                             } else {
-                                appendVarReference(uniqueVariableName, "field", vb); //$NON-NLS-1$
+                                appendFieldVariable(uniqueVariableName, vb);
                             }
                         } else {
-                            appendVarReference(uniqueVariableName, "var", vb); //$NON-NLS-1$
+                            appendVarVariable(uniqueVariableName, vb);
                         }
                         i += name.getLength() - 1;
                         continue outer;
@@ -154,12 +158,43 @@ public class SnippetCodeBuilder {
         }
 
         sb.append('\n');
-        appendImportVariable("import", imports);
-        appendImportVariable("importStatic", importStatics);
-        appendCursor();
+        appendImportVariable();
+        appendImportStaticVariable();
+        appendCursorVariable();
         replaceLeadingWhitespaces();
 
         return sb.toString();
+    }
+
+    private boolean isDeclaredInSelection(@Nonnull IBinding binding) {
+        ASTNode declaringNode = ast.findDeclaringNode(binding);
+        if (declaringNode == null || selection == null) {
+            return false; // Declared in different compilation unit
+        }
+        return selection.covers(declaringNode);
+    }
+
+    private boolean isQualified(@Nonnull SimpleName name) {
+        if (QualifiedName.NAME_PROPERTY.equals(name.getLocationInParent())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isUnqualifiedMethodInvocation(@Nonnull SimpleName name) {
+        if (!MethodInvocation.NAME_PROPERTY.equals(name.getLocationInParent())) {
+            return false;
+        }
+        MethodInvocation methodInvocation = (MethodInvocation) name.getParent();
+        if (methodInvocation.getExpression() != null) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isStatic(@Nonnull IBinding binding) {
+        return Modifier.isStatic(binding.getModifiers());
     }
 
     private boolean isDeclaration(@Nonnull SimpleName name) {
@@ -172,32 +207,48 @@ public class SnippetCodeBuilder {
         }
     }
 
-    private boolean isDeclaredInSelection(@Nonnull IVariableBinding binding, @Nullable Selection selection) {
-        ASTNode declaringNode = ast.findDeclaringNode(binding);
-        if (declaringNode == null || selection == null) {
-            return false; // Declared in different compilation unit
+    private void rememberImport(@Nonnull ITypeBinding binding) {
+        // need importable types only. Get the component type if it's an array type
+        if (binding.isArray()) {
+            rememberImport(binding.getComponentType());
+            return;
         }
-        return selection.covers(declaringNode);
+        IPackageBinding packageBinding = binding.getPackage();
+        if (packageBinding == null) {
+            return; // Either a primitive or some generics-related binding (e.g., a type variable)
+        }
+        if (packageBinding.isUnnamed()) {
+            return;
+        }
+        if (packageBinding.getName().equals("java.lang")) { //$NON-NLS-1$
+            return;
+        }
+        imports.add(binding.getErasure().getQualifiedName());
     }
 
-    private boolean isDeclaredInSelection(@Nonnull ITypeBinding binding, @Nullable Selection selection) {
-        ASTNode declaringNode = ast.findDeclaringNode(binding);
-        if (declaringNode == null || selection == null) {
-            return false; // Declared in different compilation unit
-        }
-        return selection.covers(declaringNode);
+    private void rememberStaticImport(@Nonnull IMethodBinding method) {
+        Preconditions.checkArgument(isStatic(method));
+        rememberStaticImport(method.getDeclaringClass(), method.getName());
     }
 
-    private boolean isQualified(@Nonnull SimpleName name) {
-        System.out.println(QualifiedName.NAME_PROPERTY);
-        System.out.println(name.getLocationInParent());
-        if (QualifiedName.NAME_PROPERTY.equals(name.getLocationInParent())) {
-            // if ("ChildProperty[org.eclipse.jdt.core.dom.MethodInvocation,name]".equals(name.getLocationInParent()
-            // .toString())) {
-            return true;
-        } else {
-            return false;
+    private void rememberStaticImport(@Nonnull IVariableBinding field) {
+        Preconditions.checkArgument(field.isField());
+        Preconditions.checkArgument(isStatic(field));
+        rememberStaticImport(field.getDeclaringClass(), field.getName());
+    }
+
+    private void rememberStaticImport(@Nullable ITypeBinding declaringClass, @Nonnull String member) {
+        if (declaringClass == null) {
+            return;
         }
+        IPackageBinding packageBinding = declaringClass.getPackage();
+        if (packageBinding == null) {
+            return; // Either a primitive or some generics-related binding (e.g., a type variable)
+        }
+        if (packageBinding.isUnnamed()) {
+            return;
+        }
+        importStatics.add(declaringClass.getErasure().getQualifiedName() + '.' + member);
     }
 
     private String generateUniqueVariableName(@Nullable IVariableBinding binding, @Nonnull String name) {
@@ -217,31 +268,13 @@ public class SnippetCodeBuilder {
                 i++;
                 newName = name.concat(i.toString());
             }
-
             lastVarIndex.put(name, i);
             vars.put(binding, newName);
             return newName;
         }
     }
 
-    private void appendTypeBinding(@Nonnull SimpleName name, @Nonnull ITypeBinding binding) {
-        sb.append(name);
-        if (!isQualified(name)) {
-            addImport(binding);
-        }
-    }
-
-    private void appendMethodBinding(@Nonnull SimpleName name, @Nonnull IMethodBinding binding) {
-        sb.append(name);
-        if (MethodInvocation.NAME_PROPERTY.equals(name.getLocationInParent())) {
-            if (!isQualified(name) && Modifier.isStatic(binding.getModifiers())) {
-                addStaticImport(binding.getDeclaringClass(), binding.getName());
-            }
-        }
-
-    }
-
-    private void appendNewName(@Nonnull String name, @Nonnull IVariableBinding binding) {
+    private StringBuilder appendNewNameVariable(@Nonnull String name, @Nonnull IVariableBinding binding) {
         ITypeBinding type = binding.getType();
         sb.append('$').append('{').append(name).append(':').append("newName").append('('); //$NON-NLS-1$
         if (type.isArray()) {
@@ -249,14 +282,24 @@ public class SnippetCodeBuilder {
         } else {
             sb.append(type.getErasure().getQualifiedName());
         }
-        sb.append(')').append('}');
+        return sb.append(')').append('}');
     }
 
-    private StringBuilder appendTemplateVariableReference(@Nonnull String name) {
+    private StringBuilder appendVariableReference(@Nonnull String name) {
         return sb.append('$').append('{').append(name).append('}');
     }
 
-    private void appendVarReference(@Nonnull String name, @Nonnull String kind, @Nonnull IVariableBinding binding) {
+    private StringBuilder appendFieldVariable(@Nonnull String name, @Nonnull IVariableBinding binding) {
+        Preconditions.checkArgument(binding.isField());
+        return appendVarVariableInternal("field", name, binding); //$NON-NLS-1$
+    }
+
+    private StringBuilder appendVarVariable(@Nonnull String name, @Nonnull IVariableBinding binding) {
+        return appendVarVariableInternal("var", name, binding); //$NON-NLS-1$
+    }
+
+    private StringBuilder appendVarVariableInternal(@Nonnull String kind, @Nonnull String name,
+            @Nonnull IVariableBinding binding) {
         ITypeBinding type = binding.getType();
         sb.append('$').append('{').append(name).append(':').append(kind).append('(');
         if (type.isArray()) {
@@ -264,66 +307,29 @@ public class SnippetCodeBuilder {
         } else {
             sb.append(type.getErasure().getQualifiedName());
         }
-        sb.append(')').append('}');
+        return sb.append(')').append('}');
     }
 
-    private void appendImportVariable(@Nonnull String name, @Nonnull Collection<String> imports) {
+    private StringBuilder appendImportVariable() {
+        return appendImportVariableInternal("import", imports); //$NON-NLS-1$
+    }
+
+    private StringBuilder appendImportStaticVariable() {
+        return appendImportVariableInternal("importStatic", importStatics); //$NON-NLS-1$
+    }
+
+    private StringBuilder appendImportVariableInternal(@Nonnull String name, @Nonnull Collection<String> imports) {
         if (!imports.isEmpty()) {
             String uniqueName = generateUniqueVariableName(null, name);
             String joinedImports = Joiner.on(", ").join(imports); //$NON-NLS-1$
             sb.append('$').append('{').append(uniqueName).append(':').append(name).append('(').append(joinedImports)
                     .append(')').append('}');
         }
+        return sb;
     }
 
-    private void appendCursor() {
+    private void appendCursorVariable() {
         sb.append("${cursor}"); //$NON-NLS-1$
-    }
-
-    private void addImport(@Nonnull ITypeBinding binding) {
-        // need importable types only. Get the component type if it's an array type
-        if (binding.isArray()) {
-            addImport(binding.getComponentType());
-            return;
-        }
-        if (isDeclaredInSelection(binding, selection)) {
-            return;
-        }
-        IPackageBinding packageBinding = binding.getPackage();
-        if (packageBinding == null) {
-            return; // Either a primitive or some generics-related binding (e.g., a type variable)
-        }
-        if (packageBinding.isUnnamed()) {
-            return;
-        }
-        if (packageBinding.getName().equals("java.lang")) { //$NON-NLS-1$
-            return;
-        }
-
-        String name = binding.getErasure().getQualifiedName();
-
-        imports.add(name);
-    }
-
-    private void addStaticImport(@Nonnull IMethodBinding binding) {
-        // if (!Modifier.isStatic(binding.getModifiers())) {
-        addStaticImport(binding.getDeclaringClass(), binding.getName());
-        // }
-    }
-
-    private void addStaticImport(@Nonnull IVariableBinding binding) {
-        addStaticImport(binding.getDeclaringClass(), binding.getName());
-    }
-
-    private void addStaticImport(@Nullable ITypeBinding declaringClass, String member) {
-        if (declaringClass == null) {
-            return;
-        }
-        if (declaringClass.getPackage() != null && declaringClass.getPackage().isUnnamed()) {
-            return;
-        }
-        String name = declaringClass.getErasure().getQualifiedName();
-        importStatics.add(name + "." + member);
     }
 
     private void replaceLeadingWhitespaces() {
