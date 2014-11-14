@@ -105,6 +105,7 @@ class Settings {
     String email
     boolean anonymizeStrackTraceElements
     boolean anonymizeMessages
+    boolean configured
     boolean skipSimilarErrors
     SendAction action
     long pausePeriodStart
