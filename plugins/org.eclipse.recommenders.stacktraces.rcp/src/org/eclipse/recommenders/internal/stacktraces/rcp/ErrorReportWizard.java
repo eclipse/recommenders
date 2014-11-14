@@ -37,11 +37,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.widgets.Section;
 
 public class ErrorReportWizard extends Wizard {
 
@@ -67,20 +69,36 @@ public class ErrorReportWizard extends Wizard {
 
         @Override
         public void createControl(Composite parent) {
-            Composite container = new Composite(parent, SWT.NONE);
-            GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(true).applyTo(container);
+            final Composite container = new Composite(parent, SWT.NONE);
+            GridLayoutFactory.fillDefaults().applyTo(container);
 
-            Composite tableComposite = createTableComposite(container);
+            Label label = new Label(container, SWT.NONE);
+            label.setText("We noticed an error!");
+            GridDataFactory.fillDefaults().applyTo(label);
+
+            Section advancedSection = new Section(container, Section.TWISTIE);
+            GridDataFactory.fillDefaults().applyTo(advancedSection);
+            advancedSection.setText("Advanced");
+            Composite advancedComposite = createAdvancedComposite(advancedSection);
+            advancedSection.setClient(advancedComposite);
+            setControl(container);
+        }
+
+        private Composite createAdvancedComposite(Composite container) {
+            Composite composite = new Composite(container, SWT.NONE);
+            GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(true).applyTo(composite);
+
+            Composite tableComposite = createTableComposite(composite);
             GridDataFactory.fillDefaults().hint(150, SWT.DEFAULT).minSize(150, SWT.DEFAULT).span(1, 3)
                     .grab(false, true).applyTo(tableComposite);
 
-            Composite messageComposite = createMessageComposite(container);
+            Composite messageComposite = createMessageComposite(composite);
             GridDataFactory.fillDefaults().span(2, 2).grab(true, true).applyTo(messageComposite);
 
-            Composite commentComposite = createCommentComposite(container);
+            Composite commentComposite = createCommentComposite(composite);
             GridDataFactory.fillDefaults().span(2, 1).hint(400, SWT.DEFAULT).grab(true, false)
                     .applyTo(commentComposite);
-            setControl(container);
+            return composite;
         }
 
         private Composite createTableComposite(Composite container) {
@@ -136,6 +154,7 @@ public class ErrorReportWizard extends Wizard {
             messageText.setEditable(false);
             messageText.setMargins(5, messageText.getTopMargin(), messageText.getRightMargin(),
                     messageText.getBottomMargin());
+            messageText.setBackground(new Color(container.getDisplay(), 230, 230, 230));
             messageText.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
             GridDataFactory.fillDefaults().minSize(150, 1).hint(300, 300).grab(true, true).applyTo(messageText);
             return messageComposite;
