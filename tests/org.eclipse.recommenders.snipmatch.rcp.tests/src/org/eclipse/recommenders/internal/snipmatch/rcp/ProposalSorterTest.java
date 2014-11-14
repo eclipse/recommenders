@@ -104,7 +104,9 @@ public class ProposalSorterTest {
     private RepositoryProposal mockRepositoryProposal(int repositoryPriority, String name) {
         SnippetRepositoryConfiguration config = mock(SnippetRepositoryConfiguration.class);
         when(config.getName()).thenReturn(name);
+        Device device = mock(Device.class);
+        Image image = new Image(device, 1, 1);
 
-        return new RepositoryProposal(config, repositoryPriority, 1);
+        return new RepositoryProposal(config, repositoryPriority, 1, image);
     }
 }
