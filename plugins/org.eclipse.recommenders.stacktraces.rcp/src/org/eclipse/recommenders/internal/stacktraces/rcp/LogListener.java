@@ -62,11 +62,16 @@ public class LogListener implements ILogListener, IStartup {
         settings = readSettings();
         boolean configured = false; // TODO use setting
         if (!configured) {
-            ConfigurationWizard configurationWizard = new ConfigurationWizard(settings);
-            WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-                    .getShell(), configurationWizard);
-            wizardDialog.setBlockOnOpen(true);
-            wizardDialog.open();
+            Display.getDefault().syncExec(new Runnable() {
+                @Override
+                public void run() {
+                    ConfigurationWizard configurationWizard = new ConfigurationWizard(settings);
+                    WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+                            .getShell(), configurationWizard);
+                    wizardDialog.setBlockOnOpen(true);
+                    wizardDialog.open();
+                }
+            });
         }
     }
 
