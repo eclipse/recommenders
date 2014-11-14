@@ -37,6 +37,7 @@ public final class Constants {
     static final String PROP_EMAIL = "email";
     static final String PROP_ANONYMIZE_STACKTRACES = "anonymize-stacktraces";
     static final String PROP_ANONYMIZE_MESSAGES = "anonymize-messages";
+    static final String PROP_CONFIGURED = "configured";
     static final String PROP_SEND_ACTION = "send-action";
     static final String PROP_PAUSE_PERIOD_START = "pause-period-start";
     static final String PROP_SKIP_SIMILAR_ERRORS = "skip-similar-errors";
