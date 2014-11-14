@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
@@ -61,12 +62,34 @@ public class LogListener implements ILogListener, IStartup {
     @Override
     public void earlyStartup() {
         Platform.addLogListener(this);
+        settings = readSettings();
+        boolean configured = settings.isConfigured();
+        if (!configured && isReportingAllowedInEnvironment()) {
+            firstConfiguration();
+        }
+    }
+
+    private void firstConfiguration() {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                ConfigurationDialog configurationDialog = new ConfigurationDialog(PlatformUI.getWorkbench()
+                        .getActiveWorkbenchWindow().getShell(), settings);
+                configurationDialog.setBlockOnOpen(true);
+                int status = configurationDialog.open();
+                if (status == Window.CANCEL) {
+                    settings.setAction(SendAction.IGNORE);
+                }
+                settings.setConfigured(true);
+                PreferenceInitializer.saveSettings(settings);
+            }
+        });
     }
 
     @Override
     public void logging(final IStatus status, String nouse) {
         try {
-            if (skipSendingReports() || !isErrorSeverity(status) || isRuntimeEclipse()) {
+            if (!isReportingAllowedInEnvironment() || !isErrorSeverity(status)) {
                 return;
             }
             settings = readSettings();
@@ -93,16 +116,20 @@ public class LogListener implements ILogListener, IStartup {
         }
     }
 
+    private boolean isReportingAllowedInEnvironment() {
+        return !skipSendingReports() && !isRuntimeEclipse();
+    }
+
     private boolean skipSendingReports() {
         return Boolean.getBoolean(SYSPROP_SKIP_REPORTS);
     }
 
-    private boolean isErrorSeverity(final IStatus status) {
-        return status.matches(IStatus.ERROR);
-    }
-
     private boolean isRuntimeEclipse() {
         return null == System.getProperty(SYSPROP_ECLIPSE_BUILD_ID);
+    }
+
+    private boolean isErrorSeverity(final IStatus status) {
+        return status.matches(IStatus.ERROR);
     }
 
     @VisibleForTesting
@@ -164,6 +191,7 @@ public class LogListener implements ILogListener, IStartup {
                 } else if (settings.getAction() == SendAction.IGNORE || settings.getAction() == SendAction.PAUSE_DAY
                         || settings.getAction() == SendAction.PAUSE_RESTART) {
                     // the user may have chosen to not to send events in the wizard. Respect this preference:
+                    clear();
                     return;
                 }
                 sendAndClear();
