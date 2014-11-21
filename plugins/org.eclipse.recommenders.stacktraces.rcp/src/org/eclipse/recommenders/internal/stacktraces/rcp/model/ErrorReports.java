@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.recommenders.internal.stacktraces.rcp.Constants;
+import org.eclipse.recommenders.internal.stacktraces.rcp.LogMessages;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.impl.VisitorImpl;
 import org.eclipse.recommenders.utils.AnonymousId;
 import org.eclipse.recommenders.utils.gson.EmfFieldExclusionStrategy;
@@ -221,6 +222,7 @@ public class ErrorReports {
 
         report.setName(settings.getName());
         report.setEmail(settings.getEmail());
+        report.setReportVersion(getReportVersion());
         if (settings.isAnonymizeStrackTraceElements()) {
             anonymizeStackTrace(report, settings);
         }
@@ -231,6 +233,10 @@ public class ErrorReports {
         Gson gson = createGson(pretty);
         String json = gson.toJson(report);
         return json;
+    }
+
+    private static String getReportVersion() {
+        return LogMessages.BUNDLE != null ? LogMessages.BUNDLE.getVersion().toString() : "Bundle not found";
     }
 
     private static Gson createGson(boolean pretty) {

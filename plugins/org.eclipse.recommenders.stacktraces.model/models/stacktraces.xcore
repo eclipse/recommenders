@@ -15,6 +15,7 @@ class ErrorReport {
     String eclipseBuildId
     String eclipseProduct
     String javaRuntimeVersion
+    String reportVersion
     String osgiWs
     String osgiOs
     String osgiOsVersion
