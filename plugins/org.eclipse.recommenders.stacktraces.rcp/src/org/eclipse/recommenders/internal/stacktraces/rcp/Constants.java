@@ -24,7 +24,7 @@ public final class Constants {
         throw new IllegalStateException("Not meant to be instantiated"); //$NON-NLS-1$
     }
 
-    static final String PLUGIN_ID = "org.eclipse.recommenders.stacktraces.rcp";
+    public static final String PLUGIN_ID = "org.eclipse.recommenders.stacktraces.rcp";
 
     /**
      * Specifying '-Dorg.eclipse.recommenders.stacktraces.rcp.skipReports=true' as vmarg in eclipse launch

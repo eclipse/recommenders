@@ -33,6 +33,7 @@ import org.eclipse.recommenders.utils.gson.UuidTypeAdapter;
 import org.osgi.framework.Bundle;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
@@ -221,6 +222,12 @@ public class ErrorReports {
 
         report.setName(settings.getName());
         report.setEmail(settings.getEmail());
+        Optional<Bundle> bundle = Optional.of(Platform.getBundle(Constants.PLUGIN_ID));
+        if (bundle.isPresent()) {
+            report.setStacktracesVersion(bundle.get().getVersion().toString());
+        } else {
+            report.setStacktracesVersion("Bundle not found");
+        }
         if (settings.isAnonymizeStrackTraceElements()) {
             anonymizeStackTrace(report, settings);
         }
