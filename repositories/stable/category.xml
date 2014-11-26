@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<site>
+<site associateSitesURL="associate-sites.xml">
 	<feature id="org.eclipse.recommenders.rcp.feature" version="0.0.0">
 		<category name="org.eclipse.recommenders.repositories.categories.main"/>
 	</feature>
