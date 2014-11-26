@@ -39,7 +39,6 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<outputDirectory>${project.build.directory}/repository</outputDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
