@@ -33,7 +33,7 @@ class ImportedPackagesContextFunctionTest {
         val ast = SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null)
         
         val ctx = mock(IRecommendersCompletionContext)
-        when(ctx.AST).thenReturn(ast)
+        when(ctx.AST.orNull()).thenReturn(ast)
         
         val actual = new ImportedPackagesFunction().compute(ctx, CompletionContextKey.IMPORTED_PACKAGES)
         assertThat(actual, hasItem(VmPackageName.get("java/util")))
