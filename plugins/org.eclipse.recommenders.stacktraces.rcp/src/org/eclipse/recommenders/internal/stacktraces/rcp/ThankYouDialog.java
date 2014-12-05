@@ -33,13 +33,130 @@ import com.google.common.annotations.VisibleForTesting;
 
 class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
 
+    protected static class MessageBuilder {
+
+        protected ReportState state;
+
+        @VisibleForTesting
+        protected String buildText() {
+            StringBuilder text = new StringBuilder();
+
+            if (state.isCreated()) {
+                text.append(messageNewBugCreated());
+            } else {
+                String status = state.getStatus().or(UNCONFIRMED);
+                if (equals(UNCONFIRMED, status) || equals(NEW, status) || equals(ASSIGNED, status)) {
+                    text.append(messageMatchedAgainstExistingBug());
+                } else if (equals(RESOLVED, status) || equals(CLOSED, status)) {
+                    String resolution = state.getResolved().or(UNKNOWN);
+                    if (equals(FIXED, resolution)) {
+                        text.append(messageFixed());
+                    } else if (equals(DUPLICATE, resolution)) {
+                        text.append(messageDuplicate());
+                    } else if (equals(MOVED, resolution)) {
+                        text.append(messageMoved());
+                    } else if (equals(WORKSFORME, resolution)) {
+                        text.append(messageWorksforme());
+                    } else if (equals(WONTFIX, resolution) || equals(INVALID, resolution)
+                            || equals(NOT_ECLIPSE, resolution)) {
+                        text.append(messageNormal());
+                    } else {
+                        text.append(messageUnknown(resolution));
+                    }
+                } else {
+                    text.append(messageUnknownServerResponse());
+                }
+            }
+
+            if (hasInfo()) {
+                text.append(messageCommitterInfo());
+            }
+
+            text.append(Messages.THANKYOUDIALOG_THANK_YOU_FOR_HELP);
+            return text.toString();
+        }
+
+        @VisibleForTesting
+        protected String messageNewBugCreated() {
+            return format(Messages.THANKYOUDIALOG_NEW, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageMatchedAgainstExistingBug() {
+            return format(Messages.THANKYOUDIALOG_MATCHED_EXISTING_BUG, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageFixed() {
+            return format(Messages.THANKYOUDIALOG_MARKED_FIXED, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageDuplicate() {
+            return format(Messages.THANKYOUDIALOG_MARKED_DUPLICATE, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageMoved() {
+            return format(Messages.THANKYOUDIALOG_MARKED_MOVED, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageWorksforme() {
+            return format(Messages.THANKYOUDIALOG_MARKED_WORKSFORME, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageNormal() {
+            return format(Messages.THANKYOUDIALOG_MARKED_NORMAL, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageUnknown(String resolution) {
+            return format(Messages.THANKYOUDIALOG_MARKED_UNKNOWN, resolution, getBugURL(), getBugId());
+        }
+
+        @VisibleForTesting
+        protected String messageUnknownServerResponse() {
+            return Messages.THANKYOUDIALOG_RECEIVED_UNKNOWN_SERVER_RESPONSE;
+        }
+
+        @VisibleForTesting
+        protected String messageCommitterInfo() {
+            return format(Messages.THANKYOUDIALOG_COMMITTER_MESSAGE, getInfo());
+        }
+
+        private boolean hasInfo() {
+            return state.getInformation().isPresent();
+        }
+
+        private String getInfo() {
+            return state.getInformation().or(Messages.THANKYOUDIALOG_COMMITTER_MESSAGE_EMPTY);
+        }
+
+        private String getBugId() {
+            return state.getBugId().or("---");
+        }
+
+        private String getBugURL() {
+            return state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE);
+        }
+
+        private static boolean equals(String expected, String actual) {
+            return StringUtils.equals(expected, actual);
+        }
+    }
+
     public static final Image TITLE_IMAGE = ErrorReportWizard.TITLE_IMAGE_DESC.createImage();
 
-    private final ReportState state;
+    MessageBuilder messageBuilder = new MessageBuilder();
+
+    private String bugUrl;
 
     ThankYouDialog(Shell parentShell, ReportState state) {
         super(parentShell);
-        this.state = state;
+        messageBuilder.state = state;
+        bugUrl = state.getBugUrl().get();
         setHelpAvailable(false);
     }
 
@@ -80,77 +197,17 @@ class ThankYouDialog extends org.eclipse.jface.dialogs.TitleAreaDialog {
         container.setLayout(GridLayoutFactory.swtDefaults().create());
         container.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 
-        String text = buildText();
+        String text = messageBuilder.buildText();
 
         Link link = new Link(container, SWT.WRAP);
         link.setText(text);
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                Browsers.openInExternalBrowser(state.getBugUrl().get());
+                Browsers.openInExternalBrowser(bugUrl);
             }
         });
         GridDataFactory.defaultsFor(link).align(GridData.FILL, GridData.BEGINNING).applyTo(link);
         return container;
-    }
-
-    @VisibleForTesting
-    protected String buildText() {
-        StringBuilder text = new StringBuilder();
-
-        if (state.isCreated()) {
-            String message = format(Messages.THANKYOUDIALOG_NEW, getBugURL(), getBugId());
-            text.append(message);
-        } else {
-            String status = state.getStatus().or(UNCONFIRMED);
-            if (equals(UNCONFIRMED, status) || equals(NEW, status) || equals(ASSIGNED, status)) {
-                text.append(format(Messages.THANKYOUDIALOG_MATCHED_EXISTING_BUG, getBugURL(), getBugId()));
-            } else if (equals(RESOLVED, status) || equals(CLOSED, status)) {
-                String resolution = state.getResolved().or(UNKNOWN);
-                if (equals(FIXED, resolution)) {
-                    text.append(format(Messages.THANKYOUDIALOG_MARKED_FIXED, getBugURL(), getBugId()));
-                } else if (equals(DUPLICATE, resolution)) {
-                    text.append(format(Messages.THANKYOUDIALOG_MARKED_DUPLICATE, getBugURL(), getBugId()));
-                } else if (equals(MOVED, resolution)) {
-                    text.append(format(Messages.THANKYOUDIALOG_MARKED_MOVED, getBugURL(), getBugId()));
-                } else if (equals(WORKSFORME, resolution)) {
-                    text.append(format(Messages.THANKYOUDIALOG_MARKED_WORKSFORME, getBugURL(), getBugId()));
-                } else if (equals(WONTFIX, resolution) || equals(INVALID, resolution)
-                        || equals(NOT_ECLIPSE, resolution)) {
-                    text.append(format(Messages.THANKYOUDIALOG_MARKED_NORMAL, getBugURL(), getBugId()));
-                } else {
-                    text.append(format(Messages.THANKYOUDIALOG_MARKED_UNKNOWN, resolution, getBugURL(), getBugId()));
-                }
-            } else {
-                text.append(Messages.THANKYOUDIALOG_RECEIVED_UNKNOWN_SERVER_RESPONSE);
-            }
-        }
-
-        if (hasInfo()) {
-            text.append(format(Messages.THANKYOUDIALOG_COMMITTER_MESSAGE, getInfo()));
-        }
-
-        text.append(Messages.THANKYOUDIALOG_THANK_YOU_FOR_HELP);
-        return text.toString();
-    }
-
-    private boolean hasInfo() {
-        return state.getInformation().isPresent();
-    }
-
-    private String getInfo() {
-        return state.getInformation().or(Messages.THANKYOUDIALOG_COMMITTER_MESSAGE_EMPTY);
-    }
-
-    private String getBugId() {
-        return state.getBugId().or("---");
-    }
-
-    private String getBugURL() {
-        return state.getBugUrl().or(Messages.THANKYOUDIALOG_INVALID_SERVER_RESPONSE);
-    }
-
-    private static boolean equals(String expected, String actual) {
-        return StringUtils.equals(expected, actual);
     }
 }
