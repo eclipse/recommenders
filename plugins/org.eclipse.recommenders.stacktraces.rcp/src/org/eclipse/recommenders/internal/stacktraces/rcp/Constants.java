@@ -151,6 +151,11 @@ public final class Constants {
                     "java.lang.Object",
                     "java.lang.Object",
                     "org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor"),
+            // at java.lang.Object.wait(Object.java:-2)
+            // at org.eclipse.jface.text.reconciler.AbstractReconciler$BackgroundThread.run(AbstractReconciler.java:179)
+            new StatusFilterSetting("org.eclipse.ui.monitoring",
+                    "java.lang.Object",
+                    "org.eclipse.jface.text.reconciler.AbstractReconciler"),
             // at sun.nio.ch.ServerSocketChannelImpl.accept0(ServerSocketChannelImpl.java:-2)
             // at sun.nio.ch.ServerSocketChannelImpl.accept(ServerSocketChannelImpl.java:241)
             // at org.eclipse.jetty.server.ServerConnector.accept(ServerConnector.java:377)
