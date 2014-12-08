@@ -95,7 +95,6 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -107,7 +106,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -142,14 +140,6 @@ public class ModelRepositoriesView extends ViewPart {
 
     private ListMultimap<String, KnownCoordinate> coordinatesGroupedByRepo = LinkedListMultimap.create();
     private ListMultimap<String, KnownCoordinate> filteredCoordinatesGroupedByRepo = LinkedListMultimap.create();
-
-    private final Function<ModelRepositoriesView.KnownCoordinate, String> toStringRepresentation = new Function<ModelRepositoriesView.KnownCoordinate, String>() {
-
-        @Override
-        public String apply(KnownCoordinate input) {
-            return input.pc.toString();
-        }
-    };
 
     @Inject
     public ModelRepositoriesView(IModelIndex index, SharedImages images, EclipseModelRepository repo,
@@ -392,10 +382,20 @@ public class ModelRepositoriesView extends ViewPart {
         Multimap<ProjectCoordinate, ModelCoordinate> coordinatesGroupedByProjectCoordinate = groupByProjectCoordinate(modelCoordinates);
 
         List<KnownCoordinate> coordinates = Lists.newArrayList();
+        /*
+         * proCoordinate is the list containing all the project coordinates the list proCoordinate is sorted with the
+         * Project Coordinate Comparator
+         */
+        List<ProjectCoordinate> proCoordinate = new ArrayList<ProjectCoordinate>(
+                coordinatesGroupedByProjectCoordinate.keySet());
+
+        ProjectCoordinateComparator pcc = new ProjectCoordinateComparator();
+        Collections.sort(proCoordinate, pcc);
+
         for (ProjectCoordinate pc : coordinatesGroupedByProjectCoordinate.keySet()) {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
         }
-        return Ordering.natural().onResultOf(toStringRepresentation).sortedCopy(coordinates);
+        return coordinates;
     }
 
     private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(
