@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -107,7 +108,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -152,6 +152,7 @@ public class ModelRepositoriesView extends ViewPart {
     };
 
     @Inject
+    // this is the interface
     public ModelRepositoriesView(IModelIndex index, SharedImages images, EclipseModelRepository repo,
             ModelsRcpPreferences prefs, @Named(MODEL_CLASSIFIER) ImmutableSet<String> modelClassifiers, EventBus bus) {
         this.index = index;
@@ -392,10 +393,14 @@ public class ModelRepositoriesView extends ViewPart {
         Multimap<ProjectCoordinate, ModelCoordinate> coordinatesGroupedByProjectCoordinate = groupByProjectCoordinate(modelCoordinates);
 
         List<KnownCoordinate> coordinates = Lists.newArrayList();
+
         for (ProjectCoordinate pc : coordinatesGroupedByProjectCoordinate.keySet()) {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
+
         }
-        return Ordering.natural().onResultOf(toStringRepresentation).sortedCopy(coordinates);
+        Collections.sort(coordinates, new KnownCoordinate());
+        return coordinates;
+
     }
 
     private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(
@@ -414,10 +419,14 @@ public class ModelRepositoriesView extends ViewPart {
         return coordinatesGroupedByRepo.get(url).size();
     }
 
-    public class KnownCoordinate {
+    public class KnownCoordinate implements Comparator<KnownCoordinate> {
         public String url;
         public ProjectCoordinate pc;
         public Collection<ModelCoordinate> mcs;
+
+        public KnownCoordinate() {
+
+        }
 
         public KnownCoordinate(String url, ProjectCoordinate pc, Collection<ModelCoordinate> mcs) {
             this.url = url;
@@ -456,6 +465,22 @@ public class ModelRepositoriesView extends ViewPart {
             return EqualsBuilder.reflectionEquals(this, obj, "mcs"); //$NON-NLS-1$
         }
 
+        @Override
+        public int compare(KnownCoordinate kc1, KnownCoordinate kc2) {
+            int cmpVal = kc1.pc.getGroupId().compareToIgnoreCase(kc2.pc.getGroupId());
+            if (cmpVal != 0) {
+                return cmpVal;
+            } else {
+                cmpVal = kc1.pc.getArtifactId().compareToIgnoreCase(kc2.pc.getArtifactId());
+                if (cmpVal != 0) {
+                    return cmpVal;
+                } else {
+                    return kc1.pc.getVersion().compareToIgnoreCase(kc2.pc.getVersion());
+
+                }
+
+            }
+        }
     }
 
     private static final class GlobMatcher implements Predicate<KnownCoordinate> {
