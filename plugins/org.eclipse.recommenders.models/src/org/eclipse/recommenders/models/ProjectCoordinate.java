@@ -39,10 +39,10 @@ public class ProjectCoordinate {
 
     /**
      * Creates a new coordinate. Note that <code>null</code> values are replaced with an empty string.
-     * 
+     *
      * @throws IllegalArgumentException
      *             If the coordinate parts have an invalid format.
-     * 
+     *
      * @see Versions#isValidVersion(String)
      * @see Coordinates#isValidId(String)
      */
@@ -88,4 +88,5 @@ public class ProjectCoordinate {
                 segments.length);
         return new ProjectCoordinate(segments[0], segments[1], segments[2]);
     }
+
 }
