@@ -93,7 +93,7 @@ public class Zips {
                 if (!entry.isDirectory()) {
                     final File file = new File(destFolder, entry.getName());
                     Files.createParentDirs(file);
-                    Files.write(ByteStreams.toByteArray(zis), file);
+                    Files.asByteSink(file, FileWriteMode.APPEND).writeFrom(zis);
                 }
             }
         } finally {
