@@ -84,30 +84,31 @@ public class MavenCentralFingerprintSearchAdvisor extends AbstractProjectCoordin
 
     @Override
     protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
-        try {
-            SolrQuery query = new SolrQuery();
-            query.setQuery("1:\"" + Fingerprints.sha1(dependencyInfo.getFile()) + "\"");
-            query.setRows(1);
-            QueryResponse response = server.query(query);
-            SolrDocumentList results = response.getResults();
+        if (dependencyInfo.getFile().isFile()) {
+            try {
+                SolrQuery query = new SolrQuery();
+                query.setQuery("1:\"" + Fingerprints.sha1(dependencyInfo.getFile()) + "\"");
+                query.setRows(1);
+                QueryResponse response = server.query(query);
+                SolrDocumentList results = response.getResults();
 
-            for (SolrDocument document : results) {
-                if (!SUPPORTED_PACKAGINGS.contains(document.get(FIELD_PACKAGING))) {
-                    continue;
+                for (SolrDocument document : results) {
+                    if (!SUPPORTED_PACKAGINGS.contains(document.get(FIELD_PACKAGING))) {
+                        continue;
+                    }
+
+                    String groupId = (String) document.get(FIELD_GROUP_ID);
+                    String artifactId = (String) document.get(FIELD_ARTIFACT_ID);
+                    String version = (String) document.get(FIELD_VERSION);
+
+                    return tryNewProjectCoordinate(groupId, artifactId, canonicalizeVersion(version));
                 }
-
-                String groupId = (String) document.get(FIELD_GROUP_ID);
-                String artifactId = (String) document.get(FIELD_ARTIFACT_ID);
-                String version = (String) document.get(FIELD_VERSION);
-
-                return tryNewProjectCoordinate(groupId, artifactId, canonicalizeVersion(version));
+            } catch (SolrServerException e) {
+                LOG.error("Exception when querying Solr Server <{}>", SEARCH_MAVEN_ORG, e);
+                return absent();
             }
-
-            return absent();
-        } catch (SolrServerException e) {
-            LOG.error("Exception when querying Solr Server <{}>", SEARCH_MAVEN_ORG, e);
-            return absent();
         }
+        return absent();
     }
 
     public void setProxy(String host, int port, String user, String password) {

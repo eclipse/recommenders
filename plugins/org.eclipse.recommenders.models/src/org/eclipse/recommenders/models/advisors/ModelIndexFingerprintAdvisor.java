@@ -28,8 +28,11 @@ public class ModelIndexFingerprintAdvisor extends AbstractProjectCoordinateAdvis
 
     @Override
     protected Optional<ProjectCoordinate> doSuggest(DependencyInfo dependencyInfo) {
-        String fingerprint = Fingerprints.sha1(dependencyInfo.getFile());
-        return indexer.suggestProjectCoordinateByFingerprint(fingerprint);
+        if (dependencyInfo.getFile().isFile()) {
+            String fingerprint = Fingerprints.sha1(dependencyInfo.getFile());
+            return indexer.suggestProjectCoordinateByFingerprint(fingerprint);
+        }
+        return Optional.absent();
     }
 
     @Override
