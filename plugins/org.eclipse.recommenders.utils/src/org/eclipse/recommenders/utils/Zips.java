@@ -17,6 +17,7 @@ import static org.apache.commons.io.filefilter.DirectoryFileFilter.DIRECTORY;
 import static org.apache.commons.io.filefilter.FileFileFilter.FILE;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -110,10 +111,18 @@ public class Zips {
                 String path = removeStart(f.getPath(), directory.getAbsolutePath() + File.separator);
                 path = path.replace(File.separatorChar, '/');
                 ZipEntry e = new ZipEntry(path);
-                zos.putNextEntry(e);
-                byte[] data = Files.toByteArray(f);
-                zos.write(data);
-                zos.closeEntry();
+                BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(f));
+                try {
+                    zos.putNextEntry(e);
+                    byte[] data = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(data)) > 0) {
+                        zos.write(data, 0, length);
+                    }
+                } finally {
+                    zos.closeEntry();
+                    inputStream.close();
+                }
             }
         } finally {
             Closeables.close(zos, false);
