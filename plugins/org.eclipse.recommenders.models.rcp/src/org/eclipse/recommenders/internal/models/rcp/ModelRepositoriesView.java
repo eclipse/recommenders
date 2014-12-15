@@ -141,17 +141,6 @@ public class ModelRepositoriesView extends ViewPart {
     private ListMultimap<String, KnownCoordinate> coordinatesGroupedByRepo = LinkedListMultimap.create();
     private ListMultimap<String, KnownCoordinate> filteredCoordinatesGroupedByRepo = LinkedListMultimap.create();
 
-    /*
-     * private final Function<ModelRepositoriesView.KnownCoordinate, String> toStringRepresentation = new
-     * Function<ModelRepositoriesView.KnownCoordinate, String>() {
-     * 
-     * @Override public String apply(KnownCoordinate input) {
-     * 
-     * return input.pc.toString(); }
-     * 
-     * };
-     */
-
     @Inject
     public ModelRepositoriesView(IModelIndex index, SharedImages images, EclipseModelRepository repo,
             ModelsRcpPreferences prefs, @Named(MODEL_CLASSIFIER) ImmutableSet<String> modelClassifiers, EventBus bus) {
@@ -396,10 +385,12 @@ public class ModelRepositoriesView extends ViewPart {
 
         for (ProjectCoordinate pc : coordinatesGroupedByProjectCoordinate.keySet()) {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
-
         }
+
         KnownCoordinateComparator kcc = new KnownCoordinateComparator();
-        Collections.sort(coordinates, kcc.sortlexicographically());
+
+        /* sorting order is first groupId,then artifactId and then version */
+        Collections.sort(coordinates, kcc);
         return coordinates;
     }
 
