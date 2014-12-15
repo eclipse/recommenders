@@ -398,8 +398,11 @@ public class ModelRepositoriesView extends ViewPart {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
 
         }
+
         KnownCoordinateComparator kcc = new KnownCoordinateComparator();
-        Collections.sort(coordinates, kcc.sortlexicographically());
+
+        /* the list sorted according to groupId first then artifactId and then version */
+        Collections.sort(coordinates, kcc);
         return coordinates;
     }
 
