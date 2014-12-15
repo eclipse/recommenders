@@ -141,17 +141,6 @@ public class ModelRepositoriesView extends ViewPart {
     private ListMultimap<String, KnownCoordinate> coordinatesGroupedByRepo = LinkedListMultimap.create();
     private ListMultimap<String, KnownCoordinate> filteredCoordinatesGroupedByRepo = LinkedListMultimap.create();
 
-    /*
-     * private final Function<ModelRepositoriesView.KnownCoordinate, String> toStringRepresentation = new
-     * Function<ModelRepositoriesView.KnownCoordinate, String>() {
-     * 
-     * @Override public String apply(KnownCoordinate input) {
-     * 
-     * return input.pc.toString(); }
-     * 
-     * };
-     */
-
     @Inject
     public ModelRepositoriesView(IModelIndex index, SharedImages images, EclipseModelRepository repo,
             ModelsRcpPreferences prefs, @Named(MODEL_CLASSIFIER) ImmutableSet<String> modelClassifiers, EventBus bus) {
@@ -393,13 +382,18 @@ public class ModelRepositoriesView extends ViewPart {
         Multimap<ProjectCoordinate, ModelCoordinate> coordinatesGroupedByProjectCoordinate = groupByProjectCoordinate(modelCoordinates);
 
         List<KnownCoordinate> coordinates = Lists.newArrayList();
+        /*
+         * proCoordinate is the list containing all the project coordinates the list proCoordinate is sorted with the
+         * Project Coordinate Comparator
+         */
+        List<ProjectCoordinate> proCoordinate = new ArrayList<ProjectCoordinate>(
+                coordinatesGroupedByProjectCoordinate.keySet());
 
-        for (ProjectCoordinate pc : coordinatesGroupedByProjectCoordinate.keySet()) {
+        ProjectCoordinateComparator pcc = new ProjectCoordinateComparator();
+        Collections.sort(proCoordinate, pcc);
+        for (ProjectCoordinate pc : proCoordinate) {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
-
         }
-        KnownCoordinateComparator kcc = new KnownCoordinateComparator();
-        Collections.sort(coordinates, kcc.sortlexicographically());
         return coordinates;
     }
 
