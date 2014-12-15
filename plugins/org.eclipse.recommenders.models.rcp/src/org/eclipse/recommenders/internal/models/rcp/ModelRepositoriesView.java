@@ -144,11 +144,11 @@ public class ModelRepositoriesView extends ViewPart {
     /*
      * private final Function<ModelRepositoriesView.KnownCoordinate, String> toStringRepresentation = new
      * Function<ModelRepositoriesView.KnownCoordinate, String>() {
-     * 
+     *
      * @Override public String apply(KnownCoordinate input) {
-     * 
+     *
      * return input.pc.toString(); }
-     * 
+     *
      * };
      */
 
@@ -398,7 +398,12 @@ public class ModelRepositoriesView extends ViewPart {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
 
         }
+
         KnownCoordinateComparator kcc = new KnownCoordinateComparator();
+        /*
+         * sort lexicographically function returns a comparator which takes care of the sorting order that is
+         * groupid:artifactid:version
+         */
         Collections.sort(coordinates, kcc.sortlexicographically());
         return coordinates;
     }
