@@ -106,6 +106,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -398,8 +399,12 @@ public class ModelRepositoriesView extends ViewPart {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
 
         }
+
         KnownCoordinateComparator kcc = new KnownCoordinateComparator();
-        Collections.sort(coordinates, kcc.sortlexicographically());
+
+        Ordering<KnownCoordinate> finalorder = Ordering.from(kcc);
+        /* final order is the list sorted according to groupId first then artifactId and then version */
+        Collections.sort(coordinates, finalorder);
         return coordinates;
     }
 
