@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -96,7 +95,6 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -143,16 +141,18 @@ public class ModelRepositoriesView extends ViewPart {
     private ListMultimap<String, KnownCoordinate> coordinatesGroupedByRepo = LinkedListMultimap.create();
     private ListMultimap<String, KnownCoordinate> filteredCoordinatesGroupedByRepo = LinkedListMultimap.create();
 
-    private final Function<ModelRepositoriesView.KnownCoordinate, String> toStringRepresentation = new Function<ModelRepositoriesView.KnownCoordinate, String>() {
-
-        @Override
-        public String apply(KnownCoordinate input) {
-            return input.pc.toString();
-        }
-    };
+    /*
+     * private final Function<ModelRepositoriesView.KnownCoordinate, String> toStringRepresentation = new
+     * Function<ModelRepositoriesView.KnownCoordinate, String>() {
+     * 
+     * @Override public String apply(KnownCoordinate input) {
+     * 
+     * return input.pc.toString(); }
+     * 
+     * };
+     */
 
     @Inject
-    // this is the interface
     public ModelRepositoriesView(IModelIndex index, SharedImages images, EclipseModelRepository repo,
             ModelsRcpPreferences prefs, @Named(MODEL_CLASSIFIER) ImmutableSet<String> modelClassifiers, EventBus bus) {
         this.index = index;
@@ -398,9 +398,9 @@ public class ModelRepositoriesView extends ViewPart {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
 
         }
-        Collections.sort(coordinates, new KnownCoordinate());
+        KnownCoordinateComparator kcc = new KnownCoordinateComparator();
+        Collections.sort(coordinates, kcc.sortlexicographically());
         return coordinates;
-
     }
 
     private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(
@@ -419,14 +419,10 @@ public class ModelRepositoriesView extends ViewPart {
         return coordinatesGroupedByRepo.get(url).size();
     }
 
-    public class KnownCoordinate implements Comparator<KnownCoordinate> {
+    public class KnownCoordinate {
         public String url;
         public ProjectCoordinate pc;
         public Collection<ModelCoordinate> mcs;
-
-        public KnownCoordinate() {
-
-        }
 
         public KnownCoordinate(String url, ProjectCoordinate pc, Collection<ModelCoordinate> mcs) {
             this.url = url;
@@ -465,22 +461,6 @@ public class ModelRepositoriesView extends ViewPart {
             return EqualsBuilder.reflectionEquals(this, obj, "mcs"); //$NON-NLS-1$
         }
 
-        @Override
-        public int compare(KnownCoordinate kc1, KnownCoordinate kc2) {
-            int cmpVal = kc1.pc.getGroupId().compareToIgnoreCase(kc2.pc.getGroupId());
-            if (cmpVal != 0) {
-                return cmpVal;
-            } else {
-                cmpVal = kc1.pc.getArtifactId().compareToIgnoreCase(kc2.pc.getArtifactId());
-                if (cmpVal != 0) {
-                    return cmpVal;
-                } else {
-                    return kc1.pc.getVersion().compareToIgnoreCase(kc2.pc.getVersion());
-
-                }
-
-            }
-        }
     }
 
     private static final class GlobMatcher implements Predicate<KnownCoordinate> {
