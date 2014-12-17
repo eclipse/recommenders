@@ -11,7 +11,7 @@
 package org.eclipse.recommenders.jdt;
 
 import static com.google.common.base.Optional.*;
-import static org.eclipse.jdt.core.IPackageFragmentRoot.K_SOURCE;
+import static org.eclipse.jdt.core.IPackageFragmentRoot.*;
 import static org.eclipse.recommenders.internal.jdt.LogMessages.*;
 import static org.eclipse.recommenders.utils.Logs.log;
 
@@ -53,6 +53,25 @@ public class JavaElementsFinder {
             for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
                 if (K_SOURCE == root.getKind()) {
                     b.add(root);
+                }
+            }
+        } catch (Exception e) {
+            log(ERROR_CANNOT_FETCH_PACKAGE_FRAGMENT_ROOTS, e, project);
+        }
+        return b.build();
+    }
+
+    public static ImmutableList<IPackageFragmentRoot> findPackageRootsWithSources(IJavaProject project,
+            boolean includeBinaries) {
+        Builder<IPackageFragmentRoot> b = ImmutableList.builder();
+        try {
+            for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
+                if (K_SOURCE == root.getKind()) {
+                    b.add(root);
+                } else if (includeBinaries && K_BINARY == root.getKind()) {
+                    if (hasSourceAttachment(root)) {
+                        b.add(root);
+                    }
                 }
             }
         } catch (Exception e) {
