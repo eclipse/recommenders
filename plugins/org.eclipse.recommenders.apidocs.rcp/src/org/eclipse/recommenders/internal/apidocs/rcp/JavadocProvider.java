@@ -88,23 +88,23 @@ public final class JavadocProvider extends ApidocProvider {
 
     @JavaSelectionSubscriber
     public void onTypeSelection(final IType type, final JavaElementSelectionEvent selection, final Composite parent)
-            throws JavaModelException {
+            throws CoreException, JavaModelException {
         render(type, parent);
     }
 
     @JavaSelectionSubscriber
     public void onMethodSelection(final IMethod method, final JavaElementSelectionEvent selection,
-            final Composite parent) throws JavaModelException {
+            final Composite parent) throws CoreException, JavaModelException {
         render(method, parent);
     }
 
     @JavaSelectionSubscriber
     public void onFieldSelection(final IField field, final JavaElementSelectionEvent selection, final Composite parent)
-            throws JavaModelException {
+            throws CoreException, JavaModelException {
         render(field, parent);
     }
 
-    private void render(final IMember element, final Composite parent) throws JavaModelException {
+    private void render(final IMember element, final Composite parent) throws CoreException, JavaModelException {
         final String html = findJavadoc(element);
         renderJavadoc(html, parent);
     }
@@ -178,7 +178,7 @@ public final class JavadocProvider extends ApidocProvider {
         });
     }
 
-    private String findJavadoc(final IMember element) throws JavaModelException {
+    private String findJavadoc(final IMember element) throws CoreException, JavaModelException {
         String html = JavadocContentAccess2.getHTMLContent(element, true);
         return extractJavadoc(html);
     }
