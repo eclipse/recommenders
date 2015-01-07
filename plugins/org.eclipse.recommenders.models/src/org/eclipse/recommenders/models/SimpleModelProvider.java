@@ -18,6 +18,9 @@ import static org.eclipse.recommenders.utils.Zips.closeQuietly;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.slf4j.Logger;
@@ -47,24 +50,33 @@ public abstract class SimpleModelProvider<K extends IUniqueName<?>, M> implement
     private final IModelRepository repository;
     private final IModelArchiveCoordinateAdvisor index;
     private final String modelType;
+    private final List<IInputStreamTransformer> transformers;
 
-    public SimpleModelProvider(IModelRepository cache, IModelArchiveCoordinateAdvisor index, String modelType) {
+    public SimpleModelProvider(IModelRepository cache, IModelArchiveCoordinateAdvisor index, String modelType,
+            List<IInputStreamTransformer> transformers) {
         this.repository = cache;
         this.index = index;
         this.modelType = modelType;
+        this.transformers = transformers;
     }
 
     @Override
     public Optional<M> acquireModel(K key) {
+
         try {
             // unknown model? return immediately
             ModelCoordinate mc = index.suggest(key.getProjectCoordinate(), modelType).orNull();
             if (mc == null) {
                 return absent();
             }
-            final ZipFile zip;
+
             try {
-                zip = openZips.get(mc);
+                ZipFile zip = openZips.get(mc);
+
+                ZipEntry entry = getEntry(key);
+                InputStream stream = getInputStream(zip, entry);
+                return loadModel(stream, key);
+
             } catch (UncheckedExecutionException e) {
                 if (IllegalStateException.class.equals(e.getCause().getClass())) {
                     // repository.getLocation(..) returned absent. Try to load ZIP file again next time.
@@ -73,14 +85,26 @@ public abstract class SimpleModelProvider<K extends IUniqueName<?>, M> implement
                     throw e;
                 }
             }
-            return loadModel(zip, key);
         } catch (Exception e) {
             LOG.error("Exception while loading model " + key, e);
             return absent();
         }
     }
 
-    protected abstract Optional<M> loadModel(ZipFile zip, K key) throws Exception;
+    protected abstract ZipEntry getEntry(K key);
+
+    private InputStream getInputStream(ZipFile zip, ZipEntry entry) throws IOException {
+        for (IInputStreamTransformer transformer : transformers) {
+            ZipEntry toTransform = zip.getEntry(entry.getName() + "." + transformer.getFileExtension());
+            if (toTransform == null) {
+                continue;
+            }
+            return transformer.transform(zip.getInputStream(toTransform));
+        }
+        return zip.getInputStream(entry);
+    }
+
+    protected abstract Optional<M> loadModel(InputStream stream, K key) throws Exception;
 
     @Override
     public void releaseModel(M value) {

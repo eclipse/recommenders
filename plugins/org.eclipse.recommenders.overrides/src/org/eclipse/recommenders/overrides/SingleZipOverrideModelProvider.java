@@ -11,14 +11,17 @@
 package org.eclipse.recommenders.overrides;
 
 import static org.eclipse.recommenders.utils.Constants.DOT_JSON;
-import static org.eclipse.recommenders.utils.Zips.closeQuietly;
-import static org.eclipse.recommenders.utils.Zips.readFully;
+import static org.eclipse.recommenders.utils.Zips.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.recommenders.models.IInputStreamTransformer;
 import org.eclipse.recommenders.models.IUniqueName;
 import org.eclipse.recommenders.models.UniqueTypeName;
 import org.eclipse.recommenders.utils.Openable;
@@ -38,9 +41,11 @@ public class SingleZipOverrideModelProvider implements IOverrideModelProvider, O
 
     private final File models;
     private ZipFile zip;
+    private List<IInputStreamTransformer> transformers;
 
-    public SingleZipOverrideModelProvider(File models) {
+    public SingleZipOverrideModelProvider(File models, List<IInputStreamTransformer> transformers) {
         this.models = models;
+        this.transformers = transformers;
     }
 
     @Override
@@ -55,7 +60,11 @@ public class SingleZipOverrideModelProvider implements IOverrideModelProvider, O
     }
 
     public Set<ITypeName> acquireableTypes() {
-        return Zips.types(zip, DOT_JSON);
+        for (IInputStreamTransformer transformer : transformers) {
+            Zips.types(zip.entries(), DOT_JSON + "." + transformer.getFileExtension());
+        }
+
+        return Zips.types(zip.entries(), DOT_JSON);
     }
 
     @Override
@@ -65,9 +74,27 @@ public class SingleZipOverrideModelProvider implements IOverrideModelProvider, O
     @Override
     public Optional<IOverrideModel> acquireModel(IUniqueName<ITypeName> key) {
         try {
-            return JayesOverrideModel.load(zip, key.getName());
+            String path = Zips.path(key.getName(), DOT_JSON);
+            ZipEntry entry = zip.getEntry(path);
+            if (entry == null) {
+                return Optional.absent();
+            }
+
+            InputStream is = getInputStream(zip, entry);
+            return JayesOverrideModel.load(is, key.getName());
         } catch (IOException e) {
             return Optional.absent();
         }
+    }
+
+    private InputStream getInputStream(ZipFile zip, ZipEntry entry) throws IOException {
+        for (IInputStreamTransformer transformer : transformers) {
+            ZipEntry toTransform = zip.getEntry(entry.getName() + "." + transformer.getFileExtension());
+            if (toTransform == null) {
+                continue;
+            }
+            return transformer.transform(zip.getInputStream(toTransform));
+        }
+        return zip.getInputStream(entry);
     }
 }

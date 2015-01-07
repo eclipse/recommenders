@@ -43,6 +43,7 @@ import org.eclipse.recommenders.apidocs.OverrideDirectivesModelProvider;
 import org.eclipse.recommenders.apidocs.OverridePatternsModelProvider;
 import org.eclipse.recommenders.apidocs.rcp.ApidocProvider;
 import org.eclipse.recommenders.apidocs.rcp.JavaSelectionSubscriber;
+import org.eclipse.recommenders.models.IInputStreamTransformer;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
@@ -76,12 +77,13 @@ public final class OverridesProvider extends ApidocProvider {
 
     @Inject
     public OverridesProvider(IProjectCoordinateProvider pcProvider, JavaElementResolver resolver,
-            EventBus workspaceBus, IModelRepository repository, IModelIndex index) {
+            EventBus workspaceBus, IModelRepository repository, IModelIndex index,
+            List<IInputStreamTransformer> transformers) {
         this.pcProvider = pcProvider;
         this.resolver = resolver;
         this.workspaceBus = workspaceBus;
-        this.pStore = new OverridePatternsModelProvider(repository, index);
-        this.dStore = new OverrideDirectivesModelProvider(repository, index);
+        this.pStore = new OverridePatternsModelProvider(repository, index, transformers);
+        this.dStore = new OverrideDirectivesModelProvider(repository, index, transformers);
     }
 
     @Subscribe

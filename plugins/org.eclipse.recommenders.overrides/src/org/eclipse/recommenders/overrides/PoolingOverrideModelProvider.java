@@ -10,13 +10,19 @@
  */
 package org.eclipse.recommenders.overrides;
 
-import java.util.zip.ZipFile;
+import static org.eclipse.recommenders.utils.Constants.DOT_JSON;
 
+import java.io.InputStream;
+import java.util.List;
+import java.util.zip.ZipEntry;
+
+import org.eclipse.recommenders.models.IInputStreamTransformer;
 import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.IUniqueName;
 import org.eclipse.recommenders.models.PoolingModelProvider;
 import org.eclipse.recommenders.utils.Constants;
+import org.eclipse.recommenders.utils.Zips;
 import org.eclipse.recommenders.utils.names.ITypeName;
 
 import com.google.common.base.Optional;
@@ -24,17 +30,23 @@ import com.google.common.base.Optional;
 public class PoolingOverrideModelProvider extends PoolingModelProvider<IUniqueName<ITypeName>, IOverrideModel>
         implements IOverrideModelProvider {
 
-    public PoolingOverrideModelProvider(IModelRepository repository, IModelArchiveCoordinateAdvisor index) {
-        super(repository, index, Constants.CLASS_OVRM_MODEL);
+    public PoolingOverrideModelProvider(IModelRepository repository, IModelArchiveCoordinateAdvisor index,
+            List<IInputStreamTransformer> transformers) {
+        super(repository, index, Constants.CLASS_OVRM_MODEL, transformers);
     }
 
     @Override
-    protected Optional<IOverrideModel> loadModel(ZipFile zip, IUniqueName<ITypeName> key) throws Exception {
-        return JayesOverrideModel.load(zip, key.getName());
+    protected Optional<IOverrideModel> loadModel(InputStream stream, IUniqueName<ITypeName> key) throws Exception {
+        return JayesOverrideModel.load(stream, key.getName());
     }
 
     @Override
     protected void passivateModel(IOverrideModel model) {
         model.reset();
+    }
+
+    @Override
+    protected ZipEntry getEntry(IUniqueName<ITypeName> key) {
+        return new ZipEntry(Zips.path(key.getName(), DOT_JSON));
     }
 }

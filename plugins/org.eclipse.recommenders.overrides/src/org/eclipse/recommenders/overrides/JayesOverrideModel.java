@@ -10,23 +10,18 @@
  */
 package org.eclipse.recommenders.overrides;
 
-import static com.google.common.base.Optional.absent;
 import static java.lang.String.format;
-import static org.eclipse.recommenders.utils.Constants.DOT_JSON;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.eclipse.recommenders.jayes.BayesNet;
 import org.eclipse.recommenders.jayes.BayesNode;
 import org.eclipse.recommenders.jayes.inference.jtree.JunctionTreeAlgorithm;
 import org.eclipse.recommenders.utils.Recommendation;
-import org.eclipse.recommenders.utils.Zips;
 import org.eclipse.recommenders.utils.gson.GsonUtil;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
@@ -40,15 +35,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class JayesOverrideModel implements IOverrideModel {
 
-    public static Optional<IOverrideModel> load(ZipFile zip, ITypeName type) throws IOException {
-        String path = Zips.path(type, DOT_JSON);
-        ZipEntry entry = zip.getEntry(path);
-        if (entry == null) {
-            return absent();
-        }
-
-        InputStream is = zip.getInputStream(entry);
-
+    public static Optional<IOverrideModel> load(InputStream is, ITypeName type) throws IOException {
         final Type listType = new TypeToken<List<OverrideObservation>>() {
         }.getType();
         final List<OverrideObservation> observations = GsonUtil.deserialize(is, listType);

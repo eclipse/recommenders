@@ -9,7 +9,10 @@ import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.zip.ZipFile;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.zip.ZipEntry;
 
 import org.eclipse.recommenders.utils.Zips;
 import org.junit.BeforeClass;
@@ -70,19 +73,24 @@ public class PoolingModelProviderTest {
         IModelArchiveCoordinateAdvisor models = mock(IModelArchiveCoordinateAdvisor.class);
         when(models.suggest(any(ProjectCoordinate.class), anyString())).thenReturn(of(UNKNOWN));
 
-        return new PoolingModelProviderStub(repository, models, "calls");
+        return new PoolingModelProviderStub(repository, models, "calls", Collections.EMPTY_LIST);
     }
 
     private final class PoolingModelProviderStub extends PoolingModelProvider<UniqueTypeName, String> {
         private PoolingModelProviderStub(IModelRepository repository, IModelArchiveCoordinateAdvisor index,
-                String modelType) {
-            super(repository, index, modelType);
+                String modelType, List<IInputStreamTransformer> transformers) {
+            super(repository, index, modelType, transformers);
         }
 
         @Override
-        protected Optional<String> loadModel(ZipFile zip, UniqueTypeName key) throws Exception {
+        protected Optional<String> loadModel(InputStream stream, UniqueTypeName key) throws Exception {
             // return a "simple" model
             return of(new String(""));
+        }
+
+        @Override
+        protected ZipEntry getEntry(UniqueTypeName key) {
+            return new ZipEntry("");
         }
     }
 }

@@ -14,6 +14,7 @@ import static com.google.inject.Scopes.SINGLETON;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -21,11 +22,13 @@ import javax.inject.Singleton;
 import org.eclipse.core.internal.net.ProxyManager;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.recommenders.models.IDependencyListener;
+import org.eclipse.recommenders.models.IInputStreamTransformer;
 import org.eclipse.recommenders.models.IModelArchiveCoordinateAdvisor;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
@@ -38,6 +41,7 @@ import org.eclipse.ui.IWorkbench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.eventbus.EventBus;
@@ -51,6 +55,9 @@ public class ModelsRcpModule extends AbstractModule {
 
     private static final String EXT_ID_MODEL_CLASSIFIER = "org.eclipse.recommenders.models.rcp.models"; //$NON-NLS-1$
     private static final String MODEL_CLASSIFIER_ATTRIBUTE = "classifier"; //$NON-NLS-1$
+
+    private static final String EXT_ID_TRANSFORMERS_CLASSIFIER = "org.eclipse.recommenders.models.rcp.transformers"; //$NON-NLS-1$
+    private static final String TRANSFORMER_CLASS_ATTRIBUTE = "class"; //$NON-NLS-1$
 
     public static final String IDENTIFIED_PROJECT_COORDINATES = "IDENTIFIED_PACKAGE_FRAGMENT_ROOTS"; //$NON-NLS-1$
     public static final String MODEL_CLASSIFIER = "MODEL_CLASSIFIER"; //$NON-NLS-1$
@@ -145,6 +152,23 @@ public class ModelsRcpModule extends AbstractModule {
             builder.add(classifier);
         }
 
+        return builder.build();
+    }
+
+    @Provides
+    public List<IInputStreamTransformer> provideTransformers() {
+        final IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
+                EXT_ID_TRANSFORMERS_CLASSIFIER);
+        ImmutableList.Builder<IInputStreamTransformer> builder = ImmutableList.builder();
+        for (IConfigurationElement element : elements) {
+            try {
+                IInputStreamTransformer transformer = (IInputStreamTransformer) element
+                        .createExecutableExtension(TRANSFORMER_CLASS_ATTRIBUTE);
+                builder.add(transformer);
+            } catch (CoreException e) {
+                // TODO Log error
+            }
+        }
         return builder.build();
     }
 }

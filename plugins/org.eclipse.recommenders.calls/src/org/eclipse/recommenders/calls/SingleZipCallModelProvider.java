@@ -16,11 +16,15 @@ import static org.eclipse.recommenders.utils.Zips.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.recommenders.models.IInputStreamTransformer;
 import org.eclipse.recommenders.models.UniqueTypeName;
 import org.eclipse.recommenders.utils.Openable;
 import org.eclipse.recommenders.utils.Zips;
@@ -51,11 +55,13 @@ public class SingleZipCallModelProvider implements ICallModelProvider, Openable 
     private final LoadingCache<ITypeName, ICallModel> cache = CacheBuilder.newBuilder()
             .expireAfterAccess(3, TimeUnit.MINUTES).maximumSize(CACHE_SIZE).build(new CallNetCacheLoader());
     private final File models;
+    private final List<IInputStreamTransformer> transformers;
 
     private ZipFile zip;
 
-    public SingleZipCallModelProvider(File models) {
+    public SingleZipCallModelProvider(File models, List<IInputStreamTransformer> transformers) {
         this.models = models;
+        this.transformers = transformers;
     }
 
     @Override
@@ -82,6 +88,10 @@ public class SingleZipCallModelProvider implements ICallModelProvider, Openable 
     }
 
     public Set<ITypeName> acquireableTypes() {
+        for (IInputStreamTransformer transformer : transformers) {
+            Zips.types(zip.entries(), DOT_JBIF + "." + transformer.getFileExtension());
+        }
+
         return Zips.types(zip.entries(), DOT_JBIF);
     }
 
@@ -93,7 +103,19 @@ public class SingleZipCallModelProvider implements ICallModelProvider, Openable 
     private final class CallNetCacheLoader extends CacheLoader<ITypeName, ICallModel> {
         @Override
         public ICallModel load(ITypeName type) throws Exception {
-            return JayesCallModel.load(zip, type).or(NullCallModel.INSTANCE);
+            ZipEntry entry = zip.getEntry(Zips.path(type, DOT_JBIF));
+            return JayesCallModel.load(getInputStream(zip, entry), type).or(NullCallModel.INSTANCE);
+        }
+
+        private InputStream getInputStream(ZipFile zip, ZipEntry entry) throws IOException {
+            for (IInputStreamTransformer transformer : transformers) {
+                ZipEntry toTransform = zip.getEntry(entry.getName() + "." + transformer.getFileExtension());
+                if (toTransform == null) {
+                    continue;
+                }
+                return transformer.transform(zip.getInputStream(toTransform));
+            }
+            return zip.getInputStream(entry);
         }
     }
 }
