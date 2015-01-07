@@ -10,13 +10,13 @@
  */
 package org.eclipse.recommenders.apidocs;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.of;
 import static org.eclipse.recommenders.utils.Constants.*;
 
 import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.Map;
 
+import org.eclipse.recommenders.models.IInputStreamTransformer;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
@@ -30,21 +30,20 @@ import com.google.common.base.Optional;
 public class MethodSelfCallsDirectivesModelProvider extends
         PoolingModelProvider<UniqueMethodName, MethodSelfcallDirectives> {
 
-    public MethodSelfCallsDirectivesModelProvider(IModelRepository repository, IModelIndex index) {
-        super(repository, index, CLASS_SELFM_MODEL);
+    public MethodSelfCallsDirectivesModelProvider(IModelRepository repository, IModelIndex index,
+            Map<String, IInputStreamTransformer> transformers) {
+        super(repository, index, CLASS_SELFM_MODEL, transformers);
     }
 
     @Override
-    protected Optional<MethodSelfcallDirectives> loadModel(ZipFile zip, UniqueMethodName key) throws Exception {
-        String path = Zips.path(key.getName(), DOT_JSON);
-        ZipEntry entry = zip.getEntry(path);
-        if (entry == null) {
-            return absent();
-        }
-        InputStream is = zip.getInputStream(entry);
+    protected Optional<MethodSelfcallDirectives> loadModel(InputStream is, UniqueMethodName key) throws Exception {
         MethodSelfcallDirectives res = GsonUtil.deserialize(is, MethodSelfcallDirectives.class);
         IOUtils.closeQuietly(is);
         return of(res);
     }
 
+    @Override
+    protected String getPath(UniqueMethodName key) {
+        return Zips.path(key.getName(), DOT_JSON);
+    }
 }

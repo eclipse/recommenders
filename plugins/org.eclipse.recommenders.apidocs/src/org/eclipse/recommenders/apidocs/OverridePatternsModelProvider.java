@@ -10,13 +10,13 @@
  */
 package org.eclipse.recommenders.apidocs;
 
-import static com.google.common.base.Optional.*;
+import static com.google.common.base.Optional.of;
 import static org.eclipse.recommenders.utils.Constants.*;
 
 import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.Map;
 
+import org.eclipse.recommenders.models.IInputStreamTransformer;
 import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.PoolingModelProvider;
@@ -29,20 +29,20 @@ import com.google.common.base.Optional;
 
 public class OverridePatternsModelProvider extends PoolingModelProvider<UniqueTypeName, ClassOverridePatterns> {
 
-    public OverridePatternsModelProvider(IModelRepository repository, IModelIndex index) {
-        super(repository, index, CLASS_OVRP_MODEL);
+    public OverridePatternsModelProvider(IModelRepository repository, IModelIndex index,
+            Map<String, IInputStreamTransformer> transformers) {
+        super(repository, index, CLASS_OVRP_MODEL, transformers);
     }
 
     @Override
-    protected Optional<ClassOverridePatterns> loadModel(ZipFile zip, UniqueTypeName key) throws Exception {
-        String path = Zips.path(key.getName(), DOT_JSON);
-        ZipEntry entry = zip.getEntry(path);
-        if (entry == null) {
-            return absent();
-        }
-        InputStream is = zip.getInputStream(entry);
+    protected Optional<ClassOverridePatterns> loadModel(InputStream is, UniqueTypeName key) throws Exception {
         ClassOverridePatterns res = GsonUtil.deserialize(is, ClassOverridePatterns.class);
         IOUtils.closeQuietly(is);
         return of(res);
+    }
+
+    @Override
+    protected String getPath(UniqueTypeName key) {
+        return Zips.path(key.getName(), DOT_JSON);
     }
 }
