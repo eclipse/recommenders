@@ -516,6 +516,26 @@ class SnippetCodeBuilderTest {
             '''.toString, actual)
     }
 
+    @Test
+    def void testEntireSingleLineFileSelection() {
+        val code = '''$public class testClass { int myInt; }$'''
+        val actual = exerciseFullFile(code)
+
+        assertEquals('''public class testClass { int ${myInt:newName(int)}; }
+${cursor}
+        '''.toString, actual)
+    }
+    
+        @Test
+    def void testEntireSingleLineFileSelectionWithLeadingWhitespaces() {
+        val code = '''$   public class testClass { int myInt; }$'''
+        val actual = exerciseFullFile(code)
+
+        assertEquals('''public class testClass { int ${myInt:newName(int)}; }
+${cursor}
+        '''.toString, actual)
+    }
+
     def exercise(CharSequence code) {
         val struct = FIXTURE.createFileAndPackageAndParseWithMarkers(code);
         return exercise(struct.first, struct.second.head, struct.second.last);
@@ -529,6 +549,11 @@ class SnippetCodeBuilderTest {
     def exercise(CharSequence code, int start, int end) {
         val struct = FIXTURE.createFileAndPackageAndParseWithMarkers(code);
         return exercise(struct.first, start, end);
+    }
+
+    def exerciseFullFile(CharSequence code) {
+        val struct = FIXTURE.createFileAndParseWithMarkers(code);
+        return exercise(struct.first, struct.second.head, struct.second.last);
     }
 
     def exercise(ICompilationUnit cu, int start, int end) {
