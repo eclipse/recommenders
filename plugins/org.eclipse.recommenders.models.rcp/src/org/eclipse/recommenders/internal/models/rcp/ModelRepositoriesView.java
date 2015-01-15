@@ -165,6 +165,7 @@ public class ModelRepositoriesView extends ViewPart {
 
     @Override
     public void createPartControl(Composite parent) {
+        Preconditions.checkArgument(false, "this is wrong");
         bus.register(this);
         Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout());
