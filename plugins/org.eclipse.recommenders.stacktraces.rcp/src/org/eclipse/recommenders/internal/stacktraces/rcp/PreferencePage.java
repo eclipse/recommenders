@@ -22,6 +22,7 @@ import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
@@ -49,28 +50,24 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         addField(new ComboFieldEditor(PROP_SEND_ACTION, Messages.FIELD_LABEL_ACTION, createModeLabelAndValues(),
                 getFieldEditorParent()));
 
-        BooleanFieldEditor skipSimilarErrorsFieldEditor = new BooleanFieldEditor(PROP_SKIP_SIMILAR_ERRORS,
-                Messages.FIELD_LABEL_SKIP_SIMILAR_ERRORS, getFieldEditorParent());
-        DefaultToolTip skipSimilarErrorsToolTip = new DefaultToolTip(
-                skipSimilarErrorsFieldEditor.getDescriptionControl(getFieldEditorParent()));
-        skipSimilarErrorsToolTip.setText(Messages.TOOLTIP_SKIP_SIMILAR);
-        addField(skipSimilarErrorsFieldEditor);
-
-        BooleanFieldEditor anonymizeStacktracesFieldEditor = new BooleanFieldEditor(PROP_ANONYMIZE_STACKTRACES,
-                Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES, getFieldEditorParent());
-        DefaultToolTip anonymizeStacktracesToolTip = new DefaultToolTip(
-                anonymizeStacktracesFieldEditor.getDescriptionControl(getFieldEditorParent()));
-        anonymizeStacktracesToolTip.setText(Messages.TOOLTIP_MAKE_STACKTRACE_ANONYMOUS);
-        addField(anonymizeStacktracesFieldEditor);
-
-        BooleanFieldEditor clearMessagesFieldEditor = new BooleanFieldEditor(PROP_ANONYMIZE_MESSAGES,
-                Messages.FIELD_LABEL_ANONYMIZE_MESSAGES, getFieldEditorParent());
-        DefaultToolTip clearMessagesToolTip = new DefaultToolTip(
-                clearMessagesFieldEditor.getDescriptionControl(getFieldEditorParent()));
-        clearMessagesToolTip.setText(Messages.TOOLTIP_MAKE_MESSAGES_ANONYMOUS);
-        addField(clearMessagesFieldEditor);
+        addField(addBooleanFieldEditor(PROP_SKIP_SIMILAR_ERRORS, Messages.FIELD_LABEL_SKIP_SIMILAR_ERRORS,
+                Messages.TOOLTIP_SKIP_SIMILAR));
+        addField(addBooleanFieldEditor(PROP_ANONYMIZE_STACKTRACES, Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES,
+                Messages.TOOLTIP_MAKE_STACKTRACE_ANONYMOUS));
+        addField(addBooleanFieldEditor(PROP_ANONYMIZE_MESSAGES, Messages.FIELD_LABEL_ANONYMIZE_MESSAGES,
+                Messages.TOOLTIP_MAKE_MESSAGES_ANONYMOUS));
 
         addLinks(getFieldEditorParent());
+    }
+
+    private BooleanFieldEditor addBooleanFieldEditor(String fieldEditorName, String fieldEditorLabel, String tooltipText) {
+        BooleanFieldEditor booleanFieldEditor = new BooleanFieldEditor(fieldEditorName, fieldEditorLabel,
+                getFieldEditorParent());
+        DefaultToolTip toolTip = new DefaultToolTip(booleanFieldEditor.getDescriptionControl(getFieldEditorParent()));
+        toolTip.setText(tooltipText);
+        toolTip.setShift(new Point(5, 5));
+
+        return booleanFieldEditor;
     }
 
     private void addLinks(Composite parent) {

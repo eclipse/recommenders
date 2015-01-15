@@ -130,7 +130,7 @@ public class ConfigurationDialog extends TitleAreaDialog {
 
         Label emailLabel = new Label(personalGroup, SWT.NONE);
         emailLabel.setText(Messages.FIELD_LABEL_EMAIL);
-        String emailTooltip = Messages.FIELD_MESSAGE_EMAIL + Messages.FIELD_DESC_EMAIL;
+        String emailTooltip = Messages.FIELD_MESSAGE_EMAIL + " " + Messages.FIELD_DESC_EMAIL; //$NON-NLS-1$
         emailLabel.setToolTipText(emailTooltip);
         emailText = new Text(personalGroup, SWT.BORDER);
         emailText.setMessage(Messages.FIELD_MESSAGE_EMAIL);
