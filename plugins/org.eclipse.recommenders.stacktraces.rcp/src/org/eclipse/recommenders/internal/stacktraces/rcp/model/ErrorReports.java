@@ -439,4 +439,8 @@ public class ErrorReports {
         report.accept(prettyPrintVisitor);
         return prettyPrintVisitor.print();
     }
+
+    public static String getFingerprint(ErrorReport report) {
+        return report.getStatus().getFingerprint();
+    }
 }
