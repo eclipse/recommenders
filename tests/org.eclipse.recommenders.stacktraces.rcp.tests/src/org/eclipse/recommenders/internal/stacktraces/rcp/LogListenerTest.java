@@ -16,7 +16,10 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.lucene.store.RAMDirectory;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
@@ -75,7 +78,16 @@ public class LogListenerTest {
         // Flag to bypass the runtime workbench test check:
         System.setProperty(SYSPROP_ECLIPSE_BUILD_ID, "unit-tests");
 
-        sut = spy(new LogListener());
+        History history = new History() {
+            @Override
+            protected void createIndex() throws IOException {
+                index = new RAMDirectory();
+            }
+        };
+        history.startAsync();
+        history.awaitRunning();
+        sut = new LogListener(history);
+        sut = spy(sut);
         // safety: do not send errors during tests
         doNothing().when(sut).checkAndSendWithDialog(Mockito.any(ErrorReport.class));
         doNothing().when(sut).sendStatus(Mockito.any(ErrorReport.class));
@@ -276,13 +288,14 @@ public class LogListenerTest {
             @Override
             public void override(Settings settings) {
                 settings.setSkipSimilarErrors(false);
+                settings.setAction(SendAction.SILENT);
             }
         };
 
         sut.logging(createErrorStatus(), "");
         sut.logging(createErrorStatus(), "");
 
-        verify(sut, times(2)).checkAndSendWithDialog(Mockito.any(ErrorReport.class));
+        verify(sut, times(2)).sendStatus(Mockito.any(ErrorReport.class));
     }
 
     @Test
