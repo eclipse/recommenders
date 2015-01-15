@@ -1,0 +1,139 @@
+/**
+ * Copyright (c) 2015 Codetrails GmbH.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Daniel Haftstein - initial API and implementation.
+ */
+package org.eclipse.recommenders.internal.stacktraces.rcp;
+
+import static org.eclipse.recommenders.internal.stacktraces.rcp.TestUtils.buildTraceForClasses;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.UUID;
+
+import org.apache.lucene.store.RAMDirectory;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ModelFactory;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Status;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class HistoryTest {
+    private static ModelFactory factory = ModelFactory.eINSTANCE;
+    private History sut;
+
+    @Before
+    public void setUp() throws Exception {
+        sut = new History(new RAMDirectory());
+        sut.startUp();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        sut.shutDown();
+    }
+
+    @Test
+    public void testRememberEmptyReport() {
+        ErrorReport report = factory.createErrorReport();
+        sut.remember(report);
+        assertThat(sut.isKnown(report), is(true));
+    }
+
+    @Test
+    public void testRememberSameStacktrace() {
+        ErrorReport report = factory.createErrorReport();
+        Throwable throwable = new Throwable();
+        throwable.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2"));
+        Status status = TestUtils.createStatus(IStatus.ERROR, "plugin.id", "a message", throwable);
+        report.setStatus(status);
+        sut.remember(report);
+
+        ErrorReport report2 = factory.createErrorReport();
+        Throwable throwable2 = new Throwable();
+        throwable2.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2"));
+        Status status2 = TestUtils.createStatus(IStatus.ERROR, "plugin.id", "a message", throwable2);
+        report2.setStatus(status2);
+
+        assertThat(sut.isKnown(report2), is(true));
+    }
+
+    @Test
+    public void testRememberDifferentId() {
+        ErrorReport report = factory.createErrorReport();
+        report.setEventId(UUID.randomUUID());
+        sut.remember(report);
+
+        ErrorReport report2 = factory.createErrorReport();
+        report2.setEventId(UUID.randomUUID());
+
+        assertThat(sut.isKnown(report2), is(true));
+    }
+
+    @Test
+    public void testDifferentPlugin() {
+        ErrorReport report = factory.createErrorReport();
+        Throwable throwable = new Throwable();
+        throwable.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2"));
+        Status status = TestUtils.createStatus(IStatus.ERROR, "plugin.id.1", "a message", throwable);
+        report.setStatus(status);
+        sut.remember(report);
+
+        ErrorReport report2 = factory.createErrorReport();
+        Throwable throwable2 = new Throwable();
+        throwable2.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2"));
+        Status status2 = TestUtils.createStatus(IStatus.ERROR, "plugin.id.2", "a message", throwable2);
+        report2.setStatus(status2);
+
+        assertThat(sut.isKnown(report2), is(false));
+    }
+
+    @Test
+    public void testDifferentMessage() {
+        ErrorReport report = factory.createErrorReport();
+        Throwable throwable = new Throwable("message-1");
+        throwable.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2"));
+        Status status = TestUtils.createStatus(IStatus.ERROR, "plugin.id", "a message", throwable);
+        report.setStatus(status);
+        sut.remember(report);
+
+        ErrorReport report2 = factory.createErrorReport();
+        Throwable throwable2 = new Throwable("message-2");
+        throwable2.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2"));
+        Status status2 = TestUtils.createStatus(IStatus.ERROR, "plugin.id", "a message", throwable2);
+        report2.setStatus(status2);
+
+        assertThat(sut.isKnown(report2), is(false));
+    }
+
+    @Test
+    public void testDifferentStacktrace() {
+        ErrorReport report = factory.createErrorReport();
+        Throwable throwable = new Throwable("message");
+        throwable.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2", "any.other.Class"));
+        Status status = TestUtils.createStatus(IStatus.ERROR, "plugin.id", "a message", throwable);
+        report.setStatus(status);
+        sut.remember(report);
+
+        ErrorReport report2 = factory.createErrorReport();
+        Throwable throwable2 = new Throwable("message");
+        throwable2.setStackTrace(buildTraceForClasses("any.Class1", "any.Class2"));
+        Status status2 = TestUtils.createStatus(IStatus.ERROR, "plugin.id", "a message", throwable2);
+        report2.setStatus(status2);
+
+        assertThat(sut.isKnown(report2), is(false));
+    }
+
+    @Test
+    public void testIsKnownOnEmptyHistory() {
+        ErrorReport report = factory.createErrorReport();
+        assertThat(sut.isKnown(report), is(false));
+    }
+}

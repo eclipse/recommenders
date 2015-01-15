@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
+import static org.eclipse.recommenders.internal.stacktraces.rcp.TestUtils.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.never;
@@ -17,8 +18,6 @@ import static org.mockito.Mockito.never;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.ModelFactory;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Status;
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,33 +41,8 @@ public class StandInStacktraceProviderTest {
 
     private static final Set<String> BLACKLIST = Sets.newHashSet(BLACKLISTED_CLASS_1, BLACKLISTED_CLASS_2);
 
-    private static final ModelFactory FACTORY = ModelFactory.eINSTANCE;
-
     @Spy
     private StandInStacktraceProvider stacktraceProvider = new StandInStacktraceProvider();
-
-    private static StackTraceElement[] buildTraceForClasses(String... classnames) {
-        StackTraceElement[] elements = new StackTraceElement[classnames.length];
-        for (int i = 0; i < classnames.length; i++) {
-            elements[i] = new StackTraceElement(classnames[i], "anyMethod", classnames[i] + ".java", -1);
-        }
-        return elements;
-    }
-
-    private static Status createStatus(int severity, String pluginId, String message) {
-        return createStatus(severity, pluginId, message, null);
-    }
-
-    private static Status createStatus(int severity, String pluginId, String message, java.lang.Throwable exception) {
-        Status status = FACTORY.createStatus();
-        status.setSeverity(severity);
-        status.setPluginId(pluginId);
-        status.setMessage(message);
-        if (exception != null) {
-            status.setException(ErrorReports.newThrowable(exception));
-        }
-        return status;
-    }
 
     @Test
     public void testClearBlacklistedOnTop() {
