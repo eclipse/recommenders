@@ -96,6 +96,21 @@ public class ErrorReportDialog extends MessageDialog {
     }
 
     @Override
+    public int open() {
+        int returnCode = super.open();
+        reactivateModalShell();
+        return returnCode;
+    }
+
+    private void reactivateModalShell() {
+        Shell modalShellExcluding = Shells.getModalShellExcluding(getShell());
+        if (modalShellExcluding != null) {
+            modalShellExcluding.forceActive();
+        }
+
+    }
+
+    @Override
     protected boolean customShouldTakeFocus() {
         return false;
     }
