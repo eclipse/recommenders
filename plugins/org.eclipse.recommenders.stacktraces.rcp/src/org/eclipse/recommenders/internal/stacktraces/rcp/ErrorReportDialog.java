@@ -331,6 +331,7 @@ public class ErrorReportDialog extends MessageDialog {
             UploadJob job = new UploadJob(report, history, settings, target);
             jobs.add(job);
         }
+        reports.clear();
         Jobs.sequential(format(Messages.UPLOADJOB_NAME, target), jobs);
     }
 
