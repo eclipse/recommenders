@@ -82,6 +82,7 @@ public class ErrorReportDialog extends MessageDialog {
     private Button rememberDecisionButton;
     private ComboViewer rememberSettingCombo;
     private History history;
+    private Button notAnErrorCheckbox;
 
     public ErrorReportDialog(Shell parentShell, History history, Settings settings, IObservableList errors) {
         super(
@@ -185,16 +186,22 @@ public class ErrorReportDialog extends MessageDialog {
         });
     }
 
-    private Composite createDetailsContent(Composite container) {
+    private Composite createDetailsContent(Composite parent) {
+        Composite container = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+        GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
+
         SashForm sash = new SashForm(container, SWT.HORIZONTAL);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(sash);
         createTableComposite(sash);
         createMessageComposite(sash);
         sash.setWeights(new int[] { 20, 80 });
-        return sash;
+
+        return container;
     }
 
-    private Composite createTableComposite(Composite container) {
-        Composite tableComposite = new Composite(container, SWT.NONE);
+    private Composite createTableComposite(Composite parent) {
+        Composite tableComposite = new Composite(parent, SWT.NONE);
         tableViewer = new TableViewer(tableComposite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION
                 | SWT.BORDER);
         TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
@@ -250,10 +257,15 @@ public class ErrorReportDialog extends MessageDialog {
             copy.setName(settings.getName());
             copy.setEmail(settings.getEmail());
             messageText.setText(ErrorReports.prettyPrint(copy, settings));
+            notAnErrorCheckbox.setSelection(activeSelection.isLogMessage());
         }
     }
 
-    private Composite createMessageComposite(Composite container) {
+    private Composite createMessageComposite(Composite parent) {
+        Composite container = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+        GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
+
         Composite messageComposite = new Composite(container, SWT.NONE);
         GridLayoutFactory.fillDefaults().applyTo(messageComposite);
         GridDataFactory.fillDefaults().grab(true, true).applyTo(messageComposite);
@@ -264,7 +276,18 @@ public class ErrorReportDialog extends MessageDialog {
         messageText.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         messageText.setForeground(new Color(container.getDisplay(), 80, 80, 80));
         GridDataFactory.fillDefaults().minSize(100, 1).hint(100, 300).grab(true, true).applyTo(messageText);
-        return messageComposite;
+
+        notAnErrorCheckbox = new Button(container, SWT.CHECK);
+        notAnErrorCheckbox.setText(Messages.FIELD_LABEL_NOT_AN_ERROR);
+        notAnErrorCheckbox.setToolTipText(Messages.TOOLTIP_NOT_AN_ERROR);
+        notAnErrorCheckbox.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                activeSelection.setLogMessage(notAnErrorCheckbox.getSelection());
+            }
+        });
+
+        return container;
     }
 
     protected Composite createSettingsComposite(final Composite parent) {
