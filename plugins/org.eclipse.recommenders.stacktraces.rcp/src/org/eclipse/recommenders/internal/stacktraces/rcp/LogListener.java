@@ -226,7 +226,7 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     private boolean sentSimilarErrorBefore(final ErrorReport report) {
-        return history.seen(report);
+        return history.seenSimilar(report) || history.seen(report);
     }
 
     private void firstConfiguration() {
