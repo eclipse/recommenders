@@ -73,6 +73,7 @@ public class LogListener implements ILogListener, IStartup {
     @Override
     public void earlyStartup() {
         Platform.addLogListener(this);
+        new PausedJob(PreferenceInitializer.readSettings()).schedule();
         try {
             history = new History();
             history.startAsync();
@@ -226,7 +227,8 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     private boolean sentSimilarErrorBefore(final ErrorReport report) {
-        return history.seen(report);
+        return history.seenSimilar(report) // did we send a similar error before?
+                || history.seen(report); // did we send exactly this error before?
     }
 
     private void firstConfiguration() {

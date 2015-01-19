@@ -50,6 +50,8 @@ public final class LogMessages extends DefaultLogMessage {
             "Stoping the history service failed."); //$NON-NLS-1$
     public static final LogMessages HISTORY_START_FAILED = new LogMessages(WARNING,
             "Starting the history service failed."); //$NON-NLS-1$
+    public static final ILogMessage SERVER_IS_PAUSED = new LogMessages(INFO,
+            "Error reporting was paused remotely. Pausing this client until restart."); //$NON-NLS-1$
 
     public LogMessages(int severity, String message) {
         super(severity, code++, message);
