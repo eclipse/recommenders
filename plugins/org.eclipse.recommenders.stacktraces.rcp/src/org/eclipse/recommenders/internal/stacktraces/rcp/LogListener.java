@@ -78,6 +78,7 @@ public class LogListener implements ILogListener, IStartup {
     public void earlyStartup() {
         settings = PreferenceInitializer.getDefault();
         Platform.addLogListener(this);
+        new PausedJob(PreferenceInitializer.readSettings()).schedule();
         try {
             history = new History();
             history.startAsync();
