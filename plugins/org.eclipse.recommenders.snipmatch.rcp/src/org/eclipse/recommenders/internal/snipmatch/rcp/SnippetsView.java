@@ -66,6 +66,7 @@ import org.eclipse.recommenders.rcp.IRcpService;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.ImageResource;
 import org.eclipse.recommenders.rcp.SharedImages.Images;
+import org.eclipse.recommenders.rcp.utils.Jobs;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.ISnippetRepository;
 import org.eclipse.recommenders.snipmatch.Location;
@@ -149,12 +150,12 @@ public class SnippetsView extends ViewPart implements IRcpService {
     private Action editSnippetAction;
     private Action shareSnippetAction;
 
-    private boolean initializeTableData = true;
+    private volatile boolean initializeTableData = true;
 
-    private List<SnippetRepositoryConfiguration> availableRepositories = Lists.newArrayList();
-    private ListMultimap<SnippetRepositoryConfiguration, KnownSnippet> snippetsGroupedByRepoName = LinkedListMultimap
+    private volatile List<SnippetRepositoryConfiguration> availableRepositories = Lists.newArrayList();
+    private volatile ListMultimap<SnippetRepositoryConfiguration, KnownSnippet> snippetsGroupedByRepoName = LinkedListMultimap
             .create();
-    private ListMultimap<SnippetRepositoryConfiguration, KnownSnippet> filteredSnippetsGroupedByRepoName = LinkedListMultimap
+    private volatile ListMultimap<SnippetRepositoryConfiguration, KnownSnippet> filteredSnippetsGroupedByRepoName = LinkedListMultimap
             .create();
 
     private final Function<KnownSnippet, String> toStringRepresentation = new Function<KnownSnippet, String>() {
@@ -188,15 +189,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
             @Override
             public void modifyText(ModifyEvent e) {
-                Job refreshJob = new UIJob(Messages.JOB_REFRESHING_SNIPPETS_VIEW) {
-                    @Override
-                    public IStatus runInUIThread(IProgressMonitor monitor) {
-                        updateData();
-                        refreshTable();
-                        return Status.OK_STATUS;
-                    }
-                };
-                refreshJob.schedule();
+                refreshUI();
             }
         });
         txtSearch.setData(SWT_ID, SEARCH_FIELD);
@@ -867,12 +860,9 @@ public class SnippetsView extends ViewPart implements IRcpService {
         addAction(text, imageResource, contributionManager, action);
     }
 
-    private void updateData() {
-        if (txtSearch.isDisposed()) {
-            return;
-        }
+    private void updateData(String query) {
         snippetsGroupedByRepoName = searchSnippets(""); //$NON-NLS-1$
-        filteredSnippetsGroupedByRepoName = searchSnippets(txtSearch.getText());
+        filteredSnippetsGroupedByRepoName = searchSnippets(query);
         availableRepositories = configs.getRepos();
     }
 
@@ -922,13 +912,18 @@ public class SnippetsView extends ViewPart implements IRcpService {
     }
 
     private void refreshUI() {
-
-        Job refreshJob = new UIJob(Messages.JOB_REFRESHING_SNIPPETS_VIEW) {
-
+        final String query = txtSearch.isDisposed() ? "" : txtSearch.getText();
+        Job searchSnippetsJob = new Job(Messages.JOB_SEARCHING_SNIPPET_REPOSITORIES) {
+            @Override
+            public IStatus run(IProgressMonitor monitor) {
+                updateData(query);
+                return Status.OK_STATUS;
+            }
+        };
+        Job refreshTableJob = new UIJob(Messages.JOB_REFRESHING_SNIPPETS_VIEW) {
             @Override
             public IStatus runInUIThread(IProgressMonitor monitor) {
                 if (!treeViewer.getControl().isDisposed()) {
-                    updateData();
                     if (initializeTableData) {
                         treeViewer.setInput(getViewSite());
                         initializeTableData = false;
@@ -940,7 +935,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
                 return Status.OK_STATUS;
             }
         };
-        refreshJob.schedule();
+        Jobs.sequential(Messages.JOB_GROUP_UPDATING_SNIPPETS_VIEW, searchSnippetsJob, refreshTableJob);
     }
 
     private void refreshTable() {
