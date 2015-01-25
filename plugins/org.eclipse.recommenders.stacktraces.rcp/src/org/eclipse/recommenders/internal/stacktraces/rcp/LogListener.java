@@ -25,12 +25,13 @@ import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Status;
 import org.eclipse.recommenders.utils.Checks;
-import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
@@ -72,6 +73,10 @@ public class LogListener implements ILogListener, IStartup {
 
     @Override
     public void earlyStartup() {
+        IWorkbench wb = PlatformUI.getWorkbench();
+        IEclipseContext context = wb.getService(IEclipseContext.class);
+        AeriPreferences prefs = ContextInjectionFactory.make(AeriPreferences.class, context);
+
         Platform.addLogListener(this);
         try {
             history = new History();
@@ -107,10 +112,13 @@ public class LogListener implements ILogListener, IStartup {
             }
             settings = readSettings();
             if (!settings.isConfigured()) {
+                if (isDialogOpen) {
+                    return;
+                }
                 firstConfiguration();
             }
             if (!settings.isConfigured()) {
-                Logs.log(LogMessages.FIRST_CONFIGURATION_FAILED);
+                log(LogMessages.FIRST_CONFIGURATION_FAILED);
                 return;
             }
             if (!hasPluginIdWhitelistedPrefix(status, settings.getWhitelistedPluginIds())) {
@@ -137,7 +145,7 @@ public class LogListener implements ILogListener, IStartup {
                 sendAndClear();
             }
         } catch (Exception e) {
-            Logs.log(LogMessages.REPORTING_ERROR, e);
+            log(REPORTING_ERROR, e);
         }
     }
 
@@ -231,13 +239,20 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     private void firstConfiguration() {
+        isDialogOpen = true;
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                Optional<Shell> shell = getWorkbenchWindowShell();
-                if (shell.isPresent()) {
-                    Configurator.ConfigureWithDialog(settings, shell.get());
-                    PreferenceInitializer.saveSettings(settings);
+                try {
+                    Optional<Shell> shell = getWorkbenchWindowShell();
+                    if (shell.isPresent()) {
+                        Configurator.ConfigureWithDialog(settings, shell.get());
+                        PreferenceInitializer.saveSettings(settings);
+                    }
+                } catch (Exception e) {
+                    log(REPORTING_ERROR, e);
+                } finally {
+                    isDialogOpen = false;
                 }
             }
         });
