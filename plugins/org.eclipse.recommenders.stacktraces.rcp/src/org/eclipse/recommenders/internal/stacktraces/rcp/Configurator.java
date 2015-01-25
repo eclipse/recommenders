@@ -13,29 +13,28 @@ package org.eclipse.recommenders.internal.stacktraces.rcp;
 import org.eclipse.jface.window.Window;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.RememberSendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.swt.widgets.Shell;
 
 class Configurator {
 
-    public static void ConfigureWithDialog(Settings settings, Shell parentShell) {
+    public static void ConfigureWithDialog(StacktracesRcpPreferences settings, Shell parentShell) {
         ConfigurationDialog configurationDialog = new ConfigurationDialog(parentShell, settings);
         configurationDialog.setBlockOnOpen(true);
         int status = configurationDialog.open();
 
         switch (status) {
         case Window.OK: {
-            settings.setAction(SendAction.ASK);
+            settings.setSendAction(SendAction.ASK);
             settings.setConfigured(true);
             break;
         }
         case Window.CANCEL: {
-            settings.setAction(SendAction.IGNORE);
+            settings.setSendAction(SendAction.IGNORE);
             settings.setConfigured(true);
             break;
         }
         case ConfigurationDialog.ESC_CANCEL: {
-            settings.setAction(SendAction.IGNORE);
+            settings.setSendAction(SendAction.IGNORE);
             settings.setRememberSendAction(RememberSendAction.RESTART);
             settings.setConfigured(false);
             break;

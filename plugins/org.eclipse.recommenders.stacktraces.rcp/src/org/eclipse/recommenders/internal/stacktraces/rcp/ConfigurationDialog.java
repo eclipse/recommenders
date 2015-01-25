@@ -10,7 +10,7 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
-import static org.eclipse.emf.databinding.EMFProperties.value;
+import static org.eclipse.core.databinding.beans.PojoProperties.value;
 import static org.eclipse.jface.databinding.swt.WidgetProperties.*;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.*;
 
@@ -24,8 +24,6 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.DefaultToolTip;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.ModelPackage;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -59,9 +57,9 @@ public class ConfigurationDialog extends TitleAreaDialog {
     private Button anonymizeStacktracesButton;
     private Button clearMessagesButton;
 
-    private Settings settings;
+    private StacktracesRcpPreferences settings;
 
-    public ConfigurationDialog(Shell parentShell, final Settings settings) {
+    public ConfigurationDialog(Shell parentShell, final StacktracesRcpPreferences settings) {
         super(parentShell);
         this.settings = settings;
         setHelpAvailable(false);
@@ -193,22 +191,20 @@ public class ConfigurationDialog extends TitleAreaDialog {
     private void createDataBindingContext() {
         DataBindingContext context = new DataBindingContext();
 
-        ModelPackage pkg = ModelPackage.eINSTANCE;
-
         IObservableValue ovTxtName = text(SWT.Modify).observe(nameText);
-        IObservableValue ovSetName = value(pkg.getSettings_Name()).observe(settings);
+        IObservableValue ovSetName = value("name").observe(settings);
         context.bindValue(ovTxtName, ovSetName, null, null);
 
         IObservableValue ovTxtEmail = text(SWT.Modify).observe(emailText);
-        IObservableValue ovSetEmail = value(pkg.getSettings_Email()).observe(settings);
+        IObservableValue ovSetEmail = value("email").observe(settings);
         context.bindValue(ovTxtEmail, ovSetEmail, null, null);
 
         IObservableValue ovBtnAnonSt = selection().observe(anonymizeStacktracesButton);
-        IObservableValue ovSetAnonSt = value(pkg.getSettings_AnonymizeStrackTraceElements()).observe(settings);
+        IObservableValue ovSetAnonSt = value("anonymizeStacktraces").observe(settings);
         context.bindValue(ovBtnAnonSt, ovSetAnonSt, null, null);
 
         IObservableValue ovBtnAnonMsg = selection().observe(clearMessagesButton);
-        IObservableValue ovSetAnonMsg = value(pkg.getSettings_AnonymizeMessages()).observe(settings);
+        IObservableValue ovSetAnonMsg = value("anonymizeMessages").observe(settings);
         context.bindValue(ovBtnAnonMsg, ovSetAnonMsg, null, null);
     }
 

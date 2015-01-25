@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ModelFactory;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.StackTraceElement;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Status;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Throwable;
@@ -66,7 +65,8 @@ public class ErrorReportsDTOs {
         IStatus status = new org.eclipse.core.runtime.Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces",
                 "some error message", exception);
 
-        Settings settings = ModelFactory.eINSTANCE.createSettings();
+        StacktracesRcpPreferences settings = new StacktracesRcpPreferences();
+        settings.internal_setWhitelistedPackages("java.");
         return newErrorReport(status, settings);
     }
 
