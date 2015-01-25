@@ -8,7 +8,7 @@
  * Contributors:
  *    Daniel Haftstein - initial tests.
  */
-package org.eclipse.recommenders.internal.stacktraces.rcp.model;
+package org.eclipse.recommenders.internal.stacktraces.rcp;
 
 import static org.eclipse.recommenders.internal.stacktraces.rcp.ErrorReportsDTOs.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -21,8 +21,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.recommenders.internal.stacktraces.rcp.ErrorReportsDTOs;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.AnonymizeStacktraceVisitor;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ModelFactory;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.StackTraceElement;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Throwable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -113,8 +117,8 @@ public class ErrorReportsTest {
         IStatus s1 = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message", r1);
         IStatus s2 = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message", r2);
 
-        settings = ModelFactory.eINSTANCE.createSettings();
-        settings.getWhitelistedPackages().add("org.");
+        settings = new Settings();
+        settings.internal_setWhitelistedPackages("org.");
 
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status noCause = ErrorReports.newStatus(s1, settings);
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status withCause = ErrorReports.newStatus(s2, settings);
@@ -129,8 +133,8 @@ public class ErrorReportsTest {
         IStatus s2 = new MultiStatus("org.eclipse.recommenders.stacktraces", 0, new IStatus[] { s1 },
                 "some error message", root);
 
-        settings = ModelFactory.eINSTANCE.createSettings();
-        settings.getWhitelistedPackages().add("org.");
+        settings = new Settings();
+        settings.internal_setWhitelistedPackages("org.");
 
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status normal = ErrorReports.newStatus(s1, settings);
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status multi = ErrorReports.newStatus(s2, settings);
@@ -146,7 +150,8 @@ public class ErrorReportsTest {
         java.lang.Throwable rootException = new CoreException(causedStatus);
         IStatus rootEvent = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "someErrorMessage",
                 rootException);
-        settings = ModelFactory.eINSTANCE.createSettings();
+        settings = new Settings();
+        settings.internal_setWhitelistedPackages("org.");
 
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status rootStatus = ErrorReports.newStatus(rootEvent,
                 settings);
@@ -159,8 +164,8 @@ public class ErrorReportsTest {
 
     @Test
     public void testMultistatusDuplicateChildFiltering() {
-        settings = ModelFactory.eINSTANCE.createSettings();
-        settings.getWhitelistedPackages().add("org.");
+        settings = new Settings();
+        settings.internal_setWhitelistedPackages("org.");
 
         Exception e1 = new Exception("Stack Trace");
         e1.setStackTrace(createStacktraceForClasses("java.lang.Object", "org.eclipse.core.internal.jobs.WorkerPool",
@@ -188,8 +193,8 @@ public class ErrorReportsTest {
 
     @Test
     public void testMultistatusChildFilteringHandlesEmptyStacktrace() {
-        settings = ModelFactory.eINSTANCE.createSettings();
-        settings.getWhitelistedPackages().add("org.");
+        settings = new Settings();
+        settings.internal_setWhitelistedPackages("org.");
 
         Exception e1 = new Exception("Stack Trace 1");
         e1.setStackTrace(new java.lang.StackTraceElement[0]);
@@ -206,7 +211,7 @@ public class ErrorReportsTest {
     @Test
     public void testPrettyPrintNullSafe1() {
         ModelFactory mf = ModelFactory.eINSTANCE;
-        settings = mf.createSettings();
+        settings = new Settings();
         ErrorReport report = mf.createErrorReport();
         ErrorReports.prettyPrint(report, settings);
 
@@ -215,7 +220,7 @@ public class ErrorReportsTest {
     @Test
     public void testPrettyPrintNullSafe2() {
         ModelFactory mf = ModelFactory.eINSTANCE;
-        settings = mf.createSettings();
+        settings = new Settings();
         ErrorReport report = mf.createErrorReport();
         report.setStatus(mf.createStatus());
         ErrorReports.prettyPrint(report, settings);
@@ -224,7 +229,7 @@ public class ErrorReportsTest {
     @Test
     public void testPrettyPrintNullSafe3() {
         ModelFactory mf = ModelFactory.eINSTANCE;
-        settings = mf.createSettings();
+        settings = new Settings();
         ErrorReport report = mf.createErrorReport();
         report.setStatus(mf.createStatus());
         report.getStatus().setException(mf.createThrowable());
@@ -234,8 +239,8 @@ public class ErrorReportsTest {
 
     @Test
     public void testMultistatusMainStacktracesNotFiltered() {
-        settings = ModelFactory.eINSTANCE.createSettings();
-        settings.getWhitelistedPackages().add("org.");
+        settings = new Settings();
+        settings.internal_setWhitelistedPackages("org.");
 
         Exception e1 = new Exception("Stack Trace");
         java.lang.StackTraceElement[] stackTrace = createStacktraceForClasses("java.lang.Thread",
