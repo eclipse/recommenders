@@ -33,7 +33,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.window.Window;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.gson.GsonUtil;
 import org.eclipse.swt.widgets.Display;
@@ -50,10 +49,10 @@ public class UploadJob extends Job {
     private Executor executor;
     private ErrorReport event;
     private URI target;
-    private Settings settings;
+    private StacktracesRcpPreferences settings;
     private History history;
 
-    public UploadJob(ErrorReport event, History history, Settings settings, URI target) {
+    public UploadJob(ErrorReport event, History history, StacktracesRcpPreferences settings, URI target) {
         super(format(Messages.UPLOADJOB_NAME, target));
         this.event = event;
         this.history = history;

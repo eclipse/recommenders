@@ -40,7 +40,6 @@ import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.RememberSendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
@@ -69,7 +68,7 @@ public class ErrorReportDialog extends MessageDialog {
 
     private static final Image ERROR_ICON = PlatformUI.getWorkbench().getSharedImages()
             .getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
-    private Settings settings;
+    private StacktracesRcpPreferences settings;
     private TableViewer tableViewer;
     private StyledText messageText;
     private IObservableList errors;
@@ -82,7 +81,8 @@ public class ErrorReportDialog extends MessageDialog {
     private Button logMessageButton;
     private Button ignoreSimilarButton;
 
-    public ErrorReportDialog(Shell parentShell, History history, Settings settings, IObservableList errors) {
+    public ErrorReportDialog(Shell parentShell, History history, StacktracesRcpPreferences settings,
+            IObservableList errors) {
         super(
                 parentShell,
                 "An Error Was Logged",
@@ -360,7 +360,7 @@ public class ErrorReportDialog extends MessageDialog {
     }
 
     private void send(List<ErrorReport> reports) {
-        URI target = URI.create(settings.getServerUrl());
+        URI target = URI.create(settings.getServer());
         List<Job> jobs = Lists.newLinkedList();
         for (ErrorReport report : reports) {
             UploadJob job = new UploadJob(report, history, settings, target);
@@ -387,14 +387,13 @@ public class ErrorReportDialog extends MessageDialog {
         RememberSendAction rememberSendAction = selectRememberAction();
         settings.setRememberSendAction(rememberSendAction);
         if (rememberSendAction != RememberSendAction.NONE) {
-            settings.setAction(action);
+            settings.setSendAction(action);
             if (rememberSendAction == RememberSendAction.HOURS_24) {
                 settings.setRememberSendActionPeriodStart(System.currentTimeMillis());
             }
         } else {
             // if no remember-option is selected, the action was ASK-Mode (dialog open) and should stay so
         }
-        PreferenceInitializer.saveSettings(settings);
     }
 
     private RememberSendAction selectRememberAction() {

@@ -102,24 +102,6 @@ class Visitor{
     }
 }
 
-class Settings {
-    String name
-    String email
-    boolean anonymizeStrackTraceElements
-    boolean anonymizeMessages
-    boolean configured
-    boolean skipSimilarErrors
-    SendAction action
-    RememberSendAction rememberSendAction
-    long rememberSendActionPeriodStart
-    @GenModel(documentation="The remote address where error events are send to.")
-    String serverUrl
-    @GenModel(documentation="A list of prefixes a plug-in ID is matched against using String#startsWith (e.g., 'com.codetrails.'")
-    String[] whitelistedPluginIds
-    @GenModel(documentation="A list of prefixes a class name is matched against using String#startsWith (e.g., 'com.codetrails.'")
-    String[] whitelistedPackages
-}
-
 enum SendAction{
     ASK
     IGNORE

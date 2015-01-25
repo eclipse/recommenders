@@ -29,6 +29,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.recommenders.internal.stacktraces.rcp.Constants;
+import org.eclipse.recommenders.internal.stacktraces.rcp.StacktracesRcpPreferences;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.impl.VisitorImpl;
 import org.eclipse.recommenders.utils.AnonymousId;
 import org.eclipse.recommenders.utils.gson.EmfFieldExclusionStrategy;
@@ -276,13 +277,13 @@ public class ErrorReports {
         return EcoreUtil.copy(org);
     }
 
-    public static String toJson(ErrorReport report, Settings settings, boolean pretty) {
+    public static String toJson(ErrorReport report, StacktracesRcpPreferences settings, boolean pretty) {
         // work on a copy:
         report = copy(report);
 
         report.setName(settings.getName());
         report.setEmail(settings.getEmail());
-        if (settings.isAnonymizeStrackTraceElements()) {
+        if (settings.isAnonymizeStacktraces()) {
             anonymizeStackTrace(report, settings);
         }
         if (settings.isAnonymizeMessages()) {
@@ -305,7 +306,7 @@ public class ErrorReports {
         return gson;
     }
 
-    public static ErrorReport newErrorReport(IStatus event, Settings settings) {
+    public static ErrorReport newErrorReport(IStatus event, StacktracesRcpPreferences settings) {
         ErrorReport mReport = factory.createErrorReport();
         mReport.setAnonymousId(AnonymousId.getId());
         mReport.setEventId(UUID.randomUUID());
@@ -351,7 +352,7 @@ public class ErrorReports {
     }
 
     @VisibleForTesting
-    static Status newStatus(IStatus status, Settings settings) {
+    static Status newStatus(IStatus status, StacktracesRcpPreferences settings) {
         Status mStatus = factory.createStatus();
         mStatus.setMessage(removeSourceFileContents(status.getMessage()));
         mStatus.setSeverity(status.getSeverity());
@@ -430,12 +431,12 @@ public class ErrorReports {
         event.accept(new ClearMessagesVisitor());
     }
 
-    public static void anonymizeStackTrace(ErrorReport report, final Settings settings) {
+    public static void anonymizeStackTrace(ErrorReport report, final StacktracesRcpPreferences settings) {
         report.accept(new AnonymizeStacktraceVisitor(settings.getWhitelistedPackages()));
     }
 
-    public static String prettyPrint(ErrorReport report, Settings settings) {
-        if (settings.isAnonymizeStrackTraceElements()) {
+    public static String prettyPrint(ErrorReport report, StacktracesRcpPreferences settings) {
+        if (settings.isAnonymizeStacktraces()) {
             anonymizeStackTrace(report, settings);
         }
         if (settings.isAnonymizeMessages()) {

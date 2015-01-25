@@ -42,7 +42,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.StackTraceElement;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.impl.VisitorImpl;
 import org.osgi.framework.Bundle;
@@ -63,6 +62,11 @@ public class History extends AbstractIdleService {
     private IndexWriter writer;
     private IndexReader reader;
     private IndexSearcher searcher;
+    private StacktracesRcpPreferences settings;
+
+    public History(StacktracesRcpPreferences settings) {
+        this.settings = settings;
+    }
 
     @VisibleForTesting
     protected Directory createIndexDirectory() throws IOException {
@@ -125,7 +129,6 @@ public class History extends AbstractIdleService {
     private String identity(ErrorReport report) {
         ErrorReport copy = ErrorReports.copy(report);
         copy.setEventId(null);
-        Settings settings = PreferenceInitializer.readSettings();
         String json = ErrorReports.toJson(copy, settings, false);
         String hash = Hashing.murmur3_128().newHasher().putString(json, UTF_8).hash().toString();
         return hash;
