@@ -33,7 +33,7 @@ public class HistoryTest {
 
     @Before
     public void setUp() throws Exception {
-        sut = new History() {
+        sut = new History(new Settings()) {
             @Override
             protected Directory createIndexDirectory() throws IOException {
                 return new RAMDirectory();

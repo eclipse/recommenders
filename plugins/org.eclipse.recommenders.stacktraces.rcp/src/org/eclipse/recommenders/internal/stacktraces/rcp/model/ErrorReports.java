@@ -29,6 +29,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.recommenders.internal.stacktraces.rcp.Constants;
+import org.eclipse.recommenders.internal.stacktraces.rcp.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.impl.VisitorImpl;
 import org.eclipse.recommenders.utils.AnonymousId;
 import org.eclipse.recommenders.utils.gson.EmfFieldExclusionStrategy;
@@ -282,7 +283,7 @@ public class ErrorReports {
 
         report.setName(settings.getName());
         report.setEmail(settings.getEmail());
-        if (settings.isAnonymizeStrackTraceElements()) {
+        if (settings.isAnonymizeStacktraces()) {
             anonymizeStackTrace(report, settings);
         }
         if (settings.isAnonymizeMessages()) {
@@ -351,7 +352,7 @@ public class ErrorReports {
     }
 
     @VisibleForTesting
-    static Status newStatus(IStatus status, Settings settings) {
+    public static Status newStatus(IStatus status, Settings settings) {
         Status mStatus = factory.createStatus();
         mStatus.setMessage(removeSourceFileContents(status.getMessage()));
         mStatus.setSeverity(status.getSeverity());
@@ -435,7 +436,7 @@ public class ErrorReports {
     }
 
     public static String prettyPrint(ErrorReport report, Settings settings) {
-        if (settings.isAnonymizeStrackTraceElements()) {
+        if (settings.isAnonymizeStacktraces()) {
             anonymizeStackTrace(report, settings);
         }
         if (settings.isAnonymizeMessages()) {
