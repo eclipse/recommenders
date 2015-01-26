@@ -39,7 +39,7 @@ public final class Constants {
     static final String PROP_SEND_ACTION = "send-action";
     static final String PROP_REMEMBER_SEND_ACTION = "remember-send-action";
     static final String PROP_REMEMBER_SETTING_PERIOD_START = "remember-setting-period-start";
-    static final String PROP_SKIP_SIMILAR_ERRORS = "skip-similar-errors";
+    static final String PROP_NEGATE_DEVELOPER_MODE = "negate-developer-mode";
     static final String PROP_WHITELISTED_PLUGINS = "whitelisted-plugins";
     static final String PROP_WHITELISTED_PACKAGES = "whitelisted-packages";
     static final String PROP_SERVER = "server-url";

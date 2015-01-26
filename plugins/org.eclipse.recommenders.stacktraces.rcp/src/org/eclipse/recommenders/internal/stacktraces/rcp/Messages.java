@@ -32,7 +32,7 @@ public class Messages extends NLS {
     public static String FIELD_LABEL_ACTION_REPORT_PAUSE_RESTART;
     public static String FIELD_LABEL_IGNORE_SIMILAR_ERRORS_IN_FUTURE;
     public static String FIELD_LABEL_NOT_AN_ERROR;
-    public static String FIELD_LABEL_SKIP_SIMILAR_ERRORS;
+    public static String FIELD_LABEL_NEGATE_DEVELOPER_MODE;
     public static String FIELD_LABEL_ANONYMIZE_STACKTRACES;
     public static String FIELD_LABEL_ANONYMIZE_MESSAGES;
     public static String FIELD_LABEL_NAME;
@@ -69,7 +69,7 @@ public class Messages extends NLS {
     public static String THANKYOUDIALOG_ADDITIONAL_INFORMATION;
     public static String TOOLTIP_MAKE_STACKTRACE_ANONYMOUS;
     public static String TOOLTIP_MAKE_MESSAGES_ANONYMOUS;
-    public static String TOOLTIP_SKIP_SIMILAR;
+    public static String TOOLTIP_NEGATE_DEVELOPER_MODE;
     public static String TOOLTIP_IGNORE_SIMILAR_ERRORS_IN_FUTURE;
     public static String TOOLTIP_NOT_AN_ERROR;
     public static String UPLOADJOB_ALREADY_FIXED_UPDATE;
