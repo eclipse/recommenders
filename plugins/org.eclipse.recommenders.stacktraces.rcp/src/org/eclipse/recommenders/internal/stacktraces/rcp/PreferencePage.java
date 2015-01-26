@@ -57,12 +57,12 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         addField(new ComboFieldEditor(PROP_SEND_ACTION, Messages.FIELD_LABEL_ACTION, createModeLabelAndValues(),
                 getFieldEditorParent()));
 
-        addField(createBooleanFieldEditorAndToolTip(PROP_SKIP_SIMILAR_ERRORS, Messages.FIELD_LABEL_SKIP_SIMILAR_ERRORS,
-                Messages.TOOLTIP_SKIP_SIMILAR));
         addField(createBooleanFieldEditorAndToolTip(PROP_ANONYMIZE_STACKTRACES,
                 Messages.FIELD_LABEL_ANONYMIZE_STACKTRACES, Messages.TOOLTIP_MAKE_STACKTRACE_ANONYMOUS));
         addField(createBooleanFieldEditorAndToolTip(PROP_ANONYMIZE_MESSAGES, Messages.FIELD_LABEL_ANONYMIZE_MESSAGES,
                 Messages.TOOLTIP_MAKE_MESSAGES_ANONYMOUS));
+        addField(createBooleanFieldEditorAndToolTip(PROP_DEVELOPER_MODE, Messages.FIELD_LABEL_SKIP_SIMILAR_ERRORS,
+                Messages.TOOLTIP_SKIP_SIMILAR));
 
         addLinks(getFieldEditorParent());
         Dialog.applyDialogFont(getFieldEditorParent());

@@ -41,7 +41,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         s.put(PROP_SERVER, SERVER_URL);
         s.put(PROP_NAME, "");
         s.put(PROP_EMAIL, "");
-        s.putBoolean(PROP_SKIP_SIMILAR_ERRORS, true);
+        s.putBoolean(PROP_DEVELOPER_MODE, true);
         s.putBoolean(PROP_CONFIGURED, false);
         s.put(PROP_WHITELISTED_PLUGINS, Constants.WHITELISTED_PLUGINS);
         s.put(PROP_WHITELISTED_PACKAGES, Constants.WHITELISTED_PACKAGES);
@@ -57,7 +57,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         settings.setConfigured(s.getBoolean(PROP_CONFIGURED));
         settings.setName(s.getString(PROP_NAME));
         settings.setEmail(s.getString(PROP_EMAIL));
-        settings.setSkipSimilarErrors(s.getBoolean(PROP_SKIP_SIMILAR_ERRORS));
+        settings.setSkipSimilarErrors(s.getBoolean(PROP_DEVELOPER_MODE));
         settings.setServerUrl(s.getString(PROP_SERVER));
         settings.getWhitelistedPluginIds().addAll(parseWhitelist(s.getString(PROP_WHITELISTED_PLUGINS)));
         settings.getWhitelistedPackages().addAll(parseWhitelist(s.getString(PROP_WHITELISTED_PACKAGES)));
@@ -78,7 +78,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         s.setValue(PROP_CONFIGURED, settings.isConfigured());
         s.setValue(PROP_NAME, settings.getName());
         s.setValue(PROP_EMAIL, settings.getEmail());
-        s.setValue(PROP_SKIP_SIMILAR_ERRORS, settings.isSkipSimilarErrors());
+        s.setValue(PROP_DEVELOPER_MODE, settings.isSkipSimilarErrors());
         s.setValue(PROP_ANONYMIZE_STACKTRACES, settings.isAnonymizeStrackTraceElements());
         s.setValue(PROP_ANONYMIZE_MESSAGES, settings.isAnonymizeMessages());
         s.setValue(PROP_SEND_ACTION, settings.getAction().name());
