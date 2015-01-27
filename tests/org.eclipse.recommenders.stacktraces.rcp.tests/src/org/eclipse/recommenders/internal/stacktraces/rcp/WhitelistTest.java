@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public class WhitelistTest {
 
-    Settings s = PreferenceInitializer.readSettings();
+    Settings s = PreferenceInitializer.create();
 
     @Test
     public void testWhitelistPackages() throws Exception {
