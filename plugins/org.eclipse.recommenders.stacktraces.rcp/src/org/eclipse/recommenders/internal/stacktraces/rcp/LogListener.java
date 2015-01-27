@@ -30,7 +30,6 @@ import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Status;
 import org.eclipse.recommenders.utils.Checks;
-import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
@@ -49,9 +48,10 @@ public class LogListener implements ILogListener, IStartup {
     // thread. TODO is there a better way?
     private ArrayList<ErrorReport> queueRO;
     private volatile boolean isDialogOpen;
-    private Settings settings;
+    // private Settings settings;
     private StandInStacktraceProvider stacktraceProvider = new StandInStacktraceProvider();
     private History history;
+    private Settings settings;
 
     public LogListener() {
         Display.getDefault().syncExec(new Runnable() {
@@ -65,13 +65,15 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     @VisibleForTesting
-    public LogListener(History history) {
+    public LogListener(History history, Settings settings) {
         this();
         this.history = history;
+        this.settings = settings;
     }
 
     @Override
     public void earlyStartup() {
+        settings = PreferenceInitializer.getDefault();
         Platform.addLogListener(this);
         try {
             history = new History();
@@ -105,12 +107,14 @@ public class LogListener implements ILogListener, IStartup {
                     || !isHistoryRunning()) {
                 return;
             }
-            settings = readSettings();
             if (!settings.isConfigured()) {
+                if (isDialogOpen) {
+                    return;
+                }
                 firstConfiguration();
             }
             if (!settings.isConfigured()) {
-                Logs.log(LogMessages.FIRST_CONFIGURATION_FAILED);
+                log(LogMessages.FIRST_CONFIGURATION_FAILED);
                 return;
             }
             if (!hasPluginIdWhitelistedPrefix(status, settings.getWhitelistedPluginIds())) {
@@ -137,7 +141,7 @@ public class LogListener implements ILogListener, IStartup {
                 sendAndClear();
             }
         } catch (Exception e) {
-            Logs.log(LogMessages.REPORTING_ERROR, e);
+            log(REPORTING_ERROR, e);
         }
     }
 
@@ -206,11 +210,6 @@ public class LogListener implements ILogListener, IStartup {
         return status.matches(IStatus.ERROR);
     }
 
-    @VisibleForTesting
-    protected Settings readSettings() {
-        return PreferenceInitializer.readSettings();
-    }
-
     private static boolean hasPluginIdWhitelistedPrefix(IStatus status, List<String> whitelistedIdPrefixes) {
         String pluginId = status.getPlugin();
         for (String id : whitelistedIdPrefixes) {
@@ -231,13 +230,19 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     private void firstConfiguration() {
+        isDialogOpen = true;
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                Optional<Shell> shell = getWorkbenchWindowShell();
-                if (shell.isPresent()) {
-                    Configurator.ConfigureWithDialog(settings, shell.get());
-                    PreferenceInitializer.saveSettings(settings);
+                try {
+                    Optional<Shell> shell = getWorkbenchWindowShell();
+                    if (shell.isPresent()) {
+                        Configurator.ConfigureWithDialog(settings, shell.get());
+                    }
+                } catch (Exception e) {
+                    log(REPORTING_ERROR, e);
+                } finally {
+                    isDialogOpen = false;
                 }
             }
         });
