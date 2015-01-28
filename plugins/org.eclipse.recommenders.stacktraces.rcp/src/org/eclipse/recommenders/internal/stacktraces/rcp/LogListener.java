@@ -10,7 +10,6 @@
  */
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
-import static com.google.common.base.Objects.equal;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.Constants.*;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.LogMessages.*;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.*;
@@ -26,6 +25,7 @@ import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
@@ -139,7 +139,7 @@ public class LogListener implements ILogListener, IStartup {
             }
             stacktraceProvider.insertStandInStacktraceIfEmpty(report.getStatus());
             guessInvolvedPlugins(report);
-            if (alreadyQueued(report) || settings.isSkipSimilarErrors() && sentSimilarErrorBefore(report)) {
+            if (alreadyQueued(report) || seenSameOrSimilarErrorBefore(report)) {
                 return;
             }
             addForSending(report);
@@ -164,7 +164,7 @@ public class LogListener implements ILogListener, IStartup {
 
     private boolean alreadyQueued(ErrorReport report) {
         for (ErrorReport r : queueRO) {
-            if (equal(getFingerprint(report), getFingerprint(r))) {
+            if (EcoreUtil.equals(report, r)) {
                 return true;
             }
         }
@@ -233,7 +233,11 @@ public class LogListener implements ILogListener, IStartup {
         return sendAction == SendAction.ASK || sendAction == SendAction.SILENT;
     }
 
-    private boolean sentSimilarErrorBefore(final ErrorReport report) {
+    private boolean seenSameOrSimilarErrorBefore(final ErrorReport report) {
+        // for debugging / development mode
+        if (!settings.isSkipSimilarErrors()) {
+            return false;
+        }
         return history.seenSimilar(report) // did we send a similar error before?
                 || history.seen(report); // did we send exactly this error before?
     }
@@ -280,7 +284,7 @@ public class LogListener implements ILogListener, IStartup {
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                if (!sendDialogLock.tryLock()) {
+                if (sendDialogLock.isHeldByCurrentThread() || !sendDialogLock.tryLock()) {
                     return;
                 }
                 try {
