@@ -164,7 +164,7 @@ public class LogListener implements ILogListener, IStartup {
 
     private boolean alreadyQueued(ErrorReport report) {
         for (ErrorReport r : queueRO) {
-            if (equal(getFingerprint(report), getFingerprint(r))) {
+            if (equal(report, r)) {
                 return true;
             }
         }
@@ -280,7 +280,7 @@ public class LogListener implements ILogListener, IStartup {
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                if (!sendDialogLock.tryLock()) {
+                if (sendDialogLock.isHeldByCurrentThread() || !sendDialogLock.tryLock()) {
                     return;
                 }
                 try {
