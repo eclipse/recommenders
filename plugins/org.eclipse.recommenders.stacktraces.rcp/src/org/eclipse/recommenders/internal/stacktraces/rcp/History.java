@@ -124,7 +124,6 @@ public class History extends AbstractIdleService {
 
     private String identity(ErrorReport report) {
         ErrorReport copy = ErrorReports.copy(report);
-        copy.setEventId(null);
         Settings settings = PreferenceInitializer.getDefault();
         String json = ErrorReports.toJson(copy, settings, false);
         String hash = Hashing.murmur3_128().newHasher().putString(json, UTF_8).hash().toString();
