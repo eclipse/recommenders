@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
@@ -68,18 +67,6 @@ public class HistoryTest {
         throwable2.setStackTrace(createStacktraceForClasses("any.Class1", "any.Class2"));
         Status status2 = ErrorReportsDTOs.createStatus(IStatus.ERROR, "plugin.id", "a message", throwable2);
         report2.setStatus(status2);
-
-        assertThat(sut.seen(report2), is(true));
-    }
-
-    @Test
-    public void testRememberDifferentId() {
-        ErrorReport report = factory.createErrorReport();
-        report.setEventId(UUID.randomUUID());
-        sut.remember(report);
-
-        ErrorReport report2 = factory.createErrorReport();
-        report2.setEventId(UUID.randomUUID());
 
         assertThat(sut.seen(report2), is(true));
     }
