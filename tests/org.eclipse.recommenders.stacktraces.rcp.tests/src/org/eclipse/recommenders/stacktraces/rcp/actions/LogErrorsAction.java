@@ -13,7 +13,6 @@ package org.eclipse.recommenders.stacktraces.rcp.actions;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -33,32 +32,41 @@ public class LogErrorsAction implements IWorkbenchWindowActionDelegate {
             @Override
             public IStatus run(IProgressMonitor monitor) {
                 System.setProperty("eclipse.buildId", "unit-tests");
-                int counter = 0;
-                IStatus[] children = new IStatus[3];
+                IStatus[] children = null;
                 ILog log = Platform.getLog(FrameworkUtil.getBundle(getClass()));
-                for (int i = 0; i < children.length; i++) {
-                    RuntimeException cause = new IllegalArgumentException("cause" + i);
-                    cause.fillInStackTrace();
-                    Exception exception = new RuntimeException("exception message", cause);
-                    exception.fillInStackTrace();
-                    for (int j = 3; j >= 0; j--) {
-                        Exception e = new RuntimeException("exception " + j, exception);
-                        e.fillInStackTrace();
-                        exception = e;
+                for (int k = 0; k < 100; k++) {
+                    RuntimeException cause = new IllegalArgumentException("cause" + k);
+                    StackTraceElement[] trace = new StackTraceElement[k];
+                    for (int j = k; j-- > 0;) {
+                        trace[j] = new StackTraceElement("org.eclipse", "method" + j, "", 1);
                     }
-                    children[i] = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces.rcp",
-                            "status error message " + ++counter, exception);
-                    try {
-                        Thread.sleep(750);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    cause.setStackTrace(trace);
+                    log.log(new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces.rcp", "error",
+                            new RuntimeException()));
                 }
-                log.log(new MultiStatus("org.eclipse.recommenders.stacktraces.rcp", IStatus.ERROR, children,
-                        "status error message", new RuntimeException()));
                 return Status.OK_STATUS;
             }
         };
+
+        // for (int i = 0; i < children.length; i++) {
+        // cause.setStackTrace(trace);
+        // Exception exception = new RuntimeException("exception message", cause);
+        // exception.fillInStackTrace();
+        // for (int j = 3; j >= 0; j--) {
+        // Exception e = new RuntimeException("exception " + j, exception);
+        // e.fillInStackTrace();
+        // exception = e;
+        // }
+        // children[i] = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces.rcp",
+        // "status error message " + ++counter + " - " + k, exception);
+        // try {
+        // Thread.sleep(750);
+        // } catch (InterruptedException e) {
+        // e.printStackTrace();
+        // }
+        // }
+        // return Status.OK_STATUS;
+        // }
         job.schedule();
     }
 
