@@ -53,6 +53,7 @@ public class LogListenerTest {
     private static Status createErrorStatus() {
         Exception e1 = new RuntimeException();
         e1.fillInStackTrace();
+        e1.getStackTrace();
         return new Status(IStatus.ERROR, TEST_PLUGIN_ID, "test message", e1);
     }
 
@@ -300,8 +301,10 @@ public class LogListenerTest {
         settings.setSkipSimilarErrors(true);
         settings.setAction(ASK);
 
-        sut.logging(createErrorStatus(), "");
-        sut.logging(createErrorStatus(), "");
+        Status s1 = createErrorStatus();
+        Status s2 = createErrorStatus();
+        sut.logging(s1, "");
+        sut.logging(s2, "");
 
         verify(sut, times(1)).checkAndSendWithDialog(Mockito.any(ErrorReport.class));
     }
