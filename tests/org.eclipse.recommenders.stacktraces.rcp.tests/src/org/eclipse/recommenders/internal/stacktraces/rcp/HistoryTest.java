@@ -38,7 +38,7 @@ public class HistoryTest {
         Settings s = ModelFactory.eINSTANCE.createSettings();
         s.setWhitelistedPackages(Lists.newArrayList("org."));
         s.setWhitelistedPluginIds(Lists.newArrayList("org."));
-        sut = new History(s) {
+        sut = new History() {
             @Override
             protected Directory createIndexDirectory() throws IOException {
                 return new RAMDirectory();
