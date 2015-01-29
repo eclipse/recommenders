@@ -385,12 +385,6 @@ public class ErrorReports {
             Throwable mException = newThrowable(status.getException());
             mStatus.setException(mException);
         }
-
-        ThrowableFingerprintComputer fingerprint = new ThrowableFingerprintComputer(settings.getWhitelistedPackages(),
-                1024);
-        mStatus.accept(fingerprint);
-        mStatus.setFingerprint(fingerprint.hash());
-
         return mStatus;
     }
 
@@ -443,9 +437,5 @@ public class ErrorReports {
         PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
         report.accept(prettyPrintVisitor);
         return prettyPrintVisitor.print();
-    }
-
-    public static String getFingerprint(ErrorReport report) {
-        return report.getStatus().getFingerprint();
     }
 }

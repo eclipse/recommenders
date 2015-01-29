@@ -50,7 +50,6 @@ class Status {
     int code
     int severity
     String message
-    String fingerprint
     contains Throwable exception
     contains Status[] children
     op void accept(Visitor v) {
