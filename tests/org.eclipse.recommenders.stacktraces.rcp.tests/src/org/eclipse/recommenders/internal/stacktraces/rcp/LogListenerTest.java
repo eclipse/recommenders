@@ -59,10 +59,6 @@ public class LogListenerTest {
 
     // mockito can only mock visible & non-final classes
     protected class TestHistory extends History {
-        public TestHistory(Settings settings) {
-            super(settings);
-        }
-
         @Override
         protected Directory createIndexDirectory() throws IOException {
             return new RAMDirectory();
@@ -83,7 +79,7 @@ public class LogListenerTest {
         settings.setConfigured(true);
         settings.setWhitelistedPluginIds(newArrayList(TEST_PLUGIN_ID));
         settings.setWhitelistedPackages(newArrayList("java"));
-        history = spy(new TestHistory(settings));
+        history = spy(new TestHistory());
         history.startAsync();
         history.awaitRunning();
         // not called on spy, so call manually
