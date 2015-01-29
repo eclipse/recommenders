@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.internal.stacktraces.rcp;
 
 import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.base.Objects.firstNonNull;
 import static org.apache.lucene.index.IndexReader.openIfChanged;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.LogMessages.HISTORY_NOT_AVAILABLE;
 import static org.eclipse.recommenders.utils.Logs.log;
@@ -41,9 +42,9 @@ import org.apache.lucene.util.Version;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
-import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.StackTraceElement;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Status;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.Throwable;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.impl.VisitorImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -63,11 +64,6 @@ public class History extends AbstractIdleService {
     private IndexWriter writer;
     private IndexReader reader;
     private IndexSearcher searcher;
-    private Settings settings;
-
-    public History(Settings settings) {
-        this.settings = settings;
-    }
 
     @VisibleForTesting
     protected Directory createIndexDirectory() throws IOException {
@@ -108,7 +104,7 @@ public class History extends AbstractIdleService {
     }
 
     public boolean seen(ErrorReport report) {
-        return seen(new TermQuery(new Term(F_IDENTITY, exactIdentity(report))));
+        return seen(new TermQuery(new Term(F_IDENTITY, closeIdentity(report))));
     }
 
     public boolean seenSimilar(ErrorReport report) {
@@ -127,14 +123,31 @@ public class History extends AbstractIdleService {
         }
     }
 
-    private String exactIdentity(ErrorReport report) {
-        ErrorReport copy = ErrorReports.copy(report);
-        // remove potential user content:
-        copy.setComment(null);
-        copy.setName(null);
-        copy.setEmail(null);
-        String json = ErrorReports.toJson(copy, settings, false);
-        String hash = Hashing.murmur3_128().newHasher().putString(json, UTF_8).hash().toString();
+    private String closeIdentity(ErrorReport report) {
+        final Hasher hasher = Hashing.murmur3_128().newHasher();
+        report.accept(new VisitorImpl() {
+
+            @Override
+            public void visit(Status status) {
+                hasher.putString(firstNonNull(status.getMessage(), ""), UTF_8);
+                super.visit(status);
+            }
+
+            @Override
+            public void visit(Throwable throwable) {
+                hasher.putString(firstNonNull(throwable.getClassName(), ""), UTF_8);
+                hasher.putString(firstNonNull(throwable.getMessage(), ""), UTF_8);
+                super.visit(throwable);
+            }
+
+            @Override
+            public void visit(StackTraceElement element) {
+                hasher.putString(element.getClassName(), UTF_8);
+                hasher.putString(element.getMethodName(), UTF_8);
+                hasher.putInt(element.getLineNumber());
+            }
+        });
+        String hash = hasher.hash().toString();
         return hash;
     }
 
@@ -173,7 +186,7 @@ public class History extends AbstractIdleService {
             return;
         }
         Document doc = new Document();
-        Field field = new Field(F_IDENTITY, exactIdentity(report), Store.NO, Index.NOT_ANALYZED);
+        Field field = new Field(F_IDENTITY, closeIdentity(report), Store.NO, Index.NOT_ANALYZED);
         doc.add(field);
         if (report.isIgnoreSimilar()) {
             field = new Field(F_IDENTITY_TRACE, traceIdentity(report), Store.NO, Index.NOT_ANALYZED);

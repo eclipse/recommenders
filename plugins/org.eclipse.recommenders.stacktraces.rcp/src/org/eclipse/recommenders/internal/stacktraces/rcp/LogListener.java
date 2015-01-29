@@ -79,7 +79,7 @@ public class LogListener implements ILogListener, IStartup {
         settings = PreferenceInitializer.getDefault();
         Platform.addLogListener(this);
         try {
-            history = new History(settings);
+            history = new History();
             history.startAsync();
         } catch (Exception e1) {
             log(HISTORY_START_FAILED);
