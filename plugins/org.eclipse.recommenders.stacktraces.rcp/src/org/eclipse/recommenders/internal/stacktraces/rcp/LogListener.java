@@ -15,6 +15,9 @@ import static org.eclipse.recommenders.internal.stacktraces.rcp.LogMessages.*;
 import static org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports.*;
 import static org.eclipse.recommenders.utils.Logs.log;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +30,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReport;
+import org.eclipse.recommenders.internal.stacktraces.rcp.model.ErrorReports;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.SendAction;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Settings;
 import org.eclipse.recommenders.internal.stacktraces.rcp.model.Status;
 import org.eclipse.recommenders.utils.Checks;
+import org.eclipse.recommenders.utils.IOUtils;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
@@ -262,6 +267,9 @@ public class LogListener implements ILogListener, IStartup {
     }
 
     private void addForSending(final ErrorReport report) {
+        // TODO for Bug 458792
+        saveReport(report);
+
         Runnable run = new Runnable() {
             @Override
             public void run() {
@@ -273,6 +281,21 @@ public class LogListener implements ILogListener, IStartup {
             run.run();
         } else {
             Display.getDefault().asyncExec(run);
+        }
+    }
+
+    private void saveReport(ErrorReport report) {
+        File location = Platform.getStateLocation(LogMessages.BUNDLE).toFile();
+        String json = ErrorReports.toJson(report, settings, true);
+        PrintWriter out = null;
+        try {
+            File reportFile = new File(location, "" + System.currentTimeMillis());
+            out = new PrintWriter(reportFile);
+            out.write(json);
+        } catch (FileNotFoundException e) {
+            log(REPORTING_ERROR, e);
+        } finally {
+            IOUtils.closeQuietly(out);
         }
     }
 
