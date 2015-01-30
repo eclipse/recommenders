@@ -20,7 +20,7 @@ public final class LogMessages extends DefaultLogMessage {
 
     private static int code = 1;
 
-    private static final Bundle BUNDLE = FrameworkUtil.getBundle(LogMessages.class);
+    protected static final Bundle BUNDLE = FrameworkUtil.getBundle(LogMessages.class);
     private static final String VERSION = "Version: " + BUNDLE.getVersion().toString(); //$NON-NLS-1$
 
     public static final LogMessages NO_INTERNET = new LogMessages(WARNING,
