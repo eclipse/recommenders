@@ -285,6 +285,7 @@ public class ErrorReports {
         if (settings.isAnonymizeStrackTraceElements()) {
             anonymizeStackTrace(report, settings);
         }
+        anonymizeMessages(report);
         if (settings.isAnonymizeMessages()) {
             clearMessages(report);
         }
@@ -429,8 +430,13 @@ public class ErrorReports {
         return mThrowable;
     }
 
-    public static void clearMessages(ErrorReport event) {
-        event.accept(new ClearMessagesVisitor());
+    public static void anonymizeMessages(ErrorReport report) {
+        report.accept(new AnonymizeMessagesVisitor());
+
+    }
+
+    public static void clearMessages(ErrorReport report) {
+        report.accept(new ClearMessagesVisitor());
     }
 
     public static void anonymizeStackTrace(ErrorReport report, final Settings settings) {
@@ -441,6 +447,7 @@ public class ErrorReports {
         if (settings.isAnonymizeStrackTraceElements()) {
             anonymizeStackTrace(report, settings);
         }
+        anonymizeMessages(report);
         if (settings.isAnonymizeMessages()) {
             clearMessages(report);
         }

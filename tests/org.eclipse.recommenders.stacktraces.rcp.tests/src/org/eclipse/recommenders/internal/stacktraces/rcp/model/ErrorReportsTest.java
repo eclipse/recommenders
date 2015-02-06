@@ -28,6 +28,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ErrorReportsTest {
+    private static final ModelFactory FACTORY = ModelFactory.eINSTANCE;
+
     private static final List<String> PREFIX_WHITELIST = Arrays.asList("sun.", "java.", "javax.", "org.eclipse.");
 
     private static final String WHITELISTED_CLASSNAME = "java.lang.RuntimeException";
@@ -114,7 +116,7 @@ public class ErrorReportsTest {
         IStatus s1 = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message", r1);
         IStatus s2 = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "some error message", r2);
 
-        settings = ModelFactory.eINSTANCE.createSettings();
+        settings = FACTORY.createSettings();
         settings.setWhitelistedPackages(newArrayList("org."));
 
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status noCause = ErrorReports.newStatus(s1, settings);
@@ -130,7 +132,7 @@ public class ErrorReportsTest {
         IStatus s2 = new MultiStatus("org.eclipse.recommenders.stacktraces", 0, new IStatus[] { s1 },
                 "some error message", root);
 
-        settings = ModelFactory.eINSTANCE.createSettings();
+        settings = FACTORY.createSettings();
         settings.setWhitelistedPackages(newArrayList("org."));
 
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status normal = ErrorReports.newStatus(s1, settings);
@@ -147,7 +149,7 @@ public class ErrorReportsTest {
         java.lang.Throwable rootException = new CoreException(causedStatus);
         IStatus rootEvent = new Status(IStatus.ERROR, "org.eclipse.recommenders.stacktraces", "someErrorMessage",
                 rootException);
-        settings = ModelFactory.eINSTANCE.createSettings();
+        settings = FACTORY.createSettings();
         settings.setWhitelistedPackages(newArrayList("org."));
 
         org.eclipse.recommenders.internal.stacktraces.rcp.model.Status rootStatus = ErrorReports.newStatus(rootEvent,
@@ -161,7 +163,7 @@ public class ErrorReportsTest {
 
     @Test
     public void testMultistatusDuplicateChildFiltering() {
-        settings = ModelFactory.eINSTANCE.createSettings();
+        settings = FACTORY.createSettings();
         settings.setWhitelistedPackages(newArrayList("org."));
 
         Exception e1 = new Exception("Stack Trace");
@@ -190,7 +192,7 @@ public class ErrorReportsTest {
 
     @Test
     public void testMultistatusChildFilteringHandlesEmptyStacktrace() {
-        settings = ModelFactory.eINSTANCE.createSettings();
+        settings = FACTORY.createSettings();
         settings.setWhitelistedPackages(newArrayList("org."));
 
         Exception e1 = new Exception("Stack Trace 1");
@@ -207,7 +209,7 @@ public class ErrorReportsTest {
 
     @Test
     public void testPrettyPrintNullSafe1() {
-        ModelFactory mf = ModelFactory.eINSTANCE;
+        ModelFactory mf = FACTORY;
         settings = mf.createSettings();
         ErrorReport report = mf.createErrorReport();
         ErrorReports.prettyPrint(report, settings);
@@ -216,7 +218,7 @@ public class ErrorReportsTest {
 
     @Test
     public void testPrettyPrintNullSafe2() {
-        ModelFactory mf = ModelFactory.eINSTANCE;
+        ModelFactory mf = FACTORY;
         settings = mf.createSettings();
         ErrorReport report = mf.createErrorReport();
         report.setStatus(mf.createStatus());
@@ -225,7 +227,7 @@ public class ErrorReportsTest {
 
     @Test
     public void testPrettyPrintNullSafe3() {
-        ModelFactory mf = ModelFactory.eINSTANCE;
+        ModelFactory mf = FACTORY;
         settings = mf.createSettings();
         settings.setWhitelistedPackages(newArrayList("org."));
 
@@ -240,7 +242,7 @@ public class ErrorReportsTest {
 
     @Test
     public void testMultistatusMainStacktracesNotFiltered() {
-        settings = ModelFactory.eINSTANCE.createSettings();
+        settings = FACTORY.createSettings();
         settings.setWhitelistedPackages(newArrayList("org."));
 
         Exception e1 = new Exception("Stack Trace");
@@ -276,5 +278,4 @@ public class ErrorReportsTest {
         assertThat(newStatus.getChildren().size(), is(1));
         assertThat(newStatus.getChildren().get(0).getException().getStackTrace().size(), is(stackTrace.length));
     }
-
 }
