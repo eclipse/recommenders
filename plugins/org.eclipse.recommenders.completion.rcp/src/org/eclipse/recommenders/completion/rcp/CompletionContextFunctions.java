@@ -541,6 +541,9 @@ public final class CompletionContextFunctions {
 
             try {
                 InternalCompletionContext ctx = context.get(CompletionContextKey.INTERNAL_COMPLETIONCONTEXT, null);
+                if (ctx == null) {
+                    return null;
+                }
                 InternalExtendedCompletionContext extCtx = cast(EXTENDED_CONTEXT.get(ctx));
                 if (extCtx == null) {
                     return null;
