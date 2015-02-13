@@ -15,6 +15,7 @@ import static org.eclipse.ui.dialogs.PreferencesUtil.createPreferenceDialogOn;
 
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -65,7 +66,10 @@ public class EnableSubwordsCompletionProposal extends AbstractCompletionTipPropo
     }
 
     @Override
-    public boolean isApplicable() {
+    public boolean isApplicable(Date lastSeen) {
+        if (lastSeen != null) {
+            return false; // Don't show this twice
+        }
         SessionProcessorDescriptor descriptor = preferences.getSessionProcessorDescriptor(SESSION_PROCESSOR_ID);
         return descriptor != null && !preferences.isEnabled(descriptor);
     }
