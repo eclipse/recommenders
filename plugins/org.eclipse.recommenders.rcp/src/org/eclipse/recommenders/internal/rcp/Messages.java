@@ -34,6 +34,7 @@ public final class Messages extends NLS {
     public static String LOG_ERROR_FAILED_TO_RESOLVE_METHOD;
     public static String LOG_ERROR_FAILED_TO_GENERATE_UUID;
     public static String LOG_ERROR_FAILED_TO_RESOLVE_TYPE_PARAMETER;
+    public static String LOG_ERROR_FAILED_TO_EXECUTE_COMMAND;
     public static String LOG_ERROR_AN_ERROR_OCCURRED;
 
     public static String DIALOG_TITLE_BUNDLE_RESOLUTION_FAILURE;
