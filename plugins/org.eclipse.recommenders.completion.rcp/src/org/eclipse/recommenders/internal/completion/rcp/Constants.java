@@ -31,4 +31,8 @@ public final class Constants {
     public static final String PREF_TIPS = "tips"; //$NON-NLS-1$
     public static final String PREF_ENABLED = "enabled"; //$NON-NLS-1$
     public static final String PREF_LAST_SEEN = "lastSeen"; //$NON-NLS-1$
+
+    public static final String PREF_PROJECT_NEWS_LAST_CHECKED = "projectNewsLastChecked"; //$NON-NLS-1$
+    public static final String PREF_PROJECT_NEWS_LAST_READ = "projectNewsLastRead"; //$NON-NLS-1$
+    public static final String PREF_PROJECT_NEWS_LAST_MODIFIED = "projectNewsLastModified"; //$NON-NLS-1$
 }
