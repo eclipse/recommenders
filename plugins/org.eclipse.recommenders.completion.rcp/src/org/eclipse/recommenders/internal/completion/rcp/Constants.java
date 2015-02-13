@@ -27,4 +27,8 @@ public final class Constants {
     public static final String COMPLETION_PREFERENCE_PAGE_ID = "org.eclipse.recommenders.completion.rcp.preferencePages.completions"; //$NON-NLS-1$
 
     public static final String PREF_SESSIONPROCESSORS = "sessionprocessors"; //$NON-NLS-1$
+
+    public static final String PREF_TIPS = "tips"; //$NON-NLS-1$
+    public static final String PREF_ENABLED = "enabled"; //$NON-NLS-1$
+    public static final String PREF_LAST_SEEN = "lastSeen"; //$NON-NLS-1$
 }

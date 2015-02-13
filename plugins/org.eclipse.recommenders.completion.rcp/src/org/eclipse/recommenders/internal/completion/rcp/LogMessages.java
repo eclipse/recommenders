@@ -30,6 +30,8 @@ public final class LogMessages extends DefaultLogMessage {
             Messages.LOG_ERROR_EXCEPTION_WHILE_COMPUTING_LOOKUP_ENVIRONMENT);
     public static final LogMessages LOG_ERROR_COMPILATION_FAILURE_PREVENTS_PROPOSAL_MATCHING = new LogMessages(ERROR,
             Messages.LOG_ERROR_COMPILATION_FAILURE_PREVENTS_PROPOSAL_MATCHING);
+    public static final LogMessages LOG_ERROR_CANNOT_INSTANTIATE_COMPLETION_TIP_PROPOSAL = new LogMessages(ERROR,
+            Messages.LOG_ERROR_CANNOT_INSTANTIATE_COMPLETION_TIP_PROPOSAL);
     public static final LogMessages LOG_WARNING_LINKAGE_ERROR = new LogMessages(WARNING,
             Messages.LOG_WARNING_LINKAGE_ERROR);
 

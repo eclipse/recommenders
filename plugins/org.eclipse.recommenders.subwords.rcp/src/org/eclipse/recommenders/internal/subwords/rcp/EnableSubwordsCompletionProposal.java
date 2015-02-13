@@ -15,6 +15,7 @@ import static org.eclipse.ui.dialogs.PreferencesUtil.createPreferenceDialogOn;
 
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import org.eclipse.recommenders.internal.completion.rcp.CompletionRcpPreferences
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.Images;
 import org.eclipse.recommenders.rcp.utils.BrowserUtils;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -65,7 +67,10 @@ public class EnableSubwordsCompletionProposal extends AbstractCompletionTipPropo
     }
 
     @Override
-    public boolean isApplicable() {
+    public boolean isApplicable(@Nullable Date lastSeen) {
+        if (lastSeen != null) {
+            return false; // Don't show this twice
+        }
         SessionProcessorDescriptor descriptor = preferences.getSessionProcessorDescriptor(SESSION_PROCESSOR_ID);
         return descriptor != null && !preferences.isEnabled(descriptor);
     }
