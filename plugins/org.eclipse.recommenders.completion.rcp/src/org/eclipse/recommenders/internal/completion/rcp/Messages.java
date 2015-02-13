@@ -19,9 +19,11 @@ public class Messages extends NLS {
     public static String PROPOSAL_LABEL_DISCOVER_EXTENSIONS;
     public static String PROPOSAL_LABEL_ENABLE_COMPLETION;
     public static String PROPOSAL_LABEL_NO_PROPOSALS;
+    public static String PROPOSAL_LABEL_READ_PROJECT_NEWS;
 
     public static String PROPOSAL_TOOLTIP_DISCOVER_EXTENSIONS;
     public static String PROPOSAL_TOOLTIP_ENABLE_COMPLETION;
+    public static String PROPOSAL_TOOLTIP_READ_PROJECT_NEWS;
 
     public static String PROPOSAL_CATEGORY_CODE_RECOMMENDERS;
 
@@ -50,6 +52,7 @@ public class Messages extends NLS {
     public static String LOG_ERROR_CANNOT_INSTANTIATE_COMPLETION_TIP_PROPOSAL;
 
     public static String LOG_WARNING_LINKAGE_ERROR;
+
 
     static {
         // initialize resource bundle
