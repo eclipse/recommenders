@@ -12,6 +12,8 @@ package org.eclipse.recommenders.internal.completion.rcp.tips;
 
 import static org.eclipse.jface.viewers.StyledString.DECORATIONS_STYLER;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -24,6 +26,7 @@ import org.eclipse.recommenders.internal.completion.rcp.Messages;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.Images;
 import org.eclipse.recommenders.rcp.utils.Dialogs;
+import org.eclipse.recommenders.utils.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -43,8 +46,8 @@ public class DiscoveryCompletionProposal extends AbstractCompletionTipProposal {
     }
 
     @Override
-    public boolean isApplicable() {
-        return true;
+    public boolean isApplicable(@Nullable Date lastSeen) {
+        return lastSeen == null; // Don't show this twice
     }
 
     @Override
