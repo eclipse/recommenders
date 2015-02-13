@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+	<extension-point id="org.eclipse.recommenders.rcp.linkContribution" name="Link Contribution" schema="schema/linkContribution.exsd"/>
 	<extension point="org.eclipse.ui.views">
 		<category id="org.eclipse.recommenders.rcp.views.root"
 			name="%views.root.name"/>
@@ -18,4 +19,53 @@
 	<extension point="org.eclipse.recommenders.injection.modules">
 		<module class="org.eclipse.recommenders.internal.rcp.RcpModule"/>
 	</extension>
+	<extension point="org.eclipse.recommenders.rcp.linkContribution">
+    <linkContribution
+          commandId="org.eclipse.recommenders.rcp.discoverNewExtensions"
+          icon="icons/obj16/lightbulb.gif"
+          label="%preferencePages.root.extension.label"
+          priority="4">
+    </linkContribution>
+    <linkContribution
+          commandId="org.eclipse.recommenders.rcp.openBrowser"
+          icon="icons/obj16/bird_blue_16.png"
+          label="%preferencePages.root.twitter.label"
+          priority="3">
+    </linkContribution>
+    <linkContribution
+          commandId="org.eclipse.recommenders.rcp.openBrowser"
+          icon="icons/obj16/favorite_star.png"
+          label="%preferencePages.root.marketplace.label"
+          priority="2">
+    </linkContribution>
+    <linkContribution
+          commandId="org.eclipse.recommenders.rcp.openBrowser"
+          icon="icons/obj16/container_obj.gif"
+          label="%preferencePages.root.manual.label"
+          priority="1">
+    </linkContribution>
+		<linkContribution
+			commandId="org.eclipse.recommenders.rcp.openBrowser"
+			icon="icons/obj16/homepage.png"
+			label="%preferencePages.root.homepage.label"
+			priority="0">
+		</linkContribution>
+		</extension>
+		<extension point="org.eclipse.ui.commands">
+			<command
+				defaultHandler="org.eclipse.recommenders.internal.rcp.ExtensionDiscoveryHandler"
+				id="org.eclipse.recommenders.rcp.discoverNewExtensions"
+				name="%command.discoverNewExtensions.name">
+			</command>
+			<command
+				defaultHandler="org.eclipse.recommenders.internal.rcp.OpenBrowserHandler"
+				id="org.eclipse.recommenders.rcp.openBrowser"
+				name="%command.openBrowser.name">
+				<commandParameter
+					id="org.eclipse.recommenders.rcp.linkContribution.href"
+					name="%commandParameter.uri.name"
+					optional="false">
+				</commandParameter>
+			</command>
+		</extension>
 </plugin>
