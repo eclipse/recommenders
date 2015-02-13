@@ -8,7 +8,7 @@
  * Contributors:
  *    Johannes Dorn - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.rcp.news;
+package org.eclipse.recommenders.internal.news.rcp;
 
 import java.io.StringReader;
 import java.net.URL;

@@ -17,6 +17,7 @@ public final class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.recommenders.internal.rcp.messages"; //$NON-NLS-1$
 
     public static String PREFPAGE_DESCRIPTION_EMPTY;
+    public static String PREFPAGE_LINKS_DESCRIPTION;
     public static String PREFPAGE_LINK_HOMEPAGE;
     public static String PREFPAGE_LINK_MANUAL;
     public static String PREFPAGE_LINK_FAVORITE;
@@ -34,6 +35,8 @@ public final class Messages extends NLS {
     public static String LOG_ERROR_FAILED_TO_RESOLVE_METHOD;
     public static String LOG_ERROR_FAILED_TO_GENERATE_UUID;
     public static String LOG_ERROR_FAILED_TO_RESOLVE_TYPE_PARAMETER;
+    public static String LOG_ERROR_FAILED_TO_EXECUTE_COMMAND;
+    public static String LOG_ERROR_FAILED_TO_READ_EXTENSION_ELEMENT;
     public static String LOG_ERROR_AN_ERROR_OCCURRED;
     public static String LOG_WARNING_ERROR_WHILE_PARSING_NEWS_FEED;
     public static String LOG_WARNING_ERROR_WHILE_PARSING_NEWS_FEED_ITEM;
@@ -47,8 +50,8 @@ public final class Messages extends NLS {
     public static String DIALOG_LABEL_BUNDLE_LIST;
     public static String DIALOG_RESTART_NOT_POSSIBLE;
 
-    public static String NEWS_NOTIFY_MESSAGE = "The Code Recommenders project has published a new blog post: {0}. <a href=\"{1}\">Read more...</a>";
-    public static String NEWS_LOADING_MESSAGE = "Loading Project Newsfeed...";
+    public static String NEWS_NOTIFY_MESSAGE;
+    public static String NEWS_LOADING_MESSAGE;
 
     static {
         // initialize resource bundle

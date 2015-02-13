@@ -8,7 +8,7 @@
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.rcp.news;
+package org.eclipse.recommenders.internal.news.rcp;
 
 import static org.eclipse.recommenders.internal.rcp.Constants.NEWS_ENABLED;
 
