@@ -37,9 +37,9 @@ public class TipsSessionProcessor extends SessionProcessor {
     private static final String COMPLETION_TIP_ID = "id"; //$NON-NLS-1$
     private static final String COMPLETION_TIP_CLASS = "class"; //$NON-NLS-1$
 
-    private static final String PREF_TIPS = "tips";
-    private static final String PREF_ENABLED = "enabled";
-    private static final String PREF_LAST_SEEN = "lastSeen";
+    private static final String PREF_TIPS = "tips"; //$NON-NLS-1$
+    private static final String PREF_ENABLED = "enabled"; //$NON-NLS-1$
+    private static final String PREF_LAST_SEEN = "lastSeen"; //$NON-NLS-1$
 
     private final Map<ICompletionTipProposal, String> proposalsToShow = Maps.newHashMap();
     private final Map<String, Date> seenTips = Maps.newHashMap();

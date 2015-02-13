@@ -16,8 +16,6 @@ import java.util.Date;
 
 import javax.inject.Inject;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.text.AbstractInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.viewers.StyledString;
@@ -26,16 +24,13 @@ import org.eclipse.recommenders.internal.completion.rcp.Messages;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.Images;
 import org.eclipse.recommenders.rcp.utils.Dialogs;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
-@SuppressWarnings("restriction")
 public class DiscoveryCompletionProposal extends AbstractCompletionTipProposal {
 
     @Inject
+    @SuppressWarnings("restriction")
     public DiscoveryCompletionProposal(SharedImages images) {
         Image image = images.getImage(Images.OBJ_LIGHTBULB);
         setImage(image);
@@ -56,28 +51,6 @@ public class DiscoveryCompletionProposal extends AbstractCompletionTipProposal {
 
     @Override
     protected IInformationControl createInformationControl(Shell parent, String statusLineText) {
-        return new ConfigureContentAssistInformationControl(parent, statusLineText);
-    }
-
-    private static final class ConfigureContentAssistInformationControl extends AbstractInformationControl {
-
-        private ConfigureContentAssistInformationControl(Shell parent, String statusLineText) {
-            super(parent, statusLineText);
-            create();
-        }
-
-        @Override
-        public boolean hasContents() {
-            return true;
-        }
-
-        @Override
-        protected void createContent(Composite parent) {
-            Link link = new Link(parent, SWT.NONE);
-            Dialog.applyDialogFont(link);
-            link.setForeground(parent.getForeground());
-            link.setBackground(parent.getBackground());
-            link.setText(Messages.PROPOSAL_TOOLTIP_DISCOVER_EXTENSIONS);
-        }
+        return new CompletionTipProposalInformationControl(parent, statusLineText, Messages.PROPOSAL_TOOLTIP_DISCOVER_EXTENSIONS);
     }
 }
