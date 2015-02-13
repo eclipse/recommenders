@@ -8,43 +8,42 @@
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
  *    Olav Lenz - externalize Strings.
+ *    Yasser Aziza - contribution link
  */
 package org.eclipse.recommenders.internal.rcp;
 
-import java.text.MessageFormat;
+import static org.eclipse.recommenders.internal.rcp.LogMessages.LOG_ERROR_FAILED_TO_READ_EXTENSION_ELEMENT;
 
-import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.recommenders.rcp.SharedImages;
-import org.eclipse.recommenders.rcp.SharedImages.Images;
-import org.eclipse.recommenders.rcp.utils.BrowserUtils;
-import org.eclipse.recommenders.rcp.utils.Dialogs;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-public class RootPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 
-    private final SharedImages images;
+public class RootPreferencePage extends AbstractPreferencePage {
 
-    @Inject
-    public RootPreferencePage(SharedImages images) {
-        this.images = images;
-    }
+    private final String PREF_CONTRIBUTION_ID = "org.eclipse.recommenders.rcp.linkContribution"; //$NON-NLS-1$
+    private final String CONTRIBUTION_ELEMENT = "linkContribution"; //$NON-NLS-1$
 
-    @Override
-    public void init(final IWorkbench workbench) {
-        setDescription(Messages.PREFPAGE_DESCRIPTION_EMPTY);
+    private final String LABEL_ATTRIBUTE = "label"; //$NON-NLS-1$
+    private final String COMMAND_ID_ATTRIBUTE = "commandId"; //$NON-NLS-1$
+    private final String PRIORITY_ATTRIBUTE = "priority"; //$NON-NLS-1$
+    private final String ICON_ELEMENT = "icon"; //$NON-NLS-1$
+
+    public RootPreferencePage() {
+        super(Messages.PREFPAGE_DESCRIPTION_EMPTY);
     }
 
     @Override
@@ -55,43 +54,57 @@ public class RootPreferencePage extends PreferencePage implements IWorkbenchPref
         GridLayoutFactory.swtDefaults().margins(0, 5).applyTo(composite);
 
         Group group = new Group(composite, SWT.NONE);
-        group.setText("Useful links");
+        group.setText(Messages.PREFPAGE_LINKS_DESCRIPTION);
         GridDataFactory.fillDefaults().grab(true, false).applyTo(group);
         GridLayoutFactory.swtDefaults().numColumns(2).applyTo(group);
 
-        BrowserUtils.addOpenBrowserAction(createLink(group, Images.OBJ_HOMEPAGE, Messages.PREFPAGE_LINK_HOMEPAGE,
-                "http://www.eclipse.org/recommenders/")); //$NON-NLS-1$
-
-        BrowserUtils.addOpenBrowserAction(createLink(group, Images.OBJ_CONTAINER, Messages.PREFPAGE_LINK_MANUAL,
-                "http://www.eclipse.org/recommenders/manual/")); //$NON-NLS-1$
-
-        BrowserUtils.addOpenBrowserAction(createLink(group, Images.OBJ_FAVORITE_STAR, Messages.PREFPAGE_LINK_FAVORITE,
-                "http://marketplace.eclipse.org/content/eclipse-code-recommenders")); //$NON-NLS-1$
-
-        BrowserUtils.addOpenBrowserAction(createLink(group, Images.OBJ_BIRD_BLUE, Messages.PREFPAGE_LINK_TWITTER,
-                "http://twitter.com/recommenders")); //$NON-NLS-1$
-
-        addOpenExtensionDiscoveryDialogAction(createLink(group, Images.OBJ_LIGHTBULB,
-                Messages.PREFPAGE_LINK_EXTENSIONS, "")); //$NON-NLS-1$
+        for (ContributionLink link : getContributionLinks(group)) {
+            link.appendLink(group);
+        }
 
         return parent;
     }
 
-    private Link createLink(Composite content, Images icon, String urlLabel, String url) {
-        Label label = new Label(content, SWT.BEGINNING);
-        label.setImage(images.getImage(icon));
-
-        Link link = new Link(content, SWT.BEGINNING);
-        link.setText(MessageFormat.format(urlLabel, url));
-        return link;
+    private List<ContributionLink> getContributionLinks(Group group) {
+        final IConfigurationElement[] configurationElements = Platform.getExtensionRegistry()
+                .getConfigurationElementsFor(PREF_CONTRIBUTION_ID);
+        return readRegisteredDatums(group, configurationElements);
     }
 
-    private void addOpenExtensionDiscoveryDialogAction(Link link) {
-        link.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                Dialogs.newExtensionsDiscoveryDialog().open();
+    private List<ContributionLink> readRegisteredDatums(Group group, IConfigurationElement... configurationElements) {
+        List<ContributionLink> links = Lists.newArrayList();
+        if (configurationElements == null) {
+            return links;
+        }
+        for (final IConfigurationElement configurationElement : configurationElements) {
+            if (CONTRIBUTION_ELEMENT.equals(configurationElement.getName())) {
+                final String pluginId = configurationElement.getContributor().getName();
+                final String label = configurationElement.getAttribute(LABEL_ATTRIBUTE);
+                final String commandId = configurationElement.getAttribute(COMMAND_ID_ATTRIBUTE);
+                final String priority = configurationElement.getAttribute(PRIORITY_ATTRIBUTE);
+
+                String icon = configurationElement.getAttribute(ICON_ELEMENT);
+                Image image = null;
+                if (icon != null) {
+                    image = AbstractUIPlugin.imageDescriptorFromPlugin(pluginId, icon).createImage();
+                }
+
+                try {
+                    if (isValidAttribute(label) && isValidAttribute(commandId) && isValidAttribute(priority)) {
+                        links.add(new ContributionLink(Integer.parseInt(priority), commandId, label, image));
+                    } else {
+                        Logs.log(LOG_ERROR_FAILED_TO_READ_EXTENSION_ELEMENT, CONTRIBUTION_ELEMENT);
+                    }
+                } catch (Exception e) {
+                    Logs.log(LOG_ERROR_FAILED_TO_READ_EXTENSION_ELEMENT, CONTRIBUTION_ELEMENT);
+                }
             }
-        });
+        }
+        Collections.sort(links);
+        return links;
+    }
+
+    private boolean isValidAttribute(String attribute) {
+        return !Strings.isNullOrEmpty(attribute);
     }
 }
