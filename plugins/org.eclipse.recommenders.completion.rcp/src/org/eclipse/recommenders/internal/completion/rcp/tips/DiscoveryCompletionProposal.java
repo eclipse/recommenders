@@ -12,6 +12,8 @@ package org.eclipse.recommenders.internal.completion.rcp.tips;
 
 import static org.eclipse.jface.viewers.StyledString.DECORATIONS_STYLER;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -43,8 +45,8 @@ public class DiscoveryCompletionProposal extends AbstractCompletionTipProposal {
     }
 
     @Override
-    public boolean isApplicable() {
-        return true;
+    public boolean isApplicable(Date lastSeen) {
+        return lastSeen == null; // Don't show this twice
     }
 
     @Override
