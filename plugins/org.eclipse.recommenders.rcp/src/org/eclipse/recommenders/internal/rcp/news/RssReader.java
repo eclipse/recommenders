@@ -1,0 +1,70 @@
+package org.eclipse.recommenders.internal.rcp.news;
+
+import java.io.StringReader;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+
+import org.eclipse.recommenders.internal.rcp.LogMessages;
+import org.eclipse.recommenders.utils.Logs;
+import org.eclipse.recommenders.utils.Nullable;
+import org.eclipse.recommenders.utils.Pair;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+
+public class RssReader {
+
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z", Locale.UK);
+
+    public static List<Pair<String, URL>> getEntries(@Nullable String xml, @Nullable Date fromDate) {
+        if (Strings.isNullOrEmpty(xml)) {
+            return Collections.emptyList();
+        }
+        if (fromDate == null) {
+            return Collections.emptyList();
+        }
+        List<Pair<String, URL>> entries = Lists.newArrayList();
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        try {
+            NodeList items = (NodeList) xPath.compile("rss/channel/item").evaluate(
+                    new InputSource(new StringReader(xml)), XPathConstants.NODESET);
+            for (int i = 0; i < items.getLength(); i++) {
+                Pair<String, URL> item = getItem(xPath, items.item(i), fromDate).orNull();
+                if (item != null) {
+                    entries.add(item);
+                }
+            }
+            return entries;
+        } catch (Exception e) {
+            Logs.log(LogMessages.LOG_WARNING_EXCEPTION_PARSING_NEWS_FEED, e);
+            return Collections.emptyList();
+        }
+    }
+
+    private static Optional<Pair<String, URL>> getItem(XPath xPath, Node item, Date fromDate) {
+        try {
+            Date date = DATE_FORMAT.parse(xPath.evaluate("pubDate", item));
+            if (date.before(fromDate)) {
+                return Optional.absent();
+            }
+            String title = xPath.evaluate("title", item);
+            URL url = new URL(xPath.evaluate("link", item));
+            return Optional.of(Pair.newPair(title, url));
+        } catch (Exception e) {
+            Logs.log(LogMessages.LOG_WARNING_EXCEPTION_PARSING_NEWS_FEED_ITEM, e);
+            return Optional.absent();
+        }
+    }
+}
