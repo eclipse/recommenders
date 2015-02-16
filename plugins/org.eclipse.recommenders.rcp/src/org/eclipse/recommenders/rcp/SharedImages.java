@@ -90,6 +90,7 @@ public final class SharedImages implements IDisposable {
 
     public static enum Images implements ImageResource {
         // @formatter:off
+        DLCL_NEWS(dlcl16("news.png")), //$NON-NLS-1$
         ELCL_ADD_REPOSITORY(elcl16("add_repository.png")), //$NON-NLS-1$
         ELCL_ADD_SNIPPET(elcl16("add_snippet.png")), //$NON-NLS-1$
         ELCL_CLEAR(elcl16("clear.gif")), //$NON-NLS-1$
@@ -102,6 +103,8 @@ public final class SharedImages implements IDisposable {
         ELCL_EXPAND_ALL(elcl16("expandall.gif")), //$NON-NLS-1$
         ELCL_HELP(elcl16("help.png")), //$NON-NLS-1$
         ELCL_INSTALL_EXTENSIONS(elcl16("install-extensions.png")), //$NON-NLS-1$
+        ELCL_NEWS(elcl16("news.png")), //$NON-NLS-1$
+        ELCL_NEWS_HIGHLIGHT(elcl16("news_highlight.png")), //$NON-NLS-1$
         ELCL_REFRESH(elcl16("refresh_tab.gif")), //$NON-NLS-1$
         ELCL_REMOVE_REPOSITORY(elcl16("remove_repository.png")), //$NON-NLS-1$
         ELCL_REMOVE_REPOSITORY_DISABLED(elcl16("remove_repository_disabled.png")), //$NON-NLS-1$
