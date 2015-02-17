@@ -41,7 +41,7 @@ public final class Constants {
     static final String PROP_SEND_ACTION;
     static final String PROP_REMEMBER_SEND_ACTION;
     static final String PROP_REMEMBER_SETTING_PERIOD_START;
-    static final String PROP_SKIP_SIMILAR_ERRORS;
+    static final String PROP_ACTIVATE_DEVELOPER_MODE;
     static final String PROP_WHITELISTED_PLUGINS;
     static final String PROP_WHITELISTED_PACKAGES;
     static final String PROP_SERVER;
@@ -57,7 +57,7 @@ public final class Constants {
         PROP_REMEMBER_SETTING_PERIOD_START = pkg.getSettings_RememberSendActionPeriodStart().getName();
         PROP_SEND_ACTION = pkg.getSettings_Action().getName();
         PROP_SERVER = pkg.getSettings_ServerUrl().getName();
-        PROP_SKIP_SIMILAR_ERRORS = pkg.getSettings_SkipSimilarErrors().getName();
+        PROP_ACTIVATE_DEVELOPER_MODE = pkg.getSettings_DeveloperMode().getName();
         PROP_WHITELISTED_PACKAGES = pkg.getSettings_WhitelistedPackages().getName();
         PROP_WHITELISTED_PLUGINS = pkg.getSettings_WhitelistedPluginIds().getName();
     }

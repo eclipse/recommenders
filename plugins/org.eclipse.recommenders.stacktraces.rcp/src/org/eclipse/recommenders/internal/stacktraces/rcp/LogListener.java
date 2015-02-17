@@ -238,7 +238,7 @@ public class LogListener implements ILogListener, IStartup {
 
     private boolean seenSameOrSimilarErrorBefore(final ErrorReport report) {
         // for debugging / development mode
-        if (!settings.isSkipSimilarErrors()) {
+        if (!settings.isDeveloperMode()) {
             return false;
         }
         return history.seenSimilar(report) // did we send a similar error before?
