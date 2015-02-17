@@ -110,7 +110,7 @@ class Settings {
     boolean anonymizeMessages
     boolean anonymizeStrackTraceElements
     boolean configured
-    boolean skipSimilarErrors
+    boolean developerMode
     SendAction action
     RememberSendAction rememberSendAction
     long rememberSendActionPeriodStart
