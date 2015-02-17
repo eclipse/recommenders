@@ -244,7 +244,7 @@ public class LogListenerTest {
     @Test
     public void testUseHistory() {
         settings.setAction(SendAction.SILENT);
-        settings.setSkipSimilarErrors(true);
+        settings.setDeveloperMode(false);
         Status status = new Status(IStatus.ERROR, TEST_PLUGIN_ID, "test message");
 
         sut.logging(status, "");
@@ -265,7 +265,7 @@ public class LogListenerTest {
     @Test
     public void testCheckIfAskMode() {
         settings.setAction(ASK);
-        settings.setSkipSimilarErrors(true);
+        settings.setDeveloperMode(true);
         Status status = new Status(IStatus.ERROR, TEST_PLUGIN_ID, "test message");
 
         sut.logging(status, "");
@@ -316,21 +316,19 @@ public class LogListenerTest {
     }
 
     @Test
-    public void testSkipSimilarErrors() {
-        settings.setSkipSimilarErrors(true);
+    public void testDeveloperMode() {
+        settings.setDeveloperMode(true);
         settings.setAction(ASK);
 
-        Status s1 = createErrorStatus();
-        Status s2 = createErrorStatus();
-        sut.logging(s1, "");
-        sut.logging(s2, "");
+        sut.logging(createErrorStatus(), "");
+        sut.logging(createErrorStatus(), "");
 
         verify(sut, times(1)).checkAndSendWithDialog(Mockito.any(ErrorReport.class));
     }
 
     @Test
     public void testNoSkippingSimilarErrors() {
-        settings.setSkipSimilarErrors(false);
+        settings.setDeveloperMode(true);
         settings.setAction(SILENT);
 
         sut.logging(createErrorStatus(), "");
@@ -342,13 +340,12 @@ public class LogListenerTest {
     @Test
     public void testSilentSendsErrors() {
 
-        settings.setSkipSimilarErrors(false);
+        settings.setDeveloperMode(true);
         settings.setAction(SILENT);
 
         sut.logging(createErrorStatus(), "");
-        sut.logging(createErrorStatus(), "");
 
-        verify(sut, times(2)).sendStatus(Mockito.any(ErrorReport.class));
+        verify(sut, times(1)).sendStatus(Mockito.any(ErrorReport.class));
 
     }
 
