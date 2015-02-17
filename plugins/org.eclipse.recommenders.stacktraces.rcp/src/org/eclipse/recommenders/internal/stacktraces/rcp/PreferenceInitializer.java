@@ -47,7 +47,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         s.put(PROP_SERVER, SERVER_URL);
         s.put(PROP_NAME, "");
         s.put(PROP_EMAIL, "");
-        s.putBoolean(PROP_SKIP_SIMILAR_ERRORS, true);
+        s.putBoolean(PROP_ACTIVATE_DEVELOPER_MODE, false);
         s.putBoolean(PROP_CONFIGURED, false);
         s.putLong(PROP_REMEMBER_SETTING_PERIOD_START, 0L);
         s.put(PROP_WHITELISTED_PLUGINS, Constants.WHITELISTED_PLUGINS);
