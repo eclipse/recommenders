@@ -29,6 +29,8 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.core.internal.net.ProxyManager;
+import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -119,6 +121,11 @@ public class RcpModule extends AbstractModule implements Module {
     }
 
     @Provides
+    public IProxyService provideProxyService() {
+        return ProxyManager.getProxyManager();
+    }
+
+    @Provides
     public IWebBrowser provideWebBrowser(IWorkbench wb) throws PartInitException {
         return wb.getBrowserSupport().getExternalBrowser();
     }
@@ -135,7 +142,7 @@ public class RcpModule extends AbstractModule implements Module {
             @Override
             public IStatus runInUIThread(final IProgressMonitor monitor) {
                 final IWorkbenchWindow ww = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-                final ISelectionService service = (ISelectionService) ww.getService(ISelectionService.class);
+                final ISelectionService service = ww.getService(ISelectionService.class);
                 service.addPostSelectionListener(provider);
                 return Status.OK_STATUS;
             }

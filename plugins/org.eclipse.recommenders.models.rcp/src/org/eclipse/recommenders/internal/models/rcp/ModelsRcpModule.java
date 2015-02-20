@@ -19,8 +19,6 @@ import java.util.Map;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.eclipse.core.internal.net.ProxyManager;
-import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -110,11 +108,6 @@ public class ModelsRcpModule extends AbstractModule {
     }
 
     @Provides
-    public IProxyService provideProxyService() {
-        return ProxyManager.getProxyManager();
-    }
-
-    @Provides
     public ModelIndexBundleSymbolicNameAdvisor provideModelIndexBundleSymbolicNameAdvisor(IModelIndex index) {
         return new ModelIndexBundleSymbolicNameAdvisor(index);
     }
@@ -132,7 +125,7 @@ public class ModelsRcpModule extends AbstractModule {
     @Provides
     @Singleton
     public ModelsRcpPreferences provide(IWorkbench wb, EventBus bus) {
-        IEclipseContext context = (IEclipseContext) wb.getService(IEclipseContext.class);
+        IEclipseContext context = wb.getService(IEclipseContext.class);
         context.set(EventBus.class, bus);
         return ContextInjectionFactory.make(ModelsRcpPreferences.class, context);
     }
