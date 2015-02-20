@@ -21,4 +21,66 @@
             name="Error Reporting">
       </page>
    </extension>
+   <!-- notifications: category -->
+   <extension
+         point="org.eclipse.mylyn.commons.notifications.ui.notifications">
+      <category
+            id="org.eclipse.recommenders.stacktraces.rcp"
+            label="stacktraces">
+      </category>
+   </extension>
+   <!-- notifications: sink -->
+   <extension
+         point="org.eclipse.mylyn.commons.notifications.ui.notifications">
+      <sink
+            class="org.eclipse.recommenders.internal.stacktraces.rcp.notifications.ErrorReportNotificationSink"
+            id="org.eclipse.recommenders.internal.stacktraces.rcp.notifications.ErrorReportNotificationSink"
+            label="Error Reporting Popup">
+      </sink>
+   </extension>
+   <!-- notifications: events -->
+   <extension
+         point="org.eclipse.mylyn.commons.notifications.ui.notifications">
+      <event
+            id="org.eclipse.recommenders.stacktraces.rcp.notifications.configuration"
+            label="configuration" 
+            categoryId="org.eclipse.recommenders.stacktraces.rcp">
+            <defaultHandler
+                sinkId="org.eclipse.recommenders.internal.stacktraces.rcp.notifications.ErrorReportNotificationSink">
+            </defaultHandler>
+      </event>
+   </extension>
+   <extension
+         point="org.eclipse.mylyn.commons.notifications.ui.notifications">
+      <event
+            id="org.eclipse.recommenders.stacktraces.rcp.notifications.report"
+            label="report" 
+            categoryId="org.eclipse.recommenders.stacktraces.rcp">
+            <defaultHandler
+                sinkId="org.eclipse.recommenders.internal.stacktraces.rcp.notifications.ErrorReportNotificationSink">
+            </defaultHandler>
+      </event>
+   </extension>
+   <extension
+         point="org.eclipse.mylyn.commons.notifications.ui.notifications">
+      <event
+            id="org.eclipse.recommenders.stacktraces.rcp.notifications.upload"
+            label="upload" 
+            categoryId="org.eclipse.recommenders.stacktraces.rcp">
+            <defaultHandler
+                sinkId="org.eclipse.recommenders.internal.stacktraces.rcp.notifications.ErrorReportNotificationSink">
+            </defaultHandler>
+      </event>
+   </extension>
+   <extension
+         point="org.eclipse.mylyn.commons.notifications.ui.notifications">
+      <event
+            id="org.eclipse.recommenders.stacktraces.rcp.notifications.moreinfo"
+            label="more info" 
+            categoryId="org.eclipse.recommenders.stacktraces.rcp">
+            <defaultHandler
+                sinkId="org.eclipse.recommenders.internal.stacktraces.rcp.notifications.ErrorReportNotificationSink">
+            </defaultHandler>
+      </event>
+   </extension>
 </plugin>

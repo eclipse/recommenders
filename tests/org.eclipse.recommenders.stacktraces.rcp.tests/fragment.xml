@@ -15,6 +15,15 @@
             </separator>
          </menu>
          <action
+               class="org.eclipse.recommenders.stacktraces.rcp.actions.NotificationsAction"
+               icon="icons/sample.gif"
+               id="org.eclipse.recommenders.stacktraces.rcp.test.actions.NotificationsAction"
+               label="Test Notifications"
+               menubarPath="sampleMenu/sampleGroup"
+               toolbarPath="sampleGroup"
+               tooltip="Test Notifications">
+         </action>
+         <action
                class="org.eclipse.recommenders.stacktraces.rcp.actions.UiFreezeAction"
                icon="icons/sample2.gif"
                id="org.eclipse.recommenders.stacktraces.rcp.test.actions.SampleAction"
