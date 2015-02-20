@@ -95,6 +95,12 @@ public final class Constants {
     public static final String SOURCE_BEGIN_MESSAGE = "----------------------------------- SOURCE BEGIN -------------------------------------";
     public static final String SOURCE_FILE_REMOVED = "source file contents removed";
 
+    // values for notifications
+    public static final String NOTIFY_CONFIGURATION = "org.eclipse.recommenders.stacktraces.rcp.notifications.configuration";
+    public static final String NOTIFY_REPORT = "org.eclipse.recommenders.stacktraces.rcp.notifications.report";
+    public static final String NOTIFY_UPLOAD = "org.eclipse.recommenders.stacktraces.rcp.notifications.upload";
+    public static final String NOTIFY_MORE_INFO = "org.eclipse.recommenders.stacktraces.rcp.notifications.moreinfo";
+
     public static final String VERSION = "0.6";
 
 }
