@@ -1,0 +1,8 @@
+Code-Review+1: Simon Laffoy <simon.laffoy@codetrails.com>
+Verified+1: Hudson CI
+Code-Review+2: Marcel Bruch <marcel.bruch@codetrails.com>
+Submitted-by: Marcel Bruch <marcel.bruch@codetrails.com>
+Submitted-at: Sat, 21 Feb 2015 23:14:47 -0500
+Reviewed-on: https://git.eclipse.org/r/42062
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
