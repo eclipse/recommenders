@@ -1,4 +1,4 @@
-package org.eclipse.recommenders.internal.rcp.news;
+package org.eclipse.recommenders.internal.news.rcp;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.recommenders.internal.news.rcp.RssParser;
 import org.eclipse.recommenders.utils.Pair;
 import org.junit.Test;
 
