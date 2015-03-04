@@ -42,6 +42,7 @@ import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootAdded;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootRemoved;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectClosed;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectOpened;
+import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectRemoved;
 
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -101,6 +102,9 @@ public class JavaModelEventsService implements IElementChangedListener {
             fireProjectOpenedEvent(javaProject);
         } else if (isProjectClosedEvent(delta)) {
             fireProjectClosedEvent(javaProject);
+        } else if (isProjectRemovedEvent(delta)) {
+            fireProjectClosedEvent(javaProject);
+            fireProjectRemovedEvent(javaProject);
         }
     }
 
@@ -115,13 +119,21 @@ public class JavaModelEventsService implements IElementChangedListener {
     }
 
     private boolean isProjectClosedEvent(final IJavaElementDelta delta) {
-        final boolean removed = (delta.getKind() & IJavaElementDelta.REMOVED) != 0;
         final boolean closed = (delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0;
-        return removed || closed;
+        return closed;
+    }
+
+    private boolean isProjectRemovedEvent(final IJavaElementDelta delta) {
+        final boolean removed = (delta.getKind() & IJavaElementDelta.REMOVED) != 0;
+        return removed;
     }
 
     private void fireProjectClosedEvent(final IJavaProject javaProject) {
         bus.post(new JavaProjectClosed(javaProject));
+    }
+
+    private void fireProjectRemovedEvent(final IJavaProject javaProject) {
+        bus.post(new JavaProjectRemoved(javaProject));
     }
 
     private boolean isCompilationUnitChangedEvent(final IJavaElementDelta delta) {
