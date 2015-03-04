@@ -42,6 +42,7 @@ import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootAdded;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JarPackageFragmentRootRemoved;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectClosed;
 import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectOpened;
+import org.eclipse.recommenders.rcp.JavaModelEvents.JavaProjectRemoved;
 
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -76,12 +77,12 @@ public class JavaModelEventsService implements IElementChangedListener {
             }
         }
 
-        if (isProjectChangedEvent(delta)) {
-            processProjectChangedEvent(delta);
-        } else if (isCompilationUnitChangedEvent(delta)) {
-            processCompilationUnitChangedEvent(delta);
-        } else if (isJarPackageFragementRootChangedEvent(delta)) {
-            processJarPackageFragementRootChangedEvent(delta);
+        if (isProjectDelta(delta)) {
+            processProjectDelta(delta);
+        } else if (isCompilationUnitDelta(delta)) {
+            processCompilationUnitDelta(delta);
+        } else if (isJarPackageFragementRootDelta(delta)) {
+            processJarPackageFragementRootDelta(delta);
         }
     }
 
@@ -89,22 +90,25 @@ public class JavaModelEventsService implements IElementChangedListener {
         return (delta.getFlags() & IJavaElementDelta.F_CHILDREN) != 0;
     }
 
-    private boolean isProjectChangedEvent(final IJavaElementDelta delta) {
+    private boolean isProjectDelta(final IJavaElementDelta delta) {
         final IJavaElement changedElement = delta.getElement();
         final IJavaProject javaProject = delta.getElement().getJavaProject();
         return javaProject != null && changedElement == javaProject;
     }
 
-    private void processProjectChangedEvent(final IJavaElementDelta delta) {
+    private void processProjectDelta(final IJavaElementDelta delta) {
         final IJavaProject javaProject = cast(delta.getElement());
-        if (isProjectOpenedEvent(delta)) {
+        if (isOpenedOrAddedEvent(delta)) {
             fireProjectOpenedEvent(javaProject);
-        } else if (isProjectClosedEvent(delta)) {
+        } else if (isClosedEvent(delta)) {
             fireProjectClosedEvent(javaProject);
+        } else if (isRemovedEvent(delta)) {
+            fireProjectClosedEvent(javaProject);
+            fireProjectRemovedEvent(javaProject);
         }
     }
 
-    private boolean isProjectOpenedEvent(final IJavaElementDelta delta) {
+    private boolean isOpenedOrAddedEvent(final IJavaElementDelta delta) {
         final boolean added = (delta.getKind() & IJavaElementDelta.ADDED) != 0;
         final boolean opened = (delta.getFlags() & IJavaElementDelta.F_OPENED) != 0;
         return added || opened;
@@ -114,21 +118,29 @@ public class JavaModelEventsService implements IElementChangedListener {
         bus.post(new JavaProjectOpened(javaProject));
     }
 
-    private boolean isProjectClosedEvent(final IJavaElementDelta delta) {
-        final boolean removed = (delta.getKind() & IJavaElementDelta.REMOVED) != 0;
+    private boolean isClosedEvent(final IJavaElementDelta delta) {
         final boolean closed = (delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0;
-        return removed || closed;
+        return closed;
+    }
+
+    private boolean isRemovedEvent(final IJavaElementDelta delta) {
+        final boolean removed = (delta.getKind() & IJavaElementDelta.REMOVED) != 0;
+        return removed;
     }
 
     private void fireProjectClosedEvent(final IJavaProject javaProject) {
         bus.post(new JavaProjectClosed(javaProject));
     }
 
-    private boolean isCompilationUnitChangedEvent(final IJavaElementDelta delta) {
+    private void fireProjectRemovedEvent(final IJavaProject javaProject) {
+        bus.post(new JavaProjectRemoved(javaProject));
+    }
+
+    private boolean isCompilationUnitDelta(final IJavaElementDelta delta) {
         return delta.getElement() instanceof ICompilationUnit;
     }
 
-    private void processCompilationUnitChangedEvent(final IJavaElementDelta delta) {
+    private void processCompilationUnitDelta(final IJavaElementDelta delta) {
         final ICompilationUnit cu = cast(delta.getElement());
         switch (delta.getKind()) {
         case IJavaElementDelta.ADDED:
@@ -168,11 +180,11 @@ public class JavaModelEventsService implements IElementChangedListener {
         bus.post(new CompilationUnitRemoved(cu));
     }
 
-    private boolean isJarPackageFragementRootChangedEvent(final IJavaElementDelta delta) {
+    private boolean isJarPackageFragementRootDelta(final IJavaElementDelta delta) {
         return delta.getElement() instanceof JarPackageFragmentRoot;
     }
 
-    private void processJarPackageFragementRootChangedEvent(final IJavaElementDelta delta) {
+    private void processJarPackageFragementRootDelta(final IJavaElementDelta delta) {
         switch (delta.getKind()) {
         case IJavaElementDelta.ADDED:
             fireJarPackageFragementRootAddedEvent(delta);
