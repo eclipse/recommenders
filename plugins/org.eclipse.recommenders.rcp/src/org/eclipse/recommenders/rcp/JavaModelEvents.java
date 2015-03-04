@@ -61,12 +61,12 @@ public class JavaModelEvents {
     }
 
     public static final class JavaProjectClosed {
+
         public final IJavaProject project;
 
         public JavaProjectClosed(final IJavaProject javaProject) {
             this.project = javaProject;
         }
-
     }
 
     public static final class JavaProjectOpened {
@@ -74,6 +74,15 @@ public class JavaModelEvents {
         public final IJavaProject project;
 
         public JavaProjectOpened(final IJavaProject javaProject) {
+            this.project = javaProject;
+        }
+    }
+
+    public static final class JavaProjectRemoved {
+
+        public final IJavaProject project;
+
+        public JavaProjectRemoved(final IJavaProject javaProject) {
             this.project = javaProject;
         }
     }
