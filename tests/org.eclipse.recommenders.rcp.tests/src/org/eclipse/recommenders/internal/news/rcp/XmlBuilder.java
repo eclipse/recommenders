@@ -14,6 +14,8 @@ import static java.text.MessageFormat.format;
 
 import java.util.Date;
 
+import org.eclipse.recommenders.internal.rcp.news.RssParser;
+
 class XmlBuilder {
 
     private final StringBuilder sb;

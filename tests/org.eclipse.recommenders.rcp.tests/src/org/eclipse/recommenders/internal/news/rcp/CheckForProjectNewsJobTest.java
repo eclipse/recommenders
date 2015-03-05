@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.recommenders.internal.rcp.news.CheckForProjectNewsJob;
+import org.eclipse.recommenders.internal.rcp.news.RssParser;
 import org.eclipse.recommenders.utils.Pair;
 import org.junit.Before;
 import org.junit.Test;
