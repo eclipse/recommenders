@@ -50,6 +50,18 @@ public class ContributionLink implements Comparable<ContributionLink> {
         return n.compareTo(other.getPriority());
     }
 
+    public String getText() {
+        return text;
+    }
+
+    public String getCommandId() {
+        return commandId;
+    }
+
+    public Image getIcon() {
+        return icon;
+    }
+
     public int getPriority() {
         return priority;
     }
