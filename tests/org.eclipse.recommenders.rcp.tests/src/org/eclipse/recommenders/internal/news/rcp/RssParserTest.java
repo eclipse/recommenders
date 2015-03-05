@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.recommenders.internal.rcp.news.RssParser;
 import org.eclipse.recommenders.utils.Pair;
 import org.junit.Test;
 
