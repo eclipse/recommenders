@@ -99,7 +99,7 @@ public class ContributionLink implements Comparable<ContributionLink> {
                 handlerService.executeCommand(parameterizedCommand, null);
             }
         } catch (Exception e) {
-            Logs.log(LOG_ERROR_FAILED_TO_EXECUTE_COMMAND, commandId, e);
+            Logs.log(LOG_ERROR_FAILED_TO_EXECUTE_COMMAND, e, commandId);
         }
     }
 }
