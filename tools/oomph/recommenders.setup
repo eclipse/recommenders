@@ -1441,7 +1441,7 @@
       <requirement
           name="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
       <requirement
-          name="org.eclipse.recommenders.stacktraces.rcp.feature.feature.group"/>
+          name="org.eclipse.epp.logging.aeri.feature.feature.group"/>
       <requirement
           name="org.sonatype.tycho.m2e.feature.feature.group"/>
       <requirement
@@ -1475,6 +1475,8 @@
           url="http://eclipse-cs.sourceforge.net/update/"/>
       <repository
           url="http://update.eclemma.org/"/>
+      <repository
+          url="http://download.eclipse.org/technology/epp/logging/milestones/"/>
     </setupTask>
     <setupTask
         xsi:type="maven:MavenImportTask">
@@ -1685,7 +1687,7 @@
       <requirement
           name="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
       <requirement
-          name="org.eclipse.recommenders.stacktraces.rcp.feature.feature.group"/>
+          name="org.eclipse.epp.logging.aeri.feature.feature.group"/>
       <requirement
           name="org.eclipse.recommenders.stats.rcp.feature.feature.group"/>
       <requirement
@@ -1809,7 +1811,7 @@
       <requirement
           name="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
       <requirement
-          name="org.eclipse.recommenders.stacktraces.rcp.feature.feature.group"/>
+          name="org.eclipse.epp.logging.aeri.feature.feature.group"/>
       <requirement
           name="com.codetrails.connect.hippie.rcp.feature.feature.group"/>
       <requirement
@@ -1883,7 +1885,7 @@
       <requirement
           name="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
       <requirement
-          name="org.eclipse.recommenders.stacktraces.rcp.feature.feature.group"/>
+          name="org.eclipse.epp.logging.aeri.feature.feature.group"/>
       <requirement
           name="org.sonatype.tycho.m2e.feature.feature.group"/>
       <requirement
@@ -1999,7 +2001,7 @@
       <requirement
           name="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
       <requirement
-          name="org.eclipse.recommenders.stacktraces.rcp.feature.feature.group"/>
+          name="org.eclipse.epp.logging.aeri.feature.feature.group"/>
       <requirement
           name="org.sonatype.tycho.m2e.feature.feature.group"/>
       <requirement
@@ -2114,7 +2116,7 @@
       <requirement
           name="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
       <requirement
-          name="org.eclipse.recommenders.stacktraces.rcp.feature.feature.group"/>
+          name="org.eclipse.epp.logging.aeri.feature.feature.group"/>
       <requirement
           name="org.sonatype.tycho.m2e.feature.feature.group"/>
       <requirement
@@ -2230,7 +2232,7 @@
       <requirement
           name="org.eclipse.recommenders.snipmatch.rcp.feature.feature.group"/>
       <requirement
-          name="org.eclipse.recommenders.stacktraces.rcp.feature.feature.group"/>
+          name="org.eclipse.epp.logging.aeri.feature.feature.group"/>
       <requirement
           name="org.sonatype.tycho.m2e.feature.feature.group"/>
       <requirement
