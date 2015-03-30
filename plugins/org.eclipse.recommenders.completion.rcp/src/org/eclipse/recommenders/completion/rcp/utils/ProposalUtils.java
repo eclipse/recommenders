@@ -32,9 +32,11 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.recommenders.rcp.utils.CompilerBindings;
 import org.eclipse.recommenders.utils.names.IMethodName;
+import org.eclipse.recommenders.utils.names.VmMethodName;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -45,6 +47,8 @@ public final class ProposalUtils {
     private ProposalUtils() {
         throw new IllegalStateException("Not meant to be instantiated"); //$NON-NLS-1$
     }
+
+    private static final IMethodName OBJECT_CLONE = VmMethodName.get("Ljava/lang/Object.clone()Ljava/lang/Object;");
 
     private static final char[] INIT = "<init>".toCharArray(); //$NON-NLS-1$
 
@@ -79,6 +83,12 @@ public final class ProposalUtils {
      */
     public static Optional<IMethodName> toMethodName(CompletionProposal proposal, LookupEnvironment env) {
         Preconditions.checkArgument(isKindSupported(proposal));
+
+        if (isArrayCloneMethod(proposal)) {
+            char[] signature = proposal.getSignature();
+            char[] receiverSignature = proposal.getReceiverSignature();
+            return Optional.of(OBJECT_CLONE);
+        }
 
         ReferenceBinding declaringType = getDeclaringType(proposal, env).orNull();
         if (declaringType == null) {
@@ -124,6 +134,34 @@ public final class ProposalUtils {
         default:
             return false;
         }
+    }
+
+    private static boolean isArrayCloneMethod(CompletionProposal proposal) {
+        if (proposal.isConstructor()) {
+            return false;
+        }
+
+        char[] declarationSignature = proposal.getDeclarationSignature();
+        if (declarationSignature[0] != '[') {
+            return false;
+        }
+
+        if (!Arrays.equals(TypeConstants.CLONE, proposal.getName())) {
+            return false;
+        }
+
+        char[] signature = proposal.getSignature();
+        if (signature.length != declarationSignature.length + 2 || signature[0] != '(' || signature[1] != ')') {
+            return false;
+        }
+
+        for (int i = 0; i < declarationSignature.length; i++) {
+            if (declarationSignature[i] != signature[i + 2]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static char[] stripTypeParameters(char[] proposalSignature) {
