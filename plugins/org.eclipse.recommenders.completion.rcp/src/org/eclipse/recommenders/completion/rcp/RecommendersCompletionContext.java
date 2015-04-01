@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.codeassist.complete.CompletionOnMemberAccess;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import org.eclipse.jdt.internal.compiler.lookup.IntersectionTypeBinding18;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -257,7 +258,20 @@ public class RecommendersCompletionContext implements IRecommendersCompletionCon
         if (b == null || b instanceof MissingTypeBinding) {
             return absent();
         }
-        return JdtUtils.createUnresolvedType(b.erasure());
+        return JdtUtils.createUnresolvedType(erase(b));
+    }
+
+    /**
+     * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=461562">Bug 461562</a>
+     */
+    private TypeBinding erase(TypeBinding binding) {
+        if (binding.kind() == TypeBinding.INTERSECTION_TYPE18) {
+            IntersectionTypeBinding18 intersectionTypeBinding = (IntersectionTypeBinding18) binding;
+            TypeBinding firstBinding = intersectionTypeBinding.getIntersectingTypes()[0];
+            return erase(firstBinding);
+        } else {
+            return binding.erasure();
+        }
     }
 
     @Override
