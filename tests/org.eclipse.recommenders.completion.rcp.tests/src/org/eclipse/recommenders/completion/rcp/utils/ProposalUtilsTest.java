@@ -33,7 +33,6 @@ import org.junit.runners.Parameterized.Parameters;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-@SuppressWarnings("restriction")
 @RunWith(Parameterized.class)
 public class ProposalUtilsTest {
 
@@ -239,6 +238,7 @@ public class ProposalUtilsTest {
     public void test() throws Exception {
         IRecommendersCompletionContext context = extractProposals(code);
         Collection<CompletionProposal> proposals = context.getProposals().values();
+        @SuppressWarnings("restriction")
         Optional<LookupEnvironment> environment = context.get(CompletionContextKey.LOOKUP_ENVIRONMENT);
         IMethodName actualMethod = ProposalUtils.toMethodName(getOnlyElement(proposals), environment.orNull()).get();
 
@@ -251,6 +251,7 @@ public class ProposalUtilsTest {
         ICompilationUnit cu = struct.getFirst();
         int completionIndex = struct.getSecond().iterator().next();
         JavaContentAssistInvocationContext javaContext = new JavaContentAssistContextMock(cu, completionIndex);
+        @SuppressWarnings("restriction")
         IRecommendersCompletionContext recommendersContext = new RecommendersCompletionContext(javaContext,
                 new CachingAstProvider());
         return recommendersContext;
