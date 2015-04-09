@@ -25,16 +25,18 @@ public class ProposalProcessorManager {
 
     private final Set<ProposalProcessor> processors = Sets.newLinkedHashSet();
     private final IProcessableProposal proposal;
-    private final StyledString initialDisplayString;
-
-    @SuppressWarnings("unused")
-    // intended for debugging purpose
-    private final int initialRelevance;
+    // lazy value. Do not fetch directly!
+    private StyledString _initialDisplayString;
 
     public ProposalProcessorManager(IProcessableProposal proposal) {
         this.proposal = proposal;
-        initialRelevance = proposal.getRelevance();
-        initialDisplayString = deepCopy(proposal.getStyledDisplayString());
+    }
+
+    private StyledString lazyGetInitialStyledString(IProcessableProposal proposal) {
+        if (_initialDisplayString == null) {
+            _initialDisplayString = deepCopy(proposal.getStyledDisplayString());
+        }
+        return _initialDisplayString;
     }
 
     public void addProcessor(ProposalProcessor processor) {
@@ -43,7 +45,7 @@ public class ProposalProcessorManager {
 
     public boolean prefixChanged(String prefix) {
         boolean keepProposal = false;
-        StyledString tmpStyledString = deepCopy(initialDisplayString);
+        StyledString tmpStyledString = deepCopy(lazyGetInitialStyledString(proposal));
         int tmpRelevance = 0;
 
         for (ProposalProcessor p : processors) {
