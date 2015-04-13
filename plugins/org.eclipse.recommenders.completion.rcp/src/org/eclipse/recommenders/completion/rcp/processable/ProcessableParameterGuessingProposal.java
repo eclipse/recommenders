@@ -12,6 +12,7 @@ package org.eclipse.recommenders.completion.rcp.processable;
 
 import static com.google.common.base.Optional.fromNullable;
 import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.IS_VISIBLE;
+import static org.eclipse.recommenders.completion.rcp.processable.Proposals.copyStyledString;
 import static org.eclipse.recommenders.utils.Checks.*;
 import static org.eclipse.recommenders.utils.Reflections.getDeclaredMethod;
 
@@ -54,6 +55,7 @@ import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.recommenders.internal.completion.rcp.Messages;
 import org.eclipse.recommenders.utils.Reflections;
 import org.eclipse.swt.SWT;
@@ -482,6 +484,26 @@ public class ProcessableParameterGuessingProposal extends JavaMethodCompletionPr
     }
 
     // ===========
+
+    private String lastPrefixStyled;
+    private StyledString initialDisplayString;
+
+    @Override
+    public StyledString getStyledDisplayString() {
+        if (initialDisplayString == null) {
+            StyledString copy = copyStyledString(initialDisplayString);
+            initialDisplayString = super.getStyledDisplayString();
+            StyledString decorated = mgr.decorateStyledDisplayString(copy);
+            setStyledDisplayString(decorated);
+        }
+        if (lastPrefixStyled != lastPrefix) {
+            lastPrefixStyled = lastPrefix;
+            StyledString copy = copyStyledString(initialDisplayString);
+            StyledString decorated = mgr.decorateStyledDisplayString(copy);
+            setStyledDisplayString(decorated);
+        }
+        return super.getStyledDisplayString();
+    }
 
     @Override
     public boolean isPrefix(final String prefix, final String completion) {
