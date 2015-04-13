@@ -12,6 +12,7 @@ package org.eclipse.recommenders.completion.rcp.processable;
 
 import static com.google.common.base.Optional.fromNullable;
 import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.IS_VISIBLE;
+import static org.eclipse.recommenders.completion.rcp.processable.Proposals.copyStyledString;
 import static org.eclipse.recommenders.internal.completion.rcp.LogMessages.LOG_ERROR_EXCEPTION_DURING_CODE_COMPLETION;
 import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 import static org.eclipse.recommenders.utils.Logs.log;
@@ -20,7 +21,6 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.eclipse.jdt.core.CompletionProposal;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.recommenders.utils.Reflections;
+import org.eclipse.swt.graphics.Image;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -43,9 +44,12 @@ public class ProcessableAnonymousTypeCompletionProposal extends AnonymousTypeCom
     private ProposalProcessorManager mgr;
     private CompletionProposal coreProposal;
     private String lastPrefix;
+    private String lastPrefixStyled;
+    private StyledString initialDisplayString;
 
     private static final Field F_SUPER_TYPE = Reflections
             .getDeclaredField(AnonymousTypeCompletionProposal.class, "fSuperType").orNull();
+    private AnonymousTypeCompletionProposal uiProposal;
 
     public ProcessableAnonymousTypeCompletionProposal(CompletionProposal coreProposal,
             AnonymousTypeCompletionProposal uiProposal, JavaContentAssistInvocationContext context)
@@ -55,6 +59,7 @@ public class ProcessableAnonymousTypeCompletionProposal extends AnonymousTypeCom
                 uiProposal.getStyledDisplayString(), String.valueOf(coreProposal.getDeclarationSignature()),
                 findSupertype(uiProposal, coreProposal, context), uiProposal.getRelevance());
         this.coreProposal = coreProposal;
+        this.uiProposal = uiProposal;
     }
 
     private static IType findSupertype(AnonymousTypeCompletionProposal uiProposal, CompletionProposal coreProposal,
@@ -72,12 +77,8 @@ public class ProcessableAnonymousTypeCompletionProposal extends AnonymousTypeCom
         return (IType) context.getProject().findElement(String.valueOf(coreProposal.getDeclarationKey()), null);
     }
 
-    protected ProcessableAnonymousTypeCompletionProposal(final IJavaProject jproject, final ICompilationUnit cu,
-            final JavaContentAssistInvocationContext invocationContext, final int start, final int length,
-            final String constructorCompletion, final StyledString displayName, final String declarationSignature,
-            final IType superType, final int relevance) {
-        super(jproject, cu, invocationContext, start, length, constructorCompletion, displayName, declarationSignature,
-                superType, relevance);
+    protected Image getImageForType(IType type) {
+        return uiProposal.getImage();
     }
 
     @Override
@@ -89,6 +90,23 @@ public class ProcessableAnonymousTypeCompletionProposal extends AnonymousTypeCom
             setProposalInfo(info);
         }
         return info;
+    }
+
+    @Override
+    public StyledString getStyledDisplayString() {
+        if (initialDisplayString == null) {
+            StyledString copy = copyStyledString(initialDisplayString);
+            initialDisplayString = super.getStyledDisplayString();
+            StyledString decorated = mgr.decorateStyledDisplayString(copy);
+            setStyledDisplayString(decorated);
+        }
+        if (lastPrefixStyled != lastPrefix) {
+            lastPrefixStyled = lastPrefix;
+            StyledString copy = copyStyledString(initialDisplayString);
+            StyledString decorated = mgr.decorateStyledDisplayString(copy);
+            setStyledDisplayString(decorated);
+        }
+        return super.getStyledDisplayString();
     }
 
     @Override
