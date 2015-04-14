@@ -59,6 +59,7 @@ public class ProcessableAnonymousTypeCompletionProposal extends AnonymousTypeCom
                 findSupertype(uiProposal, coreProposal, context), uiProposal.getRelevance());
         this.coreProposal = coreProposal;
         this.uiProposal = uiProposal;
+        setImage(uiProposal.getImage());
     }
 
     private static IType findSupertype(AnonymousTypeCompletionProposal uiProposal, CompletionProposal coreProposal,
@@ -77,7 +78,7 @@ public class ProcessableAnonymousTypeCompletionProposal extends AnonymousTypeCom
     }
 
     protected Image getImageForType(IType type) {
-        return uiProposal.getImage();
+        return null;
     }
 
     @Override
