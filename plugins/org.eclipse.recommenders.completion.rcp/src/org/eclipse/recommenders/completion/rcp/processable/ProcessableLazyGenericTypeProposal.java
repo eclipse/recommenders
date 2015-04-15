@@ -56,6 +56,7 @@ import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.recommenders.completion.rcp.utils.Asts;
 import org.eclipse.recommenders.internal.completion.rcp.Messages;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -659,7 +660,7 @@ public class ProcessableLazyGenericTypeProposal extends LazyJavaTypeCompletionPr
             keys[i] = String.valueOf(chKeys[0]);
         }
 
-        final ASTParser parser = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+        final ASTParser parser = ASTParser.newParser(Asts.getSharedAstLevel());
         parser.setProject(fCompilationUnit.getJavaProject());
         parser.setResolveBindings(true);
         parser.setStatementsRecovery(true);
