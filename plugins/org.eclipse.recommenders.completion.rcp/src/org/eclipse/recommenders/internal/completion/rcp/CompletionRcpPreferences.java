@@ -11,7 +11,10 @@
 package org.eclipse.recommenders.internal.completion.rcp;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,7 +33,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -56,15 +59,24 @@ public class CompletionRcpPreferences extends AbstractPreferenceInitializer {
     }
 
     private static Set<SessionProcessorDescriptor> readExtensionPoint() {
-        IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
-                Constants.EXT_POINT_SESSION_PROCESSORS);
-
-        Set<SessionProcessorDescriptor> descriptors = Sets.newHashSet();
+        IConfigurationElement[] elements = Platform.getExtensionRegistry()
+                .getConfigurationElementsFor(Constants.EXT_POINT_SESSION_PROCESSORS);
+        List<SessionProcessorDescriptor> descriptors = Lists.newArrayListWithCapacity(elements.length);
         for (final IConfigurationElement element : elements) {
             SessionProcessorDescriptor descriptor = new SessionProcessorDescriptor(element);
             descriptors.add(descriptor);
         }
-        return descriptors;
+
+        // make sure that the session processor with the lowest priority is the first in the list
+        Collections.sort(descriptors, new Comparator<SessionProcessorDescriptor>() {
+
+            @Override
+            public int compare(SessionProcessorDescriptor o1, SessionProcessorDescriptor o2) {
+                return o1.getPriority() - o2.getPriority();
+            }
+        });
+        // TODO: we use a set but should use ordered lists to make clear that this result is ordered by priority
+        return Sets.newLinkedHashSet(descriptors);
     }
 
     @Override
@@ -86,15 +98,17 @@ public class CompletionRcpPreferences extends AbstractPreferenceInitializer {
         return availableProcessors;
     }
 
-    public Set<SessionProcessorDescriptor> getEnabledSessionProcessors() {
-        return Maps.filterValues(fromString(availableProcessors, enabledSessionProcessorString),
-                new Predicate<Boolean>() {
-
-            @Override
-            public boolean apply(Boolean input) {
-                return input;
+    public List<SessionProcessorDescriptor> getEnabledSessionProcessors() {
+        // Keep the priority / processor order!
+        List<SessionProcessorDescriptor> res = Lists.newArrayList();
+        Map<SessionProcessorDescriptor, Boolean> enabled = fromString(availableProcessors,
+                enabledSessionProcessorString);
+        for (SessionProcessorDescriptor processor : availableProcessors) {
+            if (enabled.get(processor)) {
+                res.add(processor);
             }
-        }).keySet();
+        }
+        return res;
     }
 
     public SessionProcessorDescriptor getSessionProcessorDescriptor(String id) {
@@ -103,7 +117,8 @@ public class CompletionRcpPreferences extends AbstractPreferenceInitializer {
 
     public void setSessionProcessorEnabled(Collection<SessionProcessorDescriptor> enabledDescriptors,
             Collection<SessionProcessorDescriptor> disabledDescriptors) {
-        Map<SessionProcessorDescriptor, Boolean> result = fromString(availableProcessors, enabledSessionProcessorString);
+        Map<SessionProcessorDescriptor, Boolean> result = fromString(availableProcessors,
+                enabledSessionProcessorString);
 
         for (SessionProcessorDescriptor enabledDescriptor : enabledDescriptors) {
             result.put(enabledDescriptor, true);
@@ -140,8 +155,8 @@ public class CompletionRcpPreferences extends AbstractPreferenceInitializer {
         return sb.toString();
     }
 
-    private static Map<SessionProcessorDescriptor, Boolean> fromString(
-            Iterable<SessionProcessorDescriptor> descriptors, String string) {
+    private static Map<SessionProcessorDescriptor, Boolean> fromString(Iterable<SessionProcessorDescriptor> descriptors,
+            String string) {
         Map<SessionProcessorDescriptor, Boolean> result = Maps.newHashMap();
         for (SessionProcessorDescriptor descriptor : descriptors) {
             result.put(descriptor, true);
