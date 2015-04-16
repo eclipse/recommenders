@@ -2,13 +2,15 @@
 <?eclipse version="3.4"?>
 <plugin>
 	<extension point="org.eclipse.recommenders.completion.rcp.sessionprocessors">
-		<processor id="org.eclipse.recommenders.subwords.rcp.sessionprocessors.subwords"
-			class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.subwords.rcp.SubwordsSessionProcessor"
-			preferencePage="org.eclipse.recommenders.subwords.rcp.preferencePages.subwords"
-			icon="icons/obj16/Aa.png"
-			name="%sessionprocessors.subwords.name"
-			description="%sessionprocessors.subwords.description"
-			enabledByDefault="false">
+		<processor
+        class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.subwords.rcp.SubwordsSessionProcessor"
+        description="%sessionprocessors.subwords.description"
+        enabledByDefault="true"
+        icon="icons/obj16/Aa.png"
+        id="org.eclipse.recommenders.subwords.rcp.sessionprocessors.subwords"
+        name="%sessionprocessors.subwords.name"
+        preferencePage="org.eclipse.recommenders.subwords.rcp.preferencePages.subwords"
+        priority="-100">
 		</processor>
 	</extension>
 	<extension point="org.eclipse.recommenders.completion.rcp.tips">
