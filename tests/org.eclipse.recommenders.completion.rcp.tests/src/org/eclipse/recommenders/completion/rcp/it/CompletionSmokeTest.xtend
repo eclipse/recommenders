@@ -48,6 +48,7 @@ import static org.mockito.Mockito.*
 import org.eclipse.recommenders.internal.subwords.rcp.SubwordsRcpPreferences
 import com.google.common.collect.ImmutableSet
 import org.eclipse.recommenders.testing.rcp.jdt.JavaContentAssistContextMock
+import com.google.common.collect.ImmutableList
 
 @RunWith(Parameterized)
 class CompletionSmokeTest {
@@ -401,7 +402,7 @@ class CompletionSmokeTest {
         val sessionProcessor = new SessionProcessorDescriptor("", "", "", null, 0, true, "", sut)
 
         val preferences = mock(CompletionRcpPreferences)
-        when(preferences.getEnabledSessionProcessors).thenReturn(ImmutableSet.of(sessionProcessor))
+        when(preferences.getEnabledSessionProcessors).thenReturn(ImmutableList.of(sessionProcessor))
 
         val struct = fixture.createFileAndParseWithMarkers(scenario)
         val cu = struct.first;

@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -55,7 +56,7 @@ public class CompletionRcpPreferencesTest {
 
     @Test
     public void testEnabledProcessors() {
-        Set<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
+        List<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
         assertThat(enabledSessionProcessors, hasItems(FIRST_DESCRIPTOR));
         assertThat(enabledSessionProcessors.size(), is(1));
     }
@@ -63,7 +64,7 @@ public class CompletionRcpPreferencesTest {
     @Test
     public void testEnabledProcessorsNotInPreferencesString() {
         sut.setEnabledSessionProcessorString("second");
-        Set<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
+        List<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
         assertThat(enabledSessionProcessors, hasItems(FIRST_DESCRIPTOR, SECOND_DESCRIPTOR));
         assertThat(enabledSessionProcessors.size(), is(2));
     }
@@ -84,7 +85,7 @@ public class CompletionRcpPreferencesTest {
 
         sut.setEnabledSessionProcessorString(store.getString(Constants.PREF_SESSIONPROCESSORS));
 
-        Set<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
+        List<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
 
         assertThat(enabledSessionProcessors, hasItems(FIRST_DESCRIPTOR, SECOND_DESCRIPTOR));
         assertThat(enabledSessionProcessors.size(), is(2));
@@ -99,7 +100,7 @@ public class CompletionRcpPreferencesTest {
 
         sut.setEnabledSessionProcessorString(store.getString(Constants.PREF_SESSIONPROCESSORS));
 
-        Set<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
+        List<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
 
         assertThat(enabledSessionProcessors.isEmpty(), is(true));
         assertThat(sut.isEnabled(FIRST_DESCRIPTOR), is(false));
@@ -112,7 +113,7 @@ public class CompletionRcpPreferencesTest {
 
         sut.setEnabledSessionProcessorString(store.getString(Constants.PREF_SESSIONPROCESSORS));
 
-        Set<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
+        List<SessionProcessorDescriptor> enabledSessionProcessors = sut.getEnabledSessionProcessors();
 
         assertThat(enabledSessionProcessors, hasItems(SECOND_DESCRIPTOR));
         assertThat(enabledSessionProcessors.size(), is(1));
