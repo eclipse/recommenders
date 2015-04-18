@@ -11,7 +11,11 @@
 package org.eclipse.recommenders.jdt;
 
 import static com.google.common.base.Optional.*;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.repeat;
+import static org.eclipse.jdt.core.IJavaElement.*;
 import static org.eclipse.jdt.core.IPackageFragmentRoot.*;
+import static org.eclipse.jdt.core.compiler.CharOperation.charToString;
 import static org.eclipse.recommenders.internal.jdt.LogMessages.*;
 import static org.eclipse.recommenders.utils.Logs.log;
 
@@ -23,13 +27,21 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.recommenders.internal.jdt.LogMessages;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.Nullable;
+import org.eclipse.recommenders.utils.names.ITypeName;
+import org.eclipse.recommenders.utils.names.VmTypeName;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -248,5 +260,89 @@ public class JavaElementsFinder {
             log(ERROR_CANNOT_FETCH_SOURCE_ATTACHMENT_PATH, e, fragmentRoot);
             return false;
         }
+    }
+
+    /**
+     * 
+     * @param slashBasedTypeName
+     *            e.g., QList;
+     * @param enclosing
+     * @return
+     */
+    public static Optional<ITypeName> resolveType(char[] slashBasedTypeName, @Nullable IJavaElement enclosing) {
+        slashBasedTypeName = CharOperation.replaceOnCopy(slashBasedTypeName, '.', '/');
+        VmTypeName res = null;
+        try {
+            int dimensions = Signature.getArrayCount(slashBasedTypeName);
+            switch (slashBasedTypeName[dimensions]) {
+            case Signature.C_BOOLEAN:
+            case Signature.C_BYTE:
+            case Signature.C_CHAR:
+            case Signature.C_DOUBLE:
+            case Signature.C_FLOAT:
+            case Signature.C_INT:
+            case Signature.C_LONG:
+            case Signature.C_SHORT:
+            case Signature.C_VOID:
+            case Signature.C_RESOLVED:
+                res = VmTypeName.get(new String(slashBasedTypeName));
+            case Signature.C_UNRESOLVED:
+                if (enclosing == null) {
+                    break;
+                }
+                String unresolved = new String(slashBasedTypeName, dimensions + 1, slashBasedTypeName.length - 2);
+                IType ancestor = (IType) enclosing.getAncestor(IJavaElement.TYPE);
+                if (ancestor == null) {
+                    break;
+                }
+                final String[][] resolvedNames = ancestor.resolveType(unresolved);
+                if (isEmpty(resolvedNames)) {
+                    break;
+                }
+                String array = repeat('[', dimensions);
+                final String pkg = resolvedNames[0][0].replace('.', '/');
+                final String name = resolvedNames[0][1].replace('.', '$');
+                res = VmTypeName.get(array + 'L' + pkg + '/' + name);
+                break;
+            case Signature.C_TYPE_VARIABLE:
+                String varName = new String(slashBasedTypeName, dimensions + 1, slashBasedTypeName.length - 2);
+                for (IJavaElement cur = enclosing; cur instanceof IType
+                        || cur instanceof IMethod; cur = cur.getParent()) {
+                    switch (cur.getElementType()) {
+                    case TYPE: {
+                        IType type = (IType) cur;
+                        ITypeParameter param = type.getTypeParameter(varName);
+                        if (param.exists()) {
+                            String[] signatures = param.getBoundsSignatures();
+                            if (isEmpty(signatures)) {
+                                res = VmTypeName.OBJECT;
+                                break;
+                            }
+                            return resolveType(signatures[0].toCharArray(), type);
+                        }
+                    }
+                    case METHOD: {
+                        IMethod method = (IMethod) cur;
+                        ITypeParameter param = method.getTypeParameter(varName);
+                        if (param.exists()) {
+                            String[] signatures = param.getBoundsSignatures();
+                            if (isEmpty(signatures)) {
+                                res = VmTypeName.OBJECT;
+                                break;
+                            }
+                            return resolveType(signatures[0].toCharArray(), method);
+                        }
+                    }
+                    }
+                }
+
+                break;
+            default:
+                break;
+            }
+        } catch (Exception e) {
+            Logs.log(LogMessages.FAILED_TO_CREATE_TYPENAME, e);
+        }
+        return Optional.<ITypeName>fromNullable(res);
     }
 }
