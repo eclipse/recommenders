@@ -28,6 +28,7 @@ import java.util.SortedSet;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
@@ -271,14 +272,18 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                 if (ArrayUtils.isEmpty(bestSequence)) {
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
-                } else if (startsWithIgnoreCase(matchingArea, prefix)) {
+                } else if (StringUtils.startsWith(matchingArea, prefix)) {
                     proposal.setTag(SUBWORDS_SCORE, null);
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
+                } else if (startsWithIgnoreCase(matchingArea, prefix)) {
+                    proposal.setTag(SUBWORDS_SCORE, null);
+                    proposal.setTag(IS_PREFIX_MATCH, true);
+                    return -200;
                 } else if (CharOperation.camelCaseMatch(prefix.toCharArray(), matchingArea.toCharArray())) {
                     proposal.setTag(IS_PREFIX_MATCH, false);
                     proposal.setTag(IS_CAMEL_CASE_MATCH, true);
-                    return 0;
+                    return -100;
                 } else {
                     int score = LCSS.scoreSubsequence(bestSequence);
                     proposal.setTag(IS_PREFIX_MATCH, false);
