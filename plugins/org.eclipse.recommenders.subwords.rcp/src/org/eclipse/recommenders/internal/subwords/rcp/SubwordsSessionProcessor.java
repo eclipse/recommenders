@@ -20,7 +20,6 @@ import static org.eclipse.recommenders.internal.subwords.rcp.LogMessages.*;
 import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -29,6 +28,7 @@ import java.util.SortedSet;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
@@ -68,6 +68,8 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
     // Negative value ensures subsequence matches have a lower relevance than standard JDT or template proposals
     private static final int SUBWORDS_RANGE_START = -10000;
+    private static final int CAMEL_CASE_RANGE_START = -6000;
+    private static final int IGNORE_CASE_RANGE_START = -3000;
 
     private static final int[] EMPTY_SEQUENCE = new int[0];
 
@@ -288,14 +290,18 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                 if (ArrayUtils.isEmpty(bestSequence)) {
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
-                } else if (startsWithIgnoreCase(matchingArea, prefix)) {
+                } else if (StringUtils.startsWith(matchingArea, prefix)) {
                     proposal.setTag(SUBWORDS_SCORE, null);
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
+                } else if (startsWithIgnoreCase(matchingArea, prefix)) {
+                    proposal.setTag(SUBWORDS_SCORE, null);
+                    proposal.setTag(IS_PREFIX_MATCH, true);
+                    return IGNORE_CASE_RANGE_START;
                 } else if (CharOperation.camelCaseMatch(prefix.toCharArray(), matchingArea.toCharArray())) {
                     proposal.setTag(IS_PREFIX_MATCH, false);
                     proposal.setTag(IS_CAMEL_CASE_MATCH, true);
-                    return 0;
+                    return CAMEL_CASE_RANGE_START;
                 } else {
                     int score = LCSS.scoreSubsequence(bestSequence);
                     proposal.setTag(IS_PREFIX_MATCH, false);
