@@ -215,6 +215,8 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                 // result: ClassSimpleName fully.qualified.ClassSimpleName
                 char[] signature = coreProposal.getSignature();
                 char[] simpleName = Signature.getSignatureSimpleName(signature);
+                int indexOf = CharOperation.indexOf('.', simpleName);
+                simpleName = CharOperation.subarray(simpleName, indexOf + 1, simpleName.length);
                 completionIdentifier = new StringBuilder().append(simpleName).append(' ').append(signature).toString();
                 break;
             case CompletionProposal.PACKAGE_REF:
@@ -273,8 +275,10 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
             @Override
             public boolean isPrefix(String prefix) {
-                this.prefix = prefix;
-                bestSequence = LCSS.bestSubsequence(matchingArea, prefix);
+                if (this.prefix != prefix) {
+                    this.prefix = prefix;
+                    bestSequence = LCSS.bestSubsequence(matchingArea, prefix);
+                }
                 return prefix.isEmpty() || bestSequence.length > 0;
             }
 
