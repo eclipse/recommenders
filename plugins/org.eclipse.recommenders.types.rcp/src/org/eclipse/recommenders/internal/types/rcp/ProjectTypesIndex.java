@@ -230,7 +230,7 @@ public class ProjectTypesIndex extends AbstractIdleService {
         try {
             return subtypes(Names.vm2srcQualifiedType(expected), prefix);
         } catch (Exception e) {
-            // temporary workaround for 
+            // temporary workaround for
             // https://bugs.eclipse.org/bugs/show_bug.cgi?id=464925
             log(LogMessages.ERROR_ACCESSING_SEARCHINDEX_FAILED, e);
             return ImmutableSet.of();
@@ -242,6 +242,12 @@ public class ProjectTypesIndex extends AbstractIdleService {
         if (!isRunning() || isBlank(type)) {
             return b.build();
         }
+
+        if (isRebuildAfterNextAccess()) {
+            setRebuildAfterNextAccess(false);
+            rebuild();
+        }
+
         IndexSearcher searcher = getSearcher();
         BooleanQuery query = new BooleanQuery();
         query.add(new TermQuery(new Term(F_INSTANCEOF, type)), Occur.MUST);
@@ -298,6 +304,8 @@ public class ProjectTypesIndex extends AbstractIdleService {
     }
 
     private JobFuture active = null;
+
+    private boolean rebuildAfterNextAccess;
 
     public ListenableFuture<IStatus> rebuild() {
         if (!(active == null || active.isDone() || active.isCancelled())) {
@@ -570,5 +578,13 @@ public class ProjectTypesIndex extends AbstractIdleService {
             return false;
         }
 
+    }
+
+    public void setRebuildAfterNextAccess(boolean value) {
+        rebuildAfterNextAccess = value;
+    }
+
+    public boolean isRebuildAfterNextAccess() {
+        return rebuildAfterNextAccess;
     }
 }
