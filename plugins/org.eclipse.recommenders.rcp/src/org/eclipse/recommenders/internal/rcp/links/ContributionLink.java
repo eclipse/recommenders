@@ -45,9 +45,8 @@ public class ContributionLink implements Comparable<ContributionLink> {
     }
 
     @Override
-    public int compareTo(ContributionLink other) {
-        Integer n = new Integer(priority);
-        return n.compareTo(other.getPriority());
+    public int compareTo(ContributionLink that) {
+        return Integer.compare(this.getPriority(), that.getPriority());
     }
 
     public String getText() {
@@ -84,8 +83,8 @@ public class ContributionLink implements Comparable<ContributionLink> {
     }
 
     private void executeCommand(String commandId, String value) {
-        ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
-        IHandlerService handlerService = (IHandlerService) PlatformUI.getWorkbench().getService(IHandlerService.class);
+        ICommandService commandService = PlatformUI.getWorkbench().getService(ICommandService.class);
+        IHandlerService handlerService = PlatformUI.getWorkbench().getService(IHandlerService.class);
         Command command = commandService.getCommand(commandId);
 
         try {
