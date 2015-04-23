@@ -2,7 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.news.rcp;singleton:=true
 Bundle-Version: 2.1.14.qualifier
+Bundle-Activator: org.eclipse.recommenders.news.rcp.NewsFeedPlugin
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.recommenders.utils;bundle-version="2.0.0"
+Export-Package: org.eclipse.recommenders.internal.news.rcp,
+ org.eclipse.recommenders.news.rcp
+Import-Package: com.google.common.base;version="[15.0.0,16.0.0)",
+ com.google.common.collect;version="[15.0.0,16.0.0)",
+ org.apache.commons.lang3;version="[3.0.0,4.0.0)"
