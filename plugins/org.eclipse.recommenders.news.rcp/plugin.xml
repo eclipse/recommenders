@@ -8,7 +8,7 @@
             category="org.eclipse.recommenders.rcp.preferencePages.root"
             class="org.eclipse.recommenders.internal.news.rcp.NewsFeedPreferencePage"
             id="org.eclipse.recommenders.news.rcp.preferencePage"
-            name="%preferencePage.feed.name">
+            name="%preferencePage.newsFeed.name">
       </page>
    </extension>
    <extension
@@ -20,9 +20,9 @@
    <extension
          point="org.eclipse.recommenders.news.rcp.feed">
       <feed
-            id="org.recommenders.news.rcp.feed1"
-            name="Eclipse Foundation RSS"
-            url="http://feeds.feedburner.com/eclipse/fnews&quot;">
+            id="org.eclipse.recommenders.news.rcp.foundation"
+            name="%feed.foundation.name"
+            url="http://feeds.feedburner.com/eclipse/fnews">
       </feed>
    </extension>
 </plugin>
