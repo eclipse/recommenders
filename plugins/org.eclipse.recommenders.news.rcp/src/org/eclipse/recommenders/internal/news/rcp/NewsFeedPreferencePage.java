@@ -140,7 +140,7 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
                 @Override
                 public String getText(Object element) {
                     FeedDescriptor descriptor = cast(element);
-                    return descriptor.getName();
+                    return descriptor.getUrl();
                 }
 
                 @Override
