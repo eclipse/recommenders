@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension point="org.eclipse.ui.views">
+		<view id="org.eclipse.recommenders.models.rcp.views.projectCoordinates"
+			category="org.eclipse.recommenders.rcp.views.root"
+			class="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.models.rcp.ProjectCoordinatesView"
+			icon="icons/view16/depinsp.gif"
+			name="%views.projectCoordinates.name">
+		</view>
+	</extension>
+</plugin>
