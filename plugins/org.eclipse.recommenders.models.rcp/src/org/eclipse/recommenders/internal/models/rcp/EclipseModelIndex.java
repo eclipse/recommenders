@@ -11,9 +11,9 @@
  */
 package org.eclipse.recommenders.internal.models.rcp;
 
-import static com.google.common.base.Optional.*;
 import static org.eclipse.recommenders.internal.models.rcp.ModelsRcpModule.INDEX_BASEDIR;
 import static org.eclipse.recommenders.models.ModelCoordinate.HINT_REPOSITORY_URL;
+import static org.eclipse.recommenders.models.Result.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +34,7 @@ import org.eclipse.recommenders.models.IModelIndex;
 import org.eclipse.recommenders.models.IModelRepository;
 import org.eclipse.recommenders.models.ModelCoordinate;
 import org.eclipse.recommenders.models.ModelIndex;
+import org.eclipse.recommenders.models.Result;
 import org.eclipse.recommenders.models.ProjectCoordinate;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ModelArchiveDownloadedEvent;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ModelIndexOpenedEvent;
@@ -48,7 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
@@ -80,7 +80,7 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
      */
     private volatile ImmutableMap<String, Pair<File, IModelIndex>> openDelegates;
 
-    private final Cache<Pair<ProjectCoordinate, String>, Optional<ModelCoordinate>> cache = CacheBuilder.newBuilder()
+    private final Cache<Pair<ProjectCoordinate, String>, Result<ModelCoordinate>> cache = CacheBuilder.newBuilder()
             .maximumSize(CACHE_SIZE).concurrencyLevel(1).build();
 
     @Inject
@@ -180,31 +180,22 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
      * This implementation caches the previous results
      */
     @Override
-    public Optional<ModelCoordinate> suggest(final ProjectCoordinate pc, final String modelType) {
+    public Result<ModelCoordinate> suggest(final ProjectCoordinate pc, final String modelType) {
         Pair<ProjectCoordinate, String> key = Pair.newPair(pc, modelType);
-        try {
-            return cache.get(key, new Callable<Optional<ModelCoordinate>>() {
-
-                @Override
-                public Optional<ModelCoordinate> call() {
-                    for (String remote : prefs.remotes) {
-                        Pair<File, IModelIndex> pair = openDelegates.get(remote);
-                        if (pair == null) {
-                            continue; // Index not (yet) available; try next remote repository
-                        }
-                        IModelIndex index = pair.getSecond();
-                        Optional<ModelCoordinate> suggest = index.suggest(pc, modelType);
-                        if (suggest.isPresent()) {
-                            return of(createCopyWithRepositoryUrlHint(suggest.get(), remote));
-                        }
-                    }
-                    return absent();
-                }
-            });
-        } catch (ExecutionException e) {
-            LOG.error("Exception occured while accessing model coordinates cache", e); //$NON-NLS-1$
-            return absent();
+        // Is the lookup result in cache?
+        Result<ModelCoordinate> res = cache.getIfPresent(key);
+        // if not...
+        if (res == null) {
+            // if not...
+            res = new ResolveModelCoordinateJob(modelType, pc).call();
+            if (res.isError()) {
+                // do not cache the result:
+                return res;
+            }
+            // cache the result:
+            cache.put(key, res);
         }
+        return res;
     }
 
     @Override
@@ -246,10 +237,10 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     @Override
-    public Optional<ProjectCoordinate> suggestProjectCoordinateByArtifactId(String artifactId) {
+    public Result<ProjectCoordinate> suggestProjectCoordinateByArtifactId(String artifactId) {
         for (Pair<File, IModelIndex> delegate : openDelegates.values()) {
             IModelIndex index = delegate.getSecond();
-            Optional<ProjectCoordinate> suggest = index.suggestProjectCoordinateByArtifactId(artifactId);
+            Result<ProjectCoordinate> suggest = index.suggestProjectCoordinateByArtifactId(artifactId);
             if (suggest.isPresent()) {
                 return suggest;
             }
@@ -259,15 +250,14 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     }
 
     @Override
-    public Optional<ProjectCoordinate> suggestProjectCoordinateByFingerprint(String fingerprint) {
+    public Result<ProjectCoordinate> suggestProjectCoordinateByFingerprint(String fingerprint) {
         for (Pair<File, IModelIndex> delegate : openDelegates.values()) {
             IModelIndex index = delegate.getSecond();
-            Optional<ProjectCoordinate> suggest = index.suggestProjectCoordinateByFingerprint(fingerprint);
+            Result<ProjectCoordinate> suggest = index.suggestProjectCoordinateByFingerprint(fingerprint);
             if (suggest.isPresent()) {
                 return suggest;
             }
         }
-
         return absent();
     }
 
@@ -320,5 +310,31 @@ public class EclipseModelIndex implements IModelIndex, IRcpService {
     @Override
     public void updateIndex(File index) throws IOException {
         throw new UnsupportedOperationException();
+    }
+
+    private final class ResolveModelCoordinateJob implements Callable<Result<ModelCoordinate>> {
+        private final String modelType;
+        private final ProjectCoordinate pc;
+
+        private ResolveModelCoordinateJob(String modelType, ProjectCoordinate pc) {
+            this.modelType = modelType;
+            this.pc = pc;
+        }
+
+        @Override
+        public Result<ModelCoordinate> call() {
+            for (String remote : prefs.remotes) {
+                Pair<File, IModelIndex> pair = openDelegates.get(remote);
+                if (pair == null) {
+                    continue; // Index not (yet) available; try next remote repository
+                }
+                IModelIndex index = pair.getSecond();
+                Result<ModelCoordinate> suggest = index.suggest(pc, modelType);
+                if (suggest.isPresent()) {
+                    return of(createCopyWithRepositoryUrlHint(suggest.get(), remote));
+                }
+            }
+            return absent();
+        }
     }
 }

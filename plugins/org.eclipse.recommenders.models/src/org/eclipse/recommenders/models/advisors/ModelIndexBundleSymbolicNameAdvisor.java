@@ -51,7 +51,7 @@ public class ModelIndexBundleSymbolicNameAdvisor extends AbstractProjectCoordina
             return absent();
         }
         String symbolicName = osgiPc.getArtifactId();
-        ProjectCoordinate indexPc = indexer.suggestProjectCoordinateByArtifactId(symbolicName).orNull();
+        ProjectCoordinate indexPc = indexer.suggestProjectCoordinateByArtifactId(symbolicName).or(null);
         if (indexPc == null) {
             return absent();
         }

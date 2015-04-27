@@ -10,12 +10,12 @@
  */
 package org.eclipse.recommenders.models;
 
-import static com.google.common.base.Optional.absent;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.find;
 import static java.lang.Math.min;
 import static java.lang.String.format;
 import static org.eclipse.recommenders.models.Coordinates.tryNewProjectCoordinate;
+import static org.eclipse.recommenders.models.Result.*;
 import static org.eclipse.recommenders.utils.Constants.*;
 import static org.eclipse.recommenders.utils.IOUtils.closeQuietly;
 import static org.eclipse.recommenders.utils.Versions.canonicalizeVersion;
@@ -63,13 +63,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.AbstractIdleService;
 
 /**
  * The RecommendersModelIndex index is the default implementation for of an {@link IModelArchiveCoordinateAdvisor}. It
  * internally uses an Apache Lucene index. Clients should rather refer to the interface instead of referencing this
  * class directly.
  */
-public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
+public class ModelIndex extends AbstractIdleService implements IModelArchiveCoordinateAdvisor, IModelIndex {
+
+    private static final int NOT_RUNNING = -1;
 
     private static final Logger LOG = LoggerFactory.getLogger(ModelIndex.class);
 
@@ -106,12 +109,13 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
         this.index = (Directory) index;
     }
 
-    public boolean isAccessible() {
-        return index != null && reader != null;
+    @Override
+    public void open() throws IOException {
+        startAsync();
     }
 
     @Override
-    public void open() throws IOException {
+    protected void startUp() throws Exception {
         writeLock.lock();
         try {
             // Normally, indexdir is set; if not, the VisibleForTesting constructor has been used.
@@ -128,8 +132,25 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
     }
 
     @Override
+    public void close() throws IOException {
+        stopAsync();
+    }
+
+    @Override
+    protected void shutDown() throws Exception {
+        writeLock.lock();
+        try {
+            closeQuietly(reader);
+            closeQuietly(writer);
+            closeQuietly(index);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    @Override
     public void updateIndex(File index) throws IOException {
-        if (!isAccessible()) {
+        if (!isRunning()) {
             return;
         }
 
@@ -149,25 +170,16 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
     }
 
     @Override
-    public void close() throws IOException {
-        writeLock.lock();
-        try {
-            closeQuietly(reader);
-            closeQuietly(writer);
-            closeQuietly(index);
-        } finally {
-            writeLock.unlock();
+    public Result<ModelCoordinate> suggest(ProjectCoordinate pc, String modelType) {
+        if (!isRunning()) {
+            return Result.absent();
         }
-    }
-
-    @Override
-    public Optional<ModelCoordinate> suggest(ProjectCoordinate pc, String modelType) {
         readLock.lock();
         try {
             ImmutableSet<ModelCoordinate> results = suggestCandidates(pc, modelType);
 
             if (results.isEmpty()) {
-                return absent();
+                return Result.absent();
             }
 
             final Version closestVersion = Versions.findClosest(Version.valueOf(pc.getVersion()),
@@ -178,7 +190,7 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
                             return Version.valueOf(mc.getVersion());
                         }
                     }));
-            return Optional.of(find(results, new Predicate<ModelCoordinate>() {
+            return Result.of(find(results, new Predicate<ModelCoordinate>() {
 
                 @Override
                 public boolean apply(ModelCoordinate mc) {
@@ -192,11 +204,11 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
 
     @Override
     public ImmutableSet<ModelCoordinate> suggestCandidates(ProjectCoordinate pc, String modelType) {
-        Checks.ensureIsNotNull(modelType);
-        if (!isAccessible()) {
+        if (!isRunning()) {
             return ImmutableSet.of();
         }
 
+        Checks.ensureIsNotNull(modelType);
         readLock.lock();
         try {
             Builder<ModelCoordinate> res = ImmutableSet.builder();
@@ -237,7 +249,7 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
 
     @Override
     public ImmutableSet<ModelCoordinate> getKnownModels(String modelType) {
-        if (!isAccessible()) {
+        if (!isRunning()) {
             return ImmutableSet.of();
         }
 
@@ -272,9 +284,9 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
     }
 
     @Override
-    public Optional<ProjectCoordinate> suggestProjectCoordinateByArtifactId(String artifactId) {
-        if (!isAccessible()) {
-            return absent();
+    public Result<ProjectCoordinate> suggestProjectCoordinateByArtifactId(String artifactId) {
+        if (!isRunning()) {
+            return Result.error(NOT_RUNNING);
         }
 
         Term t1 = new Term(F_SYMBOLIC_NAMES, artifactId);
@@ -287,9 +299,9 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
     }
 
     @Override
-    public Optional<ProjectCoordinate> suggestProjectCoordinateByFingerprint(String fingerprint) {
-        if (!isAccessible()) {
-            return absent();
+    public Result<ProjectCoordinate> suggestProjectCoordinateByFingerprint(String fingerprint) {
+        if (!isRunning()) {
+            return Result.error(NOT_RUNNING);
         }
 
         Term t1 = new Term(F_FINGERPRINTS, fingerprint);
@@ -301,7 +313,7 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
         }
     }
 
-    private Optional<ProjectCoordinate> findProjectCoordinateByTerm(Term... terms) {
+    private Result<ProjectCoordinate> findProjectCoordinateByTerm(Term... terms) {
         BooleanQuery query = new BooleanQuery();
         for (Term t : terms) {
             TermQuery q = new TermQuery(t);
@@ -331,10 +343,10 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
             }
 
             DefaultArtifact tmp = new DefaultArtifact(string);
-            Optional<ProjectCoordinate> pc = tryNewProjectCoordinate(tmp.getGroupId(), tmp.getArtifactId(),
-                    canonicalizeVersion(tmp.getVersion()));
-            if (pc.isPresent()) {
-                return pc;
+            ProjectCoordinate pc = tryNewProjectCoordinate(tmp.getGroupId(), tmp.getArtifactId(),
+                    canonicalizeVersion(tmp.getVersion())).orNull();
+            if (pc != null) {
+                return of(pc);
             }
         }
         // Nothing found in first MAX_DOCUMENTS_SEARCHED documents; giving up.
@@ -353,4 +365,5 @@ public class ModelIndex implements IModelArchiveCoordinateAdvisor, IModelIndex {
         return new ModelCoordinate(a.getGroupId(), a.getArtifactId(), a.getClassifier(), a.getExtension(),
                 a.getVersion());
     }
+
 }

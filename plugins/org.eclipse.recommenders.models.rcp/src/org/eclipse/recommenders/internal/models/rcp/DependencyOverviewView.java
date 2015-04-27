@@ -272,7 +272,7 @@ public class DependencyOverviewView extends ViewPart {
         private String findModelCoordinateVersion(Dependency dependency, String modelType) {
             ProjectCoordinate pc = pcProvider.resolve(dependency.info).orNull();
             if (pc != null) {
-                ModelCoordinate mc = modelIndex.suggest(pc, modelType).orNull();
+                ModelCoordinate mc = modelIndex.suggest(pc, modelType).or(null);
                 return mc == null ? "" : mc.getVersion(); //$NON-NLS-1$
             }
             return ""; //$NON-NLS-1$

@@ -67,7 +67,7 @@ public abstract class SimpleModelProvider<K extends IUniqueName<?>, M> implement
     public Optional<M> acquireModel(K key) {
         try {
             // unknown model? return immediately
-            ModelCoordinate mc = index.suggest(key.getProjectCoordinate(), modelType).orNull();
+            ModelCoordinate mc = index.suggest(key.getProjectCoordinate(), modelType).or(null);
             if (mc == null) {
                 return absent();
             }

@@ -30,15 +30,15 @@ public class TriggerModelDownloadForProjectCoordinatesAction extends TriggerMode
 
     private Set<ProjectCoordinate> pcs = Sets.newHashSet();
 
-    TriggerModelDownloadForProjectCoordinatesAction(String text, List<String> modelClassifier, IModelIndex modelIndex, EclipseModelRepository repo,
-            EventBus bus) {
+    TriggerModelDownloadForProjectCoordinatesAction(String text, List<String> modelClassifier, IModelIndex modelIndex,
+            EclipseModelRepository repo, EventBus bus) {
         super(text, repo, bus);
         this.modelTypes = modelClassifier;
         this.modelIndex = modelIndex;
     }
 
-    TriggerModelDownloadForProjectCoordinatesAction(String text, Set<ProjectCoordinate> pcs, List<String> modelClassifier, IModelIndex modelIndex,
-            EclipseModelRepository repo, EventBus bus) {
+    TriggerModelDownloadForProjectCoordinatesAction(String text, Set<ProjectCoordinate> pcs,
+            List<String> modelClassifier, IModelIndex modelIndex, EclipseModelRepository repo, EventBus bus) {
         this(text, modelClassifier, modelIndex, repo, bus);
         this.pcs = pcs;
     }
@@ -52,7 +52,7 @@ public class TriggerModelDownloadForProjectCoordinatesAction extends TriggerMode
         Set<ModelCoordinate> mcs = Sets.newHashSet();
         for (ProjectCoordinate pc : pcs) {
             for (String modelType : modelTypes) {
-                ModelCoordinate mc = modelIndex.suggest(pc, modelType).orNull();
+                ModelCoordinate mc = modelIndex.suggest(pc, modelType).or(null);
                 if (mc != null) {
                     mcs.add(mc);
                 }

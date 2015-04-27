@@ -32,7 +32,7 @@ public interface IModelArchiveCoordinateAdvisor extends Openable, Closeable {
     /**
      * Returns the best matching model the index could find for the given project coordinate.
      */
-    Optional<ModelCoordinate> suggest(ProjectCoordinate pc, String modelType);
+    Result<ModelCoordinate> suggest(ProjectCoordinate pc, String modelType);
 
     /**
      * Although part of the API, this method is not expected to be called by normal clients but form the instance that
