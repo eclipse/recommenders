@@ -42,6 +42,7 @@ import org.eclipse.recommenders.models.rcp.ModelEvents.AdvisorConfigurationChang
 import org.eclipse.recommenders.models.rcp.ModelEvents.ModelIndexOpenedEvent;
 import org.eclipse.recommenders.models.rcp.ModelEvents.ProjectCoordinateChangeEvent;
 import org.eclipse.recommenders.rcp.IRcpService;
+import org.eclipse.recommenders.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class EclipseProjectCoordinateAdvisorService implements IProjectCoordinateAdvisorService, IRcpService {
+
+    private static final int FAIL_NOT_CACHED = 1;
 
     private final Logger LOG = LoggerFactory.getLogger(getClass());
 
@@ -143,6 +146,15 @@ public class EclipseProjectCoordinateAdvisorService implements IProjectCoordinat
     }
 
     @Override
+    public Result<ProjectCoordinate> trySuggest(DependencyInfo dependencyInfo) {
+        Optional<ProjectCoordinate> pc = projectCoordinateCache.getIfPresent(dependencyInfo);
+        if (pc == null) {
+            return Result.absent(FAIL_NOT_CACHED);
+        }
+        return Result.of(pc.get());
+    }
+
+    @Override
     public ImmutableList<IProjectCoordinateAdvisor> getAdvisors() {
         return delegate.getAdvisors();
     }
@@ -220,4 +232,5 @@ public class EclipseProjectCoordinateAdvisorService implements IProjectCoordinat
     public void clearCache() {
         projectCoordinateCache.invalidateAll();
     }
+
 }

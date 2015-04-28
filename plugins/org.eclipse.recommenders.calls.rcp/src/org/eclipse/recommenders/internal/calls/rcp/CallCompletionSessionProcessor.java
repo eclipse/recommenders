@@ -28,6 +28,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -51,11 +55,14 @@ import org.eclipse.recommenders.completion.rcp.utils.ProposalUtils;
 import org.eclipse.recommenders.models.UniqueTypeName;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
+import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Recommendations;
+import org.eclipse.recommenders.utils.Result;
 import org.eclipse.recommenders.utils.names.IMethodName;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -126,17 +133,34 @@ public class CallCompletionSessionProcessor extends SessionProcessor {
     }
 
     private boolean findReceiverTypeAndModel() {
-        IType receiverType = ctx.get(RECEIVER_TYPE2, null);
+        final IType receiverType = ctx.get(RECEIVER_TYPE2, null);
         if (receiverType == null) {
             return false;
         }
-        UniqueTypeName name = pcProvider.toUniqueName(receiverType).orNull();
-        if (name == null) {
-            return false;
+        Result<UniqueTypeName> res = pcProvider.tryToUniqueName(receiverType);
+        if (res.isPresent()) {
+            // TODO loop until we find a model. later
+            model = modelProvider.acquireModel(res.get()).orNull();
+            return model != null;
         }
-        // TODO loop until we find a model. later
-        model = modelProvider.acquireModel(name).orNull();
-        return model != null;
+
+        if (res.getReason() == Constants.REASON_NOT_IN_CACHE) {
+            Job job = new Job("Prefetching call model for " + receiverType.getFullyQualifiedName()) {
+
+                @Override
+                protected IStatus run(IProgressMonitor monitor) {
+                    try {
+                        UniqueTypeName name = pcProvider.toUniqueName(receiverType).orNull();
+                        ICallModel model = modelProvider.acquireModel(name).orNull();
+                        modelProvider.releaseModel(model);
+                    } catch (Exception e) {
+                    }
+                    return Status.OK_STATUS;
+                }
+            };
+            job.schedule(200);
+        }
+        return false;
     }
 
     private boolean findRecommendations() {

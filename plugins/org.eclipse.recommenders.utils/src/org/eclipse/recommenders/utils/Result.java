@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.utils;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.recommenders.utils.Checks.ensureIsTrue;
 
 import java.util.Objects;
 
@@ -29,27 +30,27 @@ public abstract class Result<T> {
         return (Result<T>) Absent.INSTANCE;
     }
 
-    public static <T> Result<T> error(int code) {
-        return (Result<T>) new Error(code, null);
+    public static <T> Result<T> absent(int code) {
+        return (Result<T>) new AbsentWithReason(code, null);
     }
 
-    public static <T> Result<T> error(Throwable exception) {
-        return (Result<T>) new Error(0, exception);
+    public static <T> Result<T> absent(Throwable exception) {
+        return (Result<T>) new AbsentWithReason(0, exception);
     }
 
-    public static <T> Result<T> error(int code, Throwable exception) {
-        return (Result<T>) new Error(code, exception);
+    public static <T> Result<T> absent(int code, Throwable exception) {
+        return (Result<T>) new AbsentWithReason(code, exception);
     }
 
     public abstract boolean isPresent();
 
-    public abstract boolean isError();
+    public abstract boolean hasReason();
 
-    public abstract T or(T defaultValue);
+    public abstract int getReason();
 
     public abstract T get();
 
-    public abstract int getErrorCode();
+    public abstract T or(T defaultValue);
 
     public abstract Result<Throwable> getException();
 
@@ -67,7 +68,7 @@ public abstract class Result<T> {
         }
 
         @Override
-        public boolean isError() {
+        public boolean hasReason() {
             return false;
         }
 
@@ -82,7 +83,7 @@ public abstract class Result<T> {
         }
 
         @Override
-        public int getErrorCode() {
+        public int getReason() {
             return 0;
         }
 
@@ -124,7 +125,7 @@ public abstract class Result<T> {
         }
 
         @Override
-        public boolean isError() {
+        public boolean hasReason() {
             return false;
         }
 
@@ -139,7 +140,7 @@ public abstract class Result<T> {
         }
 
         @Override
-        public int getErrorCode() {
+        public int getReason() {
             return 0;
         }
 
@@ -164,13 +165,13 @@ public abstract class Result<T> {
         }
     }
 
-    private static final class Error extends Result<Object> {
+    private static final class AbsentWithReason extends Result<Object> {
 
-        private final int code;
+        private final int reason;
         private final Throwable exception;
 
-        private Error(int code, Throwable exception) {
-            this.code = code;
+        private AbsentWithReason(int reason, Throwable exception) {
+            this.reason = reason;
             this.exception = exception;
         }
 
@@ -180,7 +181,7 @@ public abstract class Result<T> {
         }
 
         @Override
-        public boolean isError() {
+        public boolean hasReason() {
             return true;
         }
 
@@ -191,12 +192,12 @@ public abstract class Result<T> {
 
         @Override
         public Object get() {
-            throw Throws.throwIllegalStateException("cannot get() value from Error");
+            throw Throws.throwIllegalStateException("cannot get() value from AbsentWithReason");
         }
 
         @Override
-        public int getErrorCode() {
-            return code;
+        public int getReason() {
+            return reason;
         }
 
         @Override
@@ -206,21 +207,21 @@ public abstract class Result<T> {
 
         @Override
         public String toString() {
-            return "Result.error(" + code + ", " + exception + ")";
+            return "Result.error(" + reason + ", " + exception + ")";
         }
 
         @Override
         public boolean equals(@Nullable Object other) {
-            if (other instanceof Error) {
-                Error that = (Error) other;
-                return code == that.code && Objects.equals(exception, that.exception);
+            if (other instanceof AbsentWithReason) {
+                AbsentWithReason that = (AbsentWithReason) other;
+                return reason == that.reason && Objects.equals(exception, that.exception);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return 0x598df91c + code + (exception != null ? exception.hashCode() : 0);
+            return 0x598df91c + reason + (exception != null ? exception.hashCode() : 0);
         }
     }
 }
