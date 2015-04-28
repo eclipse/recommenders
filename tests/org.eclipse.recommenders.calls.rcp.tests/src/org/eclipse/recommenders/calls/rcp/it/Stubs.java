@@ -155,7 +155,7 @@ public class Stubs {
     public static MockedIntelligentCompletionProposalComputer newCallComputer() {
         IProjectCoordinateProvider pcProvider = mock(IProjectCoordinateProvider.class);
 
-        when(pcProvider.toUniqueName((IType) anyObject())).thenAnswer(new Answer<Optional<UniqueTypeName>>() {
+        when(pcProvider.tryToUniqueName((IType) anyObject())).thenAnswer(new Answer<Optional<UniqueTypeName>>() {
 
             @Override
             public Optional<UniqueTypeName> answer(InvocationOnMock invocation) throws Throwable {
