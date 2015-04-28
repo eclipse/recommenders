@@ -44,6 +44,8 @@ public final class Messages extends NLS {
 
     public static String LOG_WARNING_MISSING_LOOKUP_ENVIRONMENT;
     public static String LOG_ERROR_PROPOSAL_MATCHING_FAILED;
+    public static String LOG_ERROR_RECEIVER_TYPE_LOOKUP_FAILED;
+
 
     static {
         // initialize resource bundle
