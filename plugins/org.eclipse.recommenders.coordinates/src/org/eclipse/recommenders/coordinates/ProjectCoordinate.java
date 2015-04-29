@@ -14,8 +14,9 @@ import static org.eclipse.recommenders.coordinates.Coordinates.isValidId;
 import static org.eclipse.recommenders.utils.Checks.ensureIsTrue;
 import static org.eclipse.recommenders.utils.Versions.isValidVersion;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.recommenders.utils.Checks;
 import org.eclipse.recommenders.utils.Versions;
 
@@ -69,7 +70,7 @@ public class ProjectCoordinate {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, false);
+        return Objects.hash(groupId, artifactId, version);
     }
 
     @Override
