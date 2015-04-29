@@ -16,9 +16,9 @@ import static org.eclipse.recommenders.utils.Checks.ensureIsTrue;
 import static org.eclipse.recommenders.utils.Versions.isValidVersion;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.recommenders.coordinates.Coordinates;
 import org.eclipse.recommenders.utils.Throws;
 import org.eclipse.recommenders.utils.Versions;
@@ -116,7 +116,7 @@ public final class ModelCoordinate {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        return Objects.hash(groupId, artifactId, version, classifier, extension, hints);
     }
 
     @Override
@@ -126,8 +126,8 @@ public final class ModelCoordinate {
 
     @Override
     public String toString() {
-        return Joiner.on(':').useForNull("")
-                .join(getGroupId(), getArtifactId(), getClassifier(), getExtension(), getVersion());
+        return Joiner.on(':').useForNull("").join(getGroupId(), getArtifactId(), getClassifier(), getExtension(),
+                getVersion());
     }
 
     public static ModelCoordinate valueOf(String coord) {
@@ -151,8 +151,8 @@ public final class ModelCoordinate {
             vers = split[4];
             break;
         default:
-            Throws.throwIllegalArgumentException("Invalid coordinate format. It has only %d segments: %s",
-                    split.length, coord);
+            Throws.throwIllegalArgumentException("Invalid coordinate format. It has only %d segments: %s", split.length,
+                    coord);
         }
         gid = split[0];
         aid = split[1];
