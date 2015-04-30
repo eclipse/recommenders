@@ -11,6 +11,8 @@
 package org.eclipse.recommenders.completion.rcp.processable;
 
 import static org.apache.commons.lang3.StringUtils.startsWithAny;
+import static org.eclipse.recommenders.internal.completion.rcp.LogMessages.ERROR_UNEXPECTED_PROPOSAL_KIND;
+import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.lang.reflect.Method;
 
@@ -35,6 +37,7 @@ import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocLinkTypeCompletionProposal;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -61,6 +64,7 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
     private static Class<JavaCompletionProposal> javaCompletionProposalClass;
     private static Class<LazyGenericTypeProposal> lazyGenericTypeProposalClass;
     private static Class<LazyJavaTypeCompletionProposal> lazyJavaTypeCompletionProposalClass;
+    private static Class<JavadocLinkTypeCompletionProposal> javadocLinkTypeCompletionProposalClass;
     private static Class<FilledArgumentNamesMethodProposal> filledArgumentNamesMethodProposalClass;
     private static Class<ParameterGuessingProposal> parameterGuessingProposalClass;
     private static Class<MethodDeclarationCompletionProposal> methodDeclarationCompletionProposalClass;
@@ -137,6 +141,11 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
         } catch (NoClassDefFoundError e) {
             LOG.warn("Error while loading completion proposal class", e); //$NON-NLS-1$
         }
+        try {
+            javadocLinkTypeCompletionProposalClass = JavadocLinkTypeCompletionProposal.class;
+        } catch (NoClassDefFoundError e) {
+            LOG.warn("Error while loading completion proposal class", e); //$NON-NLS-1$
+        }
     }
 
     public ProcessableProposalFactory() {
@@ -203,10 +212,14 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
                         (GetterSetterCompletionProposal) uiProposal, context);
                 setProposalInfo(res, uiProposal);
                 return res;
+            } else if (javadocLinkTypeCompletionProposalClass == c) {
+                IProcessableProposal res = factory.newJavadocLinkTypeCompletionProposal(coreProposal,
+                        (JavadocLinkTypeCompletionProposal) uiProposal, context);
+                setProposalInfo(res, uiProposal);
+                return res;
             }
-            // return the fallback proposal
-            LOG.warn("Unknown JDT proposal type '{}' ('{}'). Returning original proposal instead.", c, //$NON-NLS-1$
-                    uiProposal.getDisplayString());
+            // log error and return the fallback proposal
+            log(ERROR_UNEXPECTED_PROPOSAL_KIND, c, uiProposal.getDisplayString());
             return uiProposal;
         } catch (final Exception e) {
             LOG.warn("Wrapping JDT proposal '{}' ('{}') failed. Returning original proposal instead.", c, //$NON-NLS-1$
@@ -288,6 +301,12 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
         } catch (JavaModelException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+    @Override
+    public IProcessableProposal newJavadocLinkTypeCompletionProposal(CompletionProposal coreProposal,
+            JavadocLinkTypeCompletionProposal uiProposal, JavaContentAssistInvocationContext context) {
+        return postConstruct(new ProcessableJavadocLinkTypeCompletionProposal(coreProposal, context));
     }
 
     @Override
