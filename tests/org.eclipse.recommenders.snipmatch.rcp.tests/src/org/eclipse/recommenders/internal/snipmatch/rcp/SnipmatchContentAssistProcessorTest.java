@@ -38,6 +38,7 @@ import org.eclipse.recommenders.snipmatch.rcp.model.EclipseGitSnippetRepositoryC
 import org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelFactory;
 import org.eclipse.recommenders.snipmatch.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.recommenders.utils.Recommendation;
+import org.eclipse.recommenders.utils.Result;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
 import org.junit.Test;
@@ -60,7 +61,8 @@ public class SnipmatchContentAssistProcessorTest {
 
     private static final Document DOCUMENT = new Document("Document");
 
-    private static final ProjectCoordinate EXAMPLE_COORDINATE = new ProjectCoordinate("org.example", "example", "1.0.0");
+    private static final ProjectCoordinate EXAMPLE_COORDINATE = new ProjectCoordinate("org.example", "example",
+            "1.0.0");
     private static final Set<ProjectCoordinate> NO_PROJECT_COORDINATES = ImmutableSet.of();
     private static final Set<ProjectCoordinate> PROJECT_COORDINATES = ImmutableSet.of(EXAMPLE_COORDINATE);
 
@@ -85,7 +87,7 @@ public class SnipmatchContentAssistProcessorTest {
         when(javaProject.getProject().getLocation().toFile()).thenReturn(PROJECT_DIR);
         when(javaProject.getElementName()).thenReturn("example");
 
-        when(pcProvider.resolve(PROJECT_INFO)).thenReturn(Optional.of(EXAMPLE_COORDINATE));
+        when(pcProvider.tryResolve(PROJECT_INFO)).thenReturn(Result.of(EXAMPLE_COORDINATE));
         when(dependencyListener.getDependenciesForProject(PROJECT_INFO)).thenReturn(dependencies);
 
         ICompilationUnit compilationUnit = mock(ICompilationUnit.class);
@@ -99,8 +101,8 @@ public class SnipmatchContentAssistProcessorTest {
         when(viewer.getDocument()).thenReturn(document);
         when(viewer.getSelectedRange()).thenReturn(selectedRange);
 
-        JavaContentAssistInvocationContext context = spy(new JavaContentAssistInvocationContext(viewer, 0,
-                mock(IEditorPart.class)));
+        JavaContentAssistInvocationContext context = spy(
+                new JavaContentAssistInvocationContext(viewer, 0, mock(IEditorPart.class)));
         doReturn(compilationUnit).when(context).getCompilationUnit();
 
         sut = new SnipmatchContentAssistProcessor(configs, repos, pcProvider, dependencyListener, new SharedImages());
