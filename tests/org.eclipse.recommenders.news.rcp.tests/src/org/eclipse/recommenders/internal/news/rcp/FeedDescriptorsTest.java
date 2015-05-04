@@ -5,7 +5,7 @@
 * which accompanies this distribution, and is available at
 * http://www.eclipse.org/legal/epl-v10.html
 */
-package org.eclipse.recommenders.internal.news.rcp.tests;
+package org.eclipse.recommenders.internal.news.rcp;
 
 import static org.eclipse.recommenders.internal.news.rcp.FeedDescriptors.*;
 import static org.hamcrest.CoreMatchers.*;
