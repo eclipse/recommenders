@@ -23,9 +23,6 @@ public final class LogMessages extends DefaultLogMessage {
 
     private static final Bundle BUNDLE = Logs.getBundle(LogMessages.class);
 
-    public static final LogMessages ERROR_ADVISOR_INSTANTIATION_FAILED = new LogMessages(ERROR,
-            Messages.LOG_ERROR_ADVISOR_INSTANTIATION_FAILED);
-
     public static final ILogMessage ERROR_BIND_FILE_NAME = new LogMessages(ERROR, Messages.LOG_ERROR_BIND_FILE_NAME);
 
     public static final ILogMessage ERROR_CLOSING_MODEL_INDEX_SERVICE = new LogMessages(ERROR,
@@ -33,9 +30,6 @@ public final class LogMessages extends DefaultLogMessage {
 
     public static final ILogMessage ERROR_CREATE_EXECUTABLE_EXTENSION_FAILED = new LogMessages(ERROR,
             Messages.LOG_ERROR_CREATE_EXECUTABLE_EXTENSION_FAILED);
-
-    public static final ILogMessage ERROR_IN_ADVISOR_SERVICE_SUGGEST = new LogMessages(ERROR,
-            Messages.LOG_ERROR_IN_ADVISOR_SERVICE_SUGGEST);
 
     public static final LogMessages ERROR_SAVE_PREFERENCES_FAILED = new LogMessages(ERROR,
             Messages.LOG_ERROR_SAVE_PREFERENCES);
