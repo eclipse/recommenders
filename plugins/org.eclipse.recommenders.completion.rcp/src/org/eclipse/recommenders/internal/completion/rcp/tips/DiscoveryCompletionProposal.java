@@ -19,6 +19,7 @@ import org.eclipse.jface.text.AbstractInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.tips.AbstractCompletionTipProposal;
 import org.eclipse.recommenders.internal.completion.rcp.Messages;
 import org.eclipse.recommenders.rcp.SharedImages;
@@ -45,7 +46,7 @@ public class DiscoveryCompletionProposal extends AbstractCompletionTipProposal {
     }
 
     @Override
-    public boolean isApplicable() {
+    public boolean isApplicable(IRecommendersCompletionContext context) {
         return true;
     }
 
