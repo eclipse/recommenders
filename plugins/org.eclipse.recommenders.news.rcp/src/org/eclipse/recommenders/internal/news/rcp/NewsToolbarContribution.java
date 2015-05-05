@@ -9,11 +9,11 @@ package org.eclipse.recommenders.internal.news.rcp;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.recommenders.internal.news.rcp.notifications.NewsNotificationPopup;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IRssService;
 import org.eclipse.recommenders.news.rcp.IRssService.NewFeedItemsEvent;
@@ -35,7 +35,6 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     private final IRssService service;
     private final SharedImages images;
-    private final EventBus bus;
 
     private Button button;
 
@@ -43,7 +42,6 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     public NewsToolbarContribution(IRssService service, SharedImages images, EventBus bus) {
         this.service = service;
         this.images = images;
-        this.bus = bus;
         bus.register(this);
     }
 
@@ -61,14 +59,8 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             public void widgetSelected(SelectionEvent e) {
                 super.widgetSelected(e);
                 Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
-                // TODO create notification with clickable links
-                for (Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
-                    System.out.println(entry.getKey().getName());
-                    for (IFeedMessage message : entry.getValue()) {
-                        System.out.println("-- " + message.getTitle() + " - " + message.getDate());
-                        System.out.println("  -- " + message.getUrl());
-                    }
-                }
+                new NewsNotificationPopup(messages).open();
+
                 PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
                     @Override
