@@ -8,6 +8,7 @@
 package org.eclipse.recommenders.internal.news.rcp;
 
 import static java.lang.Long.parseLong;
+import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createNewFeedItemsEvent;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -16,7 +17,10 @@ import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PreDestroy;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -27,8 +31,10 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedReader;
+import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IRssService;
+import org.eclipse.recommenders.rcp.IRcpService;
 import org.eclipse.recommenders.utils.Urls;
 
 import com.google.common.base.Function;
@@ -37,9 +43,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("restriction")
-public class RssService implements IRssService {
+public class RssService implements IRssService, IRcpService {
 
     private static final long DEFAULT_DELAY = TimeUnit.DAYS.toMinutes(1);
     private static final long START_DELAY = 0;
@@ -48,12 +55,17 @@ public class RssService implements IRssService {
     private final EventBus bus;
     private final NotificationEnvironment environment;
 
+    private final Set<String> readIds;
+
     private final HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
 
     public RssService(NewsRcpPreferences preferences, EventBus bus, NotificationEnvironment environment) {
         this.preferences = preferences;
         this.bus = bus;
         this.environment = environment;
+        bus.register(this);
+
+        readIds = ReadFeedMessagesProperties.getReadIds();
     }
 
     @Override
@@ -61,6 +73,11 @@ public class RssService implements IRssService {
         for (final FeedDescriptor feed : preferences.getEnabledFeedDescriptors()) {
             start(feed);
         }
+    }
+
+    @PreDestroy
+    public void stop() {
+        ReadFeedMessagesProperties.writeReadIds(readIds);
     }
 
     @Override
@@ -138,7 +155,7 @@ public class RssService implements IRssService {
         }
 
         if (groupedMessages.size() > 0 && newMessage) {
-            bus.post(new NewFeedItemsEvent());
+            bus.post(createNewFeedItemsEvent());
         }
         return status;
     }
@@ -178,4 +195,8 @@ public class RssService implements IRssService {
         return false;
     }
 
+    @Subscribe
+    public void handle(FeedMessageReadEvent event) {
+        readIds.add(event.getId());
+    }
 }
