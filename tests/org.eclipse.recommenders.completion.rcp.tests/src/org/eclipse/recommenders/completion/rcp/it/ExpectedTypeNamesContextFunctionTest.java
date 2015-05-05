@@ -79,9 +79,6 @@ public class ExpectedTypeNamesContextFunctionTest {
         return scenarios;
     }
 
-    <T extends Number> void m(T t) {
-    }
-
     private static Object[] scenario(CharSequence code, ITypeName... expectedTypes) {
         return new Object[] { code, expectedTypes };
     }
