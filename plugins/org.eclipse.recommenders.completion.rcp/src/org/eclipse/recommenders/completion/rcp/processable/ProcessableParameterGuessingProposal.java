@@ -14,7 +14,6 @@ import static com.google.common.base.Optional.fromNullable;
 import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.IS_VISIBLE;
 import static org.eclipse.recommenders.completion.rcp.processable.Proposals.copyStyledString;
 import static org.eclipse.recommenders.utils.Checks.*;
-import static org.eclipse.recommenders.utils.Reflections.getDeclaredMethod;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -72,14 +71,6 @@ import com.google.common.collect.Maps;
 
 @SuppressWarnings({ "restriction", "unchecked" })
 public class ProcessableParameterGuessingProposal extends JavaMethodCompletionProposal implements IProcessableProposal {
-
-    /**
-     * Whether the method {@code canAutomaticallyAppendSemicolon} is available.
-     *
-     * The method in question is available in JDT 3.9 or later and hence missing in Eclipse Juno.
-     */
-    private static final boolean HAS_CAN_AUTOMATICALLY_APPEND_SEMICOLON = getDeclaredMethod(
-            JavaMethodCompletionProposal.class, "canAutomaticallyAppendSemicolon").isPresent(); //$NON-NLS-1$
 
     private Map<IProposalTag, Object> tags = Maps.newHashMap();
     private ProposalProcessorManager mgr;
@@ -348,10 +339,8 @@ public class ProcessableParameterGuessingProposal extends JavaMethodCompletionPr
 
         buffer.append(RPAREN);
 
-        if (HAS_CAN_AUTOMATICALLY_APPEND_SEMICOLON) {
-            if (canAutomaticallyAppendSemicolon()) {
-                buffer.append(SEMICOLON);
-            }
+        if (canAutomaticallyAppendSemicolon()) {
+            buffer.append(SEMICOLON);
         }
 
         return buffer.toString();

@@ -73,7 +73,7 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
     private static Class<LazyPackageCompletionProposal> lazyPackageCompletionProposalClass;
     private static Class<GetterSetterCompletionProposal> getterSetterCompletionProposalClass;
 
-    private static Method proposalInfoMethod = Reflections
+    private static final Method GET_PROPOSAL_INFO = Reflections
             .getDeclaredMethod(AbstractJavaCompletionProposal.class, "getProposalInfo").orNull(); //$NON-NLS-1$
 
     static {
@@ -247,11 +247,11 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
 
     private static void setProposalInfo(IProcessableProposal crProposal, IJavaCompletionProposal uiProposal) {
         // XXX this method should under no circumstances throw any exception
-        if (Checks.anyIsNull(proposalInfoMethod, crProposal, uiProposal)) {
+        if (Checks.anyIsNull(GET_PROPOSAL_INFO, crProposal, uiProposal)) {
             return;
         }
         try {
-            ProposalInfo info = (ProposalInfo) proposalInfoMethod.invoke(uiProposal);
+            ProposalInfo info = (ProposalInfo) GET_PROPOSAL_INFO.invoke(uiProposal);
             crProposal.setProposalInfo(info);
         } catch (Exception e) {
             LOG.warn("Failed to set proposal info to '{}'). Returning proposal without additional info.", crProposal); //$NON-NLS-1$

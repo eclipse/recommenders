@@ -17,6 +17,13 @@
 <repository location="http://download.eclipse.org/releases/kepler/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jdt.java8patch.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.jdt.a2.java8patch.feature.group" version="0.0.0"/>
+<!-- Java 8 Support for Kepler. -->
+<!-- See <http://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler>. -->
+<repository location="http://download.eclipse.org/eclipse/updates/4.3-P-builds/P20140317-1600/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.aether.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.aether.feature.source.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.aether.connector.basic.feature.feature.group" version="0.0.0"/>
