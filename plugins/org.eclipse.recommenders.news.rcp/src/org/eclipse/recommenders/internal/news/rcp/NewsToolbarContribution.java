@@ -9,14 +9,14 @@ package org.eclipse.recommenders.internal.news.rcp;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
+import org.eclipse.recommenders.internal.news.rcp.notifications.NewsNotificationPopup;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IRssService;
-import org.eclipse.recommenders.news.rcp.IRssService.NewFeedItemsEvent;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -35,16 +35,16 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     private final IRssService service;
     private final SharedImages images;
-    private final EventBus bus;
+    private final EventBus eventBus;
 
     private Button button;
 
     @Inject
-    public NewsToolbarContribution(IRssService service, SharedImages images, EventBus bus) {
+    public NewsToolbarContribution(IRssService service, SharedImages images, EventBus eventBus) {
         this.service = service;
         this.images = images;
-        this.bus = bus;
-        bus.register(this);
+        this.eventBus = eventBus;
+        eventBus.register(this);
     }
 
     @Override
@@ -54,21 +54,15 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         composite.setLayout(layout);
 
         button = new Button(composite, SWT.NONE);
-        button.setImage(images.getImage(SharedImages.Images.OBJ_NEWSLETTER));
+        button.setImage(images.getImage(SharedImages.Images.OBJ_CONTAINER));
 
         button.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 super.widgetSelected(e);
                 Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
-                // TODO create notification with clickable links
-                for (Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
-                    System.out.println(entry.getKey().getName());
-                    for (IFeedMessage message : entry.getValue()) {
-                        System.out.println("-- " + message.getTitle() + " - " + message.getDate());
-                        System.out.println("  -- " + message.getUrl());
-                    }
-                }
+                new NewsNotificationPopup(messages, eventBus).open();
+
                 PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
                     @Override
