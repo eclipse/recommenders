@@ -12,18 +12,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NewsNotificationPopup;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NoNewsNotificationPopup;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IRssService;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
@@ -38,7 +34,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     private final SharedImages images;
     private final EventBus eventBus;
 
-    private Button button;
+    private UpdatingNewsAction updatingNewsAction;
 
     @Inject
     public NewsToolbarContribution(IRssService service, SharedImages images, EventBus eventBus) {
@@ -50,34 +46,11 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     @Override
     protected Control createControl(Composite parent) {
-        Composite composite = new Composite(parent, SWT.NONE);
-        GridLayout layout = GridLayoutFactory.fillDefaults().create();
-        composite.setLayout(layout);
+        updatingNewsAction = new UpdatingNewsAction();
+        ToolBarManager manager = new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
+        manager.add(updatingNewsAction);
 
-        button = new Button(composite, SWT.NONE);
-        button.setImage(images.getImage(SharedImages.Images.OBJ_CONTAINER));
-
-        button.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                super.widgetSelected(e);
-                Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
-                if (messages.isEmpty()) {
-                    new NoNewsNotificationPopup().open();
-                } else {
-                    new NewsNotificationPopup(messages, eventBus).open();
-                }
-
-                PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        button.setImage(images.getImage(SharedImages.Images.OBJ_CONTAINER));
-                    }
-                });
-            }
-        });
-        return composite;
+        return manager.createControl(parent);
     }
 
     @Subscribe
@@ -86,8 +59,37 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
             @Override
             public void run() {
-                button.setImage(images.getImage(SharedImages.Images.OBJ_NEWSLETTER));
+                updatingNewsAction.setAvailableNews();
             }
         });
+    }
+
+    public class NewFeedItemsEvent {
+    }
+
+    private class UpdatingNewsAction extends Action {
+        private UpdatingNewsAction() {
+            setNoAvailableNews();
+        }
+
+        @Override
+        public void run() {
+            setNoAvailableNews();
+
+            Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
+            if (messages.isEmpty()) {
+                new NoNewsNotificationPopup().open();
+            } else {
+                new NewsNotificationPopup(messages, eventBus).open();
+            }
+        }
+
+        private void setNoAvailableNews() {
+            this.setImageDescriptor(images.getDescriptor(SharedImages.Images.OBJ_CONTAINER));
+        }
+
+        private void setAvailableNews() {
+            this.setImageDescriptor(images.getDescriptor(SharedImages.Images.OBJ_NEWSLETTER));
+        }
     }
 }
