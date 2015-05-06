@@ -17,11 +17,9 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -36,7 +34,8 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     private final SharedImages images;
     private final EventBus bus;
 
-    private Button button;
+    private Label clickableLable;
+    private boolean updates = false;
 
     @Inject
     public NewsToolbarContribution(SharedImages images, EventBus bus) {
@@ -48,29 +47,48 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     @Override
     protected Control createControl(Composite parent) {
         Composite composite = new Composite(parent, SWT.NONE);
-        GridLayout layout = GridLayoutFactory.fillDefaults().create();
-        composite.setLayout(layout);
+        GridLayoutFactory.fillDefaults().applyTo(composite);
 
-        button = new Button(composite, SWT.NONE);
-        button.setImage(images.getImage(SharedImages.Images.OBJ_NEWSLETTER));
+        clickableLable = new Label(composite, SWT.NONE);
+        setNoAvailableNews();
 
-        button.addSelectionListener(new SelectionAdapter() {
+        clickableLable.addMouseListener(new MouseAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                super.widgetSelected(e);
-                button.setImage(images.getImage(SharedImages.Images.OBJ_CONTAINER));
-                new Job("read") {
+            public void mouseUp(MouseEvent e) {
+                if (!updates) {
+                    return;
+                }
 
-                    @Override
-                    protected IStatus run(IProgressMonitor monitor) {
-                        bus.post(new NewFeedItemsEvent());
-                        return Status.OK_STATUS;
-                    }
+                Rectangle labelBounds = clickableLable.getBounds();
+                if (labelBounds == null) {
+                    return;
+                }
 
-                }.schedule(2000);
+                if (labelBounds.contains(new Point(e.x, e.y))) {
+                    setNoAvailableNews();
+                    new Job("read") {
+
+                        @Override
+                        protected IStatus run(IProgressMonitor monitor) {
+                            bus.post(new NewFeedItemsEvent());
+                            return Status.OK_STATUS;
+                        }
+
+                    }.schedule(2000);
+                }
             }
         });
         return composite;
+    }
+
+    private void setNoAvailableNews() {
+        updates = false;
+        clickableLable.setImage(images.getImage(SharedImages.Images.OBJ_CONTAINER));
+    }
+
+    private void setAvailableNews() {
+        updates = true;
+        clickableLable.setImage(images.getImage(SharedImages.Images.OBJ_NEWSLETTER));
     }
 
     @Subscribe
@@ -79,8 +97,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
             @Override
             public void run() {
-                button.setImage(images.getImage(SharedImages.Images.OBJ_NEWSLETTER));
-
+                setAvailableNews();
             }
 
         });
