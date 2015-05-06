@@ -13,8 +13,9 @@
 package org.eclipse.recommenders.completion.rcp.utils;
 
 import static com.google.common.base.Objects.firstNonNull;
-import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.*;
 import static org.eclipse.jdt.core.compiler.CharOperation.NO_CHAR;
+import static org.eclipse.recommenders.internal.completion.rcp.LogMessages.ERROR_COULD_NOT_DETERMINE_DECLARING_TYPE;
 import static org.eclipse.recommenders.utils.Checks.cast;
 import static org.eclipse.recommenders.utils.Logs.log;
 import static org.eclipse.recommenders.utils.Reflections.getDeclaredField;
@@ -35,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.recommenders.internal.completion.rcp.LogMessages;
 import org.eclipse.recommenders.rcp.utils.CompilerBindings;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.VmMethodName;
 
@@ -58,7 +60,7 @@ public final class ProposalUtils {
      */
     private static final Field ORIGINAL_SIGNATURE = getDeclaredField(InternalCompletionProposal.class,
             "originalSignature") //$NON-NLS-1$
-            .orNull();
+                    .orNull();
 
     /**
      * @see <a href="https://www.eclipse.org/forums/index.php/m/1408138/">Forum discussion of the lookup strategy
@@ -183,11 +185,16 @@ public final class ProposalUtils {
      *      <code>ProblemReferenceBinding</code> handling is necessary</a>
      */
     private static Optional<ReferenceBinding> lookup(LookupEnvironment env, char[][] compoundName) {
-        ReferenceBinding result = env.getType(compoundName);
-        if (result instanceof ProblemReferenceBinding) {
-            result = cast(((ProblemReferenceBinding) result).closestMatch());
+        try {
+            ReferenceBinding result = env.getType(compoundName);
+            if (result instanceof ProblemReferenceBinding) {
+                result = cast(((ProblemReferenceBinding) result).closestMatch());
+            }
+            return fromNullable(result);
+        } catch (Exception e) {
+            log(ERROR_COULD_NOT_DETERMINE_DECLARING_TYPE, e, ArrayUtils.toString(compoundName, "null"));
+            return absent();
         }
-        return Optional.fromNullable(result);
     }
 
     private static char[] getSignature(CompletionProposal proposal) {
