@@ -11,6 +11,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.google.common.base.Preconditions;
+
 public class FeedDescriptor {
 
     private final IConfigurationElement config;
@@ -18,11 +20,13 @@ public class FeedDescriptor {
 
     public FeedDescriptor(FeedDescriptor that) {
         this(that.config, that.enabled);
+        Preconditions.checkNotNull(that.getId());
     }
 
     public FeedDescriptor(IConfigurationElement config, boolean enabled) {
         this.config = config;
         this.enabled = enabled;
+        Preconditions.checkNotNull(getId());
     }
 
     public String getId() {
