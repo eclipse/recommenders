@@ -1,15 +1,17 @@
 /**
-* Copyright (c) 2015 Pawel Nowak.
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the Eclipse Public License v1.0
-* which accompanies this distribution, and is available at
-* http://www.eclipse.org/legal/epl-v10.html
-*/
+ * Copyright (c) 2015 Pawel Nowak.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.recommenders.internal.news.rcp;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import com.google.common.base.Preconditions;
 
 public class FeedDescriptor {
 
@@ -23,6 +25,7 @@ public class FeedDescriptor {
     public FeedDescriptor(IConfigurationElement config, boolean enabled) {
         this.config = config;
         this.enabled = enabled;
+        Preconditions.checkNotNull(getId());
     }
 
     public String getId() {
