@@ -7,16 +7,12 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-import static java.lang.Long.parseLong;
-import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createNewFeedItemsEvent;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
@@ -28,7 +24,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -42,15 +37,18 @@ public class RssService implements IRssService {
     private final NewsRcpPreferences preferences;
     private final EventBus bus;
     private final NotificationEnvironment environment;
+    private final JobProvider provider;
 
     private final Set<String> readIds;
 
     private final HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
 
-    public RssService(NewsRcpPreferences preferences, EventBus bus, NotificationEnvironment environment) {
+    public RssService(NewsRcpPreferences preferences, EventBus bus, NotificationEnvironment environment,
+            JobProvider provider) {
         this.preferences = preferences;
         this.bus = bus;
         this.environment = environment;
+        this.provider = provider;
         bus.register(this);
 
         readIds = ReadFeedMessagesProperties.getReadIds();
@@ -67,42 +65,43 @@ public class RssService implements IRssService {
 
     @Override
     public void start(final FeedDescriptor feed) {
-        final PollFeedJob job = new PollFeedJob(feed, preferences, environment);
+        // final PollFeedJob job = new PollFeedJob(feed, preferences, environment);
+        final PollFeedJob job = provider.getPollFeedJob(feed, preferences, environment);
         job.setSystem(true);
         job.setPriority(Job.DECORATE);
         job.addJobChangeListener(new JobChangeAdapter() {
-            @Override
-            public void done(IJobChangeEvent event) {
-                boolean newMessage = false;
-                if (!groupedMessages.containsKey(feed)) {
-                    groupedMessages.put(feed, Lists.<IFeedMessage>newArrayList());
-                }
-                List<IFeedMessage> feedMessages = groupedMessages.get(feed);
-                for (IFeedMessage message : job.getMessages()) {
-                    if (!feedMessages.contains(message)) {
-                        feedMessages.add(message);
-                        if (!readIds.contains(message.getId())) {
-                            newMessage = true;
-                        }
-                    }
-                }
-
-                if (groupedMessages.size() > 0 && newMessage) {
-                    bus.post(createNewFeedItemsEvent());
-                }
-
-                if (!preferences.isEnabled() || !isFeedEnabled(feed)) {
-                    return;
-                }
-                if (feed.getPollingInterval() != null) {
-                    job.schedule(TimeUnit.MINUTES.toMillis(parseLong(feed.getPollingInterval())));
-                    return;
-                }
-                job.schedule(TimeUnit.MINUTES.toMillis(DEFAULT_DELAY));
-            }
+            // @Override
+            // public void done(IJobChangeEvent event) {
+            // boolean newMessage = false;
+            // if (!groupedMessages.containsKey(feed)) {
+            // groupedMessages.put(feed, Lists.<IFeedMessage>newArrayList());
+            // }
+            // List<IFeedMessage> feedMessages = groupedMessages.get(feed);
+            // for (IFeedMessage message : job.getMessages()) {
+            // if (!feedMessages.contains(message)) {
+            // feedMessages.add(message);
+            // if (!readIds.contains(message.getId())) {
+            // newMessage = true;
+            // }
+            // }
+            // }
+            //
+            // if (groupedMessages.size() > 0 && newMessage) {
+            // bus.post(createNewFeedItemsEvent());
+            // }
+            //
+            // if (!preferences.isEnabled() || !isFeedEnabled(feed)) {
+            // return;
+            // }
+            // if (feed.getPollingInterval() != null) {
+            // job.schedule(TimeUnit.MINUTES.toMillis(parseLong(feed.getPollingInterval())));
+            // return;
+            // }
+            // job.schedule(TimeUnit.MINUTES.toMillis(DEFAULT_DELAY));
+            // }
         });
 
-        if (PollFeedJob.getJobManager().find(job).length < 1) {
+        if (!provider.jobExists(feed, preferences, environment)) {
             job.schedule(START_DELAY);
         }
     }

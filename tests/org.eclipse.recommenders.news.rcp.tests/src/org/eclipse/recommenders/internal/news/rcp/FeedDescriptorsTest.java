@@ -33,8 +33,8 @@ public class FeedDescriptorsTest {
 
     @Test
     public void testLoadedSettingsIgnoresDefaultEnablement() {
-        List<FeedDescriptor> result = FeedDescriptors.load(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT
-                + SEPARATOR + THIRD_ELEMENT,
+        List<FeedDescriptor> result = FeedDescriptors.load(
+                FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR + THIRD_ELEMENT,
                 ImmutableList.of(enabled(FIRST_ELEMENT), enabled(SECOND_ELEMENT), disabled(THIRD_ELEMENT)));
 
         assertThat(result.get(0).getId(), is(equalTo(FIRST_ELEMENT)));
@@ -48,8 +48,8 @@ public class FeedDescriptorsTest {
 
     @Test
     public void testLoadIgnoresUnknownFeeds() {
-        List<FeedDescriptor> result = FeedDescriptors.load(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG
-                + UNINSTALLED_ELEMENT + SEPARATOR + SECOND_ELEMENT,
+        List<FeedDescriptor> result = FeedDescriptors.load(
+                FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + UNINSTALLED_ELEMENT + SEPARATOR + SECOND_ELEMENT,
                 ImmutableList.of(enabled(FIRST_ELEMENT), enabled(SECOND_ELEMENT)));
 
         assertThat(result.get(0).getId(), is(equalTo(FIRST_ELEMENT)));
@@ -86,10 +86,10 @@ public class FeedDescriptorsTest {
 
     @Test
     public void testStoreFeedsList() {
-        String result = FeedDescriptors.store(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT),
-                enabled(THIRD_ELEMENT)));
-        assertThat(result, is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR
-                + THIRD_ELEMENT)));
+        String result = FeedDescriptors
+                .store(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT), enabled(THIRD_ELEMENT)));
+        assertThat(result,
+                is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR + THIRD_ELEMENT)));
     }
 
     @Test
@@ -103,17 +103,17 @@ public class FeedDescriptorsTest {
     public void testStoreDescriptorMultipleTimes() {
         String result = FeedDescriptors.store(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT),
                 enabled(THIRD_ELEMENT), disabled(FIRST_ELEMENT)));
-        assertThat(result, is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR
-                + THIRD_ELEMENT)));
+        assertThat(result,
+                is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR + THIRD_ELEMENT)));
     }
 
-    private static FeedDescriptor enabled(String id) {
+    public static FeedDescriptor enabled(String id) {
         IConfigurationElement config = Mockito.mock(IConfigurationElement.class);
         when(config.getAttribute("id")).thenReturn(id);
         return new FeedDescriptor(config, true);
     }
 
-    private static FeedDescriptor disabled(String id) {
+    public static FeedDescriptor disabled(String id) {
         IConfigurationElement config = Mockito.mock(IConfigurationElement.class);
         when(config.getAttribute("id")).thenReturn(id);
         return new FeedDescriptor(config, false);
