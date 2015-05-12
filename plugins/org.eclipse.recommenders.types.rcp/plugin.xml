@@ -19,4 +19,10 @@
 	<extension point="org.eclipse.recommenders.injection.modules">
 		<module class="org.eclipse.recommenders.internal.types.rcp.TypesRcpModule"/>
 	</extension>
+    <extension point="org.eclipse.ui.preferencePages">
+        <page id="org.eclipse.recommenders.types.rcp.preferencePages.constructors"
+            category="org.eclipse.recommenders.completion.rcp.preferencePages.completions"
+            class="org.eclipse.recommenders.internal.types.rcp.ConstructorsPreferencePage"
+            name="%preferencePages.constructors.name"/>
+    </extension>
 </plugin>

@@ -19,6 +19,14 @@ public final class Messages extends NLS {
     public static String PROPOSAL_LABEL_ENABLE_TYPES_COMPLETION;
     public static String PROPOSAL_TOOLTIP_ENABLE_TYPES_COMPLETION;
 
+    public static String PREFPAGE_DESCRIPTION_CONSTRUCTORS;
+
+    public static String FIELD_LABEL_DECORATE_PROPOSAL_ICON;
+    public static String FIELD_LABEL_DECORATE_PROPOSAL_TEXT;
+    public static String FIELD_LABEL_MAX_NUMBER_OF_PROPOSALS;
+    public static String FIELD_LABEL_MIN_PROPOSAL_PROBABILITY;
+    public static String FIELD_LABEL_UPDATE_PROPOSAL_RELEVANCE;
+
     static {
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
     }
