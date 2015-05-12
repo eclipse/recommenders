@@ -19,4 +19,6 @@ public interface IRssService {
     void start();
 
     void start(FeedDescriptor feed);
+
+    void removeMessages(FeedDescriptor feed);
 }

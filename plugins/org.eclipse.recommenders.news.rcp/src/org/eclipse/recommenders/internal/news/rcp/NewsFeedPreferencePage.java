@@ -10,6 +10,7 @@ package org.eclipse.recommenders.internal.news.rcp;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -37,7 +38,7 @@ import com.google.common.collect.Lists;
 public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
     private final IRssService service;
-
+    private final Set<String> readIds;
     private BooleanFieldEditor enabledEditor;
     private FeedEditor feedEditor;
 
@@ -45,6 +46,7 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
     public NewsFeedPreferencePage(IRssService service) {
         super(GRID);
         this.service = service;
+        readIds = ReadFeedMessagesProperties.getReadIds();
     }
 
     @Override
@@ -76,12 +78,14 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
         if (!oldValue && newValue) {
             // News has been activated
             service.start();
-            return result;
         }
         for (FeedDescriptor oldFeed : oldFeedValue) {
             FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
             if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
                 service.start(newFeed);
+            }
+            if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
+                service.removeMessages(newFeed);
             }
         }
         return result;
