@@ -30,8 +30,8 @@
 					<repositories>
 						<repository>
 							<id>luna</id>
+							<url>http://download.eclipse.org/releases/luna/201502271000/</url>
 							<layout>p2</layout>
-							<url>http://download.eclipse.org/releases/luna</url>
 						</repository>
 					</repositories>
 				</configuration>

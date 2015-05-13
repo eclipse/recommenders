@@ -94,12 +94,12 @@
 						<repositories>
 							<repository>
 								<id>wtp-releng</id>
-								<url>http://download.eclipse.org/webtools/releng/repository</url>
+								<url>http://download.eclipse.org/webtools/releng/repository/</url>
 								<layout>p2</layout>
 							</repository>
 							<repository>
 								<id>luna</id>
-								<url>http://download.eclipse.org/releases/luna</url>
+								<url>http://download.eclipse.org/releases/luna/201502271000/</url>
 								<layout>p2</layout>
 							</repository>
 						</repositories>
