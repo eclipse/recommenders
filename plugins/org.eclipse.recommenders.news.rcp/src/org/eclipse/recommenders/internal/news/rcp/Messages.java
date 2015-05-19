@@ -25,7 +25,7 @@ public final class Messages extends NLS {
     public static String JOB_NAME_CLOSE;
     public static String JOB_NAME_FADE;
     public static String LABEL_NOTIFICATION_NAME;
-    public static String LABEL_NO_NEW_MESSAGS;
+    public static String LABEL_NO_NEW_MESSAGES;
     public static String TOOLTIP_NO_NEW_MESSAGES;
     public static String TOOLTIP_NEW_MESSAGES;
 

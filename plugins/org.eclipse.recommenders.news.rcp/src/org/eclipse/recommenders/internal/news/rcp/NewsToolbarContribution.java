@@ -13,8 +13,11 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
+import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
+import org.eclipse.recommenders.internal.news.rcp.menus.NoNewsMenuListener;
 import org.eclipse.recommenders.internal.news.rcp.notifications.CommonImages;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NewsNotificationPopup;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NoNewsNotificationPopup;
@@ -37,6 +40,9 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     private final EventBus eventBus;
 
     private UpdatingNewsAction updatingNewsAction;
+    private MenuManager menuManager;
+    NoNewsMenuListener noNewsMenuListener;
+    NewsMenuListener newsMenuListener;
 
     @Inject
     public NewsToolbarContribution(IRssService service, SharedImages images, EventBus eventBus) {
@@ -44,14 +50,17 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         this.images = images;
         this.eventBus = eventBus;
         eventBus.register(this);
+        noNewsMenuListener = new NoNewsMenuListener();
+        newsMenuListener = new NewsMenuListener(eventBus);
     }
 
     @Override
     protected Control createControl(Composite parent) {
+        menuManager = new MenuManager();
         updatingNewsAction = new UpdatingNewsAction();
         ToolBarManager manager = new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
         manager.add(updatingNewsAction);
-
+        manager.setContextMenuManager(menuManager);
         return manager.createControl(parent);
     }
 
@@ -62,6 +71,11 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             @Override
             public void run() {
                 updatingNewsAction.setAvailableNews();
+                menuManager.setRemoveAllWhenShown(true);
+                menuManager.removeMenuListener(noNewsMenuListener);
+                Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
+                newsMenuListener.setMessages(messages);
+                menuManager.addMenuListener(newsMenuListener);
             }
         });
     }
@@ -78,7 +92,13 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
             if (messages.isEmpty()) {
                 new NoNewsNotificationPopup().open();
+                menuManager.getMenu().setVisible(true);
             } else {
+                menuManager.setRemoveAllWhenShown(true);
+                menuManager.removeMenuListener(noNewsMenuListener);
+                newsMenuListener.setMessages(messages);
+                menuManager.addMenuListener(newsMenuListener);
+                menuManager.getMenu().setVisible(true);
                 new NewsNotificationPopup(messages, eventBus).open();
             }
         }
@@ -86,11 +106,20 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         private void setNoAvailableNews() {
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
+            menuManager.setRemoveAllWhenShown(true);
+            menuManager.removeMenuListener(newsMenuListener);
+            menuManager.addMenuListener(noNewsMenuListener);
         }
 
         private void setAvailableNews() {
             setImageDescriptor(CommonImages.RSS_ACTIVE);
             setToolTipText(Messages.TOOLTIP_NEW_MESSAGES);
+            menuManager.setRemoveAllWhenShown(true);
+            menuManager.removeMenuListener(noNewsMenuListener);
+            Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
+            newsMenuListener.setMessages(messages);
+            menuManager.addMenuListener(newsMenuListener);
         }
     }
+
 }
