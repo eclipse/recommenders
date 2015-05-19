@@ -13,8 +13,11 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
+import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
+import org.eclipse.recommenders.internal.news.rcp.menus.NoNewsMenuListener;
 import org.eclipse.recommenders.internal.news.rcp.notifications.CommonImages;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NewsNotificationPopup;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NoNewsNotificationPopup;
@@ -37,6 +40,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     private final EventBus eventBus;
 
     private UpdatingNewsAction updatingNewsAction;
+    private MenuManager menuMgr;
 
     @Inject
     public NewsToolbarContribution(IRssService service, SharedImages images, EventBus eventBus) {
@@ -48,10 +52,11 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     @Override
     protected Control createControl(Composite parent) {
+        menuMgr = new MenuManager();
         updatingNewsAction = new UpdatingNewsAction();
         ToolBarManager manager = new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
         manager.add(updatingNewsAction);
-
+        manager.setContextMenuManager(menuMgr);
         return manager.createControl(parent);
     }
 
@@ -71,6 +76,9 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             setNoAvailableNews();
         }
 
+        NoNewsMenuListener noNewsMenuListener = new NoNewsMenuListener();
+        NewsMenuListener newsMenuListener = new NewsMenuListener(eventBus);
+
         @Override
         public void run() {
             setNoAvailableNews();
@@ -79,6 +87,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             if (messages.isEmpty()) {
                 new NoNewsNotificationPopup().open();
             } else {
+                newsMenuListener.setMessages(messages);
                 new NewsNotificationPopup(messages, eventBus).open();
             }
         }
@@ -86,11 +95,20 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         private void setNoAvailableNews() {
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
+            menuMgr.setRemoveAllWhenShown(true);
+            menuMgr.removeMenuListener(newsMenuListener);
+            menuMgr.addMenuListener(noNewsMenuListener);
         }
 
         private void setAvailableNews() {
             setImageDescriptor(CommonImages.RSS_ACTIVE);
             setToolTipText(Messages.TOOLTIP_NEW_MESSAGES);
+            menuMgr.setRemoveAllWhenShown(true);
+            menuMgr.removeMenuListener(noNewsMenuListener);
+            Map<FeedDescriptor, List<IFeedMessage>> messages = service.getMessages(3);
+            newsMenuListener.setMessages(messages);
+            menuMgr.addMenuListener(newsMenuListener);
         }
     }
+
 }
