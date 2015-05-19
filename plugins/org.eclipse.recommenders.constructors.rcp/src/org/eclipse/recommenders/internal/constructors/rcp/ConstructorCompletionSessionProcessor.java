@@ -68,11 +68,14 @@ public class ConstructorCompletionSessionProcessor extends SessionProcessor {
 
     private Map<CompletionProposal, Double> recommationationsMap;
 
+    private IMethodNameProvider methodNameProvider;
+
     @Inject
     public ConstructorCompletionSessionProcessor(IProjectCoordinateProvider pcProvider,
-            IConstructorModelProvider modelProvider, ConstructorsRcpPreferences prefs, SharedImages images) {
+            IConstructorModelProvider modelProvider, IMethodNameProvider methodNameProvider, ConstructorsRcpPreferences prefs, SharedImages images) {
         this.pcProvider = requireNonNull(pcProvider);
         this.modelProvider = requireNonNull(modelProvider);
+        this.methodNameProvider = requireNonNull(methodNameProvider);
         this.prefs = requireNonNull(prefs);
         this.overlayProcessor = new OverlayImageProposalProcessor(images.getDescriptor(OVR_STAR), IDecoration.TOP_LEFT);
     }
@@ -120,7 +123,7 @@ public class ConstructorCompletionSessionProcessor extends SessionProcessor {
                 if (coreProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION) {
                     continue;
                 }
-                IMethodName methodName = ProposalUtils.toMethodName(coreProposal, env).orNull();
+                IMethodName methodName = methodNameProvider.toMethodName(coreProposal, env).orNull();
                 if (methodName == null) {
                     continue;
                 }
