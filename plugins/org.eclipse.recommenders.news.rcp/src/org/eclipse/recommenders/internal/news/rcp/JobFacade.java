@@ -7,13 +7,20 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
+import org.eclipse.recommenders.news.rcp.IFeedMessage;
+import org.eclipse.recommenders.news.rcp.IJobFacade;
+import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 
 @SuppressWarnings("restriction")
-public class JobProvider {
+public class JobFacade implements IJobFacade {
 
     private static final long START_DELAY = 0;
 
@@ -44,5 +51,35 @@ public class JobProvider {
 
     public void schedule(PollFeedJob job) {
         job.schedule(START_DELAY);
+    }
+
+    @Override
+    public void schedule() {
+        // TODO schedule the job
+
+    }
+
+    @Override
+    public IPollFeedJob getJob() {
+        // TODO return single job instance
+        return null;
+    }
+
+    @Override
+    public Map<FeedDescriptor, Date> whenWereFeedsLastPolled() {
+        // TODO return map of feeds and its last polled date
+        return null;
+    }
+
+    @Override
+    public void jobDone() {
+        // TODO rescheduling job, grouping messages
+
+    }
+
+    @Override
+    public Map<FeedDescriptor, List<IFeedMessage>> getMessages() {
+        // TODO return messages
+        return null;
     }
 }

@@ -8,28 +8,32 @@
 package org.eclipse.recommenders.internal.news.rcp;
 
 import static org.eclipse.recommenders.internal.news.rcp.TestUtils.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
+import org.eclipse.recommenders.news.rcp.IJobFacade;
+import org.eclipse.recommenders.news.rcp.IPollFeedJob;
+import org.eclipse.recommenders.news.rcp.IRssService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 
-@SuppressWarnings("restriction")
 @RunWith(MockitoJUnitRunner.class)
-public class RssServiceTest {
+@SuppressWarnings("restriction")
+public class IRssServiceTest {
 
     private static final String FIRST_ELEMENT = "first";
     private NotificationEnvironment environment;
     private NewsRcpPreferences preferences;
     private EventBus bus;
-    private PollFeedJob job;
-    private JobFacade provider;
+    private IPollFeedJob job;
+    private IJobFacade jobFacade;
 
     @Before
     public void setUp() {
@@ -37,7 +41,7 @@ public class RssServiceTest {
         preferences = mock(NewsRcpPreferences.class);
         bus = mock(EventBus.class);
         job = mock(PollFeedJob.class);
-        provider = mock(JobFacade.class);
+        jobFacade = mock(JobFacade.class);
     }
 
     @Test
@@ -45,13 +49,9 @@ public class RssServiceTest {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.isEnabled()).thenReturn(true);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        RssService service = new RssService(preferences, bus, environment, provider);
-        when(provider.getPollFeedJob(Mockito.any(FeedDescriptor.class), Mockito.any(NewsRcpPreferences.class),
-                Mockito.any(NotificationEnvironment.class), Mockito.any(RssService.class))).thenReturn(job);
-        service.start(feed);
-        verify(provider).getPollFeedJob(feed, preferences, environment, service);
-        verify(provider, times(1)).schedule(job);
-
+        IRssService service = new RssService(preferences, bus, environment, jobFacade);
+        service.start();
+        verify(jobFacade, times(1)).schedule();
     }
 
     @Test
@@ -59,11 +59,9 @@ public class RssServiceTest {
         FeedDescriptor feed = disabled(FIRST_ELEMENT);
         when(preferences.isEnabled()).thenReturn(true);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        RssService service = new RssService(preferences, bus, environment, provider);
-        when(provider.getPollFeedJob(Mockito.any(FeedDescriptor.class), Mockito.any(NewsRcpPreferences.class),
-                Mockito.any(NotificationEnvironment.class), Mockito.any(RssService.class))).thenReturn(job);
+        IRssService service = new RssService(preferences, bus, environment, jobFacade);
         service.start();
-        verify(provider, times(0)).schedule(job);
+        verify(jobFacade, times(0)).schedule();
     }
 
     @Test
@@ -71,10 +69,19 @@ public class RssServiceTest {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.isEnabled()).thenReturn(false);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        RssService service = new RssService(preferences, bus, environment, provider);
-        when(provider.getPollFeedJob(Mockito.any(FeedDescriptor.class), Mockito.any(NewsRcpPreferences.class),
-                Mockito.any(NotificationEnvironment.class), Mockito.any(RssService.class))).thenReturn(job);
+        IRssService service = new RssService(preferences, bus, environment, jobFacade);
         service.start();
-        verify(provider, times(0)).schedule(job);
+        verify(jobFacade, times(0)).schedule();
     }
+
+    @Test
+    public void testGetMessages() {
+        FeedDescriptor feed = enabled(FIRST_ELEMENT);
+        when(preferences.isEnabled()).thenReturn(true);
+        when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
+        IRssService service = new RssService(preferences, bus, environment, jobFacade);
+        service.start();
+        assertThat(service.getMessages(3).size(), is(3));
+    }
+
 }

@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
+import org.eclipse.recommenders.news.rcp.IJobFacade;
 import org.eclipse.recommenders.news.rcp.IRssService;
 
 import com.google.common.base.Function;
@@ -36,21 +37,21 @@ public class RssService implements IRssService {
     private final NewsRcpPreferences preferences;
     private final EventBus bus;
     private final NotificationEnvironment environment;
-    private final JobProvider provider;
-
+    private final JobFacade provider;
+    private final NewsFeedProperties newsFeedProperties;
     private final Set<String> readIds;
 
     private final HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
 
     public RssService(NewsRcpPreferences preferences, EventBus bus, NotificationEnvironment environment,
-            JobProvider provider) {
+            IJobFacade jobFacade) {
         this.preferences = preferences;
         this.bus = bus;
         this.environment = environment;
-        this.provider = provider;
+        this.provider = (JobFacade) jobFacade;
         bus.register(this);
-
-        readIds = ReadFeedMessagesProperties.getReadIds();
+        newsFeedProperties = new NewsFeedProperties();
+        readIds = newsFeedProperties.getReadIds();
     }
 
     @Override
@@ -65,7 +66,6 @@ public class RssService implements IRssService {
         }
     }
 
-    @Override
     public void start(final FeedDescriptor feed) {
         final PollFeedJob job = provider.getPollFeedJob(feed, preferences, environment, this);
         provider.schedule(job);
@@ -141,9 +141,10 @@ public class RssService implements IRssService {
     }
 
     @Subscribe
+    @Override
     public void handle(FeedMessageReadEvent event) {
         readIds.add(event.getId());
-        ReadFeedMessagesProperties.writeReadIds(readIds);
+        newsFeedProperties.writeReadIds(readIds);
     }
 
     @Override
@@ -152,4 +153,5 @@ public class RssService implements IRssService {
             groupedMessages.remove(feed);
         }
     }
+
 }

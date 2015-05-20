@@ -11,6 +11,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,6 +22,7 @@ import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedReader;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
+import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 import org.eclipse.recommenders.utils.Urls;
 
 import com.google.common.base.Function;
@@ -29,7 +31,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
 @SuppressWarnings("restriction")
-public class PollFeedJob extends Job {
+public class PollFeedJob extends Job implements IPollFeedJob {
     private final NewsRcpPreferences preferences;
     private final NotificationEnvironment environment;
     private List<? extends IFeedMessage> messages = Lists.newArrayList();
@@ -117,11 +119,18 @@ public class PollFeedJob extends Job {
         }).toList();
     }
 
+    @Override
     public List<? extends IFeedMessage> getMessages() {
         return messages;
     }
 
     public FeedDescriptor getFeed() {
         return feed;
+    }
+
+    @Override
+    public boolean shouldPoll(FeedDescriptor feed, Date lastPolled) {
+        // TODO determine whether Feed should be polled at this job run or later
+        return false;
     }
 }
