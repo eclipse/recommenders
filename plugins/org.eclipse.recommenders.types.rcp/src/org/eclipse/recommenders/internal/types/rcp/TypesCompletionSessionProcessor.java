@@ -38,23 +38,23 @@ public class TypesCompletionSessionProcessor extends SessionProcessor {
 
     private ImmutableSet<String> subtypes;
 
-    private final TypesIndexService service;
+    private final ITypesIndexService service;
     private final OverlayImageProposalProcessor overlayDecorator;
 
     @Inject
-    public TypesCompletionSessionProcessor(TypesIndexService service, SharedImages images) {
+    public TypesCompletionSessionProcessor(ITypesIndexService service, SharedImages images) {
         this.service = service;
         overlayDecorator = new OverlayImageProposalProcessor(images.getDescriptor(OVR_STAR), IDecoration.TOP_LEFT);
     }
 
     @Override
     public boolean startSession(IRecommendersCompletionContext context) {
-        Builder<String> b = ImmutableSet.builder();
         Set<ITypeName> expectedTypes = context.getExpectedTypeNames();
         if (expectedTypes.isEmpty()) {
             return false;
         }
 
+        Builder<String> b = ImmutableSet.builder();
         for (ITypeName expected : expectedTypes) {
             String oneCharPrefix = substring(context.getPrefix(), 0, 1);
             b.addAll(service.subtypes(expected, oneCharPrefix, context.getProject()));
