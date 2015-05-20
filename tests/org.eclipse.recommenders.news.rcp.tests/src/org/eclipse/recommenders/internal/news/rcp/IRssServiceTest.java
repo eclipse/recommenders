@@ -12,67 +12,73 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-import java.net.MalformedURLException;
+import java.util.Set;
 
+import org.eclipse.recommenders.news.rcp.IJobFacade;
+import org.eclipse.recommenders.news.rcp.INewsService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.EventBus;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PollFeedJobTest {
+public class IRssServiceTest {
 
     private static final String FIRST_ELEMENT = "first";
-    private static final String SECOND_ELEMENT = "second";
     private NewsRcpPreferences preferences;
+    private EventBus bus;
+    private IJobFacade jobFacade;
+    private Set<FeedDescriptor> feeds;
 
     @Before
     public void setUp() {
         preferences = mock(NewsRcpPreferences.class);
+        bus = mock(EventBus.class);
+        jobFacade = mock(JobFacade.class);
+        feeds = mock(Set.class);
     }
 
     @Test
-    public void testRunEnabledFeed() {
+    public void testStartEnabledFeed() {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.isEnabled()).thenReturn(true);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        PollFeedJob job = new PollFeedJob("testJob");
-        assertThat(job.shouldRun(), is(true));
+        INewsService service = new NewsService(preferences, bus, jobFacade);
+        service.start();
+        verify(jobFacade, times(1)).schedule(feeds);
     }
 
     @Test
-    public void testRunDisabledFeed() {
-        FeedDescriptor feed = disabled(SECOND_ELEMENT);
+    public void testStartDisabledFeed() {
+        FeedDescriptor feed = disabled(FIRST_ELEMENT);
         when(preferences.isEnabled()).thenReturn(true);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        PollFeedJob job = new PollFeedJob("testJob");
-        assertThat(job.shouldRun(), is(false));
+        INewsService service = new NewsService(preferences, bus, jobFacade);
+        service.start();
+        verify(jobFacade, times(0)).schedule(feeds);
     }
 
     @Test
-    public void testRunPreferencesDisabled() {
+    public void testStartDisabledPreferences() {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.isEnabled()).thenReturn(false);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        PollFeedJob job = new PollFeedJob("testJob");
-        assertThat(job.shouldRun(), is(false));
+        INewsService service = new NewsService(preferences, bus, jobFacade);
+        service.start();
+        verify(jobFacade, times(0)).schedule(feeds);
     }
 
     @Test
-    public void testFeedsWithSameIdBelongsTo() throws MalformedURLException {
-        PollFeedJob firstJob = new PollFeedJob("testJob");
-        PollFeedJob secondJob = new PollFeedJob("testJob");
-        assertThat(firstJob.belongsTo(secondJob), is(true));
-        assertThat(secondJob.belongsTo(firstJob), is(true));
+    public void testGetMessages() {
+        FeedDescriptor feed = enabled(FIRST_ELEMENT);
+        when(preferences.isEnabled()).thenReturn(true);
+        when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
+        INewsService service = new NewsService(preferences, bus, jobFacade);
+        service.start();
+        assertThat(service.getMessages(3).size(), is(3));
     }
 
-    @Test
-    public void testFeedsWithDifferentIdDoesntBelongsTo() {
-        PollFeedJob firstJob = new PollFeedJob("testJob");
-        PollFeedJob secondJob = new PollFeedJob("testJob2");
-        assertThat(firstJob.belongsTo(secondJob), is(false));
-        assertThat(secondJob.belongsTo(firstJob), is(false));
-    }
 }
