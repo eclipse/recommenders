@@ -7,11 +7,13 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -21,19 +23,25 @@ import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedReader;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
+import org.eclipse.recommenders.news.rcp.INewsFeedProperties;
+import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 import org.eclipse.recommenders.utils.Urls;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
-public class PollFeedJob extends Job {
+public class PollFeedJob extends Job implements IPollFeedJob {
     private final NewsRcpPreferences preferences;
     private final NotificationEnvironment environment;
     private List<? extends IFeedMessage> messages = Lists.newArrayList();
     private final FeedDescriptor feed;
+    private Set<FeedDescriptor> feeds = Sets.newHashSet();
+    private final INewsFeedProperties newsFeedProperties;
 
     public PollFeedJob(FeedDescriptor feed, NewsRcpPreferences preferences, NotificationEnvironment environment) {
         super(feed.getId());
@@ -43,31 +51,27 @@ public class PollFeedJob extends Job {
         this.feed = feed;
         this.preferences = preferences;
         this.environment = environment;
+        newsFeedProperties = new NewsFeedProperties();
     }
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-        int status = -1;
-        try {
-            HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
-            try {
-                connection.connect();
-                status = connection.getResponseCode();
-                if (status == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
-
-                    InputStream in = new BufferedInputStream(connection.getInputStream());
-                    try {
-                        messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
-                    } finally {
-                        in.close();
-                    }
+        Map<FeedDescriptor, Date> map = Maps.newHashMap();
+        for (FeedDescriptor feed : feeds) {
+            if (shouldPoll(feed)) {
+                // poll feed
+                map.put(feed, new Date());
+                // its just mock, put it here so you can know where it's called
+                try {
+                    readMessages(null, monitor, null);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
-            } finally {
-                connection.disconnect();
             }
-        } catch (Exception e) {
-            return Status.CANCEL_STATUS;
+
         }
+        newsFeedProperties.writePollDates(map);
         return Status.OK_STATUS;
     }
 
@@ -117,11 +121,25 @@ public class PollFeedJob extends Job {
         }).toList();
     }
 
+    @Override
     public List<? extends IFeedMessage> getMessages() {
         return messages;
     }
 
     public FeedDescriptor getFeed() {
         return feed;
+    }
+
+    @Override
+    public void setFeeds(Collection<FeedDescriptor> feeds) {
+        this.feeds = (Set<FeedDescriptor>) feeds;
+
+    }
+
+    @Override
+    public boolean shouldPoll(FeedDescriptor feed) {
+        newsFeedProperties.getPollDates();
+        // check condition
+        return false;
     }
 }
