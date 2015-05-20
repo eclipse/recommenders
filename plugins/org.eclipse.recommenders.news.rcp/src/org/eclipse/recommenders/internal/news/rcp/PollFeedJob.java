@@ -7,11 +7,13 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -21,52 +23,48 @@ import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedReader;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
+import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 import org.eclipse.recommenders.utils.Urls;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
-public class PollFeedJob extends Job {
+public class PollFeedJob extends Job implements IPollFeedJob {
+    private final String jobId;
     private final NewsRcpPreferences preferences;
     private final NotificationEnvironment environment;
     private List<? extends IFeedMessage> messages = Lists.newArrayList();
-    private final FeedDescriptor feed;
+    private Set<FeedDescriptor> feeds = Sets.newHashSet();
 
-    public PollFeedJob(FeedDescriptor feed, NewsRcpPreferences preferences, NotificationEnvironment environment) {
-        super(feed.getId());
-        Preconditions.checkNotNull(feed);
+    public PollFeedJob(NewsRcpPreferences preferences, NotificationEnvironment environment, String jobId) {
+        super(jobId);
         Preconditions.checkNotNull(preferences);
         Preconditions.checkNotNull(environment);
-        this.feed = feed;
+        Preconditions.checkNotNull(jobId);
+        this.jobId = jobId;
         this.preferences = preferences;
         this.environment = environment;
     }
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-        int status = -1;
-        try {
-            HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
+        Map<FeedDescriptor, Date> map = Maps.newHashMap();
+        for (FeedDescriptor feed : feeds) {
+            // poll feed
+            map.put(feed, new Date());
+            // its just mock, put it here so you can know where it's called
             try {
-                connection.connect();
-                status = connection.getResponseCode();
-                if (status == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
-
-                    InputStream in = new BufferedInputStream(connection.getInputStream());
-                    try {
-                        messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
-                    } finally {
-                        in.close();
-                    }
-                }
-            } finally {
-                connection.disconnect();
+                readMessages(null, monitor, null);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            return Status.CANCEL_STATUS;
+
         }
         return Status.OK_STATUS;
     }
@@ -80,15 +78,7 @@ public class PollFeedJob extends Job {
             return false;
         }
         PollFeedJob rhs = (PollFeedJob) job;
-        if (!feed.getId().equals(rhs.getFeed().getId())) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean shouldRun() {
-        if (!preferences.isEnabled() || !isFeedEnabled(feed)) {
+        if (!jobId.equals(rhs.getJobId())) {
             return false;
         }
         return true;
@@ -117,11 +107,18 @@ public class PollFeedJob extends Job {
         }).toList();
     }
 
+    @Override
     public List<? extends IFeedMessage> getMessages() {
         return messages;
     }
 
-    public FeedDescriptor getFeed() {
-        return feed;
+    @Override
+    public void setFeeds(Collection<FeedDescriptor> feeds) {
+        this.feeds = (Set<FeedDescriptor>) feeds;
+
+    }
+
+    public String getJobId() {
+        return jobId;
     }
 }
