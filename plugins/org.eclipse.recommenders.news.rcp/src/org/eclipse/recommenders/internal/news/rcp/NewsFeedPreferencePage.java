@@ -76,15 +76,17 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
             // News has been activated
             service.start();
         }
-        for (FeedDescriptor oldFeed : oldFeedValue) {
-            FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
-            if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
-                service.start(newFeed);
-            }
-            if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
-                service.removeFeed(newFeed);
-            }
-        }
+
+        // TODO make sure preference change takes effect immediately
+        // for (FeedDescriptor oldFeed : oldFeedValue) {
+        // FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
+        // if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
+        // service.start(newFeed);
+        // }
+        // if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
+        // service.removeFeed(newFeed);
+        // }
+        // }
         return result;
     }
 
