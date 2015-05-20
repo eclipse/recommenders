@@ -29,7 +29,7 @@ public class RssServiceTest {
     private NewsRcpPreferences preferences;
     private EventBus bus;
     private PollFeedJob job;
-    private JobProvider provider;
+    private JobFacade provider;
 
     @Before
     public void setUp() {
@@ -37,7 +37,7 @@ public class RssServiceTest {
         preferences = mock(NewsRcpPreferences.class);
         bus = mock(EventBus.class);
         job = mock(PollFeedJob.class);
-        provider = mock(JobProvider.class);
+        provider = mock(JobFacade.class);
     }
 
     @Test

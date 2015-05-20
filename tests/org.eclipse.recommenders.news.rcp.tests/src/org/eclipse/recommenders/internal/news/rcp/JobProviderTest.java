@@ -37,7 +37,7 @@ public class JobProviderTest {
 
     @Test
     public void testGetPollFeedJob() {
-        JobProvider provider = new JobProvider();
+        JobFacade provider = new JobFacade();
         when(feed.getId()).thenReturn(FIRST_ELEMENT);
         provider.getPollFeedJob(feed, preferences, environment, service);
         assertThat(provider.getPollFeedJob(feed, preferences, environment, service), is(not(nullValue())));
@@ -45,7 +45,7 @@ public class JobProviderTest {
 
     @Test
     public void testJobExists() {
-        JobProvider provider = new JobProvider();
+        JobFacade provider = new JobFacade();
         FeedDescriptor second = mock(FeedDescriptor.class);
         when(feed.getId()).thenReturn(FIRST_ELEMENT);
         when(second.getId()).thenReturn(FIRST_ELEMENT);
