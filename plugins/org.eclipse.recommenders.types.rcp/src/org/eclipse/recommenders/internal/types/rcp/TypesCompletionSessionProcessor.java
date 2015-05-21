@@ -84,7 +84,7 @@ public class TypesCompletionSessionProcessor extends SessionProcessor {
 
     private void handleProposal(IProcessableProposal proposal, char[] signature) {
         String name = new String(signature, 1, signature.length - 2);
-        name = substringBefore(name, "<");
+        name = substringBefore(name, "<"); //$NON-NLS-1$
         // parse the type name and remove Generics from the name
         if (subtypes.contains(name)) {
             int increment = 50;
