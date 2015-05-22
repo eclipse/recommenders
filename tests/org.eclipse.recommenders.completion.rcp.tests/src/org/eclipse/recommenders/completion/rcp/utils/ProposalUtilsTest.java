@@ -45,6 +45,8 @@ public class ProposalUtilsTest {
     private static final IMethodName INIT_NUMBER = VmMethodName.get("LExample.<init>(Ljava/lang/Number;)V");
     private static final IMethodName INIT_COLLECTION = VmMethodName.get("LExample.<init>(Ljava/util/Collection;)V");
 
+    private static final IMethodName OBJECT_INIT = VmMethodName.get("Ljava/lang/Object.<init>()V");
+
     private static final IMethodName NESTED_INIT = VmMethodName.get("LExample$Nested.<init>()V");
     private static final IMethodName NESTED_INIT_OBJECT = VmMethodName
             .get("LExample$Nested.<init>(Ljava/lang/Object;)V");
@@ -52,6 +54,7 @@ public class ProposalUtilsTest {
             .get("LExample$Nested.<init>(Ljava/lang/Number;)V");
     private static final IMethodName NESTED_INIT_COLLECTION = VmMethodName
             .get("LExample$Nested.<init>(Ljava/util/Collection;)V");
+
     private static final IMethodName INNER_INIT_EXAMPLE = VmMethodName.get("LExample$Inner.<init>(LExample;)V");
     private static final IMethodName INNER_INIT_EXAMPLE_OBJECT = VmMethodName
             .get("LExample$Inner.<init>(LExample;Ljava/lang/Object;)V");

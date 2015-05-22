@@ -397,7 +397,7 @@ public final class CompletionContextFunctions {
             ICompilationUnit cu = context.getCompilationUnit();
             ProposalCollectingCompletionRequestor collector = new ProposalCollectingCompletionRequestor(coreContext);
             try {
-                cu.codeComplete(offset, collector, new TimeDelimitedProgressMonitor(COMPLETION_TIME_OUT));
+                cu.codeComplete(offset, collector, new TimeDelimitedProgressMonitor(1000));
             } catch (final Exception e) {
                 log(ERROR_EXCEPTION_DURING_CODE_COMPLETION, e);
             }
