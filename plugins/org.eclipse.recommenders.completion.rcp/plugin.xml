@@ -20,7 +20,7 @@
 		<processor id="org.eclipse.recommenders.completion.rcp.sessionprocessors.baseRelevance"
 			class="org.eclipse.recommenders.completion.rcp.processable.BaseRelevanceSessionProcessor"
 			priority="0"
-			icon="platform:/plugin/org.eclipse.recommenders.rcp/icons/obj16/bullet_blue.png"
+			icon="icons/view16/javaassist_co.png"
 			name="%sessionprocessors.baseRelevance.name"
 			description="%sessionprocessors.baseRelevance.description"/>
 		<processor id="org.eclipse.recommenders.completion.rcp.sessionprocessors.tips"
