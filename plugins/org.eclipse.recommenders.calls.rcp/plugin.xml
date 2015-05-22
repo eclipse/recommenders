@@ -21,7 +21,7 @@
 	<extension point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="org.eclipse.recommenders.calls.rcp.proposalCategory.templates"
 		name="%proposalCategory.templates.name">
-		<proposalCategory icon="icons/view16/templates-orange.png"/>
+		<proposalCategory icon="icons/view16/contentassist_templates.png"/>
 	</extension>
 	<extension point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="org.eclipse.recommenders.calls.rcp.javaCompletionProposalComputer.templates">
