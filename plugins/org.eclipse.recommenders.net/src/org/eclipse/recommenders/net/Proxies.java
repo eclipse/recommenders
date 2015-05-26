@@ -92,13 +92,12 @@ public final class Proxies {
     }
 
     public static Executor proxy(Executor executor, URI target) {
-        IProxyData[] proxies = ProxyManager.getProxyManager().select(target);
-        if (isEmpty(proxies)) {
+        IProxyData proxy = getProxy(target).orNull();
+        if (proxy == null) {
             executor.clearAuth();
         } else {
-            IProxyData proxy = proxies[0];
-            HttpHost host = new HttpHost(proxy.getHost(), proxy.getPort());
             if (proxy.getUserId() != null) {
+                HttpHost host = getProxyHost(target).orNull();
                 String userId = getUserName(proxy.getUserId()).orNull();
                 String pass = proxy.getPassword();
                 String workstation = getWorkstation().orNull();
@@ -108,4 +107,21 @@ public final class Proxies {
         }
         return executor;
     }
+
+    private static Optional<IProxyData> getProxy(URI target) {
+        IProxyData[] proxies = ProxyManager.getProxyManager().select(target);
+        if (isEmpty(proxies)) {
+            return Optional.absent();
+        }
+        return Optional.of(proxies[0]);
+    }
+
+    public static Optional<HttpHost> getProxyHost(URI target) {
+        IProxyData proxy = getProxy(target).orNull();
+        if (proxy == null) {
+            return Optional.absent();
+        }
+        return Optional.of(new HttpHost(proxy.getHost(), proxy.getPort()));
+    }
+
 }

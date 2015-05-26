@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.fluent.Executor;
@@ -135,6 +136,10 @@ public class CheckForProjectNewsJob extends Job {
     private Optional<String> getRSSFeed() throws IOException {
         Executor executor = Executor.newInstance();
         Request request = Request.Get(feed);
+        HttpHost proxyHost = Proxies.getProxyHost(feed).orNull();
+        if (proxyHost != null) {
+            request.viaProxy(proxyHost);
+        }
         Response response = Proxies.proxy(executor, feed).execute(request);
         HttpResponse httpResponse = response.returnResponse();
         int statusCode = httpResponse.getStatusLine().getStatusCode();
