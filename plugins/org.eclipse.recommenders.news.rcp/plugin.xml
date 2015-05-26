@@ -51,5 +51,17 @@
             url="http://planeteclipse.org/planet/rss20.xml"
             pollingInterval="60">
       </feed>
+      <feed
+            id="org.eclipse.recommenders.news.rcp.eclipse.in.the.news"
+            name="%feed.eclipse.in.the.news.name"
+            pollingInterval="1"
+            url="https://eclipse.org/home/eclipseinthenews.rss">
+      </feed>
+      <feed
+            id="org.eclipse.recommenders.news.rcp.marketplace"
+            name="%feed.marketplace.name"
+            pollingInterval="2"
+            url="http://marketplace.eclipse.org/rss.xml">
+      </feed>
    </extension>
 </plugin>
