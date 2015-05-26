@@ -14,6 +14,7 @@ import static com.google.common.base.Optional.*;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -21,6 +22,7 @@ import java.net.UnknownHostException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
 import org.eclipse.core.internal.net.ProxyManager;
 import org.eclipse.core.net.proxy.IProxyData;
 
@@ -91,21 +93,23 @@ public final class Proxies {
         return contains(userName, DOUBLEBACKSLASH) ? of(substringAfterLast(userName, DOUBLEBACKSLASH)) : of(userName);
     }
 
-    public static Executor proxy(Executor executor, URI target) {
+    public static void executeRequest(Executor executor, URI target, Request request) throws IOException {
         IProxyData[] proxies = ProxyManager.getProxyManager().select(target);
         if (isEmpty(proxies)) {
             executor.clearAuth();
         } else {
             IProxyData proxy = proxies[0];
-            HttpHost host = new HttpHost(proxy.getHost(), proxy.getPort());
+            HttpHost proxyHost = new HttpHost(proxy.getHost(), proxy.getPort());
             if (proxy.getUserId() != null) {
                 String userId = getUserName(proxy.getUserId()).orNull();
                 String pass = proxy.getPassword();
                 String workstation = getWorkstation().orNull();
                 String domain = getUserDomain(proxy.getUserId()).orNull();
-                executor.auth(host, userId, pass, workstation, domain);
+                executor.auth(proxyHost, userId, pass, workstation, domain);
             }
+            request.viaProxy(proxyHost);
         }
-        return executor;
+        executor.execute(request);
     }
+
 }
