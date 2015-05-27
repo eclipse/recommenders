@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
+import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
@@ -73,12 +74,12 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
     private static final int[] EMPTY_SEQUENCE = new int[0];
 
-    private static final Field CORE_CONTEXT = Reflections
-            .getDeclaredField(JavaContentAssistInvocationContext.class, "fCoreContext").orNull(); //$NON-NLS-1$
+    private static final Field CORE_CONTEXT = Reflections.getDeclaredField(JavaContentAssistInvocationContext.class,
+            "fCoreContext").orNull(); //$NON-NLS-1$
     private static final Field CU = Reflections.getDeclaredField(JavaContentAssistInvocationContext.class, "fCU") //$NON-NLS-1$
             .orNull();
-    private static final Field CU_COMPUTED = Reflections
-            .getDeclaredField(JavaContentAssistInvocationContext.class, "fCUComputed").orNull(); //$NON-NLS-1$
+    private static final Field CU_COMPUTED = Reflections.getDeclaredField(JavaContentAssistInvocationContext.class,
+            "fCUComputed").orNull(); //$NON-NLS-1$
 
     private final SubwordsRcpPreferences prefs;
 
@@ -134,8 +135,8 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         }
     }
 
-    private SortedSet<Integer> computeTriggerLocations(int offset, ASTNode completionNode, ASTNode completionNodeParent,
-            int length) {
+    private SortedSet<Integer> computeTriggerLocations(int offset, ASTNode completionNode,
+            ASTNode completionNodeParent, int length) {
         // It is important to trigger at higher locations first, as the base relevance assigned to a proposal by the JDT
         // may depend on the prefix. Proposals which are made for both an empty prefix and a non-empty prefix are thus
         // assigned a base relevance that is as close as possible to that the JDT would assign without subwords
@@ -169,8 +170,8 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         ICompilationUnit cu = originalContext.getCompilationUnit();
         ITextViewer viewer = originalContext.getViewer();
         IEditorPart editor = lookupEditor(cu);
-        JavaContentAssistInvocationContext newJdtContext = new JavaContentAssistInvocationContext(viewer, triggerOffset,
-                editor);
+        JavaContentAssistInvocationContext newJdtContext = new JavaContentAssistInvocationContext(viewer,
+                triggerOffset, editor);
         setCompilationUnit(newJdtContext, cu);
         ProposalCollectingCompletionRequestor collector = computeProposals(cu, newJdtContext, triggerOffset);
         Map<IJavaCompletionProposal, CompletionProposal> proposals = collector.getProposals();
@@ -321,12 +322,33 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                 }
             }
 
+            /**
+             * Since we may simulate completion triggers at positions before the actual triggering, we don't get JDT's
+             * additional relevance for exact prefix matches. So we add the additional relevance ourselves, if is not
+             * already supplied by the JDT which it does, if the prefix is shorter than the configured minimum prefix
+             * length.
+             *
+             * The boost is the same one as JDT adds at
+             * {@link org.eclipse.jdt.internal.codeassist.CompletionEngine#computeRelevanceForCaseMatching}
+             */
             @Override
             public int modifyRelevance() {
                 if (ArrayUtils.isEmpty(bestSequence)) {
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
-                } else if (StringUtils.startsWith(matchingArea, prefix)) {
+                }
+
+                if (prefs.minPrefixLengthForTypes < prefix.length()) {
+                    if (StringUtils.equalsIgnoreCase(matchingArea, prefix)) {
+                        // not R_EXACT_NAME as it is not part of the subwords score
+                        proposal.setTag(SUBWORDS_SCORE, null);
+                        proposal.setTag(IS_PREFIX_MATCH, true);
+
+                        return RelevanceConstants.R_EXACT_NAME;
+                    }
+                }
+
+                if (StringUtils.startsWith(matchingArea, prefix)) {
                     proposal.setTag(SUBWORDS_SCORE, null);
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
