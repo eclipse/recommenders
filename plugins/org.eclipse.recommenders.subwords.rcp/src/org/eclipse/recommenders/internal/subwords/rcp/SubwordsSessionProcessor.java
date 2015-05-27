@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
+import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
@@ -80,11 +81,11 @@ public class SubwordsSessionProcessor extends SessionProcessor {
     private static final Field CU_COMPUTED = Reflections
             .getDeclaredField(JavaContentAssistInvocationContext.class, "fCUComputed").orNull(); //$NON-NLS-1$
 
-    private final SubwordsRcpPreferences prefs;
+    private final int minPrefixLengthForTypes;
 
     @Inject
     public SubwordsSessionProcessor(SubwordsRcpPreferences prefs) {
-        this.prefs = prefs;
+        this.minPrefixLengthForTypes = prefs.minPrefixLengthForTypes;
     }
 
     @Override
@@ -146,7 +147,7 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
         // Trigger first with either the specified prefix or the specified minimum prefix length. Note that this is only
         // effective for type and constructor completions, but this situation cannot be detected reliably.
-        int triggerOffset = min(prefs.minPrefixLengthForTypes, length);
+        int triggerOffset = min(minPrefixLengthForTypes, length);
         triggerlocations.add(emptyPrefix + triggerOffset);
 
         // Always trigger with empty prefix to get all members at the current location:
@@ -321,12 +322,31 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                 }
             }
 
+            /**
+             * Since we may simulate completion triggers at positions before the actual triggering, we don't get JDT's
+             * additional relevance for exact prefix matches. So we add the additional relevance ourselves, if is not
+             * already supplied by the JDT which it does, if the prefix is shorter than the configured minimum prefix
+             * length.
+             *
+             * The boost is the same one as JDT adds at
+             * {@link org.eclipse.jdt.internal.codeassist.CompletionEngine#computeRelevanceForCaseMatching}
+             */
             @Override
             public int modifyRelevance() {
                 if (ArrayUtils.isEmpty(bestSequence)) {
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
-                } else if (StringUtils.startsWith(matchingArea, prefix)) {
+                }
+
+                if (minPrefixLengthForTypes < prefix.length() && StringUtils.equalsIgnoreCase(matchingArea, prefix)) {
+                    // not R_EXACT_NAME as it is not part of the subwords score
+                    proposal.setTag(SUBWORDS_SCORE, null);
+                    proposal.setTag(IS_PREFIX_MATCH, true);
+
+                    return RelevanceConstants.R_EXACT_NAME;
+                }
+
+                if (StringUtils.startsWith(matchingArea, prefix)) {
                     proposal.setTag(SUBWORDS_SCORE, null);
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     return 0;
