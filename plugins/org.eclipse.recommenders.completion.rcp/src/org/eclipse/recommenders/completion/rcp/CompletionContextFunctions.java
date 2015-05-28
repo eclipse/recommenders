@@ -71,8 +71,10 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.compiler.util.ObjectVector;
 import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.recommenders.completion.rcp.processable.ProposalCollectingCompletionRequestor;
 import org.eclipse.recommenders.internal.completion.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.jdt.AstBindings;
@@ -386,6 +388,8 @@ public final class CompletionContextFunctions {
 
     public static class InternalCompletionContextFunction implements ICompletionContextFunction<Object> {
 
+        private final HTMLTagCompletionProposalComputer htmlTagProposalComputer = new HTMLTagCompletionProposalComputer();
+
         @Override
         public Object compute(IRecommendersCompletionContext context, CompletionContextKey<Object> key) {
             JavaContentAssistInvocationContext coreContext = context.getJavaContext();
@@ -396,6 +400,7 @@ public final class CompletionContextFunctions {
             }
             ICompilationUnit cu = context.getCompilationUnit();
             ProposalCollectingCompletionRequestor collector = new ProposalCollectingCompletionRequestor(coreContext);
+            List<ICompletionProposal> htmlTagProposals = Collections.emptyList();
             try {
                 cu.codeComplete(offset, collector, new TimeDelimitedProgressMonitor(COMPLETION_TIME_OUT));
             } catch (final Exception e) {
@@ -404,12 +409,27 @@ public final class CompletionContextFunctions {
             InternalCompletionContext internal = collector.getCoreContext();
             context.set(INTERNAL_COMPLETIONCONTEXT, internal);
             Map<IJavaCompletionProposal, CompletionProposal> proposals = collector.getProposals();
+            putAllHtmlTagProposals(proposals, coreContext);
             context.set(JAVA_PROPOSALS, proposals);
 
             if (INTERNAL_COMPLETIONCONTEXT.equals(key)) {
                 return internal;
             } else {
                 return proposals;
+            }
+        }
+
+        private void putAllHtmlTagProposals(Map<IJavaCompletionProposal, CompletionProposal> proposals,
+                JavaContentAssistInvocationContext coreContext) {
+            List<ICompletionProposal> htmlTagProposals;
+            htmlTagProposalComputer.sessionStarted();
+            htmlTagProposals = htmlTagProposalComputer.computeCompletionProposals(coreContext,
+                    new NullProgressMonitor());
+            htmlTagProposalComputer.sessionEnded();
+            for (ICompletionProposal htmlTagProposal : htmlTagProposals) {
+                if (htmlTagProposal instanceof IJavaCompletionProposal) { // Should never be false
+                    proposals.put((IJavaCompletionProposal) htmlTagProposal, null);
+                }
             }
         }
     }

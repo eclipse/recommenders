@@ -20,6 +20,7 @@ import static org.eclipse.recommenders.internal.subwords.rcp.l10n.LogMessages.*;
 import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -29,6 +30,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
@@ -38,10 +40,12 @@ import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.recommenders.completion.rcp.CompletionContextKey;
 import org.eclipse.recommenders.completion.rcp.CompletionContexts;
@@ -75,12 +79,12 @@ public class SubwordsSessionProcessor extends SessionProcessor {
 
     private static final int[] EMPTY_SEQUENCE = new int[0];
 
-    private static final Field CORE_CONTEXT = Reflections.getDeclaredField(JavaContentAssistInvocationContext.class,
-            "fCoreContext").orNull(); //$NON-NLS-1$
+    private static final Field CORE_CONTEXT = Reflections
+            .getDeclaredField(JavaContentAssistInvocationContext.class, "fCoreContext").orNull(); //$NON-NLS-1$
     private static final Field CU = Reflections.getDeclaredField(JavaContentAssistInvocationContext.class, "fCU") //$NON-NLS-1$
             .orNull();
-    private static final Field CU_COMPUTED = Reflections.getDeclaredField(JavaContentAssistInvocationContext.class,
-            "fCUComputed").orNull(); //$NON-NLS-1$
+    private static final Field CU_COMPUTED = Reflections
+            .getDeclaredField(JavaContentAssistInvocationContext.class, "fCUComputed").orNull(); //$NON-NLS-1$
 
     private final SubwordsRcpPreferences prefs;
     private int minPrefixLengthForTypes;
@@ -138,8 +142,8 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         }
     }
 
-    private SortedSet<Integer> computeTriggerLocations(int offset, ASTNode completionNode,
-            ASTNode completionNodeParent, int length) {
+    private SortedSet<Integer> computeTriggerLocations(int offset, ASTNode completionNode, ASTNode completionNodeParent,
+            int length) {
         // It is important to trigger at higher locations first, as the base relevance assigned to a proposal by the JDT
         // may depend on the prefix. Proposals which are made for both an empty prefix and a non-empty prefix are thus
         // assigned a base relevance that is as close as possible to that the JDT would assign without subwords
@@ -173,12 +177,31 @@ public class SubwordsSessionProcessor extends SessionProcessor {
         ICompilationUnit cu = originalContext.getCompilationUnit();
         ITextViewer viewer = originalContext.getViewer();
         IEditorPart editor = lookupEditor(cu);
-        JavaContentAssistInvocationContext newJdtContext = new JavaContentAssistInvocationContext(viewer,
-                triggerOffset, editor);
+        JavaContentAssistInvocationContext newJdtContext = new JavaContentAssistInvocationContext(viewer, triggerOffset,
+                editor);
         setCompilationUnit(newJdtContext, cu);
         ProposalCollectingCompletionRequestor collector = computeProposals(cu, newJdtContext, triggerOffset);
         Map<IJavaCompletionProposal, CompletionProposal> proposals = collector.getProposals();
-        return proposals != null ? proposals : Maps.<IJavaCompletionProposal, CompletionProposal>newHashMap();
+        if (proposals == null) {
+            proposals = Maps.<IJavaCompletionProposal, CompletionProposal>newHashMap();
+        }
+        putAllHtmlTagProposals(proposals, originalContext);
+        return proposals;
+    }
+
+    private final HTMLTagCompletionProposalComputer htmlTagProposalComputer = new HTMLTagCompletionProposalComputer();
+
+    private void putAllHtmlTagProposals(Map<IJavaCompletionProposal, CompletionProposal> proposals,
+            JavaContentAssistInvocationContext coreContext) {
+        htmlTagProposalComputer.sessionStarted();
+        List<ICompletionProposal> htmlTagProposals = htmlTagProposalComputer.computeCompletionProposals(coreContext,
+                new NullProgressMonitor());
+        htmlTagProposalComputer.sessionEnded();
+        for (ICompletionProposal htmlTagProposal : htmlTagProposals) {
+            if (htmlTagProposal instanceof IJavaCompletionProposal) { // Should never be false
+                proposals.put((IJavaCompletionProposal) htmlTagProposal, null);
+            }
+        }
     }
 
     private void setCompilationUnit(JavaContentAssistInvocationContext newJdtContext, ICompilationUnit cu) {
@@ -351,7 +374,7 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                     relevanceBoost += 16 * RelevanceConstants.R_EXACT_NAME;
                 }
 
-                if (StringUtils.startsWith(matchingArea, prefix)) {
+                if (StringUtils.startsWith(matchingArea, prefix) && proposal.getCoreProposal().isPresent()) {
                     proposal.setTag(SUBWORDS_SCORE, null);
                     proposal.setTag(IS_PREFIX_MATCH, true);
                     // Don't adjust relevance.

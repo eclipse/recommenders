@@ -51,19 +51,31 @@ public final class CompletionContexts {
      * add(Object o) --> add
      * ArrayList(Collection c) --> ArrayList
      * org.eclipse.other --> org.eclipse.other
+     * &lt;blockquote&gt; --> blockquote
      * </pre>
      *
      */
     public static String getPrefixMatchingArea(String displayString) {
         int end = displayString.length();
+        if (isHtmlTag(displayString)) {
+            return displayString.substring(1, end - 1);
+        }
         for (int i = 0; i < displayString.length(); i++) {
             char c = displayString.charAt(i);
-            if (!(isJavaIdentifierPart(c) || c == '@' || c == '{' || c == '}') && c != '.') {
+            if (!isJavaIdentifierLike(c) && c != '.') {
                 end = i;
                 break;
             }
         }
         return displayString.substring(0, end);
+    }
+
+    private static boolean isHtmlTag(String displayString) {
+        return displayString.startsWith("<") && displayString.endsWith(">");
+    }
+
+    private static boolean isJavaIdentifierLike(char c) {
+        return isJavaIdentifierPart(c) || c == '@' || c == '{' || c == '}';
     }
 
     public static final String JDT_ALL_CATEGORY = "org.eclipse.jdt.ui.javaAllProposalCategory"; //$NON-NLS-1$
