@@ -24,7 +24,6 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-@SuppressWarnings("restriction")
 public class NewsService implements INewsService {
 
     private final NewsRcpPreferences preferences;
