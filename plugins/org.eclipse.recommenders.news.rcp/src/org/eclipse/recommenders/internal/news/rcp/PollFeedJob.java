@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
@@ -44,6 +45,9 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         super(jobId);
         Preconditions.checkNotNull(jobId);
         this.jobId = jobId;
+        setSystem(true);
+        setPriority(DECORATE);
+        setRule(new MutexRule());
         // not sure if this will work, but lets remove it from the constructor
         this.environment = new NotificationEnvironment();
     }
@@ -108,5 +112,19 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     public String getJobId() {
         return jobId;
+    }
+
+    class MutexRule implements ISchedulingRule {
+
+        @Override
+        public boolean contains(ISchedulingRule rule) {
+            return rule == this;
+        }
+
+        @Override
+        public boolean isConflicting(ISchedulingRule rule) {
+            return rule == this;
+        }
+
     }
 }
