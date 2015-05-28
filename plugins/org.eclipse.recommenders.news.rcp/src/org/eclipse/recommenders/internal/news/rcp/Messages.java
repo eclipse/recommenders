@@ -19,6 +19,7 @@ public final class Messages extends NLS {
     public static String PREFPAGE_DESCRIPTION;
     public static String FIELD_LABEL_FEEDS;
     public static String FIELD_LABEL_NEWS_ENABLED;
+    public static String FIELD_LABEL_POLLING_INTERVAL;
     public static String BUTTON_LABEL_UP;
     public static String BUTTON_LABEL_DOWN;
 
