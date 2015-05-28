@@ -17,5 +17,7 @@ public final class Constants {
     public static final String PREF_FEED_LIST_SORTED = "feed.list.sorted"; //$NON-NLS-1$
     public static final String PREF_NEWS_ENABLED = "newsEnabled"; //$NON-NLS-1$
     public static final String JOB_FAMILY = "newsFeedJob"; //$NON-NLS-1$
+    public static final String PREF_POLLING_INTERVAL = "pollingInterval"; //$NON-NLS-1$
+    public static final String DEFAULT_POLLING_INTERVAL = "120"; //$NON-NLS-1$
 
 }
