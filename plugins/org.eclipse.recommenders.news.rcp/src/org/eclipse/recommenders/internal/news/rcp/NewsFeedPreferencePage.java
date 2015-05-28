@@ -20,6 +20,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -39,6 +40,7 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
     private final INewsService service;
     private BooleanFieldEditor enabledEditor;
     private FeedEditor feedEditor;
+    private StringFieldEditor pollingIntervalEditor;
 
     @Inject
     public NewsFeedPreferencePage(INewsService service) {
@@ -51,6 +53,9 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
         enabledEditor = new BooleanFieldEditor(Constants.PREF_NEWS_ENABLED, Messages.FIELD_LABEL_NEWS_ENABLED,
                 getFieldEditorParent());
         addField(enabledEditor);
+        pollingIntervalEditor = new StringFieldEditor(Constants.PREF_POLLING_INTERVAL,
+                Messages.FIELD_LABEL_POLLING_INTERVAL, getFieldEditorParent());
+        addField(pollingIntervalEditor);
         feedEditor = new FeedEditor(Constants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS,
                 getFieldEditorParent());
         addField(feedEditor);

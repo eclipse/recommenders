@@ -7,11 +7,15 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createNewFeedItemsEvent;
+
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
@@ -19,24 +23,29 @@ import org.eclipse.recommenders.news.rcp.IJobFacade;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-@SuppressWarnings("restriction")
 public class NewsService implements INewsService {
 
     private final NewsRcpPreferences preferences;
     private final NewsFeedProperties newsFeedProperties;
     private final Set<String> readIds;
     private final IJobFacade jobFacade;
-    private final Map<FeedDescriptor, Date> pollDates;
+    private final Map<String, Date> pollDates;
+    private final EventBus bus;
 
     private HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
 
     public NewsService(NewsRcpPreferences preferences, EventBus bus, IJobFacade jobFacade) {
         this.preferences = preferences;
+        this.bus = bus;
         bus.register(this);
         newsFeedProperties = new NewsFeedProperties();
         readIds = newsFeedProperties.getReadIds();
@@ -51,7 +60,7 @@ public class NewsService implements INewsService {
             return;
         }
         for (final FeedDescriptor feed : preferences.getFeedDescriptors()) {
-            if (feed.isEnabled()) {
+            if (shouldPoll(feed)) {
                 feeds.add(feed);
             }
         }
@@ -60,8 +69,33 @@ public class NewsService implements INewsService {
 
     @Override
     public Map<FeedDescriptor, List<IFeedMessage>> getMessages(final int countPerFeed) {
-        // limit those messages to countPerFeed and return
-        return null;
+        Map<FeedDescriptor, List<IFeedMessage>> transformedMap = Maps.transformValues(groupedMessages,
+                new Function<List<IFeedMessage>, List<IFeedMessage>>() {
+
+                    @Override
+                    public List<IFeedMessage> apply(List<IFeedMessage> input) {
+                        return FluentIterable.from(input).limit(countPerFeed).filter(new Predicate<IFeedMessage>() {
+
+                            @Override
+                            public boolean apply(IFeedMessage input) {
+                                return !readIds.contains(input.getId());
+                            }
+                        }).toList();
+                    }
+                });
+        Map<FeedDescriptor, List<IFeedMessage>> filteredMap = Maps.filterValues(transformedMap,
+                new Predicate<List<IFeedMessage>>() {
+
+                    @Override
+                    public boolean apply(List<IFeedMessage> input) {
+                        if (input == null) {
+                            return false;
+                        }
+                        return !input.isEmpty();
+                    }
+
+                });
+        return ImmutableMap.copyOf(filteredMap);
     }
 
     @Subscribe
@@ -73,15 +107,52 @@ public class NewsService implements INewsService {
 
     @Override
     public void jobDone(IPollFeedJob job) {
-        // organize messages here
-        // reschedule according to users preference, lets say by default 30 minutes
+        boolean newMessage = false;
+        Map<FeedDescriptor, List<IFeedMessage>> messages = job.getMessages();
+        for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
+            if (!groupedMessages.containsKey(entry.getKey())) {
+                groupedMessages.put(entry.getKey(), entry.getValue());
+                if (entry.getValue().size() > 0) {
+                    newMessage = true;
+                }
+            }
+
+            for (IFeedMessage message : entry.getValue()) {
+                if (!groupedMessages.get(entry.getKey()).contains(message)) {
+                    groupedMessages.get(entry.getKey()).add(message);
+                    newMessage = true;
+                }
+            }
+        }
+
+        if (groupedMessages.size() > 0 && newMessage) {
+            bus.post(createNewFeedItemsEvent());
+        }
+
+        if (!preferences.isEnabled()) {
+            return;
+        }
+        PollFeedJob pollFeedJob = (PollFeedJob) job;
+        pollFeedJob.schedule(TimeUnit.MINUTES.toMillis(Long.parseLong(preferences.getPollingInterval())));
     }
 
     @Override
     public boolean shouldPoll(FeedDescriptor feed) {
-        newsFeedProperties.getPollDates();
-        // check condition
-        return false;
+        if (!feed.isEnabled()) {
+            return false;
+        }
+        Integer pollingInterval = Integer.parseInt(preferences.getPollingInterval());
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, pollingInterval);
+        Date lhs = calendar.getTime();
+        for (Map.Entry<String, Date> entry : newsFeedProperties.getPollDates().entrySet()) {
+            if (entry.getKey().equals(feed.getId())) {
+                if (entry.getValue().after(lhs)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
