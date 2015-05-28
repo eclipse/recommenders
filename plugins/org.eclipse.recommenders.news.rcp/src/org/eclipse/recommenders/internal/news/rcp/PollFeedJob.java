@@ -7,8 +7,10 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -18,11 +20,13 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedReader;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
+import org.eclipse.recommenders.news.rcp.INewsFeedProperties;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 import org.eclipse.recommenders.utils.Urls;
 
@@ -37,31 +41,48 @@ import com.google.common.collect.Sets;
 public class PollFeedJob extends Job implements IPollFeedJob {
     private final String jobId;
     private final NotificationEnvironment environment;
-    private List<? extends IFeedMessage> messages = Lists.newArrayList();
+    private Map<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
     private Set<FeedDescriptor> feeds = Sets.newHashSet();
+    private INewsFeedProperties newsFeedProperties;
 
     public PollFeedJob(String jobId) {
         super(jobId);
         Preconditions.checkNotNull(jobId);
         this.jobId = jobId;
-        // not sure if this will work, but lets remove it from the constructor
+        setSystem(true);
+        setPriority(DECORATE);
+        setRule(new MutexRule());
         this.environment = new NotificationEnvironment();
+        newsFeedProperties = new NewsFeedProperties();
     }
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         Map<FeedDescriptor, Date> map = Maps.newHashMap();
-        for (FeedDescriptor feed : feeds) {
-            // poll feed
-            map.put(feed, new Date());
-            // its just mock, put it here so you can know where it's called
-            try {
-                readMessages(null, monitor, null);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        try {
+            for (FeedDescriptor feed : feeds) {
+                List<IFeedMessage> messages;
+                HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
+                try {
+                    connection.connect();
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
+                        InputStream in = new BufferedInputStream(connection.getInputStream());
+                        try {
+                            messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
+                            groupedMessages.put(feed, messages);
+                        } finally {
+                            in.close();
+                        }
+                    }
+                } finally {
+                    connection.disconnect();
+                }
+                map.put(feed, new Date());
             }
-
+            newsFeedProperties.writePollDates(map);
+        } catch (Exception e) {
+            System.out.println(e.getCause());
+            return Status.CANCEL_STATUS;
         }
         return Status.OK_STATUS;
     }
@@ -97,7 +118,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     @Override
     public Map<FeedDescriptor, List<IFeedMessage>> getMessages() {
-        return null;
+        return groupedMessages;
     }
 
     @Override
@@ -108,5 +129,19 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     public String getJobId() {
         return jobId;
+    }
+
+    class MutexRule implements ISchedulingRule {
+
+        @Override
+        public boolean contains(ISchedulingRule rule) {
+            return rule == this;
+        }
+
+        @Override
+        public boolean isConflicting(ISchedulingRule rule) {
+            return rule == this;
+        }
+
     }
 }
