@@ -6,17 +6,23 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Andreas Sewe - initial API and implementation.
+ *    Johannes Dorn - initial API and implementation.
  */
 package org.eclipse.recommenders.internal.types.rcp;
 
-import java.util.Set;
+import java.io.Closeable;
+import java.util.Collection;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.recommenders.utils.names.ITypeName;
 
-public interface ITypesIndexService {
+import com.google.common.base.Optional;
 
-    Set<String> subtypes(ITypeName expected, String prefix, IJavaProject project);
+public interface IIndexProvider extends Closeable {
+
+    Optional<IProjectTypesIndex> findIndex(IJavaProject project);
+
+    Optional<IProjectTypesIndex> findOrCreateIndex(IJavaProject project);
+
+    Collection<IProjectTypesIndex> getAllIndexes();
 
 }
