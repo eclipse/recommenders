@@ -2,7 +2,6 @@ package org.eclipse.recommenders.completion.rcp.utils;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.eclipse.recommenders.testing.CodeBuilder.*;
-import static org.eclipse.recommenders.utils.names.VmMethodName.get;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
@@ -64,189 +63,376 @@ public class ProposalUtilsTest {
 
     private static final IMethodName COMPARE_TO_BOOLEAN = VmMethodName
             .get("Ljava/lang/Boolean.compareTo(Ljava/lang/Boolean;)I");
-    private static final IMethodName COMPARE_TO_OBJECT = VmMethodName
+    private static final IMethodName COMPARABLE_COMPARE_TO_OBJECT = VmMethodName
             .get("Ljava/lang/Comparable.compareTo(Ljava/lang/Object;)I");
+    private static final IMethodName COMPARE_TO_OBJECT = VmMethodName.get("LExample.compareTo(Ljava/lang/Object;)I");
+    private static final IMethodName COMPARE_TO_EXAMPLE = VmMethodName.get("LExample.compareTo(LExample;)I");
 
     private static final IMethodName OBJECT_HASH_CODE = VmMethodName.get("Ljava/lang/Object.hashCode()I");
     private static final IMethodName EXAMPLE_HASH_CODE = VmMethodName.get("LExample.hashCode()I");
+    private static final IMethodName SUBEXAMPLE_HASH_CODE = VmMethodName.get("LSubExample.hashCode()I");
 
     private static final IMethodName OBJECT_CLONE = VmMethodName.get("Ljava/lang/Object.clone()Ljava/lang/Object;");
 
     private final boolean ignore;
-    private final CharSequence code;
+    private final CharSequence exampleCode;
+    private final CharSequence scenarioCode;
     private final IMethodName expectedMethod;
 
-    public ProposalUtilsTest(boolean ignore, CharSequence code, IMethodName expectedMethod) {
+    public ProposalUtilsTest(boolean ignore, String description, CharSequence exampleCode, CharSequence scenarioCode,
+            IMethodName expectedMethod) {
         this.ignore = ignore;
-        this.code = code;
+        this.exampleCode = exampleCode;
+        this.scenarioCode = scenarioCode;
         this.expectedMethod = expectedMethod;
     }
 
-    @Parameters
+    @Parameters(name = "{index}: {1}")
     public static Collection<Object[]> scenarios() {
         LinkedList<Object[]> scenarios = Lists.newLinkedList();
 
-        scenarios.add(scenario(classbody("Example", "void method() { this.method$ }"), METHOD_VOID));
-        scenarios.add(scenario(classbody("Example", "void method(Object o) { this.method$ }"), METHOD_OBJECT));
-        scenarios.add(scenario(classbody("Example", "void method(Collection c) { this.method$ }"), METHOD_COLLECTION));
-
-        scenarios.add(scenario(classbody("Example", "void method(int[] is) { this.method$ }"), METHOD_INTS));
-        scenarios.add(scenario(classbody("Example", "void method(Object[] os) { this.method$ }"), METHOD_OBJECTS));
-
-        scenarios.add(scenario(classbody("Example", "static class Nested { void method() { this.method$ } }"),
-                NESTED_METHOD_VOID));
-        scenarios.add(scenario(classbody("Example<T>", "static class Nested { void method() { this.method$ } }"),
-                NESTED_METHOD_VOID));
-        scenarios.add(scenario(classbody("Example", "static class Nested<T> { void method() { this.method$ } }"),
-                NESTED_METHOD_VOID));
-
-        scenarios.add(scenario(classbody("Example", "void method(Collection<Number> c) { this.method$ }"),
+        // @formatter:off
+        scenarios.add(scenario("Method With No Arguments",
+                classbody("Example", "public void method() {}"),
+                method("new Example().method$ "),
+                METHOD_VOID));
+        scenarios.add(scenario("Method With Object Argument",
+                classbody("Example", "public void method(Object o) {}"),
+                method("new Example().method$ "),
+                METHOD_OBJECT));
+        scenarios.add(scenario("Method With Collection Argument",
+                classbody("Example", "public void method(Collection c) {}"),
+                method("new Example().method$ "),
                 METHOD_COLLECTION));
-        scenarios.add(
-                scenario(classbody("Example", "void method(Collection<?> c) { this.method$ }"), METHOD_COLLECTION));
-        scenarios.add(scenario(classbody("Example", "void method(Collection<? extends Number> c) { this.method$ }"),
-                METHOD_COLLECTION));
-        scenarios.add(scenario(classbody("Example", "void method(Collection<? super Number> c) { this.method$ }"),
-                METHOD_COLLECTION));
-
-        scenarios.add(scenario(classbody("Example<T>", "void method(T t) { this.method$ }"), METHOD_OBJECT));
-        scenarios.add(
-                scenario(classbody("Example<O extends Object>", "void method(O o) { this.method$ }"), METHOD_OBJECT));
-        scenarios.add(ignoredScenario(classbody("Example<N extends Number>", "void method(N n) { this.method$ }"),
-                METHOD_NUMBER));
-        scenarios.add(ignoredScenario(
-                classbody("Example<N extends Number & Comparable>", "void method(N n) { this.method$ }"),
-                METHOD_NUMBER));
-
-        scenarios.add(
-                scenario(classbody("Example<L extends List<String>>", "void method(L l) { l.set$ }"), SET_INT_STRING));
-
-        String auxiliaryDefinition = "class Auxiliary<L extends List<String>> { <N extends L> void method(N n) { } }";
-        scenarios.add(
-                ignoredScenario(classbody("Example", "void method(Auxiliary a) { a.method$ }") + auxiliaryDefinition,
-                        get("LAuxiliary.method(Ljava/util/List;)V")));
-
-        scenarios.add(scenario(classbody("Example<T>", "void method(T[] t) { this.method$ }"), METHOD_OBJECTS));
-        scenarios.add(scenario(classbody("Example<O extends Object>", "void method(O[] o) { this.method$ }"),
+        scenarios.add(scenario("Method With Primitive Array Argument",
+                classbody("Example", "public void method(int[] is) {}"),
+                method("new Example().method$ "),
+                METHOD_INTS));
+        scenarios.add(scenario("Method With Object Array Argument",
+                classbody("Example", "public void method(Object[] os) {}"),
+                method("new Example().method$ "),
                 METHOD_OBJECTS));
 
-        scenarios.add(scenario(classbody("Example<N extends Number>", "void method(Collection<N> c) { this.method$ }"),
+        scenarios.add(scenario("Method Of Static Nested Class",
+                classbody("Example", "public static class Nested { public void method() {} }"),
+                method("new Example.Nested().method$ "),
+                NESTED_METHOD_VOID));
+        scenarios.add(scenario("Method of Static Nested Class of Parameterized Class",
+                classbody("Example<T>", "public static class Nested { public void method() {} }"),
+                method("new Example.Nested().method$ "),
+                NESTED_METHOD_VOID));
+        scenarios.add(scenario("Method of Parameterized Static Nested Class",
+                classbody("Example", "public static class Nested<T> { public void method() {} }"),
+                method("new Example.Nested<String>().method$ "),
+                NESTED_METHOD_VOID));
+
+        scenarios.add(scenario("Method With Parameterized Collection Argument",
+                classbody("Example", "public void method(Collection<Number> c) {}"),
+                method("new Example().method$ "),
+                METHOD_COLLECTION));
+        scenarios.add(scenario("Method With Wildcard Parameterized Collection Argument",
+                classbody("Example", "public void method(Collection<?> c) {}"),
+                method("new Example().method$ "),
+                METHOD_COLLECTION));
+        scenarios.add(scenario("Method With Bounded Above Wildcard Parameterized Collection Argument",
+                classbody("Example", "public void method(Collection<? extends Number> c) {}"),
+                method("new Example().method$ "),
+                METHOD_COLLECTION));
+        scenarios.add(scenario("Method With Bounded Below Wildcard Parameterized Collection Argument",
+                classbody("Example", "public void method(Collection<? super Number> c) {}"),
+                method("new Example().method$ "),
                 METHOD_COLLECTION));
 
-        scenarios.add(scenario(classbody("Example", "<T> void method(T t) { this.method$ }"), METHOD_OBJECT));
-        scenarios.add(
-                scenario(classbody("Example", "<O extends Object> void method(O o) { this.method$ }"), METHOD_OBJECT));
-        scenarios.add(ignoredScenario(classbody("Example", "<N extends Number> void method(N n) { this.method$ }"),
+        scenarios.add(scenario("Method With Unspecified Class Parameter Argument",
+                classbody("Example<T>", "public void method(T t) {}"),
+                method("new Example().method$ "),
+                METHOD_OBJECT));
+        scenarios.add(scenario("Method With Specified Class Parameter As Argument",
+                classbody("Example<T>", "public void method(T t) {}"),
+                method("new Example<Number>().method$ "),
+                METHOD_OBJECT));
+        scenarios.add(scenario("Method With Unspecified Object Bounded Class Parameter As Argument",
+                classbody("Example<O extends Object>", "public void method(O o) {}"),
+                method("new Example().method$ "),
+                METHOD_OBJECT));
+        scenarios.add(ignoredScenario("Method With Unspecified Bounded Class Parameter As Argument",
+                classbody("Example<N extends Number>", "public void method(N n) {}"),
+                method("new Example().method$ "),
                 METHOD_NUMBER));
-        scenarios.add(ignoredScenario(
-                classbody("Example", "<N extends Number & Comparable> void method(N n) { this.method$ }"),
+        scenarios.add(ignoredScenario("Method With Specified Bounded Class Parameter As Argument",
+                classbody("Example<N extends Number>", "public void method(N n) {}"),
+                method("new Example<Integer>().method$ "),
+                METHOD_NUMBER));
+        scenarios.add(ignoredScenario("Method With Unspecified Multiple Bound Class Parameter As Argument",
+                classbody("Example<N extends Number & Comparable>", "public void method(N n) {}"),
+                method("new Example().method$ "),
                 METHOD_NUMBER));
 
-        scenarios.add(scenario(classbody("Example", "static <T> void method(T t) { Example.<Integer>method$ }"),
+        scenarios.add(scenario("Method Call On Unspecified Bounded Class Parameter With Nested Parameterization",
+                classbody("Example<L extends List<String>>", "public L l;"),
+                method("new Example().l.set$ "),
+                SET_INT_STRING));
+
+        String auxiliaryDefinition = "class Auxiliary<L extends List<String>> { public <N extends L> void method(N n) { } }";
+        scenarios.add(ignoredScenario("Secondary Class With Nested, Bounded Parameters And Method With Bounded Parameter",
+                classbody("Example", "void method(Auxiliary a) {}") + auxiliaryDefinition,
+                classbody("SubExample extends Example", "void method(Auxiliary a) { a.method$ }"),
+                VmMethodName.get("LAuxiliary.method(Ljava/util/List;)V")));
+
+        scenarios.add(scenario("Method With Class Parameter Array As Argument",
+                classbody("Example<T>", "public void method(T[] t) {}"),
+                method("new Example().method$ "),
+                METHOD_OBJECTS));
+        scenarios.add(scenario("Method With Unspecified Object Bounded Class Parameter Array As Argument",
+                classbody("Example<O extends Object>", "public void method(O[] o) {}"),
+                method("new Example().method$ "),
+                METHOD_OBJECTS));
+        scenarios.add(scenario("Method With Unspecified Bounded Class Parameter Collection As Argument",
+                classbody("Example<N extends Number>", "public void method(Collection<N> c) {}"),
+                method("new Example().method$ "),
+                METHOD_COLLECTION));
+
+        scenarios.add(scenario("Method With Method Parameter As Argument",
+                classbody("Example", "public <T> void method(T t) {}"),
+                method("new Example().method$ "),
                 METHOD_OBJECT));
-        scenarios.add(scenario(
-                classbody("Example", "static <O extends Object> void method(O o) { Example.<Integer>method$ }"),
+        scenarios.add(scenario("Method With Object Bounded Method Parameter As Argument",
+                classbody("Example", "public <O extends Object> void method(O o) {}"),
+                method("new Example().method$ "),
                 METHOD_OBJECT));
-        scenarios.add(ignoredScenario(
-                classbody("Example", "static <N extends Number> void method(N n) { Example.<Integer>method$ }"),
+        scenarios.add(ignoredScenario("Method with Bounded Method Parameter As Argument",
+                classbody("Example", "public <N extends Number> void method(N n) {}"),
+                method("new Example().method$ "),
                 METHOD_NUMBER));
-        scenarios.add(ignoredScenario(
-                classbody("Example",
-                        "static <N extends Number & Comparable> void method(N n) { Example.<Integer>method$ }"),
+        scenarios.add(ignoredScenario("Method With Multiple Bounded Method Parameter As Argument",
+                classbody("Example", "public <N extends Number & Comparable> void method(N n) {}"),
+                method("new Example().method$ "),
                 METHOD_NUMBER));
 
-        scenarios.add(scenario(classbody("Example", "<T> void method(T[] t) { this.method$ }"), METHOD_OBJECTS));
-        scenarios.add(scenario(classbody("Example", "<O extends Object> void method(O[] o) { this.method$ }"),
+        scenarios.add(scenario("Static Method With Specified Method Parameter As Argument",
+                classbody("Example", "public static <T> void method(T t) {}"),
+                method("Example.<Integer>method$ "),
+                METHOD_OBJECT));
+        scenarios.add(scenario("Static Method With Specified, Object Bounded Method Parameter As Argument",
+                classbody("Example", "public static <O extends Object> void method(O o) {}"),
+                method("Example.<Integer>method$ "),
+                METHOD_OBJECT));
+        scenarios.add(ignoredScenario("Static Method With Specified, Bounded Method Parameter As Argument",
+                classbody("Example", "public static <N extends Number> void method(N n) {}"),
+                method("Example.<Integer>method$ "),
+                METHOD_NUMBER));
+        scenarios.add(ignoredScenario("Static Method with Specified, Multiple Bounded Method Parameter As Argument",
+                classbody("Example", "public static <N extends Number & Comparable> void method(N n) {}"),
+                method("Example.<Integer>method$ "),
+                METHOD_NUMBER));
+
+        scenarios.add(scenario("Method With Method Parameter Array As Argument",
+                classbody("Example", "public <T> void method(T[] t) {}"),
+                method("new Example().method$ "),
+                METHOD_OBJECTS));
+        scenarios.add(scenario("Method With Object Bounded Method Parameter Array As Argument",
+                classbody("Example", "public <O extends Object> void method(O[] o) {}"),
+                method("new Example().method$ "),
                 METHOD_OBJECTS));
 
-        scenarios.add(scenario(classbody("Example", "void method(Boolean b) { b.compareTo$ }"), COMPARE_TO_BOOLEAN));
-        scenarios.add(scenario(classbody("Example", "void method(Delayed d) { d.compareTo$ }"), COMPARE_TO_OBJECT));
+        scenarios.add(scenario("Method Call On Object Field Of Class",
+                classbody("Example", "public Boolean b;"),
+                method("new Example().b.compareTo$ "),
+                COMPARE_TO_BOOLEAN));
+        scenarios.add(scenario("Method Call On Interface Field Of Class",
+                classbody("Example", "public Delayed d;"),
+                method("new Example().d.compareTo$ "),
+                COMPARABLE_COMPARE_TO_OBJECT));
 
-        scenarios.add(scenario(classbody("Example", "Example() { this($) }"), INIT));
-        scenarios.add(scenario(classbody("Example<T>", "Example(T t) { this($) }"), INIT_OBJECT));
-        scenarios.add(scenario(classbody("Example<T extends Object>", "Example(T t) { this($) }"), INIT_OBJECT));
-        scenarios.add(ignoredScenario(classbody("Example<N extends Number>", "Example(N n) { this($) }"), INIT_NUMBER));
-        scenarios.add(
-                scenario(classbody("Example<N>", "Example(Collection<? extends N> c) { this($) }"), INIT_COLLECTION));
+        scenarios.add(scenario("Implicit No Args Constructor",
+                classbody("Example", ""),
+                classbody("SubExample extends Example", "SubExample() { super($) }"),
+                INIT));
+        scenarios.add(scenario("Explicit No Args Constructor",
+                classbody("Example", "protected Example() {}"),
+                classbody("SubExample extends Example", "SubExample() { super($) }"),
+                INIT));
+        scenarios.add(scenario("Constructor With Class Parameter As Argument",
+                classbody("Example<T>", "protected Example(T t) {}"),
+                classbody("SubExample extends Example", "SubExample() { super($) }"),
+                INIT_OBJECT));
+        scenarios.add(scenario("Constructor With Object Bounnded Class Parameter As Argument",
+                classbody("Example<T extends Object>", "protected Example(T t) {}"),
+                classbody("SubExample extends Example", "SubExample() { super($) }"),
+                INIT_OBJECT));
+        scenarios.add(ignoredScenario("Constructor With Bounded Class Parameter As Argument",
+                classbody("Example<N extends Number>", "protected Example(N n) {}"),
+                classbody("SubExample extends Example", "SubExample() { super($) }"),
+                INIT_NUMBER));
+        scenarios.add(scenario("Constructor With Wildcard Parameter (Bounded By Class Parameter) Collection As Argument",
+                classbody("Example<N>", "protected Example(Collection<? extends N> c) {}"),
+                classbody("SubExample extends Example", "SubExample() { super($) }"),
+                INIT_COLLECTION));
 
         // Using nested classes to speed up JDT's constructor completion; this avoids timeouts.
-        scenarios.add(scenario(classbody("Example", "static class Nested { Nested() { new Example.Nested$ } }"),
+        scenarios.add(scenario("Static Nested Class Constructor",
+                classbody("Example", "public static class Nested { public Nested() {} }"),
+                method("new Example.Nested$ "),
                 NESTED_INIT));
-        scenarios.add(scenario(classbody("Example", "static class Nested<T> { Nested(T t) { new Example.Nested$ } }"),
+        scenarios.add(scenario("Static Nested Class Constructor With Nested Class Parameter As Argument",
+                classbody("Example", "public static class Nested<T> { public Nested(T t) {} }"),
+                method("new Example.Nested$ "),
                 NESTED_INIT_OBJECT));
-        scenarios.add(scenario(
-                classbody("Example", "static class Nested<T extends Object> { Nested(T t) { new Example.Nested$ } }"),
+        scenarios.add(scenario("Static Nested Class Constructor With Object Bounded Nested Class Parameter As Argument",
+                classbody("Example", "public static class Nested<T extends Object> { public Nested(T t) {} }"),
+                method("new Example.Nested$ "),
                 NESTED_INIT_OBJECT));
-        scenarios.add(ignoredScenario(
-                classbody("Example", "static class Nested<N extends Number> { Nested(N n) { new Example.Nested$ } }"),
+        scenarios.add(ignoredScenario("Static Nested Class Constructor With Bounded Nested Class Parameter As Argument",
+                classbody("Example", "public static class Nested<N extends Number> { public Nested(N n) {} }"),
+                method("new Example.Nested$ "),
                 NESTED_INIT_NUMBER));
         scenarios.add(scenario(
-                classbody("Example",
-                        "static class Nested<N> { Nested(Collection<? extends N> c) { new Example.Nested$ } }"),
+                "Static Nested Class Constructor With Wildcard Parameter (Bounded By Static Nested Class Parameter) Collection As Argument",
+                classbody("Example", "public static class Nested<N> { public Nested(Collection<? extends N> c) {} }"),
+                method("new Example.Nested$ "),
                 NESTED_INIT_COLLECTION));
 
-        scenarios.add(ignoredScenario(classbody("Example", "class Inner { Inner() { new Example.Inner$ } }"),
+        scenarios.add(ignoredScenario("Inner Class Constructor",
+                classbody("Example", "public class Inner { public Inner() {} }"),
+                method("new Example().new Inner$"),
                 INNER_INIT_EXAMPLE));
-        scenarios.add(ignoredScenario(classbody("Example", "class Inner<T> { Inner(T t) { new Example.Inner$ } }"),
+        scenarios.add(ignoredScenario("Inner Class Constructor With Inner Class Parameter As Argument",
+                classbody("Example", "public class Inner { public Inner(T t) {} }"),
+                method("new Example().new Inner$"),
                 INNER_INIT_EXAMPLE_OBJECT));
-        scenarios.add(ignoredScenario(
-                classbody("Example", "class Inner<T extends Object> { Inner(T t) { new Example.Inner$ } }"),
+        scenarios.add(ignoredScenario("Inner Class Constructor With Object Bounded Inner Class Parameter As Argument",
+                classbody("Example", "public class Inner<T extends Object> { public Inner(T t) {} }"),
+                method("new Example().new Inner$"),
                 INNER_INIT_EXAMPLE_OBJECT));
-        scenarios.add(ignoredScenario(
-                classbody("Example", "class Inner<N extends Number> { Inner(N n) { new Example.Inner$ } }"),
+        scenarios.add(ignoredScenario("Inner Class Constructor With Bounded Inner Class Parameter As Argument",
+                classbody("Example", "public class Inner<N extends Number> { public Inner(N n) {} }"),
+                method("new Example().new Inner$"),
                 INNER_INIT_EXAMPLE_NUMBER));
         scenarios.add(ignoredScenario(
-                classbody("Example", "class Inner<N> { Inner(Collection<? extends N> c) { new Example.Inner$ } }"),
+                "Inner Class Constructor With Wildcard Parameter (Bounded By Inner Class Parameter) Collection As Argument",
+                classbody("Example", "public class Inner<N> { public Inner(Collection<? extends N> c) {} }"),
+                method("new Example().new Inner$"),
                 INNER_INIT_EXAMPLE_COLLECTION));
 
-        scenarios.add(scenario(classbody("Example implements Comparable", "compareTo$"), COMPARE_TO_OBJECT));
-        scenarios.add(scenario(classbody("Example implements Comparable<Example>", "compareTo$"), COMPARE_TO_OBJECT));
-        scenarios.add(scenario(classbody("Example<T> implements Comparable<T>", "compareTo$"), COMPARE_TO_OBJECT));
-        scenarios.add(scenario(classbody("Example<N extends Number> implements Comparable<N>", "compareTo$"),
+        scenarios.add(scenario("Override Superclass Method Inherited From Interface",
+                classbody("Example implements Comparable", "public int compareTo(Object o) {return 0;} "),
+                classbody("SubExample extends Example", "compareTo$ "),
+                COMPARE_TO_OBJECT));
+        scenarios.add(scenario("Override Superclass Method Inherited From Interface, Interface Parameterized By Superclass",
+                classbody("Example implements Comparable<Example>", "public int compareTo(Example example) {return 0;} "),
+                classbody("SubExample extends Example", "compareTo$ "),
+                COMPARE_TO_EXAMPLE));
+        scenarios.add(scenario("Override Superclass Method Inherited From Interface, Interface And Superlass Share Parameter",
+                classbody("Example<T> implements Comparable<T>", "public int compareTo(Object o) {return 0;} "),
+                classbody("SubExample extends Example", "compareTo$ "),
+                COMPARE_TO_OBJECT));
+        scenarios.add(scenario("Override Superclass Method Inherited From Interface, Interface And Class Share Parameter, Class Parameter Bounded",
+                classbody("Example<N extends Number> implements Comparable<N>", "public int compareTo(Object o) {return 0;}"),
+                classbody("SubExample extends Example", "compareTo$ "),
                 COMPARE_TO_OBJECT));
 
-        scenarios.add(scenario(classbody("Example<T extends Throwable>", "void method() throws T { this.method$ }"),
+        scenarios.add(scenario("Method Throws Bounded Parameter of Class",
+                classbody("Example<T extends Throwable>", "public void method() throws T {}"),
+                method("new Example().method$ "),
                 METHOD_VOID));
-        scenarios.add(scenario(classbody("Example", "<T extends Throwable> void method() throws T { this.method$ }"),
+        scenarios.add(scenario("Method Throws Bounded Parameter Of Method",
+                classbody("Example", "public <T extends Throwable> void method() throws T {}"),
+                method("new Example().method$ "),
                 METHOD_VOID));
 
-        scenarios.add(scenario(classbody("Example", "int hashCode() { hashCode$ }"), EXAMPLE_HASH_CODE));
-        scenarios.add(scenario(classbody("Example", "int hashCode() { this.hashCode$ }"), EXAMPLE_HASH_CODE));
-        scenarios.add(scenario(classbody("Example", "int hashCode() { super.hashCode$ }"), OBJECT_HASH_CODE));
+        scenarios.add(scenario("Overridden Method Of Object Class",
+                classbody("Example", "public int hashCode() { return 0; }"),
+                method(" new Example().hashcode$ "),
+                EXAMPLE_HASH_CODE));
+        scenarios.add(scenario("Non-Overridden Method Of Object Class",
+                classbody("Example", ""),
+                classbody("SubExample extends Example", "void method() { this.hashCode$ }"),
+                OBJECT_HASH_CODE));
+        scenarios.add(scenario("Method Of Object Class, Overridden by SuperClass",
+                classbody("Example", "public int hashCode() { return 0; }"),
+                classbody("SubExample extends Example", "void method() { this.hashCode$ }"),
+                EXAMPLE_HASH_CODE));
+        scenarios.add(scenario("Call This. On Object Class Method, Method Overridden By Current Class And SuperClass",
+                classbody("Example", "public int hashCode() { return 0; }"),
+                classbody("SubExample extends Example", "public int hashCode() { return 0; } void method() { this.hashCode$ }"),
+                SUBEXAMPLE_HASH_CODE));
+        scenarios.add(scenario("Call Super. On Object Class Method, Method Overridden By Current Class And SuperClass",
+                classbody("Example", "public int hashCode() { return 0; }"),
+                classbody("SubExample extends Example", "public int hashCode() { return 0; } void method() { super.hashCode$ }"),
+                EXAMPLE_HASH_CODE));
+        scenarios.add(scenario("Call Super. On Object Class Method From Anonymous Class, Method Overridden By Anonymous Class And SuperClass",
+                classbody("Example", "public int hashCode() { return 0; }"),
+                method("new Example() { public int hashCode() { return 0; } void method() { return super.hashCode$ } };"),
+                EXAMPLE_HASH_CODE));
 
-        scenarios
-                .add(scenario(method("new Object() { int hashCode() { return super.hashCode$ } };"), OBJECT_HASH_CODE));
-
-        scenarios.add(scenario(method("new Object[0].hashCode$"), OBJECT_HASH_CODE));
+        scenarios.add(scenario("Overridden Method Of Object Class, Invoked On Array",
+                classbody("Example", "public int hashCode() { return 0; }"),
+                method("new Example[0].hashCode$"),
+                OBJECT_HASH_CODE));
 
         // See <https://bugs.eclipse.org/bugs/show_bug.cgi?id=442723>.
-        scenarios.add(scenario(method("this.clone$"), OBJECT_CLONE));
-        scenarios.add(scenario(method("new Object[0].clone$"), OBJECT_CLONE));
-        scenarios.add(scenario(method("new Object[0][0].clone$"), OBJECT_CLONE));
-        scenarios.add(scenario(method("new String[0].clone$"), OBJECT_CLONE));
-        scenarios.add(scenario(classbody("Example<T>", "void method() { new T[0].clone$ }"), OBJECT_CLONE));
+        scenarios.add(scenario("Clone Method Invoked On Class",
+                classbody("Example", ""),
+                classbody("SubExample", "void method() { new SubExample().clone$ }"),
+                OBJECT_CLONE));
+        scenarios.add(scenario("Clone Method Invoked On New Array",
+                classbody("Example", ""),
+                method("new Example[0].clone$"),
+                OBJECT_CLONE));
+        scenarios.add(scenario("Clone Method Invoked On New 2D Array",
+                classbody("Example", ""),
+                method("new Example[0][0].clone$"),
+                OBJECT_CLONE));
+        scenarios.add(scenario("Clone Method Invoked on Array Of A Parameterized Type",
+                classbody("Example<T>", "void method() {}"),
+                classbody("SubExample<T> extends Example<T>", "void method() { T[] t = (T[]) new Object[0]; t.clone$ }"),
+                OBJECT_CLONE));
+        // @formatter:on
 
         return scenarios;
     }
 
-    private static Object[] scenario(CharSequence compilationUnit, IMethodName expectedMethod) {
-        return new Object[] { false, compilationUnit, expectedMethod };
+    private static Object[] scenario(String description, CharSequence exampleCU, CharSequence invokingCU,
+            IMethodName expectedMethod) {
+        return new Object[] { false, description, exampleCU, invokingCU, expectedMethod };
     }
 
     /**
      * Ignored scenarios are due to <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=467902">Bug 467902</a>. Once
      * JDT makes the necessary changes, the scenarios can be un-ignored.
      */
-    private static Object[] ignoredScenario(CharSequence compilationUnit, IMethodName expectedMethod) {
-        return new Object[] { true, compilationUnit, expectedMethod };
+    private static Object[] ignoredScenario(String description, CharSequence exampleCU, CharSequence invokingCU,
+            IMethodName expectedMethod) {
+        return new Object[] { true, description, exampleCU, invokingCU, expectedMethod };
     }
 
     @Test
-    public void test() throws Exception {
+    public void testSourceBindings() throws Exception {
         assumeThat(ignore, is(equalTo(false)));
 
+        TemporaryProject dependency = WORKSPACE.createProject();
+        dependency.createFile(exampleCode);
+
         TemporaryProject projectWithSources = WORKSPACE.createProject();
-        IRecommendersCompletionContext context = projectWithSources.createFile(code).triggerContentAssist();
+        IRecommendersCompletionContext context = projectWithSources.withDependencyOn(dependency)
+                .createFile(scenarioCode).triggerContentAssist();
+
+        Collection<CompletionProposal> proposals = context.getProposals().values();
+        IMethodName actualMethod = ProposalUtils.toMethodName(getOnlyElement(proposals)).get();
+
+        assertThat(actualMethod, is(equalTo(expectedMethod)));
+    }
+
+    @Test
+    public void testBinaryBindings() throws Exception {
+        assumeThat(ignore, is(equalTo(false)));
+
+        TemporaryProject dependency = WORKSPACE.createProject();
+        dependency.createFile(exampleCode);
+
+        TemporaryProject projectWithSources = WORKSPACE.createProject();
+        IRecommendersCompletionContext context = projectWithSources.withDependencyOnClassesOf(dependency)
+                .createFile(scenarioCode).triggerContentAssist();
 
         Collection<CompletionProposal> proposals = context.getProposals().values();
         IMethodName actualMethod = ProposalUtils.toMethodName(getOnlyElement(proposals)).get();
