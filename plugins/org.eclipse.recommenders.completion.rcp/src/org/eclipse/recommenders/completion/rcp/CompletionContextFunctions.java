@@ -213,7 +213,8 @@ public final class CompletionContextFunctions {
     public static class ExpectedTypeNamesContextFunction implements ICompletionContextFunction<Set<ITypeName>> {
 
         @Override
-        public Set<ITypeName> compute(IRecommendersCompletionContext context, CompletionContextKey<Set<ITypeName>> key) {
+        public Set<ITypeName> compute(IRecommendersCompletionContext context,
+                CompletionContextKey<Set<ITypeName>> key) {
             ASTNode completion = context.getCompletionNode().orNull();
             InternalCompletionContext core = context.get(INTERNAL_COMPLETIONCONTEXT, null);
 
