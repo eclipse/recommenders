@@ -11,6 +11,8 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.io.File.separator;
 import static java.util.Arrays.asList;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -23,14 +25,17 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.recommenders.utils.Constants;
 import org.eclipse.recommenders.utils.Nonnull;
 import org.eclipse.recommenders.utils.Throws;
+import org.eclipse.recommenders.utils.Zips;
 
 import com.google.common.collect.Sets;
 
@@ -38,6 +43,7 @@ public class TemporaryProject {
 
     static final String BIN_FOLDER_NAME = "bin";
     static final String SRC_FOLDER_NAME = "src";
+    static final String JAR_FOLDER_NAME = "jar";
 
     private final Set<TemporaryFile> temporaryFiles = Sets.newHashSet();
     private final IWorkspace workspace;
@@ -62,6 +68,41 @@ public class TemporaryProject {
         return this;
     }
 
+    public TemporaryProject withDependencyOnJarOf(TemporaryProject dependency) throws IOException, JavaModelException {
+        String relativePathToJar = dependency.getWorkspaceRelativePathString() + separator + dependency.getName()
+                + Constants.DOT_JAR;
+        String pathToJar = dependency.getAbsolutePathString() + separator + dependency.getName() + Constants.DOT_JAR;
+        File jar = new File(pathToJar);
+
+        String pathToClassDirectory = dependency.getAbsolutePathString() + separator + BIN_FOLDER_NAME;
+        File classFileDirectory = new File(pathToClassDirectory);
+
+        Zips.zip(classFileDirectory, jar);
+
+        addToClasspath(JavaCore.newContainerEntry(new Path(relativePathToJar)));
+
+        return this;
+    }
+
+    private File getClassDirectory() {
+        String pathToClassDirectory = this.getAbsolutePathString() + separator + BIN_FOLDER_NAME;
+        return new File(pathToClassDirectory);
+    }
+
+    private File getJarDirectory() {
+        String pathToJarDirectory = this.getAbsolutePathString() + separator + JAR_FOLDER_NAME;
+        File jarDirectory = new File(pathToJarDirectory);
+        if (!jarDirectory.exists()) {
+            jarDirectory.mkdir();
+        }
+
+        return jarDirectory;
+    }
+
+    private String getWorkspaceRelativeJarDirectory() {
+        return this.getWorkspaceRelativePathString() + separator + JAR_FOLDER_NAME;
+    }
+
     public TemporaryFile createFile(CharSequence code) throws CoreException {
         TemporaryFile tempFile = new TemporaryFile(this, code);
         temporaryFiles.add(tempFile);
@@ -75,6 +116,14 @@ public class TemporaryProject {
     void refreshAndBuildProject() throws CoreException {
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
         project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+    }
+
+    String getWorkspaceRelativePathString() {
+        return project.getFullPath().toString();
+    }
+
+    String getAbsolutePathString() {
+        return project.getLocation().toString();
     }
 
     private void addToClasspath(@Nonnull final IClasspathEntry classpathEntry) throws JavaModelException {
