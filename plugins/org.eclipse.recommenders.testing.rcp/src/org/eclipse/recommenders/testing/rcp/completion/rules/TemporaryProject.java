@@ -161,7 +161,7 @@ public class TemporaryProject {
         return project;
     }
 
-    IJavaProject getJavaProject() {
+    public IJavaProject getJavaProject() {
         return javaProject;
     }
 }

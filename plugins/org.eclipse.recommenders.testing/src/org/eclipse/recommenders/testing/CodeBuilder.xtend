@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.testing
 
 import java.util.concurrent.atomic.AtomicInteger
+import com.google.common.base.Joiner
 
 class CodeBuilder {
 
@@ -29,6 +30,20 @@ class CodeBuilder {
     }
 
     def static classDeclaration(CharSequence declaration, CharSequence body) {
+        classDeclaration(declaration, body, "");
+    }
+    
+    def static classDeclaration(CharSequence declaration, CharSequence body, CharSequence superclass, CharSequence... interfaces) {
+        var extends = "";
+        if (superclass.length > 0) {
+            extends = " extends " + superclass;
+        }
+        
+        var implements = "";
+        if (interfaces.length > 0) {
+            implements = " implements " + Joiner.on(',').join(interfaces);
+            
+        }
         '''
             import java.lang.reflect.*;
             import java.lang.annotation.*;
@@ -40,8 +55,8 @@ class CodeBuilder {
             import java.util.concurrent.atomic.*;
             import javax.annotation.*;
             import javax.xml.ws.Action;
-            «declaration» {
-            	«body»
+            «declaration»«extends»«implements» {
+                «body»
             }
         '''
     }

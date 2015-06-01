@@ -9,4 +9,5 @@ Fragment-Host: org.eclipse.recommenders.types.rcp
 Require-Bundle: org.eclipse.recommenders.testing.rcp,
  org.hamcrest,
  org.junit,
- org.mockito
+ org.mockito,
+ org.eclipse.recommenders.testing

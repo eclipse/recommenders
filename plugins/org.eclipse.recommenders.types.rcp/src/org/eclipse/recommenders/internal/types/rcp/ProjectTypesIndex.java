@@ -105,15 +105,18 @@ public class ProjectTypesIndex extends AbstractIdleService implements IProjectTy
     private JobFuture activeRebuild = null;
     private boolean rebuildAfterNextAccess;
 
+    private final boolean testMode;
+
     public ProjectTypesIndex(IJavaProject project, File indexDir) {
-        this(project, indexDir, true);
+        this(project, indexDir, false);
     }
 
     @VisibleForTesting
-    ProjectTypesIndex(IJavaProject project, File indexDir, boolean startService) {
+    ProjectTypesIndex(IJavaProject project, File indexDir, boolean testMode) {
         this.project = project;
         this.indexDir = indexDir;
-        if (startService) {
+        this.testMode = testMode;
+        if (!testMode) {
             startAsync();
         }
     }
@@ -137,7 +140,8 @@ public class ProjectTypesIndex extends AbstractIdleService implements IProjectTy
         writer.commit();
     }
 
-    private boolean needsRebuild() {
+    @VisibleForTesting
+    boolean needsRebuild() {
         List<IPackageFragmentRoot> roots = findArchivePackageFragmentRoots();
         StringBuilder sb = new StringBuilder();
         try {
@@ -171,9 +175,21 @@ public class ProjectTypesIndex extends AbstractIdleService implements IProjectTy
     }
 
     private List<IPackageFragmentRoot> findArchivePackageFragmentRoots() {
-        Iterable<IPackageFragmentRoot> filter = Iterables.filter(JavaElementsFinder.findPackageFragmentRoots(project),
+        Iterable<IPackageFragmentRoot> filtered = Iterables.filter(JavaElementsFinder.findPackageFragmentRoots(project),
                 new ArchiveFragmentRootsOnlyPredicate());
-        return Ordering.usingToString().sortedCopy(filter);
+        Iterable<IPackageFragmentRoot> result;
+        if (testMode) {
+            result = Iterables.filter(filtered, new Predicate<IPackageFragmentRoot>() {
+
+                @Override
+                public boolean apply(IPackageFragmentRoot input) {
+                    return !input.getPath().toFile().getAbsolutePath().contains("Java");
+                }
+            });
+        } else {
+            result = filtered;
+        }
+        return Ordering.usingToString().sortedCopy(result);
     }
 
     private Set<File> getIndexedRoots() throws IOException {
@@ -331,7 +347,8 @@ public class ProjectTypesIndex extends AbstractIdleService implements IProjectTy
         job.schedule(2000);
     }
 
-    private synchronized void rebuild(SubMonitor progress) {
+    @VisibleForTesting
+    synchronized void rebuild(SubMonitor progress) {
         List<IPackageFragmentRoot> roots = findArchivePackageFragmentRoots();
         for (IPackageFragmentRoot root : roots) {
             progress.subTask(root.getElementName());
