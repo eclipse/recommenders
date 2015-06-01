@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.completion.rcp.processable;
 
+import static java.util.Arrays.asList;
 import static org.eclipse.recommenders.completion.rcp.CompletionContextKey.ACTIVE_PROCESSORS;
 import static org.eclipse.recommenders.completion.rcp.processable.ProcessableProposalFactory.create;
 import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.*;
@@ -169,6 +170,8 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
     private void enableRecommenders() {
         new DisableContentAssistCategoryJob(MYLYN_ALL_CATEGORY).schedule();
         new DisableContentAssistCategoryJob(JDT_ALL_CATEGORY).schedule();
+        new DisableContentAssistCategoryJob(JDT_TYPE_CATEGORY).schedule();
+        new DisableContentAssistCategoryJob(JDT_NON_TYPE_CATEGORY).schedule();
     }
 
     @Override
@@ -182,24 +185,24 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
     }
 
     protected boolean isContentAssistConfigurationOkay() {
-        Set<String> cats = Sets.newHashSet(PreferenceConstants.getExcludedCompletionProposalCategories());
-        if (cats.contains(RECOMMENDERS_ALL_CATEGORY_ID)) {
+        Set<String> excludedCategories = Sets.newHashSet(PreferenceConstants.getExcludedCompletionProposalCategories());
+        if (excludedCategories.contains(RECOMMENDERS_ALL_CATEGORY_ID)) {
             // If we are excluded on the default tab, then we cannot be on the default tab now, as we are executing.
             // Hence, we must be on a subsequent tab.
             return true;
         }
-        if (isJdtAllEnabled(cats) || isMylynInstalledAndEnabled(cats)) {
+        if (isJdtJavaProposalsEnabled(excludedCategories) || isMylynJavaProposalsEnabled(excludedCategories)) {
             return false;
         }
         return true;
     }
 
-    private boolean isMylynInstalledAndEnabled(Set<String> cats) {
-        return isMylynInstalled() && !cats.contains(MYLYN_ALL_CATEGORY);
+    private boolean isMylynJavaProposalsEnabled(Set<String> excludedCategories) {
+        return isMylynInstalled() && !excludedCategories.contains(MYLYN_ALL_CATEGORY);
     }
 
-    private boolean isJdtAllEnabled(Set<String> cats) {
-        return !cats.contains(JDT_ALL_CATEGORY);
+    private boolean isJdtJavaProposalsEnabled(Set<String> excludedCategories) {
+        return !excludedCategories.containsAll(asList(JDT_ALL_CATEGORY, JDT_TYPE_CATEGORY, JDT_NON_TYPE_CATEGORY));
     }
 
     private boolean isMylynInstalled() {
