@@ -59,17 +59,18 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
             feedTitle.setFont(CommonFonts.BOLD);
             feedTitle.setText(entry.getKey().getName());
             for (final IFeedMessage message : entry.getValue()) {
-                Link link = new Link(composite, SWT.WRAP);
-                link.setText(MessageFormat.format("<a href=\"{1}\">{0}</a>", message.getTitle(), message.getUrl())); //$NON-NLS-1$
-                GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(link);
-                link.addSelectionListener(new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        BrowserUtils.openInExternalBrowser(e.text);
-                        eventBus.post(createFeedMessageReadEvent(message.getId()));
-                    }
-                });
-
+                if (!message.isRead()) {
+                    Link link = new Link(composite, SWT.WRAP);
+                    link.setText(MessageFormat.format("<a href=\"{1}\">{0}</a>", message.getTitle(), message.getUrl())); //$NON-NLS-1$
+                    GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(link);
+                    link.addSelectionListener(new SelectionAdapter() {
+                        @Override
+                        public void widgetSelected(SelectionEvent e) {
+                            BrowserUtils.openInExternalBrowser(e.text);
+                            eventBus.post(createFeedMessageReadEvent(message.getId()));
+                        }
+                    });
+                }
             }
         }
     }

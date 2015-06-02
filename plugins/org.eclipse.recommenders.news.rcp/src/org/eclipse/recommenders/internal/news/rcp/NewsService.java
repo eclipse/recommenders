@@ -20,13 +20,14 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IJobFacade;
+import org.eclipse.recommenders.news.rcp.INewsFeedProperties;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -35,21 +36,20 @@ import com.google.common.eventbus.Subscribe;
 public class NewsService implements INewsService {
 
     private final NewsRcpPreferences preferences;
-    private final NewsFeedProperties newsFeedProperties;
+    private final INewsFeedProperties newsFeedProperties;
     private final Set<String> readIds;
     private final IJobFacade jobFacade;
-    private final Map<String, Date> pollDates;
     private final EventBus bus;
 
     private HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
 
-    public NewsService(NewsRcpPreferences preferences, EventBus bus, IJobFacade jobFacade) {
+    public NewsService(NewsRcpPreferences preferences, EventBus bus, IJobFacade jobFacade,
+            INewsFeedProperties newsFeedProperties) {
         this.preferences = preferences;
         this.bus = bus;
         bus.register(this);
-        newsFeedProperties = new NewsFeedProperties();
+        this.newsFeedProperties = newsFeedProperties;
         readIds = newsFeedProperties.getReadIds();
-        pollDates = newsFeedProperties.getPollDates();
         this.jobFacade = jobFacade;
     }
 
@@ -74,28 +74,26 @@ public class NewsService implements INewsService {
 
                     @Override
                     public List<IFeedMessage> apply(List<IFeedMessage> input) {
-                        return FluentIterable.from(input).limit(countPerFeed).filter(new Predicate<IFeedMessage>() {
-
-                            @Override
-                            public boolean apply(IFeedMessage input) {
-                                return !readIds.contains(input.getId());
+                        ImmutableList<IFeedMessage> list = FluentIterable.from(input).limit(countPerFeed).toList();
+                        for (IFeedMessage message : list) {
+                            if (readIds.contains(message.getId())) {
+                                message.setRead(true);
                             }
-                        }).toList();
-                    }
-                });
-        Map<FeedDescriptor, List<IFeedMessage>> filteredMap = Maps.filterValues(transformedMap,
-                new Predicate<List<IFeedMessage>>() {
-
-                    @Override
-                    public boolean apply(List<IFeedMessage> input) {
-                        if (input == null) {
-                            return false;
                         }
-                        return !input.isEmpty();
+                        return list;
                     }
-
                 });
-        return ImmutableMap.copyOf(filteredMap);
+        return Maps.filterValues(transformedMap, new Predicate<List<IFeedMessage>>() {
+
+            @Override
+            public boolean apply(List<IFeedMessage> input) {
+                if (input == null) {
+                    return false;
+                }
+                return !input.isEmpty();
+            }
+
+        });
     }
 
     @Subscribe
@@ -112,7 +110,7 @@ public class NewsService implements INewsService {
         for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
             if (!groupedMessages.containsKey(entry.getKey())) {
                 groupedMessages.put(entry.getKey(), entry.getValue());
-                if (entry.getValue().size() > 0) {
+                if (!entry.getValue().isEmpty()) {
                     newMessage = true;
                 }
             }
@@ -125,8 +123,9 @@ public class NewsService implements INewsService {
             }
         }
 
-        if (groupedMessages.size() > 0 && newMessage) {
+        if (!groupedMessages.isEmpty() && newMessage) {
             bus.post(createNewFeedItemsEvent());
+            validateReadIds();
         }
 
         if (!preferences.isEnabled()) {
@@ -160,5 +159,22 @@ public class NewsService implements INewsService {
         if (groupedMessages.containsKey(feed)) {
             groupedMessages.remove(feed);
         }
+    }
+
+    private void validateReadIds() {
+        Set<String> result = Sets.newHashSet();
+        Set<String> allMessages = Sets.newHashSet();
+        for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : groupedMessages.entrySet()) {
+            for (IFeedMessage message : entry.getValue()) {
+                allMessages.add(message.getId());
+            }
+        }
+        for (String s : readIds) {
+            if (allMessages.contains(s)) {
+                result.add(s);
+            }
+        }
+        readIds.clear();
+        readIds.addAll(result);
     }
 }
