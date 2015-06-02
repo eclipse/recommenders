@@ -10,10 +10,11 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
+import static org.eclipse.jdt.ui.text.IJavaPartitions.*;
+
 import java.util.Set;
 
 import org.eclipse.jdt.core.CompletionContext;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.TextUtilities;
@@ -35,21 +36,23 @@ public class JavaEditorSearchContext extends SearchContext {
 
     private static Location getLocation(JavaContentAssistInvocationContext context) {
         try {
-            String partition = TextUtilities.getContentType(context.getDocument(), IJavaPartitions.JAVA_PARTITIONING,
+            String partition = TextUtilities.getContentType(context.getDocument(), JAVA_PARTITIONING,
                     context.getInvocationOffset(), true);
-            if (partition.equals(IJavaPartitions.JAVA_DOC)) {
+            if (partition.equals(JAVA_DOC)) {
                 return Location.JAVADOC;
-            } else {
-                CompletionContext coreContext = context.getCoreContext();
-                if (coreContext != null) {
-                    int tokenLocation = coreContext.getTokenLocation();
-                    if ((tokenLocation & CompletionContext.TL_MEMBER_START) != 0) {
-                        return Location.JAVA_TYPE_MEMBERS;
-                    } else if ((tokenLocation & CompletionContext.TL_STATEMENT_START) != 0) {
-                        return Location.JAVA_STATEMENTS;
-                    }
-                    return Location.UNKNOWN;
+            }
+            if (partition.equals(JAVA_SINGLE_LINE_COMMENT) || partition.equals(JAVA_MULTI_LINE_COMMENT)) {
+                return Location.FILE;
+            }
+            CompletionContext coreContext = context.getCoreContext();
+            if (coreContext != null) {
+                int tokenLocation = coreContext.getTokenLocation();
+                if ((tokenLocation & CompletionContext.TL_MEMBER_START) != 0) {
+                    return Location.JAVA_TYPE_MEMBERS;
+                } else if ((tokenLocation & CompletionContext.TL_STATEMENT_START) != 0) {
+                    return Location.JAVA_STATEMENTS;
                 }
+                return Location.UNKNOWN;
             }
         } catch (BadLocationException e) {
             Logs.log(LogMessages.ERROR_CANNOT_COMPUTE_LOCATION, e);
