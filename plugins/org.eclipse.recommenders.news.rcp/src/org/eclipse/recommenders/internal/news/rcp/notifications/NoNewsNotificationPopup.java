@@ -36,7 +36,7 @@ public class NoNewsNotificationPopup extends AbstractNotificationPopup {
         Label noNewFeedsTitle = new Label(composite, SWT.NONE);
         GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(noNewFeedsTitle);
         noNewFeedsTitle.setFont(CommonFonts.BOLD);
-        noNewFeedsTitle.setText(Messages.LABEL_NO_NEW_MESSAGS);
+        noNewFeedsTitle.setText(Messages.LABEL_NO_NEW_MESSAGES);
         return;
     }
 
