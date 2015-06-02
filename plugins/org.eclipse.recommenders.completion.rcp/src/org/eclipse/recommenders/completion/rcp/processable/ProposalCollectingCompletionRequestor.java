@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.recommenders.internal.completion.rcp.Constants;
 import org.eclipse.recommenders.utils.Reflections;
 import org.eclipse.swt.graphics.Point;
 import org.slf4j.Logger;
@@ -93,7 +95,13 @@ public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
         collector.setIgnored(PACKAGE_REF, false);
         collector.setIgnored(POTENTIAL_METHOD_DECLARATION, false);
         collector.setIgnored(VARIABLE_DECLARATION, false);
-        collector.setIgnored(TYPE_REF, false);
+
+        if (doesJdtProposeNonTypesOnly()) {
+            collector.setIgnored(TYPE_REF, true);
+        } else {
+            collector.setIgnored(TYPE_REF, false);
+        }
+
         collector.setIgnored(JAVADOC_BLOCK_TAG, false);
         collector.setIgnored(JAVADOC_FIELD_REF, false);
         collector.setIgnored(JAVADOC_INLINE_TAG, false);
@@ -115,6 +123,13 @@ public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
 
         collector.setFavoriteReferences(getFavoriteStaticMembers());
         collector.setRequireExtendedContext(true);
+    }
+
+    private boolean doesJdtProposeNonTypesOnly() {
+        String[] excludes = PreferenceConstants.getExcludedCompletionProposalCategories();
+        return !ArrayUtils.contains(excludes, Constants.JDT_NON_TYPE_CATEGORY)
+                && ArrayUtils.contains(excludes, Constants.JDT_ALL_CATEGORY)
+                && ArrayUtils.contains(excludes, Constants.JDT_TYPE_CATEGORY);
     }
 
     @Override
