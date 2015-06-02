@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IJobFacade;
+import org.eclipse.recommenders.news.rcp.INewsFeedProperties;
 import org.eclipse.recommenders.utils.Urls;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,12 +40,14 @@ public class NewsServiceTest {
     private NewsRcpPreferences preferences;
     private EventBus bus;
     private IJobFacade jobFacade;
+    private INewsFeedProperties properties;
 
     @Before
     public void setUp() {
         preferences = mock(NewsRcpPreferences.class);
         bus = mock(EventBus.class);
         jobFacade = mock(JobFacade.class);
+        properties = mock(NewsFeedProperties.class);
     }
 
     @Test
@@ -55,7 +58,7 @@ public class NewsServiceTest {
         when(preferences.getPollingInterval()).thenReturn("1");
         Set<FeedDescriptor> feeds = new HashSet<>();
         feeds.addAll(ImmutableList.of(feed));
-        NewsService sut = new NewsService(preferences, bus, jobFacade);
+        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
         sut.start();
         verify(jobFacade, times(1)).schedule(feeds, sut);
     }
@@ -68,7 +71,7 @@ public class NewsServiceTest {
         when(preferences.getPollingInterval()).thenReturn("1");
         Set<FeedDescriptor> feeds = new HashSet<>();
         feeds.addAll(ImmutableList.of(feed));
-        NewsService sut = new NewsService(preferences, bus, jobFacade);
+        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
         sut.start();
         verify(jobFacade, times(0)).schedule(feeds, sut);
     }
@@ -80,7 +83,7 @@ public class NewsServiceTest {
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
         Set<FeedDescriptor> feeds = new HashSet<>();
         feeds.addAll(ImmutableList.of(feed));
-        NewsService sut = new NewsService(preferences, bus, jobFacade);
+        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
         sut.start();
         verify(jobFacade, times(0)).schedule(feeds, sut);
     }
@@ -99,7 +102,7 @@ public class NewsServiceTest {
         }
         groupedMessages.put(feed, messages);
         when(job.getMessages()).thenReturn(groupedMessages);
-        NewsService sut = new NewsService(preferences, bus, jobFacade);
+        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
         sut.jobDone(job);
         assertThat(sut.getMessages(3).values().iterator().next().size(), is(3));
     }
