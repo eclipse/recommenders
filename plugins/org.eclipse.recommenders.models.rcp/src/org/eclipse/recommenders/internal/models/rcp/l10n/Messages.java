@@ -62,6 +62,8 @@ public final class Messages extends NLS {
     public static String JOB_DOWNLOADING_MODELS;
     public static String JOB_DOWNLOAD_TRANSFERRED_SIZE;
     public static String JOB_DOWNLOAD_TRANSFERRED_TOTAL_SIZE;
+
+    public static String JOB_PREFETCHING_MODEL_ARCHIVE;
     public static String JOB_REFRESHING_DEPENDENCY_OVERVIEW_VIEW;
     public static String JOB_REFRESHING_MODEL_REPOSITORIES_VIEW;
     public static String JOB_RESOLVING_MODEL;
@@ -79,6 +81,8 @@ public final class Messages extends NLS {
     public static String LOG_INFO_NO_MODEL_RESOLVED;
 
     public static String LIST_SEPARATOR;
+
+    public static String RESOLVING_COORDINATES_MONITOR;
 
     static {
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

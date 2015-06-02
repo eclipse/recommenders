@@ -44,6 +44,8 @@ public final class Messages extends NLS {
 
     public static String LOG_ERROR_RECEIVER_TYPE_LOOKUP_FAILED;
 
+    public static String METHOD_MUST_NOT_BE_A_CONSTRUCTOR;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

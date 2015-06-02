@@ -24,6 +24,10 @@ public final class Messages extends NLS {
     public static String PROPOSAL_TOOLTIP_ENABLED_COMPLETION;
     public static String PROPOSAL_CATEGORY_CODE_RECOMMENDERS;
 
+    public static String PROPOSAL_KIND_IS_NOT_FIELD_REF;
+
+    public static String PROPOSAL_KIND_IS_NOT_LOCAL_VARIABLE;
+
     public static String PREFPAGE_TITLE_COMPLETIONS;
 
     public static String PREFPAGE_DESCRIPTION_COMPLETIONS;
