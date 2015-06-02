@@ -34,8 +34,9 @@ public class NewsRcpModule extends AbstractModule {
 
     @Provides
     @Singleton
-    INewsService provideRssService(NewsRcpPreferences preferences, EventBus eventBus, JobFacade provider) {
-        return new NewsService(preferences, eventBus, provider);
+    INewsService provideRssService(NewsRcpPreferences preferences, EventBus eventBus, JobFacade provider,
+            NewsFeedProperties properties) {
+        return new NewsService(preferences, eventBus, provider, properties);
     }
 
 }
