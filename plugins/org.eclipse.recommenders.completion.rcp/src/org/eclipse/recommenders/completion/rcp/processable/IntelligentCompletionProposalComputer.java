@@ -56,7 +56,6 @@ import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.utils.Logs;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -117,24 +116,32 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
         if (!isTriggeredInJavaProject()) {
             return Collections.emptyList();
         }
+        Map<IJavaCompletionProposal, CompletionProposal> proposals = crContext.getProposals();
         if (!isContentAssistConfigurationOkay()) {
             enableRecommenders();
             int offset = context.getInvocationOffset();
+
+            List<ICompletionProposal> nonRecommendedProposals = Lists.newArrayList();
+
             EnabledCompletionProposal info = new EnabledCompletionProposal(images, offset);
-            boolean hasOtherProposals = !crContext.getProposals().isEmpty();
+            // Return the enabled proposal
+            nonRecommendedProposals.add(info);
+
+            boolean hasOtherProposals = !proposals.isEmpty();
             if (hasOtherProposals) {
-                // Return the configure proposal
-                return ImmutableList.<ICompletionProposal>of(info);
+                nonRecommendedProposals.addAll(proposals.keySet());
             } else {
-                return ImmutableList.<ICompletionProposal>of(info, new EmptyCompletionProposal(offset));
+                nonRecommendedProposals.add(new EmptyCompletionProposal(offset));
             }
+
+            return nonRecommendedProposals;
         } else {
             List<ICompletionProposal> res = Lists.newLinkedList();
             registerCompletionListener();
             crContext.set(ACTIVE_PROCESSORS, ImmutableSet.copyOf(activeProcessors));
             fireInitializeContext(crContext);
             fireStartSession(crContext);
-            for (Entry<IJavaCompletionProposal, CompletionProposal> pair : crContext.getProposals().entrySet()) {
+            for (Entry<IJavaCompletionProposal, CompletionProposal> pair : proposals.entrySet()) {
                 IJavaCompletionProposal jdtProposal = create(pair.getValue(), pair.getKey(), jdtContext,
                         proposalFactory);
                 res.add(jdtProposal);
