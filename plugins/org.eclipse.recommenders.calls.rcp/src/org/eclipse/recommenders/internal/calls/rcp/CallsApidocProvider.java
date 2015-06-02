@@ -145,8 +145,8 @@ public final class CallsApidocProvider extends ApidocProvider {
             model.setObservedCalls(calls);
             model.setObservedDefinitionKind(kind);
 
-            Iterable<Recommendation<IMethodName>> methodCalls = sortByRelevance(Recommendations.filterRelevance(
-                    model.recommendCalls(), 0.01 / 100));
+            Iterable<Recommendation<IMethodName>> methodCalls = sortByRelevance(
+                    Recommendations.filterRelevance(model.recommendCalls(), 0.01 / 100));
             runSyncInUiThread(new CallRecommendationsRenderer(overrideContext, methodCalls, calls,
                     variable.getElementName(), definingMethod, kind, parent));
         } finally {
@@ -210,15 +210,15 @@ public final class CallsApidocProvider extends ApidocProvider {
             setInfoBackgroundColor(preamble2);
             preamble2.setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 0).create());
             if (isEmpty(methodCalls)) {
-                preamble2.setText(format(Messages.PROVIDER_INTRO_NO_RECOMMENDATIONS, receiverType.getElementName(),
-                        varName));
+                preamble2.setText(
+                        format(Messages.PROVIDER_INTRO_NO_RECOMMENDATIONS, receiverType.getElementName(), varName));
             } else {
-                preamble2.setText(format(Messages.PROVIDER_INTRO_RECOMMENDATIONS, receiverType.getElementName(),
-                        varName));
+                preamble2.setText(
+                        format(Messages.PROVIDER_INTRO_RECOMMENDATIONS, receiverType.getElementName(), varName));
             }
 
-            new Label(container, SWT.NONE).setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 0)
-                    .hint(SWT.DEFAULT, 1).create());
+            new Label(container, SWT.NONE)
+                    .setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 0).hint(SWT.DEFAULT, 1).create());
             for (final Recommendation<IMethodName> rec : methodCalls) {
                 createLabel(container, percentageToRecommendationPhrase(asPercentage(rec)), true, false,
                         COLOR_INFO_FOREGROUND, false);
@@ -249,11 +249,12 @@ public final class CallsApidocProvider extends ApidocProvider {
             }
             preamble.setText(text);
 
-            new Label(container, SWT.NONE).setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 5)
-                    .hint(SWT.DEFAULT, 1).create());
+            new Label(container, SWT.NONE)
+                    .setLayoutData(GridDataFactory.swtDefaults().span(4, 1).indent(0, 5).hint(SWT.DEFAULT, 1).create());
 
             if (def != null) {
-                createLabel(container, Messages.TABLE_CELL_RELATION_DEFINED_BY, true, false, SWT.COLOR_DARK_GRAY, false);
+                createLabel(container, Messages.TABLE_CELL_RELATION_DEFINED_BY, true, false, SWT.COLOR_DARK_GRAY,
+                        false);
                 createLabel(container, "", false, false, SWT.COLOR_DARK_GRAY, false); //$NON-NLS-1$
                 if (def == VmMethodName.NULL) {
                     createLabel(container, Messages.TABLE_CELL_DEFINITION_UNTRAINED, false, false, SWT.COLOR_DARK_GRAY,
