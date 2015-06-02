@@ -38,7 +38,6 @@ public class NewsService implements INewsService {
     private final NewsFeedProperties newsFeedProperties;
     private final Set<String> readIds;
     private final IJobFacade jobFacade;
-    private final Map<String, Date> pollDates;
     private final EventBus bus;
 
     private HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
@@ -49,7 +48,6 @@ public class NewsService implements INewsService {
         bus.register(this);
         newsFeedProperties = new NewsFeedProperties();
         readIds = newsFeedProperties.getReadIds();
-        pollDates = newsFeedProperties.getPollDates();
         this.jobFacade = jobFacade;
     }
 
