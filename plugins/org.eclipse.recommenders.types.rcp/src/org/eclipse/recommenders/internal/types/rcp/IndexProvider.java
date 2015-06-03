@@ -41,6 +41,16 @@ public class IndexProvider implements IIndexProvider {
     }
 
     @Override
+    public void deleteIndex(IJavaProject project) {
+        IProjectTypesIndex index = findIndex(project).orNull();
+        if (index == null) {
+            return;
+        }
+        index.delete();
+        cache.invalidate(project);
+    }
+
+    @Override
     public void close() throws IOException {
         for (IProjectTypesIndex index : cache.asMap().values()) {
             index.close();
