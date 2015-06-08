@@ -52,6 +52,7 @@ public class EnableTypesCompletionProposal extends AbstractCompletionTipProposal
 
     // this proposal should appear below the enable code completion proposal
     private static final int ENABLE_TYPE_COMPLETION_RELEVANCE = ENABLE_CODE_COMPLETION_RELEVANCE - RELEVANCE_STEP_SIZE;
+    private static final int TIME_DELAY_IN_MINUTES = 15;
 
     private final CompletionRcpPreferences preferences;
 
@@ -64,6 +65,7 @@ public class EnableTypesCompletionProposal extends AbstractCompletionTipProposal
         StyledString text = new StyledString(Messages.PROPOSAL_LABEL_ENABLE_TYPES_COMPLETION, DECORATIONS_STYLER);
         setStyledDisplayString(text);
         setSortString(text.getString());
+        setDisplayTimeDelayInMinutes(TIME_DELAY_IN_MINUTES);
     }
 
     @Override
@@ -74,6 +76,10 @@ public class EnableTypesCompletionProposal extends AbstractCompletionTipProposal
         }
 
         if (preferences.isEnabled(descriptor)) {
+            return false;
+        }
+
+        if (!isDisplayTimeDelayComplete()) {
             return false;
         }
 

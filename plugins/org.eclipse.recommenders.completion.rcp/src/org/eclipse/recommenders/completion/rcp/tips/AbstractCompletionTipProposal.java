@@ -7,6 +7,8 @@
  */
 package org.eclipse.recommenders.completion.rcp.tips;
 
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
 import org.eclipse.jface.text.IInformationControl;
@@ -15,8 +17,8 @@ import org.eclipse.recommenders.internal.completion.rcp.l10n.Messages;
 import org.eclipse.swt.widgets.Shell;
 
 @SuppressWarnings("restriction")
-public abstract class AbstractCompletionTipProposal extends AbstractJavaCompletionProposal implements
-        ICompletionTipProposal {
+public abstract class AbstractCompletionTipProposal extends AbstractJavaCompletionProposal
+        implements ICompletionTipProposal {
 
     private static final Object DUMMY_INFO = new Object();
 
@@ -25,10 +27,14 @@ public abstract class AbstractCompletionTipProposal extends AbstractJavaCompleti
     // matches) can have a relevance of -10000.
     private static final int RELEVANCE = -10001;
 
+    private long displayTimeDelay;
+    private final long initializationTime;
+
     public AbstractCompletionTipProposal() {
         setRelevance(RELEVANCE);
         setCursorPosition(0);
         setReplacementString(""); //$NON-NLS-1$
+        this.initializationTime = System.currentTimeMillis();
     }
 
     @Override
@@ -54,4 +60,12 @@ public abstract class AbstractCompletionTipProposal extends AbstractJavaCompleti
     }
 
     protected abstract IInformationControl createInformationControl(Shell parent, String statusLineText);
+
+    protected void setDisplayTimeDelayInMinutes(int minutes) {
+        displayTimeDelay = TimeUnit.MINUTES.toMillis(minutes);
+    }
+
+    protected boolean isDisplayTimeDelayComplete() {
+        return System.currentTimeMillis() - initializationTime > displayTimeDelay;
+    }
 }

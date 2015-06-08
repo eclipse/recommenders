@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 public class DiscoveryCompletionProposal extends AbstractCompletionTipProposal {
 
     private static final String DISCOVERY_URL = "http://download.eclipse.org/recommenders/discovery/2.0/completion/directory.xml"; //$NON-NLS-1$
+    private static final int TIME_DELAY_IN_MINUTES = 30;
 
     @Inject
     public DiscoveryCompletionProposal(SharedImages images) {
@@ -39,11 +40,12 @@ public class DiscoveryCompletionProposal extends AbstractCompletionTipProposal {
         StyledString text = new StyledString(Messages.PROPOSAL_LABEL_DISCOVER_EXTENSIONS, DECORATIONS_STYLER);
         setStyledDisplayString(text);
         setSortString(text.getString());
+        setDisplayTimeDelayInMinutes(TIME_DELAY_IN_MINUTES);
     }
 
     @Override
     public boolean isApplicable(IRecommendersCompletionContext context) {
-        return true;
+        return isDisplayTimeDelayComplete();
     }
 
     @Override
