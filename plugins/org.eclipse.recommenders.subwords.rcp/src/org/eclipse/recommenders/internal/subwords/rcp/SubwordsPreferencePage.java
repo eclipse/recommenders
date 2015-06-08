@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.subwords.rcp;
 import static org.eclipse.jface.fieldassist.FieldDecorationRegistry.DEC_INFORMATION;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -49,5 +50,6 @@ public class SubwordsPreferencePage extends FieldEditorPreferencePage implements
         dec.setImage(infoDecoration.getImage());
         dec.setDescriptionText(Messages.PREFPAGE_TOOLTIP_PREFIX_LENGTH);
         addField(prefixLengthEditor);
+        Dialog.applyDialogFont(getControl());
     }
 }
