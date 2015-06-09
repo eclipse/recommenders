@@ -487,6 +487,9 @@ public abstract class AbstractNotificationPopup extends Window {
     }
 
     private void setNullBackground(final Composite outerCircle) {
+        if (outerCircle.isDisposed()) {
+            return;
+        }
         for (Control c : outerCircle.getChildren()) {
             c.setBackground(null);
             if (c instanceof Composite) {
@@ -503,8 +506,8 @@ public abstract class AbstractNotificationPopup extends Window {
         int width = Math.min(initialSize.x, MAX_WIDTH);
 
         Point size = new Point(width, height);
-        shell.setLocation(clArea.width + clArea.x - size.x - PADDING_EDGE, clArea.height + clArea.y - size.y
-                - PADDING_EDGE);
+        shell.setLocation(clArea.width + clArea.x - size.x - PADDING_EDGE,
+                clArea.height + clArea.y - size.y - PADDING_EDGE);
         shell.setSize(size);
     }
 

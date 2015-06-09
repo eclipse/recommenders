@@ -19,4 +19,6 @@ public interface IPollFeedJob {
 
     Map<FeedDescriptor, Date> getPollDates();
 
+    Map<FeedDescriptor, Date> getFeedLatestMessageDates();
+
 }
