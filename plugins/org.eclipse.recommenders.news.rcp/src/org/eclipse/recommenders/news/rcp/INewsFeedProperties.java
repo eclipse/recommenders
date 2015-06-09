@@ -19,7 +19,7 @@ public interface INewsFeedProperties {
 
     void writeReadIds(Set<String> readIds);
 
-    Map<String, Date> getPollDates();
+    void writeDates(Map<FeedDescriptor, Date> map, String filename);
 
-    void writePollDates(Map<FeedDescriptor, Date> map);
+    Map<String, Date> getDates(String filename);
 }
