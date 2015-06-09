@@ -43,6 +43,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     private final Map<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
     private final Set<FeedDescriptor> feeds = Sets.newHashSet();
     private final Map<FeedDescriptor, Date> pollDates = Maps.newHashMap();
+    private final Map<FeedDescriptor, Date> feedLatestMessageDates = Maps.newHashMap();
 
     public PollFeedJob(String jobId, Collection<FeedDescriptor> feeds) {
         super(jobId);
@@ -60,14 +61,14 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     protected IStatus run(IProgressMonitor monitor) {
         try {
             for (FeedDescriptor feed : feeds) {
-                List<IFeedMessage> messages;
+                List<IFeedMessage> messages = Lists.newArrayList();
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
                 try {
                     connection.connect();
                     if (connection.getResponseCode() == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
                         InputStream in = new BufferedInputStream(connection.getInputStream());
                         try {
-                            messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
+                            messages.addAll(readMessages(in, monitor, feed.getId()));
                             groupedMessages.put(feed, messages);
                         } finally {
                             in.close();
@@ -77,6 +78,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                     connection.disconnect();
                 }
                 pollDates.put(feed, new Date());
+                feedLatestMessageDates.put(feed, messages.get(0).getDate());
             }
         } catch (Exception e) {
             System.out.println(e.getCause());
@@ -122,6 +124,11 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     public Map<FeedDescriptor, Date> getPollDates() {
         return pollDates;
+    }
+
+    @Override
+    public Map<FeedDescriptor, Date> getFeedLatestMessageDates() {
+        return feedLatestMessageDates;
     }
 
     public String getJobId() {

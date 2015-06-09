@@ -13,6 +13,9 @@ package org.eclipse.recommenders.internal.news.rcp.notifications;
 import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createFeedMessageReadEvent;
 
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,11 +34,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 
 public class NewsNotificationPopup extends AbstractNotificationPopup {
 
     private static final int DELAY_CLOSE_MS = 4000;
+    private static final int DEFAULT_NOTIFICATION_MESSAGES = 6;
+    private static final int DEFAULT_NOTIFICATION_MESSAGE_PER_FEED = 2;
 
     private final Map<FeedDescriptor, List<IFeedMessage>> messages;
     private final EventBus eventBus;
@@ -52,26 +59,75 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
     protected void createContentArea(Composite composite) {
         super.createContentArea(composite);
         composite.setLayout(new GridLayout(1, true));
+        int counter = 0;
+        int innerCounter = 0;
+        Map<FeedDescriptor, List<IFeedMessage>> sortedMap = sortByFirstDate(messages);
 
-        for (Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
-            Label feedTitle = new Label(composite, SWT.NONE);
-            GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(feedTitle);
-            feedTitle.setFont(CommonFonts.BOLD);
-            feedTitle.setText(entry.getKey().getName());
-            for (final IFeedMessage message : entry.getValue()) {
-                Link link = new Link(composite, SWT.WRAP);
-                link.setText(MessageFormat.format("<a href=\"{1}\">{0}</a>", message.getTitle(), message.getUrl())); //$NON-NLS-1$
-                GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(link);
-                link.addSelectionListener(new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        BrowserUtils.openInExternalBrowser(e.text);
-                        eventBus.post(createFeedMessageReadEvent(message.getId()));
+        for (Entry<FeedDescriptor, List<IFeedMessage>> entry : sortedMap.entrySet()) {
+            if (counter < DEFAULT_NOTIFICATION_MESSAGES && !isMessagesReadOrEmpty(entry.getValue())) {
+                Label feedTitle = new Label(composite, SWT.NONE);
+                GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT)
+                        .applyTo(feedTitle);
+                feedTitle.setFont(CommonFonts.BOLD);
+                feedTitle.setText(entry.getKey().getName());
+
+                for (final IFeedMessage message : entry.getValue()) {
+                    if (counter < DEFAULT_NOTIFICATION_MESSAGES && !message.isRead()
+                            && innerCounter < DEFAULT_NOTIFICATION_MESSAGE_PER_FEED) {
+                        Link link = new Link(composite, SWT.WRAP);
+                        link.setText(
+                                MessageFormat.format("<a href=\"{1}\">{0}</a>", message.getTitle(), message.getUrl())); //$NON-NLS-1$
+                        GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT)
+                                .applyTo(link);
+                        link.addSelectionListener(new SelectionAdapter() {
+                            @Override
+                            public void widgetSelected(SelectionEvent e) {
+                                BrowserUtils.openInExternalBrowser(e.text);
+                                eventBus.post(createFeedMessageReadEvent(message.getId()));
+                            }
+                        });
+                        counter++;
+                        innerCounter++;
                     }
-                });
-
+                }
+                innerCounter = 0;
             }
         }
+        Label hint = new Label(composite, SWT.NONE);
+        GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(hint);
+        hint.setText(Messages.HINT_MORE_MESSAGES);
+        if (counter == 0) {
+            super.close();
+        }
+    }
+
+    private static Map<FeedDescriptor, List<IFeedMessage>> sortByFirstDate(
+            Map<FeedDescriptor, List<IFeedMessage>> unsortedMap) {
+        List<Map.Entry<FeedDescriptor, List<IFeedMessage>>> list = Lists.newArrayList(unsortedMap.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<FeedDescriptor, List<IFeedMessage>>>() {
+
+            @Override
+            public int compare(Entry<FeedDescriptor, List<IFeedMessage>> lhs,
+                    Entry<FeedDescriptor, List<IFeedMessage>> rhs) {
+                return lhs.getValue().get(0).getDate().compareTo(rhs.getValue().get(0).getDate());
+            }
+
+        });
+        Map<FeedDescriptor, List<IFeedMessage>> result = Maps.newLinkedHashMap();
+        for (Iterator<Map.Entry<FeedDescriptor, List<IFeedMessage>>> iter = list.iterator(); iter.hasNext();) {
+            Map.Entry<FeedDescriptor, List<IFeedMessage>> entry = iter.next();
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
+    private boolean isMessagesReadOrEmpty(List<IFeedMessage> messages) {
+        for (IFeedMessage message : messages) {
+            if (!message.isRead()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

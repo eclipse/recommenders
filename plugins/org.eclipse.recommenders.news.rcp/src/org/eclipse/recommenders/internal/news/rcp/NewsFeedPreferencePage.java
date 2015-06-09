@@ -54,6 +54,8 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
         enabledEditor = new BooleanFieldEditor(Constants.PREF_NEWS_ENABLED, Messages.FIELD_LABEL_NEWS_ENABLED,
                 getFieldEditorParent());
         addField(enabledEditor);
+        addField(new BooleanFieldEditor(Constants.PREF_NOTIFICATION_ENABLED, Messages.FIELD_LABEL_NOTIFICATION_ENABLED,
+                getFieldEditorParent()));
         pollingIntervalEditor = new IntegerFieldEditor(Constants.PREF_POLLING_INTERVAL,
                 Messages.FIELD_LABEL_POLLING_INTERVAL, getFieldEditorParent(), 4);
         addField(pollingIntervalEditor);
@@ -74,25 +76,11 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
         IPreferenceStore store = getPreferenceStore();
         boolean oldValue = store.getBoolean(Constants.PREF_NEWS_ENABLED);
         boolean newValue = enabledEditor.getBooleanValue();
-        List<FeedDescriptor> oldFeedValue = FeedDescriptors.load(store.getString(Constants.PREF_FEED_LIST_SORTED),
-                feedEditor.getValue());
-        List<FeedDescriptor> newFeedValue = feedEditor.getValue();
         boolean result = super.performOk();
         if (!oldValue && newValue) {
             // News has been activated
             service.start();
         }
-
-        // TODO make sure preference change takes effect immediately
-        // for (FeedDescriptor oldFeed : oldFeedValue) {
-        // FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
-        // if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
-        // service.start(newFeed);
-        // }
-        // if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
-        // service.removeFeed(newFeed);
-        // }
-        // }
         return result;
     }
 
