@@ -140,6 +140,10 @@ public class NewsService implements INewsService {
         if (!feed.isEnabled()) {
             return false;
         }
+        if (feed.isOverwritePollingInterval()) {
+            feed.setOverwritePollingInterval(false);
+            return true;
+        }
         int pollingInterval = preferences.getPollingInterval().intValue();
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, pollingInterval);

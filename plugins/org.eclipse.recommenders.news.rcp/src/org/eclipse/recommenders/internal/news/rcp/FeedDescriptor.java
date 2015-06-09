@@ -22,6 +22,7 @@ public class FeedDescriptor {
 
     private final IConfigurationElement config;
     private boolean enabled;
+    private boolean overwritePollingInterval;
 
     public FeedDescriptor(FeedDescriptor that) {
         this(that.config, that.enabled);
@@ -65,6 +66,14 @@ public class FeedDescriptor {
     public Image getIcon() {
         String iconPath = config.getAttribute("icon"); //$NON-NLS-1$
         return AbstractUIPlugin.imageDescriptorFromPlugin(Constants.PLUGIN_ID, iconPath).createImage();
+    }
+
+    public boolean isOverwritePollingInterval() {
+        return overwritePollingInterval;
+    }
+
+    public void setOverwritePollingInterval(boolean overwritePollingInterval) {
+        this.overwritePollingInterval = overwritePollingInterval;
     }
 
     @Override
