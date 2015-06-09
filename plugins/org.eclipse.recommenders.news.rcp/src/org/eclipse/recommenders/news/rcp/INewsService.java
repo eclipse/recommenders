@@ -7,6 +7,7 @@
  */
 package org.eclipse.recommenders.news.rcp;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,5 +27,7 @@ public interface INewsService {
     boolean shouldPoll(FeedDescriptor feed);
 
     void jobDone(IPollFeedJob job);
+
+    void updateFeedDates(Map<FeedDescriptor, Date> map);
 
 }

@@ -60,14 +60,14 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     protected IStatus run(IProgressMonitor monitor) {
         try {
             for (FeedDescriptor feed : feeds) {
-                List<IFeedMessage> messages;
+                List<IFeedMessage> messages = Lists.newArrayList();
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
                 try {
                     connection.connect();
                     if (connection.getResponseCode() == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
                         InputStream in = new BufferedInputStream(connection.getInputStream());
                         try {
-                            messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
+                            messages.addAll(readMessages(in, monitor, feed.getId()));
                             groupedMessages.put(feed, messages);
                         } finally {
                             in.close();

@@ -35,7 +35,6 @@ import com.google.common.io.Files;
 public class NewsFeedProperties implements INewsFeedProperties {
 
     private static final String FILENAME_READ_MESSAGES = "read-messages.properties"; //$NON-NLS-1$
-    private static final String FILENAME_POLL_DATES = "poll-dates.properties"; //$NON-NLS-1$
     private static final String VALUE_READ = "read"; //$NON-NLS-1$
     private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"); //$NON-NLS-1$
 
@@ -82,9 +81,9 @@ public class NewsFeedProperties implements INewsFeedProperties {
     }
 
     @Override
-    public Map<String, Date> getPollDates() {
+    public Map<String, Date> getDates(String filename) {
         Map<String, Date> result = Maps.newConcurrentMap();
-        File statusFile = getFile(FILENAME_POLL_DATES);
+        File statusFile = getFile(filename);
         if (!statusFile.exists()) {
             return result;
         }
@@ -96,7 +95,7 @@ public class NewsFeedProperties implements INewsFeedProperties {
             }
             return result;
         } catch (IOException | ParseException e) {
-            Logs.log(LogMessages.ERROR_READING_PROPERTIES, e, FILENAME_POLL_DATES);
+            Logs.log(LogMessages.ERROR_READING_PROPERTIES, e, filename);
             return result;
         }
     }
@@ -106,12 +105,12 @@ public class NewsFeedProperties implements INewsFeedProperties {
     /**
      * Stores last feed poll date, however it doesn't overwrite it, just add new entries.
      */
-    public void writePollDates(Map<FeedDescriptor, Date> map) {
+    public void writeDates(Map<FeedDescriptor, Date> map, String filename) {
         if (map == null) {
             return;
         }
         Properties properties = new Properties();
-        File statusFile = getFile(FILENAME_POLL_DATES);
+        File statusFile = getFile(filename);
         if (statusFile.exists()) {
             try (InputStream stream = Files.asByteSource(statusFile).openStream()) {
                 properties.load(stream);
@@ -127,10 +126,10 @@ public class NewsFeedProperties implements INewsFeedProperties {
                 properties.setProperty(entry.getKey().getId(), dateFormat.format(entry.getValue()));
             }
         }
-        try (FileOutputStream stream = new FileOutputStream(getFile(FILENAME_POLL_DATES))) {
+        try (FileOutputStream stream = new FileOutputStream(getFile(filename))) {
             properties.store(stream, "");
         } catch (IOException e) {
-            Logs.log(LogMessages.ERROR_WRITING_PROPERTIES, FILENAME_POLL_DATES, e);
+            Logs.log(LogMessages.ERROR_WRITING_PROPERTIES, filename, e);
         }
     }
 }

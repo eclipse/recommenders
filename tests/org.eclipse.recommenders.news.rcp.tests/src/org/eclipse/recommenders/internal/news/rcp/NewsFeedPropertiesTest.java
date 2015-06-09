@@ -80,8 +80,8 @@ public class NewsFeedPropertiesTest {
         Date date = dateFormat.parse(dateFormat.format(new Date()));
         FeedDescriptor feed = enabled(testId);
         writePollDates.put(feed, date);
-        sut.writePollDates(writePollDates);
-        Map<String, Date> readPollDates = sut.getPollDates();
+        sut.writeDates(writePollDates, Constants.FILENAME_POLL_DATES);
+        Map<String, Date> readPollDates = sut.getDates(Constants.FILENAME_POLL_DATES);
         assertThat(readPollDates.keySet().contains(feed.getId()), is(true));
         assertThat(readPollDates.values().contains(date), is(true));
     }
@@ -95,8 +95,8 @@ public class NewsFeedPropertiesTest {
         FeedDescriptor secondFeed = enabled(testIdTwo);
         writePollDates.put(feed, date);
         writePollDates.put(secondFeed, date);
-        sut.writePollDates(writePollDates);
-        Map<String, Date> readPollDates = sut.getPollDates();
+        sut.writeDates(writePollDates, Constants.FILENAME_POLL_DATES);
+        Map<String, Date> readPollDates = sut.getDates(Constants.FILENAME_POLL_DATES);
         assertThat(readPollDates.keySet(), containsInAnyOrder(testId, testIdTwo));
         assertThat(readPollDates.values(), containsInAnyOrder(date, date));
         assertThat(readPollDates.size(), is(2));
@@ -106,8 +106,8 @@ public class NewsFeedPropertiesTest {
     public void testWriteEmptyMap() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Map<FeedDescriptor, Date> writePollDates = Maps.newHashMap();
-        sut.writePollDates(writePollDates);
-        Map<String, Date> readPollDates = sut.getPollDates();
+        sut.writeDates(writePollDates, Constants.FILENAME_POLL_DATES);
+        Map<String, Date> readPollDates = sut.getDates(Constants.FILENAME_POLL_DATES);
         assertThat(readPollDates.size(), is(2));
     }
 
@@ -116,8 +116,8 @@ public class NewsFeedPropertiesTest {
     public void testWriteNullMap() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Map<FeedDescriptor, Date> writePollDates = null;
-        sut.writePollDates(writePollDates);
-        Map<String, Date> readPollDates = sut.getPollDates();
+        sut.writeDates(writePollDates, Constants.FILENAME_POLL_DATES);
+        Map<String, Date> readPollDates = sut.getDates(Constants.FILENAME_POLL_DATES);
         assertThat(readPollDates.size(), is(2));
     }
 }
