@@ -54,11 +54,12 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
         enabledEditor = new BooleanFieldEditor(Constants.PREF_NEWS_ENABLED, Messages.FIELD_LABEL_NEWS_ENABLED,
                 getFieldEditorParent());
         addField(enabledEditor);
+        addField(new BooleanFieldEditor(Constants.PREF_NOTIFICATION_ENABLED, Messages.FIELD_LABEL_NOTIFICATION_ENABLED,
+                getFieldEditorParent()));
         pollingIntervalEditor = new IntegerFieldEditor(Constants.PREF_POLLING_INTERVAL,
                 Messages.FIELD_LABEL_POLLING_INTERVAL, getFieldEditorParent(), 4);
         addField(pollingIntervalEditor);
-        feedEditor = new FeedEditor(Constants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS,
-                getFieldEditorParent());
+        feedEditor = new FeedEditor(Constants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS, getFieldEditorParent());
         addField(feedEditor);
     }
 
@@ -83,16 +84,15 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
             service.start();
         }
 
-        // TODO make sure preference change takes effect immediately
-        // for (FeedDescriptor oldFeed : oldFeedValue) {
-        // FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
-        // if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
-        // service.start(newFeed);
-        // }
-        // if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
-        // service.removeFeed(newFeed);
-        // }
-        // }
+        for (FeedDescriptor oldFeed : oldFeedValue) {
+            FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
+            if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
+                service.start();
+            }
+            if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
+                service.removeFeed(newFeed);
+            }
+        }
         return result;
     }
 
