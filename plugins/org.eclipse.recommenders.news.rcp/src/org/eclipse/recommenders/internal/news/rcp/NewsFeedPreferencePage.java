@@ -78,21 +78,25 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
                 feedEditor.getValue());
         List<FeedDescriptor> newFeedValue = feedEditor.getValue();
         boolean result = super.performOk();
+        boolean forceStart = false;
         if (!oldValue && newValue) {
             // News has been activated
             service.start();
         }
 
-        // TODO make sure preference change takes effect immediately
-        // for (FeedDescriptor oldFeed : oldFeedValue) {
-        // FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
-        // if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
-        // service.start(newFeed);
-        // }
-        // if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
-        // service.removeFeed(newFeed);
-        // }
-        // }
+        for (FeedDescriptor oldFeed : oldFeedValue) {
+            FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
+            if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
+                forceStart = true;
+            }
+            if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
+                service.removeFeed(newFeed);
+            }
+        }
+
+        if (forceStart) {
+            service.forceStart();
+        }
         return result;
     }
 

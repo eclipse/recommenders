@@ -7,10 +7,8 @@
  */
 package org.eclipse.recommenders.news.rcp;
 
-import java.util.Collection;
-
-import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
-
 public interface IJobFacade {
-    void schedule(Collection<FeedDescriptor> feeds, INewsService service);
+    void schedule(INewsService service, long delay);
+
+    void forceSchedule(INewsService service, long delay);
 }
