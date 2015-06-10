@@ -32,7 +32,7 @@ public final class Messages extends NLS {
 
     public static String LOG_ERROR_READING_PROPERTIES;
     public static String LOG_ERROR_WRITING_PROPERTIES;
-
+    public static String LOG_ERROR_RUNNING_JOB;
 
     static {
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

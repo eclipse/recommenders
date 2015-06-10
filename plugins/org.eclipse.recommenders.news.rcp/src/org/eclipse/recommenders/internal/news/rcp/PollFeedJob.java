@@ -25,8 +25,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedReader;
+import org.eclipse.recommenders.internal.news.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.Urls;
 
 import com.google.common.base.Function;
@@ -60,26 +62,12 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     protected IStatus run(IProgressMonitor monitor) {
         try {
             for (FeedDescriptor feed : feeds) {
-                List<IFeedMessage> messages;
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
-                try {
-                    connection.connect();
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
-                        InputStream in = new BufferedInputStream(connection.getInputStream());
-                        try {
-                            messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
-                            groupedMessages.put(feed, messages);
-                        } finally {
-                            in.close();
-                        }
-                    }
-                } finally {
-                    connection.disconnect();
-                }
+                updateGroupedMessages(connection, monitor, feed);
                 pollDates.put(feed, new Date());
             }
         } catch (Exception e) {
-            System.out.println(e.getCause());
+            Logs.log(LogMessages.ERROR_RUNNING_JOB, e);
             return Status.CANCEL_STATUS;
         }
         return Status.OK_STATUS;
@@ -126,6 +114,25 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     public String getJobId() {
         return jobId;
+    }
+
+    private void updateGroupedMessages(HttpURLConnection connection, IProgressMonitor monitor, FeedDescriptor feed) {
+        try {
+            connection.connect();
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
+                InputStream in = new BufferedInputStream(connection.getInputStream());
+                try {
+                    List<IFeedMessage> messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
+                    groupedMessages.put(feed, messages);
+                } finally {
+                    in.close();
+                }
+            }
+        } catch (Exception e) {
+            Logs.log(LogMessages.ERROR_RUNNING_JOB, e);
+        } finally {
+            connection.disconnect();
+        }
     }
 
     class MutexRule implements ISchedulingRule {

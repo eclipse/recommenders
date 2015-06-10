@@ -12,6 +12,8 @@ import java.util.Date;
 
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 
+import com.google.common.base.Objects;
+
 public class FeedMessage implements IFeedMessage {
 
     private final String id;
@@ -66,14 +68,7 @@ public class FeedMessage implements IFeedMessage {
             return false;
         }
         FeedMessage rhs = (FeedMessage) obj;
-        if (id == null) {
-            if (rhs.id != null) {
-                return false;
-            }
-        } else if (!id.equals(rhs.id)) {
-            return false;
-        }
-        return true;
+        return Objects.equal(id, rhs.getId());
     }
 
     @Override

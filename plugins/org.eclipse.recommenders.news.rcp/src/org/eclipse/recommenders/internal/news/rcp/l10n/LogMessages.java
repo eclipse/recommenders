@@ -24,6 +24,8 @@ public final class LogMessages extends DefaultLogMessage {
     public static final LogMessages ERROR_WRITING_PROPERTIES = new LogMessages(ERROR,
             Messages.LOG_ERROR_WRITING_PROPERTIES);
 
+    public static final LogMessages ERROR_RUNNING_JOB = new LogMessages(ERROR, Messages.LOG_ERROR_RUNNING_JOB);
+
     private LogMessages(int severity, String message) {
         super(severity, code++, message);
     }
