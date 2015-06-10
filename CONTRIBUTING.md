@@ -1,3 +1,5 @@
+JUST A TEST, TO BE ABANDONED
+
 How to Contribute to Eclipse Code Recommenders
 ==============================================
 
