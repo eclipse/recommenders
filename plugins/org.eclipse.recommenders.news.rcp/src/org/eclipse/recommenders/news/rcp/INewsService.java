@@ -23,8 +23,9 @@ public interface INewsService {
 
     void handleMessageRead(FeedMessageReadEvent event);
 
-    boolean shouldPoll(FeedDescriptor feed);
+    boolean shouldPoll(FeedDescriptor feed, boolean overwrite);
 
     void jobDone(IPollFeedJob job);
 
+    void pollFeeds();
 }

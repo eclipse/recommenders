@@ -41,8 +41,9 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     private final String jobId;
     private final NotificationEnvironment environment;
     private final Map<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
-    private final Set<FeedDescriptor> feeds = Sets.newHashSet();
     private final Map<FeedDescriptor, Date> pollDates = Maps.newHashMap();
+
+    private Set<FeedDescriptor> feeds = Sets.newHashSet();
 
     public PollFeedJob(String jobId, Collection<FeedDescriptor> feeds) {
         super(jobId);
@@ -61,6 +62,9 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         try {
             for (FeedDescriptor feed : feeds) {
                 List<IFeedMessage> messages;
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
+                }
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
                 try {
                     connection.connect();

@@ -7,7 +7,7 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-import static org.eclipse.recommenders.internal.news.rcp.TestUtils.*;
+import static org.eclipse.recommenders.internal.news.rcp.TestUtils.enabled;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -17,8 +17,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IJobFacade;
 import org.eclipse.recommenders.news.rcp.INewsFeedProperties;
@@ -29,7 +30,6 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
@@ -47,6 +47,7 @@ public class NewsServiceTest {
     private EventBus bus;
     private IJobFacade jobFacade;
     private INewsFeedProperties properties;
+    private Job simpleJob;
 
     @Before
     public void setUp() {
@@ -54,6 +55,7 @@ public class NewsServiceTest {
         bus = mock(EventBus.class);
         jobFacade = mock(JobFacade.class);
         properties = mock(NewsFeedProperties.class);
+        simpleJob = mock(Job.class);
     }
 
     @Test
@@ -62,22 +64,9 @@ public class NewsServiceTest {
         when(preferences.isEnabled()).thenReturn(true);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
         when(preferences.getPollingInterval()).thenReturn(POLLING_INTERVAL);
-        Set<FeedDescriptor> feeds = ImmutableSet.of(feed);
-        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
+        NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
         sut.start();
-        verify(jobFacade, times(1)).schedule(feeds, sut);
-    }
-
-    @Test
-    public void testNotStartDisabledFeed() {
-        FeedDescriptor feed = disabled(FIRST_ELEMENT);
-        when(preferences.isEnabled()).thenReturn(true);
-        when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        when(preferences.getPollingInterval()).thenReturn(POLLING_INTERVAL);
-        Set<FeedDescriptor> feeds = ImmutableSet.of(feed);
-        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
-        sut.start();
-        verify(jobFacade, never()).schedule(feeds, sut);
+        verify(jobFacade, times(1)).scheduleNewsUpdate(sut);
     }
 
     @Test
@@ -85,7 +74,7 @@ public class NewsServiceTest {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.isEnabled()).thenReturn(false);
         when(preferences.getFeedDescriptors()).thenReturn(ImmutableList.of(feed));
-        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
+        NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
         sut.start();
         verifyZeroInteractions(jobFacade);
     }
@@ -104,11 +93,12 @@ public class NewsServiceTest {
         }
         groupedMessages.put(feed, messages);
         when(job.getMessages()).thenReturn(groupedMessages);
-        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
-        sut.jobDone(job);
+        NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
+        sut.jobDone(job, simpleJob);
         Map<FeedDescriptor, List<IFeedMessage>> sutMessages = sut.getMessages(COUNT_PER_FEED);
         assertThat(sutMessages, hasKey(feed));
         assertThat(sutMessages.get(feed), hasSize(COUNT_PER_FEED));
+        verify(simpleJob).schedule(TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
     }
 
     @Test
@@ -125,11 +115,12 @@ public class NewsServiceTest {
         }
         groupedMessages.put(feed, messages);
         when(job.getMessages()).thenReturn(groupedMessages);
-        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
-        sut.jobDone(job);
+        NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
+        sut.jobDone(job, simpleJob);
         Map<FeedDescriptor, List<IFeedMessage>> sutMessages = sut.getMessages(COUNT_PER_FEED);
         assertThat(sutMessages, hasKey(feed));
         assertThat(sutMessages.get(feed), hasSize(LESS_THAN_COUNT_PER_FEED));
+        verify(simpleJob).schedule(TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
     }
 
     @Test
@@ -141,10 +132,11 @@ public class NewsServiceTest {
         PollFeedJob job = mock(PollFeedJob.class);
         HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
         when(job.getMessages()).thenReturn(groupedMessages);
-        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
-        sut.jobDone(job);
+        NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
+        sut.jobDone(job, simpleJob);
         assertNotNull(sut.getMessages(COUNT_PER_FEED));
         assertThat(sut.getMessages(COUNT_PER_FEED).isEmpty(), is(true));
+        verify(simpleJob).schedule(TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
     }
 
     @Test
@@ -163,12 +155,28 @@ public class NewsServiceTest {
         groupedMessages.put(feed, messages);
         groupedMessages.put(secondFeed, messages);
         when(job.getMessages()).thenReturn(groupedMessages);
-        NewsService sut = new NewsService(preferences, bus, jobFacade, properties);
-        sut.jobDone(job);
+        NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
+        sut.jobDone(job, simpleJob);
         Map<FeedDescriptor, List<IFeedMessage>> sutMessages = sut.getMessages(COUNT_PER_FEED);
         assertThat(sutMessages.keySet(), containsInAnyOrder(feed, secondFeed));
         assertThat(sutMessages.size(), is(2));
         assertThat(sutMessages.get(feed), hasSize(COUNT_PER_FEED));
+        verify(simpleJob).schedule(TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
     }
 
+    // TO-DO write below tests once https://git.eclipse.org/r/#/c/49926/ is merged
+    @Test
+    public void testShouldntPollFeedWithDateAfter() {
+
+    }
+
+    @Test
+    public void testPollFeedWithDateBefore() {
+
+    }
+
+    @Test
+    public void testShouldPollOverridenFeedWithDateAfter() {
+
+    }
 }

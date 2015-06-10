@@ -38,34 +38,26 @@ public class NewsService implements INewsService {
     private final INewsFeedProperties newsFeedProperties;
     private final Set<String> readIds;
     private final IJobFacade jobFacade;
-    private final Map<String, Date> pollDates;
     private final EventBus bus;
 
     private HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
 
-    public NewsService(NewsRcpPreferences preferences, EventBus bus, IJobFacade jobFacade,
-            INewsFeedProperties newsFeedProperties) {
+    public NewsService(NewsRcpPreferences preferences, EventBus bus, INewsFeedProperties newsFeedProperties,
+            IJobFacade jobFacade) {
         this.preferences = preferences;
-        this.bus = bus;
         bus.register(this);
-        this.newsFeedProperties = newsFeedProperties;
+        this.bus = bus;
         readIds = newsFeedProperties.getReadIds();
-        pollDates = newsFeedProperties.getPollDates();
+        this.newsFeedProperties = newsFeedProperties;
         this.jobFacade = jobFacade;
     }
 
     @Override
     public void start() {
-        Set<FeedDescriptor> feeds = Sets.newHashSet();
         if (!preferences.isEnabled()) {
             return;
         }
-        for (final FeedDescriptor feed : preferences.getFeedDescriptors()) {
-            if (shouldPoll(feed)) {
-                feeds.add(feed);
-            }
-        }
-        jobFacade.schedule(feeds, this);
+        jobFacade.schedulePollFeeds(this, getFeedsToPoll(true));
     }
 
     @Override
@@ -131,14 +123,16 @@ public class NewsService implements INewsService {
         if (!preferences.isEnabled()) {
             return;
         }
-        PollFeedJob pollFeedJob = (PollFeedJob) job;
-        pollFeedJob.schedule(TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
+        jobFacade.scheduleNewsUpdate(this, TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
     }
 
     @Override
-    public boolean shouldPoll(FeedDescriptor feed) {
+    public boolean shouldPoll(FeedDescriptor feed, boolean override) {
         if (!feed.isEnabled()) {
             return false;
+        }
+        if (override) {
+            return true;
         }
         int pollingInterval = preferences.getPollingInterval().intValue();
         Calendar calendar = Calendar.getInstance();
@@ -154,10 +148,25 @@ public class NewsService implements INewsService {
         return true;
     }
 
+    private Set<FeedDescriptor> getFeedsToPoll(boolean override) {
+        Set<FeedDescriptor> feeds = Sets.newHashSet();
+        for (final FeedDescriptor feed : preferences.getFeedDescriptors()) {
+            if (shouldPoll(feed, override)) {
+                feeds.add(feed);
+            }
+        }
+        return feeds;
+    }
+
     @Override
     public void removeFeed(FeedDescriptor feed) {
         if (groupedMessages.containsKey(feed)) {
             groupedMessages.remove(feed);
         }
+    }
+
+    @Override
+    public void pollFeeds() {
+        jobFacade.schedulePollFeeds(this, getFeedsToPoll(false));
     }
 }
