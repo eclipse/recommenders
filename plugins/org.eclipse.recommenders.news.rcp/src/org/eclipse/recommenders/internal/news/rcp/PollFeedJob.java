@@ -30,6 +30,7 @@ import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 import org.eclipse.recommenders.utils.Urls;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -38,17 +39,15 @@ import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
 public class PollFeedJob extends Job implements IPollFeedJob {
-    private final String jobId;
     private final NotificationEnvironment environment;
     private final Map<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
-    private final Set<FeedDescriptor> feeds = Sets.newHashSet();
     private final Map<FeedDescriptor, Date> pollDates = Maps.newHashMap();
 
-    public PollFeedJob(String jobId, Collection<FeedDescriptor> feeds) {
-        super(jobId);
-        Preconditions.checkNotNull(jobId);
+    private Set<FeedDescriptor> feeds = Sets.newHashSet();
+
+    public PollFeedJob(Collection<FeedDescriptor> feeds) {
+        super(Constants.POLL_FEED_JOB_FAMILY);
         Preconditions.checkNotNull(feeds);
-        this.jobId = jobId;
         this.environment = new NotificationEnvironment();
         this.feeds.addAll(feeds);
         setSystem(true);
@@ -61,6 +60,9 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         try {
             for (FeedDescriptor feed : feeds) {
                 List<IFeedMessage> messages;
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
+                }
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
                 try {
                     connection.connect();
@@ -87,14 +89,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     @Override
     public boolean belongsTo(Object job) {
-        if (job == null) {
-            return false;
-        }
-        if (!(job instanceof PollFeedJob)) {
-            return false;
-        }
-        PollFeedJob rhs = (PollFeedJob) job;
-        if (!jobId.equals(rhs.getJobId())) {
+        if (!Objects.equal(Constants.POLL_FEED_JOB_FAMILY, job)) {
             return false;
         }
         return true;
@@ -122,10 +117,6 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     public Map<FeedDescriptor, Date> getPollDates() {
         return pollDates;
-    }
-
-    public String getJobId() {
-        return jobId;
     }
 
     class MutexRule implements ISchedulingRule {
