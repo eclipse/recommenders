@@ -38,7 +38,6 @@ public class NewsService implements INewsService {
     private final INewsFeedProperties newsFeedProperties;
     private final Set<String> readIds;
     private final IJobFacade jobFacade;
-    private final Map<String, Date> pollDates;
     private final EventBus bus;
 
     private HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
@@ -50,22 +49,15 @@ public class NewsService implements INewsService {
         bus.register(this);
         this.newsFeedProperties = newsFeedProperties;
         readIds = newsFeedProperties.getReadIds();
-        pollDates = newsFeedProperties.getPollDates();
         this.jobFacade = jobFacade;
     }
 
     @Override
     public void start() {
-        Set<FeedDescriptor> feeds = Sets.newHashSet();
         if (!preferences.isEnabled()) {
             return;
         }
-        for (final FeedDescriptor feed : preferences.getFeedDescriptors()) {
-            if (shouldPoll(feed)) {
-                feeds.add(feed);
-            }
-        }
-        jobFacade.schedule(feeds, this);
+        jobFacade.schedule(checkFeeds(), this);
     }
 
     @Override
@@ -132,6 +124,7 @@ public class NewsService implements INewsService {
             return;
         }
         PollFeedJob pollFeedJob = (PollFeedJob) job;
+        pollFeedJob.setFeeds(checkFeeds());
         pollFeedJob.schedule(TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
     }
 
@@ -152,6 +145,16 @@ public class NewsService implements INewsService {
             }
         }
         return true;
+    }
+
+    private Set<FeedDescriptor> checkFeeds() {
+        Set<FeedDescriptor> feeds = Sets.newHashSet();
+        for (final FeedDescriptor feed : preferences.getFeedDescriptors()) {
+            if (shouldPoll(feed)) {
+                feeds.add(feed);
+            }
+        }
+        return feeds;
     }
 
     @Override
