@@ -9,6 +9,7 @@ package org.eclipse.recommenders.news.rcp;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
@@ -23,8 +24,14 @@ public interface INewsService {
 
     void handleMessageRead(FeedMessageReadEvent event);
 
-    boolean shouldPoll(FeedDescriptor feed);
-
     void jobDone(IPollFeedJob job);
+
+    boolean shouldPoll(FeedDescriptor feed, boolean overwrite);
+
+    Set<FeedDescriptor> getFeedsToPoll(boolean overwrite);
+
+    void forceStart();
+
+    boolean isOverride();
 
 }

@@ -41,8 +41,9 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     private final String jobId;
     private final NotificationEnvironment environment;
     private final Map<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
-    private final Set<FeedDescriptor> feeds = Sets.newHashSet();
     private final Map<FeedDescriptor, Date> pollDates = Maps.newHashMap();
+
+    private Set<FeedDescriptor> feeds = Sets.newHashSet();
 
     public PollFeedJob(String jobId, Collection<FeedDescriptor> feeds) {
         super(jobId);
@@ -61,10 +62,13 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         try {
             for (FeedDescriptor feed : feeds) {
                 List<IFeedMessage> messages;
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
+                }
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
                 try {
                     connection.connect();
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK && !monitor.isCanceled()) {
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         InputStream in = new BufferedInputStream(connection.getInputStream());
                         try {
                             messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
@@ -126,6 +130,10 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     public String getJobId() {
         return jobId;
+    }
+
+    public void setFeeds(Set<FeedDescriptor> feeds) {
+        this.feeds = feeds;
     }
 
     class MutexRule implements ISchedulingRule {
