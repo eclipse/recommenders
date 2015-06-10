@@ -15,11 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
-import org.eclipse.recommenders.news.rcp.IJobFacade;
 import org.eclipse.recommenders.news.rcp.INewsFeedProperties;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
@@ -37,35 +35,37 @@ public class NewsService implements INewsService {
     private final NewsRcpPreferences preferences;
     private final INewsFeedProperties newsFeedProperties;
     private final Set<String> readIds;
-    private final IJobFacade jobFacade;
-    private final Map<String, Date> pollDates;
+    private final JobFacade jobFacade;
     private final EventBus bus;
+
+    private boolean override;
 
     private HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
 
-    public NewsService(NewsRcpPreferences preferences, EventBus bus, IJobFacade jobFacade,
-            INewsFeedProperties newsFeedProperties) {
+    public NewsService(NewsRcpPreferences preferences, EventBus bus, INewsFeedProperties newsFeedProperties) {
         this.preferences = preferences;
         this.bus = bus;
         bus.register(this);
         this.newsFeedProperties = newsFeedProperties;
         readIds = newsFeedProperties.getReadIds();
-        pollDates = newsFeedProperties.getPollDates();
-        this.jobFacade = jobFacade;
+        this.jobFacade = new JobFacade(this, preferences);
     }
 
     @Override
     public void start() {
-        Set<FeedDescriptor> feeds = Sets.newHashSet();
         if (!preferences.isEnabled()) {
             return;
         }
-        for (final FeedDescriptor feed : preferences.getFeedDescriptors()) {
-            if (shouldPoll(feed)) {
-                feeds.add(feed);
-            }
+        jobFacade.schedule();
+    }
+
+    @Override
+    public void forceStart() {
+        if (!preferences.isEnabled()) {
+            return;
         }
-        jobFacade.schedule(feeds, this);
+        setOverride(true);
+        jobFacade.forceSchedule();
     }
 
     @Override
@@ -106,6 +106,7 @@ public class NewsService implements INewsService {
 
     @Override
     public void jobDone(IPollFeedJob job) {
+        setOverride(false);
         boolean newMessage = false;
         Map<FeedDescriptor, List<IFeedMessage>> messages = job.getMessages();
         for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
@@ -131,14 +132,15 @@ public class NewsService implements INewsService {
         if (!preferences.isEnabled()) {
             return;
         }
-        PollFeedJob pollFeedJob = (PollFeedJob) job;
-        pollFeedJob.schedule(TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
     }
 
     @Override
-    public boolean shouldPoll(FeedDescriptor feed) {
+    public boolean shouldPoll(FeedDescriptor feed, boolean overwrite) {
         if (!feed.isEnabled()) {
             return false;
+        }
+        if (overwrite) {
+            return true;
         }
         int pollingInterval = preferences.getPollingInterval().intValue();
         Calendar calendar = Calendar.getInstance();
@@ -155,9 +157,31 @@ public class NewsService implements INewsService {
     }
 
     @Override
+    public Set<FeedDescriptor> checkFeeds(boolean overwrite) {
+        Set<FeedDescriptor> feeds = Sets.newHashSet();
+        for (final FeedDescriptor feed : preferences.getFeedDescriptors()) {
+            if (shouldPoll(feed, overwrite)) {
+                feeds.add(feed);
+            }
+        }
+        return feeds;
+    }
+
+    @Override
     public void removeFeed(FeedDescriptor feed) {
         if (groupedMessages.containsKey(feed)) {
             groupedMessages.remove(feed);
         }
     }
+
+    @Override
+    public boolean isOverride() {
+        return override;
+    }
+
+    @Override
+    public void setOverride(boolean override) {
+        this.override = override;
+    }
+
 }
