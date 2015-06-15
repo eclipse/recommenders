@@ -28,6 +28,7 @@ import org.eclipse.recommenders.utils.Logs;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -74,7 +75,8 @@ public class NewsFeedProperties implements INewsFeedProperties {
         }
     }
 
-    private static File getFile(String name) {
+    @VisibleForTesting
+    protected static File getFile(String name) {
         Bundle bundle = FrameworkUtil.getBundle(NewsFeedProperties.class);
         File stateLocation = Platform.getStateLocation(bundle).toFile();
         return new File(stateLocation, name);
@@ -116,7 +118,7 @@ public class NewsFeedProperties implements INewsFeedProperties {
             try (InputStream stream = Files.asByteSource(statusFile).openStream()) {
                 properties.load(stream);
             } catch (IOException e) {
-                Logs.log(LogMessages.ERROR_READING_PROPERTIES, e, FILENAME_READ_MESSAGES);
+                Logs.log(LogMessages.ERROR_READING_PROPERTIES, e, FILENAME_POLL_DATES);
             }
         }
         List<String> propertyNames = (List<String>) Collections.list(properties.propertyNames());

@@ -7,13 +7,17 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import static org.eclipse.recommenders.internal.news.rcp.TestUtils.enabled;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,27 +26,35 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PollFeedJobTest {
 
-    private static final String FIRST_ELEMENT = "first";
-    private static final String SECOND_ELEMENT = "second";
-
+    private NewsRcpPreferences preferences;
     private Set<FeedDescriptor> feeds;
+    private IProgressMonitor monitor;
 
     @Before
     public void setup() {
         feeds = new HashSet<>();
+        feeds.add(enabled("test"));
+        preferences = mock(NewsRcpPreferences.class);
+        monitor = mock(IProgressMonitor.class);
     }
 
     @Test
-    public void testFeedsWithSameIdBelongsTo() throws MalformedURLException {
-        assertThat(new PollFeedJob(FIRST_ELEMENT, feeds).belongsTo(new PollFeedJob(FIRST_ELEMENT, feeds)), is(true));
-        assertThat(new PollFeedJob(FIRST_ELEMENT, feeds).belongsTo(new PollFeedJob(FIRST_ELEMENT, feeds)), is(true));
+    public void testJobBelongsToGivenTheSameFamily() throws MalformedURLException {
+        assertThat(new PollFeedJob(feeds).belongsTo(Constants.POLL_FEED_JOB_FAMILY), is(true));
     }
 
     @Test
-    public void testFeedsWithDifferentIdDoesntBelongsTo() {
-        PollFeedJob firstJob = new PollFeedJob(FIRST_ELEMENT, feeds);
-        PollFeedJob secondJob = new PollFeedJob(SECOND_ELEMENT, feeds);
-        assertThat(firstJob.belongsTo(secondJob), is(false));
-        assertThat(secondJob.belongsTo(firstJob), is(false));
+    public void testJobBelongsToGivenDifferentFamily() throws MalformedURLException {
+        assertThat(new PollFeedJob(feeds).belongsTo("rndm"), is(false));
+    }
+
+    @Test
+    public void testJobWillBeCanceledIfPreferencesAreDisabled() {
+        when(preferences.isEnabled()).thenReturn(false);
+        when(monitor.isCanceled()).thenReturn(false);
+
+        PollFeedJob sut = new PollFeedJob(feeds);
+
+        assertThat(sut.run(monitor), is(Status.OK_STATUS));
     }
 }
