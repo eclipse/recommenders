@@ -39,8 +39,10 @@ public class NewsFeedPropertiesTest {
     public void testWriteSingleId() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Set<String> writeIds = ImmutableSet.of(testId);
+
         sut.writeReadIds(writeIds);
         Set<String> readIds = sut.getReadIds();
+
         assertThat(readIds, contains(testId));
         assertThat(readIds.size(), is(1));
     }
@@ -49,8 +51,10 @@ public class NewsFeedPropertiesTest {
     public void testWriteMultipleIds() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Set<String> writeIds = ImmutableSet.of(testId, testIdTwo);
+
         sut.writeReadIds(writeIds);
         Set<String> readIds = sut.getReadIds();
+
         assertThat(readIds, containsInAnyOrder(testId, testIdTwo));
         assertThat(readIds.size(), is(2));
     }
@@ -59,8 +63,10 @@ public class NewsFeedPropertiesTest {
     public void testWriteEmptySet() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Set<String> writeIds = Sets.newHashSet();
+
         sut.writeReadIds(writeIds);
         Set<String> readIds = sut.getReadIds();
+
         assertThat(readIds.isEmpty(), is(true));
     }
 
@@ -68,8 +74,10 @@ public class NewsFeedPropertiesTest {
     public void testWriteNullReadIdSet() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Set<String> writeIds = null;
+
         sut.writeReadIds(writeIds);
         Set<String> readIds = sut.getReadIds();
+
         assertThat(readIds.isEmpty(), is(true));
     }
 
@@ -80,8 +88,10 @@ public class NewsFeedPropertiesTest {
         Date date = dateFormat.parse(dateFormat.format(new Date()));
         FeedDescriptor feed = enabled(testId);
         writePollDates.put(feed, date);
+
         sut.writePollDates(writePollDates);
         Map<String, Date> readPollDates = sut.getPollDates();
+
         assertThat(readPollDates.keySet().contains(feed.getId()), is(true));
         assertThat(readPollDates.values().contains(date), is(true));
     }
@@ -95,8 +105,10 @@ public class NewsFeedPropertiesTest {
         FeedDescriptor secondFeed = enabled(testIdTwo);
         writePollDates.put(feed, date);
         writePollDates.put(secondFeed, date);
+
         sut.writePollDates(writePollDates);
         Map<String, Date> readPollDates = sut.getPollDates();
+
         assertThat(readPollDates.keySet(), containsInAnyOrder(testId, testIdTwo));
         assertThat(readPollDates.values(), containsInAnyOrder(date, date));
         assertThat(readPollDates.size(), is(2));
@@ -106,8 +118,10 @@ public class NewsFeedPropertiesTest {
     public void testWriteEmptyMap() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Map<FeedDescriptor, Date> writePollDates = Maps.newHashMap();
+
         sut.writePollDates(writePollDates);
         Map<String, Date> readPollDates = sut.getPollDates();
+
         assertThat(readPollDates.size(), is(2));
     }
 
@@ -116,8 +130,10 @@ public class NewsFeedPropertiesTest {
     public void testWriteNullMap() {
         INewsFeedProperties sut = new NewsFeedProperties();
         Map<FeedDescriptor, Date> writePollDates = null;
+
         sut.writePollDates(writePollDates);
         Map<String, Date> readPollDates = sut.getPollDates();
+
         assertThat(readPollDates.size(), is(2));
     }
 }
