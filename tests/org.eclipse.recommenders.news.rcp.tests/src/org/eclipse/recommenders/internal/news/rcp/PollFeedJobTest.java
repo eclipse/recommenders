@@ -22,9 +22,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PollFeedJobTest {
 
-    private static final String FIRST_ELEMENT = "first";
-    private static final String SECOND_ELEMENT = "second";
-
     private Set<FeedDescriptor> feeds;
 
     @Before
@@ -33,16 +30,12 @@ public class PollFeedJobTest {
     }
 
     @Test
-    public void testFeedsWithSameIdBelongsTo() throws MalformedURLException {
-        assertThat(new PollFeedJob(FIRST_ELEMENT, feeds).belongsTo(new PollFeedJob(FIRST_ELEMENT, feeds)), is(true));
-        assertThat(new PollFeedJob(FIRST_ELEMENT, feeds).belongsTo(new PollFeedJob(FIRST_ELEMENT, feeds)), is(true));
+    public void testJobBelongsToGivenTheSameFamily() throws MalformedURLException {
+        assertThat(new PollFeedJob(feeds).belongsTo(Constants.POLL_FEED_JOB_FAMILY), is(true));
     }
 
     @Test
-    public void testFeedsWithDifferentIdDoesntBelongsTo() {
-        PollFeedJob firstJob = new PollFeedJob(FIRST_ELEMENT, feeds);
-        PollFeedJob secondJob = new PollFeedJob(SECOND_ELEMENT, feeds);
-        assertThat(firstJob.belongsTo(secondJob), is(false));
-        assertThat(secondJob.belongsTo(firstJob), is(false));
+    public void testJobBelongsToGivenDifferentFamily() throws MalformedURLException {
+        assertThat(new PollFeedJob(feeds).belongsTo("rndm"), is(false));
     }
 }
