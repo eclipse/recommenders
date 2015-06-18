@@ -7,12 +7,15 @@
  *
  * Contributors:
  *    Marcel Bruch - initial API and implementation.
+ *    Pawel Nowak - displaying only latest feeds, refactor
  */
 package org.eclipse.recommenders.internal.news.rcp.notifications;
 
 import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createFeedMessageReadEvent;
 
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,11 +34,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.eventbus.EventBus;
 
 public class NewsNotificationPopup extends AbstractNotificationPopup {
 
     private static final int DELAY_CLOSE_MS = 4000;
+    private static final int DEFAULT_NOTIFICATION_MESSAGES = 6;
+    private static final int DEFAULT_NOTIFICATION_MESSAGE_PER_FEED = 2;
 
     private final Map<FeedDescriptor, List<IFeedMessage>> messages;
     private final EventBus eventBus;
@@ -52,13 +58,50 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
     protected void createContentArea(Composite composite) {
         super.createContentArea(composite);
         composite.setLayout(new GridLayout(1, true));
+        Map<FeedDescriptor, List<IFeedMessage>> sortedMap = sortByDate(messages);
 
-        for (Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
-            Label feedTitle = new Label(composite, SWT.NONE);
-            GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(feedTitle);
-            feedTitle.setFont(CommonFonts.BOLD);
-            feedTitle.setText(entry.getKey().getName());
-            for (final IFeedMessage message : entry.getValue()) {
+        processNotificationData(composite, sortedMap);
+
+        Label hint = new Label(composite, SWT.NONE);
+        GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(hint);
+        hint.setText(Messages.HINT_MORE_MESSAGES);
+    }
+
+    @VisibleForTesting
+    protected static Map<FeedDescriptor, List<IFeedMessage>> sortByDate(Map<FeedDescriptor, List<IFeedMessage>> map) {
+        for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : map.entrySet()) {
+            List<IFeedMessage> list = entry.getValue();
+            Collections.sort(list, new Comparator<IFeedMessage>() {
+                @Override
+                public int compare(IFeedMessage lhs, IFeedMessage rhs) {
+                    return rhs.getDate().compareTo(lhs.getDate());
+                }
+            });
+            entry.setValue(list);
+        }
+        return map;
+    }
+
+    private void processNotificationData(Composite composite, Map<FeedDescriptor, List<IFeedMessage>> sortedMap) {
+        int counter = 0;
+        for (Entry<FeedDescriptor, List<IFeedMessage>> entry : sortedMap.entrySet()) {
+            if (counter < DEFAULT_NOTIFICATION_MESSAGES) {
+                Label feedTitle = new Label(composite, SWT.NONE);
+                GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT)
+                        .applyTo(feedTitle);
+                feedTitle.setFont(CommonFonts.BOLD);
+                feedTitle.setText(entry.getKey().getName());
+
+                processMessages(composite, counter, entry.getValue());
+            }
+        }
+    }
+
+    private void processMessages(Composite composite, int counter, List<IFeedMessage> messages) {
+        int innerCounter = 0;
+        for (final IFeedMessage message : messages) {
+            if (counter < DEFAULT_NOTIFICATION_MESSAGES && !message.isRead()
+                    && innerCounter < DEFAULT_NOTIFICATION_MESSAGE_PER_FEED) {
                 Link link = new Link(composite, SWT.WRAP);
                 link.setText(MessageFormat.format("<a href=\"{1}\">{0}</a>", message.getTitle(), message.getUrl())); //$NON-NLS-1$
                 GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(link);
@@ -69,9 +112,22 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
                         eventBus.post(createFeedMessageReadEvent(message.getId()));
                     }
                 });
-
+                counter++;
+                innerCounter++;
             }
         }
+    }
+
+    private int countUnreadMessages(Map<FeedDescriptor, List<IFeedMessage>> map) {
+        int result = 0;
+        for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : map.entrySet()) {
+            for (IFeedMessage message : entry.getValue()) {
+                if (!message.isRead()) {
+                    result++;
+                }
+            }
+        }
+        return result;
     }
 
     @Override

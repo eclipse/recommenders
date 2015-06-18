@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -68,13 +69,13 @@ public class NewsService implements INewsService {
 
                     @Override
                     public List<IFeedMessage> apply(List<IFeedMessage> input) {
-                        return FluentIterable.from(input).limit(countPerFeed).filter(new Predicate<IFeedMessage>() {
-
-                            @Override
-                            public boolean apply(IFeedMessage input) {
-                                return !readIds.contains(input.getId());
+                        ImmutableList<IFeedMessage> list = FluentIterable.from(input).limit(countPerFeed).toList();
+                        for (IFeedMessage message : list) {
+                            if (readIds.contains(message.getId())) {
+                                message.setRead(true);
                             }
-                        }).toList();
+                        }
+                        return list;
                     }
                 });
         return Maps.filterValues(transformedMap, new Predicate<List<IFeedMessage>>() {
@@ -118,13 +119,15 @@ public class NewsService implements INewsService {
         }
         if (!groupedMessages.isEmpty() && newMessage) {
             bus.post(createNewFeedItemsEvent());
-            newsFeedProperties.writePollDates(job.getPollDates());
+            newsFeedProperties.writeDates(job.getPollDates(), Constants.FILENAME_POLL_DATES);
+            updateReadIds();
         }
 
         if (!preferences.isEnabled()) {
             return;
         }
         jobFacade.scheduleNewsUpdate(this, TimeUnit.MINUTES.toMillis(preferences.getPollingInterval()));
+        displayNotification();
     }
 
     @VisibleForTesting
@@ -139,7 +142,7 @@ public class NewsService implements INewsService {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, pollingInterval);
         Date lhs = calendar.getTime();
-        for (Map.Entry<String, Date> entry : newsFeedProperties.getPollDates().entrySet()) {
+        for (Map.Entry<String, Date> entry : newsFeedProperties.getDates(Constants.FILENAME_POLL_DATES).entrySet()) {
             if (entry.getKey().equals(feed.getId())) {
                 if (entry.getValue().after(lhs)) {
                     return false;
@@ -174,5 +177,42 @@ public class NewsService implements INewsService {
     @Override
     public void forceStop() {
         jobFacade.cancelPollFeeds();
+    }
+
+    @Override
+    public void updateFeedDates(Map<FeedDescriptor, Date> map) {
+        newsFeedProperties.writeDates(map, Constants.FILENAME_FEED_DATES);
+    }
+
+    private void updateReadIds() {
+        Set<String> result = Sets.newHashSet();
+        Set<String> allMessages = Sets.newHashSet();
+        for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : groupedMessages.entrySet()) {
+            for (IFeedMessage message : entry.getValue()) {
+                allMessages.add(message.getId());
+            }
+        }
+        for (String s : readIds) {
+            if (allMessages.contains(s)) {
+                result.add(s);
+            }
+        }
+        readIds.clear();
+        readIds.addAll(result);
+    }
+
+    @Override
+    public void displayNotification() {
+        Map<FeedDescriptor, List<IFeedMessage>> messages = Utils
+                .getLatestMessages(getMessages(Constants.COUNT_PER_FEED));
+        if (preferences.isNotificationEnabled() && !messages.isEmpty()) {
+            NotificationFacade notificationFacade = new NotificationFacade();
+            notificationFacade.displayNotificaiton(messages, bus);
+            Map<FeedDescriptor, Date> feedDates = Maps.newHashMap();
+            for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
+                feedDates.put(entry.getKey(), entry.getValue().get(0).getDate());
+            }
+            updateFeedDates(feedDates);
+        }
     }
 }
