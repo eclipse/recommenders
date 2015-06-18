@@ -7,6 +7,7 @@
  */
 package org.eclipse.recommenders.news.rcp;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -28,4 +29,8 @@ public interface INewsService {
     void pollFeeds();
 
     void forceStop();
+
+    void updateFeedDates(Map<FeedDescriptor, Date> map);
+
+    void displayNotification();
 }
