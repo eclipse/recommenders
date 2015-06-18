@@ -7,11 +7,13 @@
  */
 package org.eclipse.recommenders.news.rcp;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
+import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessagesReadEvent;
 
 public interface INewsService {
 
@@ -23,9 +25,15 @@ public interface INewsService {
 
     void handleMessageRead(FeedMessageReadEvent event);
 
+    void handleMessagesRead(FeedMessagesReadEvent event);
+
     void jobDone(IPollFeedJob job);
 
     void pollFeeds();
 
     void forceStop();
+
+    void updateFeedDates(Map<FeedDescriptor, Date> map);
+
+    void displayNotification();
 }
