@@ -151,7 +151,7 @@ public class NewsServiceTest {
     public void testShouldntPollFeedWithDateAfter() {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.getPollingInterval()).thenReturn(POLLING_INTERVAL);
-        when(properties.getPollDates()).thenReturn(mockPollDates(FIRST_ELEMENT, 1000));
+        when(properties.getDates(Constants.FILENAME_POLL_DATES)).thenReturn(mockPollDates(FIRST_ELEMENT, 1000));
 
         NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
 
@@ -162,7 +162,7 @@ public class NewsServiceTest {
     public void testPollFeedWithDateBefore() {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.getPollingInterval()).thenReturn(POLLING_INTERVAL);
-        when(properties.getPollDates()).thenReturn(mockPollDates(FIRST_ELEMENT, -1000));
+        when(properties.getDates(Constants.FILENAME_POLL_DATES)).thenReturn(mockPollDates(FIRST_ELEMENT, -1000));
 
         NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
 
@@ -173,7 +173,7 @@ public class NewsServiceTest {
     public void testShouldPollOverridenFeedWithDateAfter() {
         FeedDescriptor feed = enabled(FIRST_ELEMENT);
         when(preferences.getPollingInterval()).thenReturn(POLLING_INTERVAL);
-        when(properties.getPollDates()).thenReturn(mockPollDates(FIRST_ELEMENT, 1000));
+        when(properties.getDates(Constants.FILENAME_POLL_DATES)).thenReturn(mockPollDates(FIRST_ELEMENT, 1000));
 
         NewsService sut = new NewsService(preferences, bus, properties, jobFacade);
 

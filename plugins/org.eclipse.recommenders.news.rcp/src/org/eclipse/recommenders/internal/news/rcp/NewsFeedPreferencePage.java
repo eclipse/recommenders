@@ -57,6 +57,8 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
                 Messages.FIELD_LABEL_POLLING_INTERVAL, getFieldEditorParent(), 4);
         feedEditor = new FeedEditor(Constants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS,
                 getFieldEditorParent());
+        addField(new BooleanFieldEditor(Constants.PREF_NOTIFICATION_ENABLED, Messages.FIELD_LABEL_NOTIFICATION_ENABLED,
+                getFieldEditorParent()));
         addField(pollingIntervalEditor);
         addField(enabledEditor);
         addField(feedEditor);
