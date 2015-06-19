@@ -77,7 +77,9 @@ public class Utils {
     }
 
     public static List<IFeedMessage> mergeMessages(Map<FeedDescriptor, List<IFeedMessage>> messages) {
-        Preconditions.checkNotNull(messages);
+        if (messages == null) {
+            return Lists.newArrayList();
+        }
         List<IFeedMessage> result = Lists.newArrayList();
         for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
             result.addAll(entry.getValue());
