@@ -45,7 +45,7 @@ public class Utils {
                 result.put(entry.getKey(), list);
             }
         }
-        return result;
+        return sortByDate(result);
     }
 
     public static List<IFeedMessage> updateMessages(Entry<FeedDescriptor, List<IFeedMessage>> entry) {
@@ -57,6 +57,8 @@ public class Utils {
             } else if (message.getDate()
                     .after(properties.getDates(Constants.FILENAME_FEED_DATES).get(entry.getKey().getId()))) {
                 feedMessages.add(message);
+                System.out.println(message.getDate());
+                System.out.println(properties.getDates(Constants.FILENAME_FEED_DATES).get(entry.getKey().getId()));
             }
         }
         return feedMessages;
