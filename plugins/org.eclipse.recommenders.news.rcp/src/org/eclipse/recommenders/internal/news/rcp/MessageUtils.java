@@ -19,7 +19,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class Utils {
+public class MessageUtils {
 
     public static boolean containsUnreadMessages(Map<FeedDescriptor, List<IFeedMessage>> map) {
         if (map == null) {
