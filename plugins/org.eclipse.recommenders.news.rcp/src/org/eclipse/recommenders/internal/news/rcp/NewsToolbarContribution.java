@@ -16,6 +16,8 @@ import javax.inject.Inject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.recommenders.internal.news.rcp.FeedEvents.AllReadEvent;
+import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
@@ -72,6 +74,16 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         });
     }
 
+    @Subscribe
+    public void handleAllRead(AllReadEvent event) {
+        updatingNewsAction.checkForNews();
+    }
+
+    @Subscribe
+    public void handleFeedRead(FeedReadEvent event) {
+        updatingNewsAction.checkForNews();
+    }
+
     private class UpdatingNewsAction extends Action {
         Map<FeedDescriptor, List<IFeedMessage>> messages = Maps.newHashMap();
 
@@ -117,6 +129,13 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         private void setNewsMenu(Map<FeedDescriptor, List<IFeedMessage>> messages) {
             newsMenuListener.setMessages(messages);
             menuManager.addMenuListener(newsMenuListener);
+        }
+
+        public void checkForNews() {
+            messages = service.getMessages(Constants.COUNT_PER_FEED);
+            if (messages.isEmpty() || !Utils.containsUnreadMessages(messages)) {
+                setNoAvailableNews();
+            }
         }
     }
 }
