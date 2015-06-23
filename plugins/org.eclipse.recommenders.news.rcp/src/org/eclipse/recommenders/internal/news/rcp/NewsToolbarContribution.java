@@ -84,7 +84,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             setNoAvailableNews();
             messages = service.getMessages(Constants.COUNT_PER_FEED);
             menuManager.getMenu().setVisible(true);
-            if (!messages.isEmpty() && Utils.containsUnreadMessages(messages)) {
+            if (!messages.isEmpty() && MessageUtils.containsUnreadMessages(messages)) {
                 setAvailableNews();
             }
         }
@@ -103,7 +103,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             }
             setImageDescriptor(CommonImages.RSS_ACTIVE);
             setToolTipText(MessageFormat.format(Messages.TOOLTIP_NEW_MESSAGES,
-                    Utils.getUnreadMessagesNumber(Utils.mergeMessages(messages))));
+                    MessageUtils.getUnreadMessagesNumber(MessageUtils.mergeMessages(messages))));
             clearMenu();
             setNewsMenu(messages);
         }
