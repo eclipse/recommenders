@@ -25,6 +25,10 @@ public class FeedEvents {
         return new AllReadEvent();
     }
 
+    public static UpdateStatusBarEvent createUpdateStatusBarEvent() {
+        return new UpdateStatusBarEvent();
+    }
+
     public static class NewFeedItemsEvent {
     }
 
@@ -53,7 +57,8 @@ public class FeedEvents {
     }
 
     public static class AllReadEvent {
-
     }
 
+    public static class UpdateStatusBarEvent {
+    }
 }

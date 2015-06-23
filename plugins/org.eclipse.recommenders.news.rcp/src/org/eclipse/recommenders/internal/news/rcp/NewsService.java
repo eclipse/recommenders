@@ -7,7 +7,7 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createNewFeedItemsEvent;
+import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.*;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -47,6 +47,7 @@ public class NewsService implements INewsService {
     private final INotificationFacade notificationFacade;
 
     private HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
+    private boolean override;
 
     public NewsService(NewsRcpPreferences preferences, EventBus bus, INewsFeedProperties newsFeedProperties,
             IJobFacade jobFacade, INotificationFacade notificationFacade) {
@@ -143,10 +144,11 @@ public class NewsService implements INewsService {
                 }
             }
         }
-        if (!groupedMessages.isEmpty() && newMessage) {
+        if (!groupedMessages.isEmpty() && (newMessage || override)) {
             bus.post(createNewFeedItemsEvent());
             newsFeedProperties.writeDates(job.getPollDates(), Constants.FILENAME_POLL_DATES);
             updateReadIds();
+            override = false;
         }
 
         if (!preferences.isEnabled()) {
@@ -162,6 +164,7 @@ public class NewsService implements INewsService {
             return false;
         }
         if (override) {
+            this.override = override;
             return true;
         }
         int pollingInterval = preferences.getPollingInterval().intValue();
@@ -239,5 +242,10 @@ public class NewsService implements INewsService {
             }
             updateFeedDates(feedDates);
         }
+    }
+
+    @Override
+    public void updateStatusBar() {
+        bus.post(createUpdateStatusBarEvent());
     }
 }

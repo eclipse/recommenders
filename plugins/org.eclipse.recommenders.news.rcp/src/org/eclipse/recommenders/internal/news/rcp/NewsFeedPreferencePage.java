@@ -86,8 +86,10 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
         if (!oldEnabled && newEnabled) {
             // News has been activated
             forceStart = true;
+            service.updateStatusBar();
         } else if (oldEnabled && !newEnabled) {
             forceStop = true;
+            service.updateStatusBar();
         }
 
         for (FeedDescriptor oldFeed : oldFeedValue) {

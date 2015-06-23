@@ -14,9 +14,11 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
+import org.eclipse.recommenders.internal.news.rcp.FeedEvents.UpdateStatusBarEvent;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
 import org.eclipse.recommenders.internal.news.rcp.menus.NoNewsMenuListener;
@@ -27,6 +29,13 @@ import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
@@ -68,6 +77,37 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             @Override
             public void run() {
                 updatingNewsAction.setAvailableNews();
+            }
+        });
+    }
+
+    @Subscribe
+    public void updateStatusBar(UpdateStatusBarEvent event) {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+
+                IWorkbench wb = PlatformUI.getWorkbench();
+                IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+
+                IWorkbenchPage page = win.getActivePage();
+
+                IWorkbenchPart part = page.getActivePart();
+                IWorkbenchPartSite site = part.getSite();
+
+                IViewSite vSite = (IViewSite) site;
+
+                IActionBars actionBars = vSite.getActionBars();
+
+                if (actionBars == null) {
+                    return;
+                }
+                IStatusLineManager statusLineManager = actionBars.getStatusLineManager();
+
+                if (statusLineManager == null) {
+                    return;
+                }
+                statusLineManager.update(true);
             }
         });
     }

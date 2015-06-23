@@ -39,4 +39,6 @@ public interface INewsService {
     void handleAllRead(AllReadEvent event);
 
     void handleFeedRead(FeedReadEvent event);
+
+    void updateStatusBar();
 }
