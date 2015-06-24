@@ -10,7 +10,8 @@
       <!-- @generated snipmatchrcp -->
       <package
             uri="org.eclipse.recommenders.snipmatch.rcp"
-            class="org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelPackage"/>
+            class="org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelPackage"
+            genModel="model/snipmatchrcp.genmodel"/>
    </extension>
 	<extension point="org.eclipse.ui.editors">
 		<editor
