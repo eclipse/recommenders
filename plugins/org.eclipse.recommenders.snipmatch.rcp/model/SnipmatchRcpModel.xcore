@@ -1,0 +1,25 @@
+@Ecore(nsPrefix="org.eclipse.recommenders", nsURI="org.eclipse.recommenders.snipmatch.rcp")
+@GenModel(modelDirectory="/org.eclipse.recommenders.snipmatch.rcp/target/generated-sources/emf", prefix="SnipmatchRcpModel", modelName="Snipmatch", importerID="org.eclipse.emf.importer.ecore", bundleManifest="false", complianceLevel="6.0")
+package org.eclipse.recommenders.snipmatch.rcp.model
+
+import org.eclipse.emf.ecore.EEList
+import org.eclipse.recommenders.snipmatch.model.DefaultSnippetRepositoryConfigurationProvider
+import org.eclipse.recommenders.snipmatch.model.ESnippetRepository
+import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration
+
+class EclipseGitSnippetRepositoryConfiguration extends org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration {
+    String url
+    String pushUrl
+    String pushBranchPrefix
+    @GenModel(body="return org.eclipse.recommenders.internal.snipmatch.rcp.EclipseGitSnippetRepository.createRepositoryInstance(this);")
+    op org.eclipse.recommenders.snipmatch.model.ESnippetRepository createRepositoryInstance()
+}
+
+class SnippetRepositoryConfigurations {
+    contains org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration[] repos
+}
+
+class DefaultEclipseGitSnippetRepositoryConfiguration extends org.eclipse.recommenders.snipmatch.model.DefaultSnippetRepositoryConfigurationProvider {
+    @GenModel(body="return org.eclipse.recommenders.internal.snipmatch.rcp.EclipseGitSnippetRepository.getDefaultConfiguration();")
+    op org.eclipse.emf.ecore.EEList < org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration > getDefaultConfiguration()
+}
