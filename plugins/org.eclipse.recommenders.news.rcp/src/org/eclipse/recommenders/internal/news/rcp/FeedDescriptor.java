@@ -22,6 +22,11 @@ public class FeedDescriptor {
 
     private final IConfigurationElement config;
     private boolean enabled;
+    private boolean extensionPoint;
+    private String id;
+    private URL url;
+    private String name;
+    private String pollingInterval;
 
     public FeedDescriptor(FeedDescriptor that) {
         this(that.config, that.enabled);
@@ -30,28 +35,59 @@ public class FeedDescriptor {
     public FeedDescriptor(IConfigurationElement config, boolean enabled) {
         this.config = config;
         this.enabled = enabled;
+        extensionPoint = true;
         Preconditions.checkNotNull(getId());
         Preconditions.checkArgument(isUrlValid(config.getAttribute("url")), Messages.FEED_DESCRIPTOR_MALFORMED_URL); //$NON-NLS-1$
     }
 
+    public FeedDescriptor(String url, String name, String pollingInterval) {
+        Preconditions.checkArgument(isUrlValid(url), Messages.FEED_DESCRIPTOR_MALFORMED_URL);
+
+        config = null;
+        id = url;
+        enabled = true;
+        this.url = stringToUrl(url);
+        this.name = name;
+        this.pollingInterval = pollingInterval;
+    }
+
     public String getId() {
+        if (config == null) {
+            return id;
+        }
         return config.getAttribute("id"); //$NON-NLS-1$
     }
 
     public String getName() {
+        if (config == null) {
+            return name;
+        }
         return config.getAttribute("name"); //$NON-NLS-1$
     }
 
     public URL getUrl() {
+        if (config == null) {
+            return url;
+        }
         return stringToUrl(config.getAttribute("url")); //$NON-NLS-1$
     }
 
     public String getDescription() {
+        if (config == null) {
+            return name;
+        }
         return config.getAttribute("description"); //$NON-NLS-1$
     }
 
     public String getPollingInterval() {
+        if (config == null) {
+            return pollingInterval;
+        }
         return config.getAttribute("pollingInterval"); //$NON-NLS-1$
+    }
+
+    public boolean isExtensionPoint() {
+        return extensionPoint;
     }
 
     public boolean isEnabled() {
@@ -63,6 +99,9 @@ public class FeedDescriptor {
     }
 
     public Image getIcon() {
+        if (config == null) {
+            return null;
+        }
         String iconPath = config.getAttribute("icon"); //$NON-NLS-1$
         if (iconPath != null) {
             return AbstractUIPlugin.imageDescriptorFromPlugin(Constants.PLUGIN_ID, iconPath).createImage();

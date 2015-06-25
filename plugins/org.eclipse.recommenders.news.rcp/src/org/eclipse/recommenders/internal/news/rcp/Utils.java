@@ -93,6 +93,9 @@ public class Utils {
             Collections.sort(list, new Comparator<IFeedMessage>() {
                 @Override
                 public int compare(IFeedMessage lhs, IFeedMessage rhs) {
+                    if (rhs.getDate() == null || lhs.getDate() == null) {
+                        return 0;
+                    }
                     return rhs.getDate().compareTo(lhs.getDate());
                 }
             });
