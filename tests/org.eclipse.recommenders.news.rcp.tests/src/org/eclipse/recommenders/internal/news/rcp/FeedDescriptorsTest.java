@@ -85,7 +85,7 @@ public class FeedDescriptorsTest {
     @Test
     public void testStoreFeedsList() {
         String result = FeedDescriptors
-                .store(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT), enabled(THIRD_ELEMENT)));
+                .feedsToString(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT), enabled(THIRD_ELEMENT)));
         assertThat(result,
                 is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR + THIRD_ELEMENT)));
     }
@@ -93,13 +93,13 @@ public class FeedDescriptorsTest {
     @Test
     public void testStoreEmptyList() {
         ImmutableList<FeedDescriptor> emptyList = ImmutableList.of();
-        String result = FeedDescriptors.store(emptyList);
+        String result = FeedDescriptors.feedsToString(emptyList);
         assertThat(result, is(equalTo(EMPTY_STRING)));
     }
 
     @Test
     public void testStoreDescriptorMultipleTimes() {
-        String result = FeedDescriptors.store(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT),
+        String result = FeedDescriptors.feedsToString(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT),
                 enabled(THIRD_ELEMENT), disabled(FIRST_ELEMENT)));
         assertThat(result,
                 is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR + THIRD_ELEMENT)));

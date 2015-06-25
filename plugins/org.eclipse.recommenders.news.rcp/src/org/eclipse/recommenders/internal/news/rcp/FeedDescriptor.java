@@ -20,38 +20,65 @@ import com.google.common.base.Preconditions;
 
 public class FeedDescriptor {
 
-    private final IConfigurationElement config;
+    private IConfigurationElement config;
     private boolean enabled;
+    private boolean defaultRepository;
+    private String id;
+    private URL url;
+    private String name;
+    private String pollingInterval;
 
     public FeedDescriptor(FeedDescriptor that) {
         this(that.config, that.enabled);
     }
 
     public FeedDescriptor(IConfigurationElement config, boolean enabled) {
+        this(config.getAttribute("url"), config.getAttribute("name"), config.getAttribute("pollingInterval")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         this.config = config;
         this.enabled = enabled;
+        defaultRepository = true;
         Preconditions.checkNotNull(getId());
         Preconditions.checkArgument(isUrlValid(config.getAttribute("url")), Messages.FEED_DESCRIPTOR_MALFORMED_URL); //$NON-NLS-1$
     }
 
+    public FeedDescriptor(String url, String name, String pollingInterval) {
+        Preconditions.checkArgument(isUrlValid(url), Messages.FEED_DESCRIPTOR_MALFORMED_URL);
+
+        id = url;
+        enabled = true;
+        this.url = stringToUrl(url);
+        this.name = name;
+        this.pollingInterval = pollingInterval;
+    }
+
     public String getId() {
-        return config.getAttribute("id"); //$NON-NLS-1$
+        return id;
     }
 
     public String getName() {
-        return config.getAttribute("name"); //$NON-NLS-1$
+        return name;
     }
 
     public URL getUrl() {
-        return stringToUrl(config.getAttribute("url")); //$NON-NLS-1$
+        return url;
     }
 
     public String getDescription() {
+        if (config == null) {
+            return name;
+        }
         return config.getAttribute("description"); //$NON-NLS-1$
     }
 
     public String getPollingInterval() {
+        if (config == null) {
+            return pollingInterval;
+        }
         return config.getAttribute("pollingInterval"); //$NON-NLS-1$
+    }
+
+    public boolean isDefaultRepository() {
+        return defaultRepository;
     }
 
     public boolean isEnabled() {
@@ -63,6 +90,9 @@ public class FeedDescriptor {
     }
 
     public Image getIcon() {
+        if (config == null) {
+            return null;
+        }
         String iconPath = config.getAttribute("icon"); //$NON-NLS-1$
         if (iconPath != null) {
             return AbstractUIPlugin.imageDescriptorFromPlugin(Constants.PLUGIN_ID, iconPath).createImage();
@@ -96,7 +126,7 @@ public class FeedDescriptor {
         return result;
     }
 
-    private boolean isUrlValid(String url) {
+    public static boolean isUrlValid(String url) {
         URL u;
         try {
             u = new URL(url);
