@@ -9,6 +9,7 @@ package org.eclipse.recommenders.internal.news.rcp;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -19,6 +20,9 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class FeedDescriptors {
 
@@ -43,7 +47,16 @@ public class FeedDescriptors {
             descriptors.add(new FeedDescriptor(element, enabled));
         }
         return descriptors;
+    }
 
+    public static List<FeedDescriptor> getFeeds(String json) {
+        if (json == null || json.isEmpty()) {
+            return Lists.newArrayList();
+        }
+        Gson gson = new GsonBuilder().create();
+        Type collectionType = new TypeToken<List<FeedDescriptor>>() {
+        }.getType();
+        return gson.fromJson(json, collectionType);
     }
 
     public static List<FeedDescriptor> load(String preferenceString, List<FeedDescriptor> available) {
@@ -74,7 +87,7 @@ public class FeedDescriptors {
         return result;
     }
 
-    public static String store(List<FeedDescriptor> descriptors) {
+    public static String feedsToString(List<FeedDescriptor> descriptors) {
         StringBuilder sb = new StringBuilder();
         Iterator<FeedDescriptor> it = descriptors.iterator();
         while (it.hasNext()) {
@@ -94,6 +107,12 @@ public class FeedDescriptors {
             result = result.substring(0, result.length() - 1);
         }
         return result;
+    }
+
+    public static String customFeedsToString(List<FeedDescriptor> feeds) {
+        Gson gson = new GsonBuilder().create();
+        String temp = gson.toJson(feeds);
+        return temp;
     }
 
     private static FeedDescriptor find(List<FeedDescriptor> descriptors, String id) {
