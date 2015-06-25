@@ -17,6 +17,7 @@ public final class Messages extends NLS {
 
     public static String PREFPAGE_TITLE;
     public static String PREFPAGE_DESCRIPTION;
+    public static String FEED_DIALOG_TITLE;
     public static String FIELD_LABEL_FEEDS;
     public static String FIELD_LABEL_NEWS_ENABLED;
     public static String FIELD_LABEL_NOTIFICATION_ENABLED;
