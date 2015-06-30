@@ -13,13 +13,18 @@ package org.eclipse.recommenders.completion.rcp.processable;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.FilledArgumentNamesMethodProposal;
 import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaFieldWithCastedReceiverCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.LazyGenericTypeProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyPackageCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocInlineTagCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocLinkTypeCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -39,22 +44,22 @@ public interface IProcessableProposalFactory {
             JavaFieldWithCastedReceiverCompletionProposal uiProposal, JavaContentAssistInvocationContext context);
 
     IProcessableProposal newFilledArgumentNamesMethodProposal(CompletionProposal coreCompletion,
-            JavaContentAssistInvocationContext context);
+            FilledArgumentNamesMethodProposal uiProposal, JavaContentAssistInvocationContext context);
 
     IProcessableProposal newOverrideCompletionProposal(CompletionProposal coreProposal,
             OverrideCompletionProposal uiProposal, JavaContentAssistInvocationContext context);
 
     IProcessableProposal newJavaMethodCompletionProposal(CompletionProposal coreCompletion,
-            JavaContentAssistInvocationContext context);
+            JavaMethodCompletionProposal uiProposal, JavaContentAssistInvocationContext context);
 
     IProcessableProposal newLazyGenericTypeProposal(CompletionProposal coreCompletion,
-            JavaContentAssistInvocationContext context);
+            LazyGenericTypeProposal uiProposal, JavaContentAssistInvocationContext context);
 
     IProcessableProposal newLazyJavaTypeCompletionProposal(CompletionProposal coreCompletion,
-            JavaContentAssistInvocationContext context);
+            LazyJavaTypeCompletionProposal uiProposal, JavaContentAssistInvocationContext context);
 
     IProcessableProposal newParameterGuessingProposal(CompletionProposal coreCompletion,
-            JavaContentAssistInvocationContext context);
+            ParameterGuessingProposal uiProposal, JavaContentAssistInvocationContext context);
 
     IProcessableProposal newMethodDeclarationCompletionProposal(CompletionProposal coreProposal,
             MethodDeclarationCompletionProposal uiProposal, JavaContentAssistInvocationContext context);
