@@ -9,7 +9,9 @@ package org.eclipse.recommenders.internal.news.rcp;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -17,8 +19,13 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.recommenders.internal.news.rcp.l10n.LogMessages;
+import org.eclipse.recommenders.utils.Logs;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class FeedDescriptors {
 
@@ -34,7 +41,7 @@ public class FeedDescriptors {
 
             @Override
             public int compare(IConfigurationElement lhs, IConfigurationElement rhs) {
-                return lhs.getAttribute("name").compareTo(rhs.getAttribute("name"));
+                return lhs.getAttribute(Constants.ATTRIBUTE_NAME).compareTo(rhs.getAttribute(Constants.ATTRIBUTE_NAME));
             }
         });
         final List<FeedDescriptor> descriptors = Lists.newLinkedList();
@@ -43,7 +50,25 @@ public class FeedDescriptors {
             descriptors.add(new FeedDescriptor(element, enabled));
         }
         return descriptors;
+    }
 
+    @SuppressWarnings("serial")
+    public static List<FeedDescriptor> getFeeds(String json) {
+        if (json == null || json.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Gson gson = new GsonBuilder().create();
+        Type collectionType = new TypeToken<List<FeedDescriptor>>() {
+        }.getType();
+        List<FeedDescriptor> list = gson.fromJson(json, collectionType);
+        Collections.sort(list, new Comparator<FeedDescriptor>() {
+
+            @Override
+            public int compare(FeedDescriptor lhs, FeedDescriptor rhs) {
+                return lhs.getName().compareTo(rhs.getName());
+            }
+        });
+        return list;
     }
 
     public static List<FeedDescriptor> load(String preferenceString, List<FeedDescriptor> available) {
@@ -61,7 +86,11 @@ public class FeedDescriptors {
             if (found != null) {
                 FeedDescriptor descriptor = new FeedDescriptor(found);
                 descriptor.setEnabled(enabled);
-                result.add(descriptor);
+                if (!result.contains(descriptor)) {
+                    result.add(descriptor);
+                } else {
+                    Logs.log(LogMessages.WARNING_DUPLICATE_FEED, descriptor.getId(), descriptor.getName());
+                }
             }
         }
 
@@ -74,7 +103,7 @@ public class FeedDescriptors {
         return result;
     }
 
-    public static String store(List<FeedDescriptor> descriptors) {
+    public static String feedsToString(List<FeedDescriptor> descriptors) {
         StringBuilder sb = new StringBuilder();
         Iterator<FeedDescriptor> it = descriptors.iterator();
         while (it.hasNext()) {
@@ -94,6 +123,11 @@ public class FeedDescriptors {
             result = result.substring(0, result.length() - 1);
         }
         return result;
+    }
+
+    public static String customFeedsToString(List<FeedDescriptor> feeds) {
+        Gson gson = new GsonBuilder().create();
+        return gson.toJson(feeds);
     }
 
     private static FeedDescriptor find(List<FeedDescriptor> descriptors, String id) {
