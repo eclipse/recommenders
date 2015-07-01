@@ -25,5 +25,12 @@ public final class Constants {
     public static final String FILENAME_POLL_DATES = "poll-dates.properties"; //$NON-NLS-1$
     public static final String FILENAME_FEED_DATES = "feed-dates.properties"; //$NON-NLS-1$
     public static final int COUNT_PER_FEED = 20;
+    public static final String PREF_CUSTOM_FEED_LIST_SORTED = "custom.feed.list.sorted"; //$NON-NLS-1$
+    public static final String ATTRIBUTE_URL = "url";
+    public static final String ATTRIBUTE_ID = "id";
+    public static final String ATTRIBUTE_NAME = "name";
+    public static final String ATTRIBUTE_DESCRIPTION = "description";
+    public static final String ATTRIBUTE_POLLING_INTERVAL = "pollingInterval";
+    public static final String ATTRIBUTE_ICON = "icon";
 
 }
