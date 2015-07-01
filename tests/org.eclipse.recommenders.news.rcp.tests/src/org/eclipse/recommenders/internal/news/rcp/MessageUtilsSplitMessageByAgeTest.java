@@ -57,6 +57,9 @@ public class MessageUtilsSplitMessageByAgeTest {
         // Empty or null message
         scenarios.add(new Object[] { on(MONDAY_2015_06_01), null, expectedGroupings(), Locale.US });
         scenarios.add(new Object[] { on(MONDAY_2015_06_01), messagesFrom(), expectedGroupings(), Locale.US });
+        scenarios.add(new Object[] { on(MONDAY_2015_06_01), messagesFrom(MONDAY_2015_06_01, null, SATURDAY_2015_05_30),
+                expectedGroupings(today(MONDAY_2015_06_01), yesterday(), thisWeek(), lastWeek(SATURDAY_2015_05_30)),
+                Locale.US });
 
         // Future message
         scenarios.add(new Object[] { on(SUNDAY_2015_05_31), messagesFrom(MONDAY_2015_06_01),
@@ -139,7 +142,9 @@ public class MessageUtilsSplitMessageByAgeTest {
         }
         List<IFeedMessage> messages = Lists.newArrayList();
         for (Date date : dates) {
-            messages.add(new FeedMessage(date.toString(), date, "", "", null));
+            if (date != null) {
+                messages.add(new FeedMessage(date.toString(), date, "", "", null));
+            }
         }
         return messages;
     }
