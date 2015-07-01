@@ -10,6 +10,7 @@ package org.eclipse.recommenders.internal.news.rcp;
 import static org.eclipse.recommenders.internal.news.rcp.FeedDescriptors.*;
 import static org.eclipse.recommenders.internal.news.rcp.TestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
@@ -28,6 +29,9 @@ public class FeedDescriptorsTest {
     private static final String THIRD_ELEMENT = "third";
     private static final String UNINSTALLED_ELEMENT = "uninstalled";
     private static final String EMPTY_STRING = "";
+    private static final String EMPTY_JSON_STRING = "[]";
+    private static final String VALID_JSON_FOR_ENABLED_FIRST_ELEMENT_AND_DISABLED_SECOND_ELEMENT = "[{\"defaultRepository\":true,\"id\":\"first\",\"url\":\"http://planeteclipse.org/planet/rss20.xml\",\"name\":\"first\",\"enabled\":true},{\"defaultRepository\":true,\"id\":\"second\",\"url\":\"http://planeteclipse.org/planet/rss20.xml\",\"name\":\"second\",\"enabled\":false}]";
+    private static final String VALID_JSON_FOR_DUPLICATED_ELEMENTS = "[{\"defaultRepository\":true,\"id\":\"first\",\"url\":\"http://planeteclipse.org/planet/rss20.xml\",\"name\":\"first\",\"enabled\":true},{\"defaultRepository\":true,\"id\":\"first\",\"url\":\"http://planeteclipse.org/planet/rss20.xml\",\"name\":\"first\",\"enabled\":true}]";
 
     @Test
     public void testLoadedSettingsIgnoresDefaultEnablement() {
@@ -83,23 +87,82 @@ public class FeedDescriptorsTest {
     }
 
     @Test
+    public void testLoadDuplicateFeeds() {
+        List<FeedDescriptor> result = FeedDescriptors.load(
+                FIRST_ELEMENT + SEPARATOR + SECOND_ELEMENT + SEPARATOR + FIRST_ELEMENT,
+                ImmutableList.of(enabled(FIRST_ELEMENT), enabled(SECOND_ELEMENT)));
+
+        assertThat(result.get(0).getId(), is(equalTo(FIRST_ELEMENT)));
+        assertThat(result.get(0).isEnabled(), is(true));
+        assertThat(result.get(1).getId(), is(equalTo(SECOND_ELEMENT)));
+        assertThat(result.get(1).isEnabled(), is(true));
+        assertThat(result.size(), is(2));
+    }
+
+    @Test
+    public void testLoadCustomFeeds() {
+        List<FeedDescriptor> result = FeedDescriptors
+                .getFeeds(VALID_JSON_FOR_ENABLED_FIRST_ELEMENT_AND_DISABLED_SECOND_ELEMENT);
+
+        assertThat(result.get(0).getId(), is(equalTo(FIRST_ELEMENT)));
+        assertThat(result.get(0).isEnabled(), is(true));
+        assertThat(result.get(1).getId(), is(equalTo(SECOND_ELEMENT)));
+        assertThat(result.get(1).isEnabled(), is(false));
+        assertThat(result.size(), is(2));
+    }
+
+    @Test
+    public void testLoadCustomDuplicatedFeeds() {
+        List<FeedDescriptor> result = FeedDescriptors.getFeeds(VALID_JSON_FOR_DUPLICATED_ELEMENTS);
+
+        assertThat(result.get(0).getId(), is(equalTo(FIRST_ELEMENT)));
+        assertThat(result.get(0).isEnabled(), is(true));
+        assertThat(result.get(1).getId(), is(equalTo(FIRST_ELEMENT)));
+        assertThat(result.get(1).isEnabled(), is(true));
+        assertThat(result.size(), is(2));
+    }
+
+    @Test
+    public void testLoadCustomFeedsEmptyString() {
+        List<FeedDescriptor> result = FeedDescriptors.getFeeds("");
+
+        assertThat(result, is(empty()));
+    }
+
+    @Test
     public void testStoreFeedsList() {
-        String result = FeedDescriptors
-                .store(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT), enabled(THIRD_ELEMENT)));
+        String result = FeedDescriptors.feedsToString(
+                ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT), enabled(THIRD_ELEMENT)));
         assertThat(result,
                 is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR + THIRD_ELEMENT)));
     }
 
     @Test
+    public void testStoreCustomFeedsList() {
+        String result = FeedDescriptors
+                .customFeedsToString(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT)));
+        assertThat(result, is(equalTo(VALID_JSON_FOR_ENABLED_FIRST_ELEMENT_AND_DISABLED_SECOND_ELEMENT)));
+    }
+
+    @Test
+    public void testStoreCustomFeedsEmptyList() {
+        ImmutableList<FeedDescriptor> emptyList = ImmutableList.of();
+        String result = FeedDescriptors.customFeedsToString(emptyList);
+
+        assertThat(result, is(equalTo(EMPTY_JSON_STRING)));
+    }
+
+    @Test
     public void testStoreEmptyList() {
         ImmutableList<FeedDescriptor> emptyList = ImmutableList.of();
-        String result = FeedDescriptors.store(emptyList);
+        String result = FeedDescriptors.feedsToString(emptyList);
+
         assertThat(result, is(equalTo(EMPTY_STRING)));
     }
 
     @Test
     public void testStoreDescriptorMultipleTimes() {
-        String result = FeedDescriptors.store(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT),
+        String result = FeedDescriptors.feedsToString(ImmutableList.of(enabled(FIRST_ELEMENT), disabled(SECOND_ELEMENT),
                 enabled(THIRD_ELEMENT), disabled(FIRST_ELEMENT)));
         assertThat(result,
                 is(equalTo(FIRST_ELEMENT + SEPARATOR + DISABLED_FLAG + SECOND_ELEMENT + SEPARATOR + THIRD_ELEMENT)));
