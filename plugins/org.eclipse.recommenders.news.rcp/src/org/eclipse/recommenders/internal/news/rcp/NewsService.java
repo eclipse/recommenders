@@ -76,7 +76,7 @@ public class NewsService implements INewsService {
                     public List<IFeedMessage> apply(List<IFeedMessage> input) {
                         ImmutableList<IFeedMessage> list = FluentIterable.from(input).limit(countPerFeed).toList();
                         for (IFeedMessage message : list) {
-                            if (readIds.contains(message.getId())) {
+                            if (message.getId() != null && readIds.contains(message.getId())) {
                                 message.setRead(true);
                             }
                         }
@@ -99,8 +99,10 @@ public class NewsService implements INewsService {
     @Subscribe
     @Override
     public void handleMessageRead(FeedMessageReadEvent event) {
-        readIds.add(event.getId());
-        newsFeedProperties.writeReadIds(readIds);
+        if (event.getId() != null) {
+            readIds.add(event.getId());
+            newsFeedProperties.writeReadIds(readIds);
+        }
     }
 
     @Subscribe
@@ -235,7 +237,8 @@ public class NewsService implements INewsService {
             notificationFacade.displayNotification(messages, bus);
             Map<FeedDescriptor, Date> feedDates = Maps.newHashMap();
             for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
-                feedDates.put(entry.getKey(), entry.getValue().get(0).getDate());
+                Date date = new Date();
+                feedDates.put(entry.getKey(), date);
             }
             updateFeedDates(feedDates);
         }
