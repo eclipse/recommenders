@@ -474,7 +474,7 @@ class MockedIntelligentCompletionProposalComputer<T extends SessionProcessor> ex
 
    new(T processor, CompletionRcpPreferences preferences) {
       super(preferences, new CachingAstProvider(), new SharedImages,
-         CallCompletionContextFunctions.registerDefaults(CompletionContextFunctions.defaultFunctions));
+         CallCompletionContextFunctions.registerDefaults(CompletionContextFunctions.defaultFunctions), new EditorPartRetriever());
       this.processor = processor
    }
 

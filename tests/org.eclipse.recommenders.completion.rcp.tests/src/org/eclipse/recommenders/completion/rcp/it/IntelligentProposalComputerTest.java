@@ -1,39 +1,40 @@
 package org.eclipse.recommenders.completion.rcp.it;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.recommenders.completion.rcp.CompletionContextFunctions;
 import org.eclipse.recommenders.completion.rcp.processable.IntelligentCompletionProposalComputer;
+import org.eclipse.recommenders.completion.rcp.processable.IntelligentCompletionProposalComputer.EditorPartRetriever;
 import org.eclipse.recommenders.internal.completion.rcp.CompletionRcpPreferences;
 import org.eclipse.recommenders.internal.rcp.CachingAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
+import org.eclipse.ui.IEditorPart;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("restriction")
 public class IntelligentProposalComputerTest {
 
-    private IntelligentCompletionProposalComputer sut;
     private List<ICompletionProposal> NO_PROPOSALS = Collections.<ICompletionProposal>emptyList();
 
-    @Before
-    public void before() {
+    public IntelligentCompletionProposalComputer createSUT() {
+        return createSUT(new EditorPartRetriever());
+    }
+
+    public IntelligentCompletionProposalComputer createSUT(EditorPartRetriever retriever) {
         CompletionRcpPreferences preferences = new CompletionRcpPreferences();
         preferences.setEnabledSessionProcessorString("");
-        sut = new IntelligentCompletionProposalComputer(preferences, new CachingAstProvider(), new SharedImages(),
-                CompletionContextFunctions.defaultFunctions());
-
+        return new IntelligentCompletionProposalComputer(preferences, new CachingAstProvider(), new SharedImages(),
+                CompletionContextFunctions.defaultFunctions(), retriever);
     }
 
     @Test
@@ -43,6 +44,7 @@ public class IntelligentProposalComputerTest {
         JavaContentAssistInvocationContext ctx = new JavaContentAssistInvocationContext(cu);
 
         // exercise
+        IntelligentCompletionProposalComputer sut = createSUT();
         sut.sessionStarted();
         List<ICompletionProposal> proposals = sut.computeCompletionProposals(ctx, null);
 
@@ -59,6 +61,7 @@ public class IntelligentProposalComputerTest {
         JavaContentAssistInvocationContext ctx = new JavaContentAssistInvocationContext(cu);
 
         // exercise
+        IntelligentCompletionProposalComputer sut = createSUT();
         sut.sessionStarted();
         List<ICompletionProposal> proposals = sut.computeCompletionProposals(ctx, null);
 
@@ -66,8 +69,8 @@ public class IntelligentProposalComputerTest {
         Assert.assertThat(proposals, equalTo(NO_PROPOSALS));
     }
 
-    @Test(expected = AssertionFailedException.class)
-    public void testProjectExistsTrue() {
+    @Test
+    public void testSubClassOfCompilationUnitEditor() {
         // setup
         ICompilationUnit cu = mock(ICompilationUnit.class);
         IJavaProject project = mock(IJavaProject.class);
@@ -75,13 +78,17 @@ public class IntelligentProposalComputerTest {
         when(project.exists()).thenReturn(true);
         JavaContentAssistInvocationContext ctx = new JavaContentAssistInvocationContext(cu);
 
+        CompilationUnitEditor anonymousCUEditor = new CompilationUnitEditor() {
+        };
+        EditorPartRetriever retriever = mock(EditorPartRetriever.class);
+        when(retriever.getEditor()).thenReturn((IEditorPart) anonymousCUEditor);
+
         // exercise
+        IntelligentCompletionProposalComputer sut = createSUT(retriever);
         sut.sessionStarted();
-        sut.computeCompletionProposals(ctx, null);
+        List<ICompletionProposal> proposals = sut.computeCompletionProposals(ctx, null);
 
-        // verify. We expect that we receive an assertion failed exception caused elsewhere
-        // this is not clean but at least ensures that we do not fail silently early...
-        fail("should not come that far");
+        // verify
+        Assert.assertThat(proposals, equalTo(NO_PROPOSALS));
     }
-
 }

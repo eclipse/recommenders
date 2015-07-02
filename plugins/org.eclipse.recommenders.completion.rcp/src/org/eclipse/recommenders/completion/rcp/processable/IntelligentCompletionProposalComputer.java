@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer;
@@ -55,7 +56,10 @@ import org.eclipse.recommenders.internal.completion.rcp.EnabledCompletionProposa
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.utils.Logs;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -64,6 +68,14 @@ import com.google.common.collect.Sets;
 @SuppressWarnings({ "restriction", "rawtypes" })
 public class IntelligentCompletionProposalComputer extends JavaAllCompletionProposalComputer
         implements ICompletionListener, ICompletionListenerExtension2 {
+
+    @VisibleForTesting
+    public static class EditorPartRetriever {
+        @VisibleForTesting
+        public IEditorPart getEditor() {
+            return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+        }
+    }
 
     private final CompletionRcpPreferences preferences;
     private final IAstProvider astProvider;
@@ -74,6 +86,8 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
     private final Set<SessionProcessor> processors = Sets.newLinkedHashSet();
     private final Set<SessionProcessor> activeProcessors = Sets.newLinkedHashSet();
 
+    private final EditorPartRetriever editorRetriever;
+
     // Set in storeContext
     public JavaContentAssistInvocationContext jdtContext;
     public IRecommendersCompletionContext crContext;
@@ -82,11 +96,13 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
 
     @Inject
     public IntelligentCompletionProposalComputer(CompletionRcpPreferences preferences, IAstProvider astProvider,
-            SharedImages images, Map<CompletionContextKey, ICompletionContextFunction> functions) {
+            SharedImages images, Map<CompletionContextKey, ICompletionContextFunction> functions,
+            EditorPartRetriever editorRetriever) {
         this.preferences = preferences;
         this.astProvider = astProvider;
         this.images = images;
         this.functions = functions;
+        this.editorRetriever = editorRetriever;
     }
 
     @Override
@@ -159,6 +175,16 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
         if (jdtContext == null) {
             return false;
         }
+
+        IEditorPart editorPart = editorRetriever.getEditor();
+        if (editorPart == null) {
+            return false;
+        }
+
+        if (!editorPart.getClass().equals(CompilationUnitEditor.class)) {
+            return false;
+        }
+
         IJavaProject project = jdtContext.getProject();
         if (project == null) {
             return false;
