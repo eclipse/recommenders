@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer;
@@ -55,6 +56,8 @@ import org.eclipse.recommenders.internal.completion.rcp.EnabledCompletionProposa
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.utils.Logs;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -159,6 +162,16 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
         if (jdtContext == null) {
             return false;
         }
+
+        IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+        if (editorPart == null) {
+            return false;
+        }
+
+        if (!editorPart.getClass().equals(CompilationUnitEditor.class)) {
+            return false;
+        }
+
         IJavaProject project = jdtContext.getProject();
         if (project == null) {
             return false;
