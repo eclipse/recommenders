@@ -26,10 +26,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer;
@@ -55,6 +57,7 @@ import org.eclipse.recommenders.internal.completion.rcp.EnabledCompletionProposa
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.utils.Logs;
+import org.eclipse.ui.IEditorPart;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -69,6 +72,7 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
     private final IAstProvider astProvider;
     private final SharedImages images;
     private final Map<CompletionContextKey, ICompletionContextFunction> functions;
+    private final Provider<IEditorPart> editorRetriever;
     private final IProcessableProposalFactory proposalFactory = new ProcessableProposalFactory();
 
     private final Set<SessionProcessor> processors = Sets.newLinkedHashSet();
@@ -82,11 +86,13 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
 
     @Inject
     public IntelligentCompletionProposalComputer(CompletionRcpPreferences preferences, IAstProvider astProvider,
-            SharedImages images, Map<CompletionContextKey, ICompletionContextFunction> functions) {
+            SharedImages images, Map<CompletionContextKey, ICompletionContextFunction> functions,
+            Provider<IEditorPart> editorRetriever) {
         this.preferences = preferences;
         this.astProvider = astProvider;
         this.images = images;
         this.functions = functions;
+        this.editorRetriever = editorRetriever;
     }
 
     @Override
@@ -159,6 +165,16 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
         if (jdtContext == null) {
             return false;
         }
+
+        IEditorPart editorPart = editorRetriever.get();
+        if (editorPart == null) {
+            return false;
+        }
+
+        if (!editorPart.getClass().equals(CompilationUnitEditor.class)) {
+            return false;
+        }
+
         IJavaProject project = jdtContext.getProject();
         if (project == null) {
             return false;
