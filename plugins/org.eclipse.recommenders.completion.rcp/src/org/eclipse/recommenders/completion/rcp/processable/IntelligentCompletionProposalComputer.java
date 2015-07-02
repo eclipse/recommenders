@@ -29,7 +29,11 @@ import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.codeassist.impl.AssistCompilationUnit;
+import org.eclipse.jdt.internal.core.ClassFileWorkingCopy;
+import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer;
@@ -64,6 +68,9 @@ import com.google.common.collect.Sets;
 @SuppressWarnings({ "restriction", "rawtypes" })
 public class IntelligentCompletionProposalComputer extends JavaAllCompletionProposalComputer
         implements ICompletionListener, ICompletionListenerExtension2 {
+
+    private static final Set VALID_COMPILATION_UNIT_CLASSES = ImmutableSet.of(ICompilationUnit.class,
+            CompilationUnit.class, AssistCompilationUnit.class, ClassFileWorkingCopy.class);
 
     private final CompletionRcpPreferences preferences;
     private final IAstProvider astProvider;
@@ -159,6 +166,12 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
         if (jdtContext == null) {
             return false;
         }
+
+        ICompilationUnit compilationUnit = jdtContext.getCompilationUnit();
+        if (!VALID_COMPILATION_UNIT_CLASSES.contains(compilationUnit.getClass())) {
+            return false;
+        }
+
         IJavaProject project = jdtContext.getProject();
         if (project == null) {
             return false;
