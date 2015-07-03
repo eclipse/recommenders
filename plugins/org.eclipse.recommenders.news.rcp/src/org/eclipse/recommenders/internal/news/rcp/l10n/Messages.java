@@ -43,6 +43,8 @@ public final class Messages extends NLS {
 
     public static String NOTIFICATION_TITLE;
     public static String UNREAD_MESSAGE_PREFIX;
+    public static String READ_MESSAGE_PREFIX;
+    public static String PARTIALLY_READ_FEED;
 
     public static String LOG_ERROR_READING_PROPERTIES;
     public static String LOG_ERROR_WRITING_PROPERTIES;
