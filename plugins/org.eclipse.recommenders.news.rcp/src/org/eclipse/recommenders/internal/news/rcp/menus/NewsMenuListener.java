@@ -24,6 +24,7 @@ import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.rcp.utils.BrowserUtils;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
@@ -57,6 +58,20 @@ public class NewsMenuListener implements IMenuListener {
             addMarkAsReadAction(entry.getKey(), menu);
             manager.add(menu);
         }
+        manager.add(new Separator());
+        manager.add(new Action() {
+            @Override
+            public void run() {
+                PreferencesUtil
+                        .createPreferenceDialogOn(null, "org.eclipse.recommenders.news.rcp.preferencePage", null, null) //$NON-NLS-1$
+                        .open();
+            }
+
+            @Override
+            public String getText() {
+                return Messages.LABEL_PREFERENCES;
+            }
+        });
         manager.add(new Separator());
         manager.add(newMarkAllAsReadAction(eventBus));
     }
