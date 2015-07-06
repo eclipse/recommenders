@@ -16,6 +16,7 @@ import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 public class FeedDescriptor {
@@ -72,28 +73,16 @@ public class FeedDescriptor {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        FeedDescriptor rhs = (FeedDescriptor) obj;
-        if (!getId().equals(rhs.getId())) {
-            return false;
-        }
-        return true;
+        FeedDescriptor that = (FeedDescriptor) obj;
+        return Objects.equal(this.getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        final int prime = 43;
-        int result = 1;
-        result = prime * result + (getId() == null ? 0 : getId().hashCode());
-        return result;
+        return Objects.hashCode(getId());
     }
 
     private boolean isUrlValid(String url) {
