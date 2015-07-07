@@ -17,8 +17,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.*;
+
+import java.util.Set;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
@@ -31,11 +32,12 @@ import org.eclipse.recommenders.completion.rcp.processable.ProposalTag;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.SetMultimap;
 
 public class TypesCompletionSessionProcessorTest {
 
@@ -47,29 +49,10 @@ public class TypesCompletionSessionProcessorTest {
     private static final String LINKED_LIST_SIGNATURE = "Ljava.util.LinkedList;";
     private static final String ABSTRACT_SET_SIGNATURE = "Ljava.util.AbstractSet;";
 
-    private ITypesIndexService service;
-
-    @Before
-    public void setUp() {
-        service = mock(ITypesIndexService.class);
-
-        when(service.subtypes(eq(LIST), startsWith("A"), any(IJavaProject.class)))
-                .thenReturn(ImmutableSet.of("java.util.ArrayList"));
-        when(service.subtypes(eq(LIST), startsWith("B"), any(IJavaProject.class)))
-                .thenReturn(ImmutableSet.<String>of());
-        when(service.subtypes(eq(LIST), startsWith("L"), any(IJavaProject.class)))
-                .thenReturn(ImmutableSet.of("java.util.LinkedList"));
-        when(service.subtypes(eq(LIST), eq(""), any(IJavaProject.class)))
-                .thenReturn(ImmutableSet.of("java.util.ArrayList", "java.util.LinkedList"));
-
-        when(service.subtypes(eq(SET), startsWith("A"), any(IJavaProject.class)))
-                .thenReturn(ImmutableSet.of("java.util.AbstractSet"));
-    }
-
     @Test
     public void testNoExpectedTypes() {
-        IRecommendersCompletionContext context = setUpCompletionScenario("A");
-
+        ITypesIndexService service = mockTypesIndexServer(ImmutableSetMultimap.<ITypeName, String>of());
+        IRecommendersCompletionContext context = mockCompletionContextWithExpectedTypeNames();
         TypesCompletionSessionProcessor sut = new TypesCompletionSessionProcessor(service, new SharedImages());
 
         boolean shouldProcess = sut.startSession(context);
@@ -81,8 +64,8 @@ public class TypesCompletionSessionProcessorTest {
 
     @Test
     public void testNoProposals() throws Exception {
-        IRecommendersCompletionContext context = setUpCompletionScenario("B", LIST);
-
+        ITypesIndexService service = mockTypesIndexServer(ImmutableSetMultimap.<ITypeName, String>of());
+        IRecommendersCompletionContext context = mockCompletionContextWithExpectedTypeNames(LIST);
         TypesCompletionSessionProcessor sut = new TypesCompletionSessionProcessor(service, new SharedImages());
 
         boolean shouldProcess = sut.startSession(context);
@@ -91,8 +74,9 @@ public class TypesCompletionSessionProcessorTest {
     }
 
     @Test
-    public void testPrefixWithSingleProposal() throws Exception {
-        IRecommendersCompletionContext context = setUpCompletionScenario("L", LIST);
+    public void testSingleProposal() throws Exception {
+        ITypesIndexService service = mockTypesIndexServer(ImmutableSetMultimap.of(LIST, "java.util.ArrayList"));
+        IRecommendersCompletionContext context = mockCompletionContextWithExpectedTypeNames(LIST);
 
         TypesCompletionSessionProcessor sut = new TypesCompletionSessionProcessor(service, new SharedImages());
 
@@ -101,20 +85,22 @@ public class TypesCompletionSessionProcessorTest {
         assertThat(shouldProcess, is(equalTo(true)));
 
         ProposalProcessorManager manager = mock(ProposalProcessorManager.class);
-        IProcessableProposal linkedListProcessableProposal = mockProcessableProposal(manager,
-                CompletionProposal.TYPE_REF, LINKED_LIST_SIGNATURE);
+        IProcessableProposal arrayListProcessableProposal = mockProcessableProposal(manager,
+                CompletionProposal.TYPE_REF, ARRAY_LIST_SIGNATURE);
 
-        sut.process(linkedListProcessableProposal);
+        sut.process(arrayListProcessableProposal);
 
-        verify(linkedListProcessableProposal).setTag(ProposalTag.RECOMMENDERS_SCORE, BOOST);
+        verify(arrayListProcessableProposal).setTag(ProposalTag.RECOMMENDERS_SCORE, BOOST);
         verify(manager, times(1)).addProcessor(processorWithBoost(BOOST));
         verify(manager, times(1)).addProcessor(isA(OverlayImageProposalProcessor.class));
         verifyNoMoreInteractions(manager);
     }
 
     @Test
-    public void testEmptyPrefix() throws Exception {
-        IRecommendersCompletionContext context = setUpCompletionScenario("", LIST);
+    public void testMultipleProposals() throws Exception {
+        ITypesIndexService service = mockTypesIndexServer(
+                ImmutableSetMultimap.of(LIST, "java.util.ArrayList", LIST, "java.util.LinkedList"));
+        IRecommendersCompletionContext context = mockCompletionContextWithExpectedTypeNames(LIST);
 
         TypesCompletionSessionProcessor sut = new TypesCompletionSessionProcessor(service, new SharedImages());
 
@@ -147,7 +133,9 @@ public class TypesCompletionSessionProcessorTest {
 
     @Test
     public void testMultipleExpectedTypes() throws Exception {
-        IRecommendersCompletionContext context = setUpCompletionScenario("A", LIST, SET);
+        ITypesIndexService service = mockTypesIndexServer(
+                ImmutableSetMultimap.of(LIST, "java.util.ArrayList", SET, "java.util.AbstractSet"));
+        IRecommendersCompletionContext context = mockCompletionContextWithExpectedTypeNames(LIST, SET);
 
         TypesCompletionSessionProcessor sut = new TypesCompletionSessionProcessor(service, new SharedImages());
 
@@ -180,7 +168,8 @@ public class TypesCompletionSessionProcessorTest {
 
     @Test
     public void testConstructorInvocationProposalWithGenerics() throws Exception {
-        IRecommendersCompletionContext context = setUpCompletionScenario("A", LIST);
+        ITypesIndexService service = mockTypesIndexServer(ImmutableSetMultimap.of(LIST, "java.util.ArrayList"));
+        IRecommendersCompletionContext context = mockCompletionContextWithExpectedTypeNames(LIST);
 
         TypesCompletionSessionProcessor sut = new TypesCompletionSessionProcessor(service, new SharedImages());
 
@@ -202,7 +191,8 @@ public class TypesCompletionSessionProcessorTest {
 
     @Test
     public void testAnonymousClassConstructorInvocationProposal() throws Exception {
-        IRecommendersCompletionContext context = setUpCompletionScenario("A", SET);
+        ITypesIndexService service = mockTypesIndexServer(ImmutableSetMultimap.of(SET, "java.util.AbstractSet"));
+        IRecommendersCompletionContext context = mockCompletionContextWithExpectedTypeNames(SET);
 
         TypesCompletionSessionProcessor sut = new TypesCompletionSessionProcessor(service, new SharedImages());
 
@@ -222,10 +212,8 @@ public class TypesCompletionSessionProcessorTest {
         verifyNoMoreInteractions(manager);
     }
 
-    private IRecommendersCompletionContext setUpCompletionScenario(String prefix, ITypeName... expectedTypeNames) {
+    private IRecommendersCompletionContext mockCompletionContextWithExpectedTypeNames(ITypeName... expectedTypeNames) {
         IRecommendersCompletionContext context = mock(IRecommendersCompletionContext.class);
-
-        when(context.getPrefix()).thenReturn(prefix);
 
         when(context.getExpectedTypeNames()).thenReturn(ImmutableSet.copyOf(expectedTypeNames));
 
@@ -233,6 +221,17 @@ public class TypesCompletionSessionProcessorTest {
         when(context.getProject()).thenReturn(project);
 
         return context;
+    }
+
+    private ITypesIndexService mockTypesIndexServer(SetMultimap<ITypeName, String> index) {
+        ITypesIndexService service = mock(ITypesIndexService.class);
+
+        for (ITypeName typeName : index.keySet()) {
+            Set<String> subtypes = index.get(typeName);
+            when(service.subtypes(eq(typeName), any(String.class), any(IJavaProject.class))).thenReturn(subtypes);
+        }
+
+        return service;
     }
 
     private IProcessableProposal mockProcessableProposal(ProposalProcessorManager manager, int coreProposalKind,
