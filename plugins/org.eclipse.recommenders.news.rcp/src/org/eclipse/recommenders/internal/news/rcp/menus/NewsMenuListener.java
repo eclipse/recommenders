@@ -131,7 +131,12 @@ public class NewsMenuListener implements IMenuListener {
             }
         }
         if (read) {
-            return Messages.READ_MESSAGE_PREFIX.concat(feedName);
+            if (getUnreadMessagesNumber(messages) > 0) {
+                return Messages.UNREAD_MESSAGE_PREFIX.concat(feedName)
+                        .concat(" (" + getUnreadMessagesNumber(messages) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+            } else {
+                return Messages.READ_MESSAGE_PREFIX.concat(feedName);
+            }
         } else {
             return Messages.UNREAD_MESSAGE_PREFIX.concat(feedName)
                     .concat(" (" + getUnreadMessagesNumber(messages) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
