@@ -10,7 +10,7 @@
  */
 package org.eclipse.recommenders.internal.types.rcp;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 import static org.eclipse.recommenders.completion.rcp.processable.ProposalTag.RECOMMENDERS_SCORE;
 import static org.eclipse.recommenders.rcp.SharedImages.Images.OVR_STAR;
 
@@ -19,6 +19,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.processable.IProcessableProposal;
@@ -57,8 +58,7 @@ public class TypesCompletionSessionProcessor extends SessionProcessor {
 
         Builder<String> b = ImmutableSet.builder();
         for (ITypeName expected : expectedTypes) {
-            String oneCharPrefix = substring(context.getPrefix(), 0, 1);
-            b.addAll(service.subtypes(expected, oneCharPrefix, context.getProject()));
+            b.addAll(service.subtypes(expected, "", context.getProject()));
         }
         subtypes = b.build();
         return !subtypes.isEmpty();
@@ -71,19 +71,31 @@ public class TypesCompletionSessionProcessor extends SessionProcessor {
         }
         final CompletionProposal coreProposal = proposal.getCoreProposal().or(NULL_PROPOSAL);
         switch (coreProposal.getKind()) {
+        case CompletionProposal.FIELD_REF:
+        case CompletionProposal.LOCAL_VARIABLE_REF:
         case CompletionProposal.TYPE_REF: {
             char[] sig = coreProposal.getSignature();
             handleProposal(proposal, sig);
             break;
         }
         case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
-        case CompletionProposal.CONSTRUCTOR_INVOCATION:
+        case CompletionProposal.CONSTRUCTOR_INVOCATION: {
             char[] sig = coreProposal.getDeclarationSignature();
             handleProposal(proposal, sig);
+            break;
+        }
+        case CompletionProposal.METHOD_REF: {
+            char[] returnType = Signature.getReturnType(coreProposal.getSignature());
+            handleProposal(proposal, returnType);
+            break;
+        }
         }
     }
 
     private void handleProposal(IProcessableProposal proposal, char[] signature) {
+        if (isPrimitiveType(signature)) {
+            return;
+        }
         // parse the type name and remove Generics from the name
         String name = new String(signature, 1, signature.length - 2);
         name = substringBefore(name, "<"); //$NON-NLS-1$
@@ -93,5 +105,9 @@ public class TypesCompletionSessionProcessor extends SessionProcessor {
             mgr.addProcessor(new SimpleProposalProcessor(BOOST));
             mgr.addProcessor(overlayDecorator);
         }
+    }
+
+    private boolean isPrimitiveType(char[] signature) {
+        return signature.length == 1;
     }
 }
