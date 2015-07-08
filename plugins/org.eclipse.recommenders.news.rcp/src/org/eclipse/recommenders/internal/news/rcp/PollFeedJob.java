@@ -11,7 +11,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +45,7 @@ import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
 public class PollFeedJob extends Job implements IPollFeedJob {
+    private static final String RELIABLE_HOST = "http://google.com";
     private final NotificationEnvironment environment;
     private final Map<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
     private final Set<FeedDescriptor> feeds = Sets.newHashSet();
@@ -61,6 +64,12 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         URL url = null;
+        boolean internetConnectionAvailable = true;
+        try {
+            InetAddress.getByName(RELIABLE_HOST);
+        } catch (UnknownHostException e) {
+            internetConnectionAvailable = false;
+        }
         try {
             for (FeedDescriptor feed : feeds) {
                 if (monitor.isCanceled()) {
@@ -74,8 +83,9 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 pollDates.put(feed, new Date());
             }
         } catch (IOException e) {
-            Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
-            return Status.CANCEL_STATUS;
+            if (internetConnectionAvailable) {
+                Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
+            }
         }
         return Status.OK_STATUS;
     }
