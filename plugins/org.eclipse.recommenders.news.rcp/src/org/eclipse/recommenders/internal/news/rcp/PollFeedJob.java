@@ -61,6 +61,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         URL url = null;
+        int connectionErrorCounter = 0;
         try {
             for (FeedDescriptor feed : feeds) {
                 if (monitor.isCanceled()) {
@@ -74,8 +75,10 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 pollDates.put(feed, new Date());
             }
         } catch (IOException e) {
-            Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
-            return Status.CANCEL_STATUS;
+            connectionErrorCounter++;
+            if (connectionErrorCounter == feeds.size()) {
+                Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
+            }
         }
         return Status.OK_STATUS;
     }
