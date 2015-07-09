@@ -45,6 +45,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
@@ -94,17 +95,21 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
     @Override
     public boolean performOk() {
         IPreferenceStore store = getPreferenceStore();
-        boolean oldEnabled = store.getBoolean(Constants.PREF_NEWS_ENABLED);
-        boolean newEnabled = enabledEditor.getBooleanValue();
-        List<FeedDescriptor> oldFeedValue = newsRcpPreferences.getFeedDescriptors();
-        List<FeedDescriptor> newFeedValue = feedEditor.getValue();
         boolean result = super.performOk();
+        doPerformOK(store.getBoolean(Constants.PREF_NEWS_ENABLED), enabledEditor.getBooleanValue(),
+                newsRcpPreferences.getFeedDescriptors(), feedEditor.getValue());
+        return result;
+    }
+
+    @VisibleForTesting
+    void doPerformOK(boolean oldEnabledValue, boolean newEnabledValue, List<FeedDescriptor> oldFeedValue,
+            List<FeedDescriptor> newFeedValue) {
         boolean forceStop = false;
         boolean forceStart = false;
-        if (!oldEnabled && newEnabled) {
+        if (!oldEnabledValue && newEnabledValue) {
             // News has been activated
             forceStart = true;
-        } else if (oldEnabled && !newEnabled) {
+        } else if (oldEnabledValue && !newEnabledValue) {
             forceStop = true;
         }
 
@@ -133,7 +138,6 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
         if (forceStop) {
             service.forceStop();
         }
-        return result;
     }
 
     private final class FeedEditor extends FieldEditor {
