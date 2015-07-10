@@ -189,7 +189,7 @@ public class FeedDialog extends TitleAreaDialog {
                 return Optional.of(feed.getId());
             }
         }
-        return Optional.absent();
+        return null;
     }
 
     private boolean isUrlValid(String urlString) {
