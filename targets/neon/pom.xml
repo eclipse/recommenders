@@ -10,8 +10,8 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>juno</artifactId>
+	<artifactId>neon</artifactId>
 	<packaging>eclipse-target-definition</packaging>
 
-	<name>Target Definition for Eclipse Juno (4.2)</name>
+	<name>Target Definition for Eclipse Neon (4.6)</name>
 </project>
