@@ -151,7 +151,8 @@ public class FeedDialog extends TitleAreaDialog {
             super.getButton(OK).setEnabled(false);
         } else if (getFeedByUrl(urlValue.getText()) != null) {
             setErrorMessage(
-                    MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, getFeedByUrl(urlValue.getText())));
+                    MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, getFeedByUrl(urlValue.getText())
+                            .toString().substring(12, getFeedByUrl(urlValue.getText()).toString().length() - 1)));
             super.getButton(OK).setEnabled(false);
         } else if (!pollingIntervalValue.getText().matches("[0-9]+")) {
             setErrorMessage(Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_DIGITS_ONLY);
@@ -189,7 +190,7 @@ public class FeedDialog extends TitleAreaDialog {
                 return Optional.of(feed.getId());
             }
         }
-        return Optional.absent();
+        return null;
     }
 
     private boolean isUrlValid(String urlString) {
