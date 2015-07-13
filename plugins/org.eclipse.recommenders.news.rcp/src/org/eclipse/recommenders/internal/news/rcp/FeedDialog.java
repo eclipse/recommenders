@@ -150,7 +150,7 @@ public class FeedDialog extends TitleAreaDialog {
         } else if (!isUrlValid(urlValue.getText()) || !urlValue.getText().contains(".")) {
             setErrorMessage(Messages.FEED_DIALOG_ERROR_INVALID_URL);
             super.getButton(OK).setEnabled(false);
-        } else if (duplicateFeedForUrl != null) {
+        } else if (duplicateFeedForUrl != null && feed == null) {
             setErrorMessage(MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, duplicateFeedForUrl));
             super.getButton(OK).setEnabled(false);
         } else if (!pollingIntervalValue.getText().matches("[0-9]+")) {
