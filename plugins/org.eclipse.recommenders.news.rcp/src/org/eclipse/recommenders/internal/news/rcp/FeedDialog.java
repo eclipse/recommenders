@@ -7,12 +7,6 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.MessageFormat;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.swt.SWT;
@@ -26,13 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-
 public class FeedDialog extends TitleAreaDialog {
-    private static final List<String> ACCEPTED_PROTOCOLS = ImmutableList.of("http", "https"); //$NON-NLS-1$ , //$NON-NLS-2$
-
     private final NewsRcpPreferences newsRcpPreferences;
     private FeedDescriptor feed;
     private Text nameValue;
@@ -135,65 +123,10 @@ public class FeedDialog extends TitleAreaDialog {
     }
 
     private void updateDialog() {
-        setErrorMessage(null);
-        String duplicateFeedForUrl = getFeedId(urlValue.getText()).orNull();
-
-        if (Strings.isNullOrEmpty(nameValue.getText())) {
-            setErrorMessage(Messages.FEED_DIALOG_ERROR_EMPTY_NAME);
-            super.getButton(OK).setEnabled(false);
-        } else if (Strings.isNullOrEmpty(urlValue.getText())) {
-            setErrorMessage(Messages.FEED_DIALOG_ERROR_EMPTY_URL);
-            super.getButton(OK).setEnabled(false);
-        } else if (!isUriProtocolSupported(parseUriQuietly(urlValue.getText()), ACCEPTED_PROTOCOLS)) {
-            setErrorMessage(MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, urlValue.getText()));
-            super.getButton(OK).setEnabled(false);
-        } else if (!isUrlValid(urlValue.getText()) || !urlValue.getText().contains(".")) {
-            setErrorMessage(Messages.FEED_DIALOG_ERROR_INVALID_URL);
-            super.getButton(OK).setEnabled(false);
-        } else if (duplicateFeedForUrl != null) {
-            setErrorMessage(MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, duplicateFeedForUrl));
-            super.getButton(OK).setEnabled(false);
-        } else if (!pollingIntervalValue.getText().matches("[0-9]+")) {
-            setErrorMessage(Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_DIGITS_ONLY);
-            super.getButton(OK).setEnabled(false);
-        }
-
+        setErrorMessage(MessageUtils.validateFeedDialog(feed, nameValue.getText(), urlValue.getText(),
+                pollingIntervalValue.getText(), newsRcpPreferences));
         if (getErrorMessage() == null) {
             super.getButton(OK).setEnabled(true);
         }
-    }
-
-    private static URI parseUriQuietly(String uriString) {
-        try {
-            return new URI(uriString);
-        } catch (URISyntaxException e) {
-            return null;
-        }
-    }
-
-    private static boolean isUriProtocolSupported(URI uri, List<String> protocols) {
-        if (uri == null) {
-            return false;
-        }
-        for (String protocol : protocols) {
-            if (StringUtils.equalsIgnoreCase(protocol, uri.getScheme())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Optional<String> getFeedId(String url) {
-        for (FeedDescriptor feed : newsRcpPreferences.getFeedDescriptors()) {
-            if (feed.getUrl().toString().equals(url)) {
-                return Optional.of(feed.getId());
-            }
-        }
-        return Optional.absent();
-    }
-
-    private boolean isUrlValid(String urlString) {
-        return urlString.matches(
-                "(@)?(http://)?(https://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?"); //$NON-NLS-1$
     }
 }
