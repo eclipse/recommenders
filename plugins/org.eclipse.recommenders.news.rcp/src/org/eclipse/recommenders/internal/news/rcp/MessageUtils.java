@@ -7,6 +7,9 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,11 +20,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -35,6 +43,7 @@ public class MessageUtils {
     public static final int LAST_MONTH = 5;
     public static final int THIS_YEAR = 6;
     public static final int OLDER = 7;
+    private static final List<String> ACCEPTED_PROTOCOLS = ImmutableList.of("http", "https"); //$NON-NLS-1$ , //$NON-NLS-2$
 
     public static boolean containsUnreadMessages(Map<FeedDescriptor, List<IFeedMessage>> map) {
         if (map == null) {
@@ -188,6 +197,60 @@ public class MessageUtils {
             calendar.set(Calendar.DAY_OF_MONTH, 31);
         }
         return calendar.getTime();
+    }
+
+    public static String validateFeedDialog(FeedDescriptor currentFeed, String name, String url, String pollingInterval,
+            NewsRcpPreferences preferences) {
+        String duplicateFeedForUrl = getFeedId(url, preferences).orNull();
+        if (Strings.isNullOrEmpty(name)) {
+            return Messages.FEED_DIALOG_ERROR_EMPTY_NAME;
+        } else if (Strings.isNullOrEmpty(url)) {
+            return Messages.FEED_DIALOG_ERROR_EMPTY_URL;
+        } else if (!isUriProtocolSupported(parseUriQuietly(url), ACCEPTED_PROTOCOLS)) {
+            return MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, url);
+        } else if (!isUrlValid(url) || !url.contains(".")) {
+            return Messages.FEED_DIALOG_ERROR_INVALID_URL;
+        } else if (duplicateFeedForUrl != null && currentFeed == null) {
+            return MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, duplicateFeedForUrl);
+        } else if (!pollingInterval.matches("[0-9]+")) {
+            return Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_DIGITS_ONLY;
+        }
+
+        return null;
+    }
+
+    private static URI parseUriQuietly(String uriString) {
+        try {
+            return new URI(uriString);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    private static boolean isUriProtocolSupported(URI uri, List<String> protocols) {
+        if (uri == null) {
+            return false;
+        }
+        for (String protocol : protocols) {
+            if (StringUtils.equalsIgnoreCase(protocol, uri.getScheme())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static Optional<String> getFeedId(String url, NewsRcpPreferences preferences) {
+        for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
+            if (feed.getUrl().toString().equals(url)) {
+                return Optional.of(feed.getId());
+            }
+        }
+        return Optional.absent();
+    }
+
+    private static boolean isUrlValid(String urlString) {
+        return urlString.matches(
+                "(@)?(http://)?(https://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?"); //$NON-NLS-1$
     }
 
 }
