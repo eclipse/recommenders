@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.news.rcp.notifications;
 
 import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createFeedMessageReadEvent;
 
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,6 @@ import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.MessageUtils;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
-import org.eclipse.recommenders.rcp.utils.BrowserUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,6 +32,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
 
 import com.google.common.eventbus.EventBus;
 
@@ -91,7 +93,13 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
                 link.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
-                        BrowserUtils.openInExternalBrowser(e.text);
+                        try {
+                            IWebBrowser defaultBrowser = PlatformUI.getWorkbench().getBrowserSupport()
+                                    .createBrowser(null);
+                            defaultBrowser.openURL(new URL(message.getUrl().toExternalForm()));
+                        } catch (Exception ex) {
+                            // via BrowserUtils: Ignore failure; this method is best effort.
+                        }
                         eventBus.post(createFeedMessageReadEvent(message.getId()));
                     }
                 });

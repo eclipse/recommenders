@@ -11,6 +11,7 @@ import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createFeedMe
 import static org.eclipse.recommenders.internal.news.rcp.MessageUtils.*;
 import static org.eclipse.recommenders.internal.news.rcp.menus.MarkAsReadAction.*;
 
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,8 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
-import org.eclipse.recommenders.rcp.utils.BrowserUtils;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -102,7 +104,12 @@ public class NewsMenuListener implements IMenuListener {
 
                 @Override
                 public void run() {
-                    BrowserUtils.openInExternalBrowser(message.getUrl());
+                    try {
+                        IWebBrowser defaultBrowser = PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null);
+                        defaultBrowser.openURL(new URL(message.getUrl().toExternalForm()));
+                    } catch (Exception e) {
+                        // via BrowserUtils: Ignore failure; this method is best effort.
+                    }
                     eventBus.post(createFeedMessageReadEvent(message.getId()));
                 }
             };
