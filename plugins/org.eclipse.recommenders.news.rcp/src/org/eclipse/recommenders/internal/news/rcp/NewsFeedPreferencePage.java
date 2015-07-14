@@ -40,9 +40,11 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.common.base.Predicate;
@@ -69,8 +71,6 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
     protected void createFieldEditors() {
         enabledEditor = new BooleanFieldEditor(Constants.PREF_NEWS_ENABLED, Messages.FIELD_LABEL_NEWS_ENABLED, 0,
                 getFieldEditorParent());
-        addField(new BooleanFieldEditor(Constants.PREF_NOTIFICATION_ENABLED, Messages.FIELD_LABEL_NOTIFICATION_ENABLED,
-                getFieldEditorParent()));
         addField(enabledEditor);
         pollingIntervalEditor = new IntegerFieldEditor(Constants.PREF_POLLING_INTERVAL,
                 Messages.FIELD_LABEL_POLLING_INTERVAL, getFieldEditorParent(), 4);
@@ -82,6 +82,9 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
 
         feedEditor = new FeedEditor(Constants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS, bottomGroup);
         addField(feedEditor);
+
+        addField(new NotificationEnablementEditor(Constants.PREF_NOTIFICATION_ENABLED,
+                Messages.FIELD_LABEL_NOTIFICATION_ENABLED, getFieldEditorParent()));
     }
 
     @Override
@@ -418,6 +421,52 @@ public class NewsFeedPreferencePage extends FieldEditorPreferencePage implements
                 descriptor.setEnabled(tableViewer.getChecked(descriptor));
             }
             return descriptors;
+        }
+    }
+
+    private final class NotificationEnablementEditor extends FieldEditor {
+
+        public NotificationEnablementEditor(String name, String labelText, Composite parent) {
+            super(name, labelText, parent);
+        }
+
+        @Override
+        protected void adjustForNumColumns(int numColumns) {
+        }
+
+        @Override
+        protected void doFillIntoGrid(Composite parent, int numColumns) {
+            Link contentAssistLink = new Link(parent, SWT.NONE | SWT.WRAP);
+            contentAssistLink.setLayoutData(GridDataFactory.swtDefaults().span(2, 1).align(SWT.FILL, SWT.BEGINNING)
+                    .grab(true, false).hint(super.convertHorizontalDLUsToPixels(contentAssistLink,
+                            IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+                    .create());
+            contentAssistLink.setText(Messages.PREFPAGE_NOTIFICATION_ENABLEMENT);
+            contentAssistLink.addSelectionListener(new SelectionAdapter() {
+
+                @Override
+                public void widgetSelected(SelectionEvent event) {
+                    PreferencesUtil.createPreferenceDialogOn(getShell(),
+                            "org.eclipse.mylyn.commons.notifications.preferencePages.Notifications", null, null); //$NON-NLS-1$
+                }
+            });
+        }
+
+        @Override
+        protected void doLoad() {
+        }
+
+        @Override
+        protected void doLoadDefault() {
+        }
+
+        @Override
+        protected void doStore() {
+        }
+
+        @Override
+        public int getNumberOfControls() {
+            return 0;
         }
     }
 }
