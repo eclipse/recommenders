@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.recommenders.internal.news.rcp.notifications.CommonImages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -50,10 +51,26 @@ public class FeedDialog extends TitleAreaDialog {
     }
 
     @Override
+    protected void configureShell(Shell newShell) {
+        super.configureShell(newShell);
+        if (feed != null) {
+            newShell.setText(Messages.FEED_DIALOG_TITLE_EDIT);
+        } else {
+            newShell.setText(Messages.FEED_DIALOG_TITLE_NEW);
+        }
+    }
+
+    @Override
     public void create() {
         super.create();
-        setTitle(Messages.FEED_DIALOG_TITLE);
+        if (feed != null) {
+            setTitle(Messages.FEED_DIALOG_TITLE_EDIT);
+        } else {
+            setTitle(Messages.FEED_DIALOG_TITLE_NEW);
+        }
+        setMessage(Messages.FEED_DIALOG_DESCRIPTION);
         setHelpAvailable(false);
+        setTitleImage(CommonImages.RSS_DIALOG_TITLE.createImage());
         super.getButton(OK).setEnabled(false);
     }
 
@@ -145,7 +162,7 @@ public class FeedDialog extends TitleAreaDialog {
     @VisibleForTesting
     static String validateFeedDialog(FeedDescriptor currentFeed, String name, String url, String pollingInterval,
             NewsRcpPreferences preferences) {
-        String duplicateFeedForUrl = getFeedId(url, preferences).orNull();
+        String duplicateFeedForUrl = getFeedName(url, preferences).orNull();
         if (Strings.isNullOrEmpty(name)) {
             return Messages.FEED_DIALOG_ERROR_EMPTY_NAME;
         } else if (Strings.isNullOrEmpty(url)) {
@@ -183,10 +200,10 @@ public class FeedDialog extends TitleAreaDialog {
         return false;
     }
 
-    private static Optional<String> getFeedId(String url, NewsRcpPreferences preferences) {
+    private static Optional<String> getFeedName(String url, NewsRcpPreferences preferences) {
         for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
             if (feed.getUrl().toString().equals(url)) {
-                return Optional.of(feed.getId());
+                return Optional.of(feed.getName());
             }
         }
         return Optional.absent();

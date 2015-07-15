@@ -32,6 +32,8 @@ public class CommonImages {
 
     public static final ImageDescriptor RSS_INACTIVE = create(T_EVIEW, "rss-inactive.gif"); //$NON-NLS-1$ ;
 
+    public static final ImageDescriptor RSS_DIALOG_TITLE = create(T_EVIEW, "rss-dialog-title.gif"); //$NON-NLS-1$
+
     private static ImageDescriptor create(String prefix, String name) {
         try {
             return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
