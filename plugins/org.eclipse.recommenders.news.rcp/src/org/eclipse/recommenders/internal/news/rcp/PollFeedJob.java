@@ -53,7 +53,6 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         Preconditions.checkNotNull(feeds);
         this.environment = new NotificationEnvironment();
         this.feeds.addAll(feeds);
-        setSystem(true);
         setPriority(DECORATE);
         setRule(new MutexRule());
     }
@@ -61,6 +60,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         URL url = null;
+        monitor.beginTask(Messages.POLL_FEED_JOB_TASK_NAME, feeds.size());
         for (FeedDescriptor feed : feeds) {
             try {
                 if (monitor.isCanceled()) {
@@ -72,10 +72,12 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 updateGroupedMessages(connection, monitor, feed);
                 connection.disconnect();
                 pollDates.put(feed, new Date());
+                monitor.worked(1);
             } catch (IOException e) {
                 Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
             }
         }
+        monitor.done();
         return Status.OK_STATUS;
     }
 
