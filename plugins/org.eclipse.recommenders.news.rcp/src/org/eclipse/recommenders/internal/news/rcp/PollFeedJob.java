@@ -22,6 +22,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
@@ -53,7 +54,6 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         Preconditions.checkNotNull(feeds);
         this.environment = new NotificationEnvironment();
         this.feeds.addAll(feeds);
-        setSystem(true);
         setPriority(DECORATE);
         setRule(new MutexRule());
     }
@@ -61,6 +61,8 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         URL url = null;
+        SubMonitor sub = SubMonitor.convert(monitor, feeds.size() * 100);
+        sub.beginTask(Messages.POLL_FEED_JOB_TASK_NAME, feeds.size() * 100);
         for (FeedDescriptor feed : feeds) {
             try {
                 if (monitor.isCanceled()) {
@@ -69,9 +71,10 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
                 url = connection.getURL();
                 connection.connect();
-                updateGroupedMessages(connection, monitor, feed);
+                updateGroupedMessages(connection, sub.newChild(50), feed);
                 connection.disconnect();
                 pollDates.put(feed, new Date());
+                sub.worked(50);
             } catch (IOException e) {
                 Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
             }
@@ -86,8 +89,10 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     private List<? extends IFeedMessage> readMessages(InputStream in, IProgressMonitor monitor, String eventId)
             throws IOException {
+        SubMonitor sub = SubMonitor.convert(monitor, 100);
+        sub.beginTask(null, 100);
         FeedReader reader = new FeedReader(eventId, environment);
-        reader.parse(in, monitor);
+        reader.parse(in, sub);
         return FluentIterable.from(reader.getEntries()).transform(new Function<FeedEntry, IFeedMessage>() {
 
             @Override
@@ -109,13 +114,16 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     }
 
     private void updateGroupedMessages(HttpURLConnection connection, IProgressMonitor monitor, FeedDescriptor feed) {
+        SubMonitor sub = SubMonitor.convert(monitor, 100);
+        sub.beginTask(null, 100);
         try {
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK || monitor.isCanceled()) {
                 return;
             }
             try (InputStream in = new BufferedInputStream(connection.getInputStream())) {
-                List<IFeedMessage> messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
+                List<IFeedMessage> messages = Lists.newArrayList(readMessages(in, sub.newChild(80), feed.getId()));
                 groupedMessages.put(feed, messages);
+                sub.worked(20);
             }
         } catch (IOException e) {
             Logs.log(LogMessages.ERROR_FETCHING_MESSAGES, e, feed.getUrl());
