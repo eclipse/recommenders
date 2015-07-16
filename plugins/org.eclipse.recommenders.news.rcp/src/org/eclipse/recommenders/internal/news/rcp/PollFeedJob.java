@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.mylyn.commons.notifications.core.NotificationEnvironment;
@@ -53,7 +55,6 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         Preconditions.checkNotNull(feeds);
         this.environment = new NotificationEnvironment();
         this.feeds.addAll(feeds);
-        setSystem(true);
         setPriority(DECORATE);
         setRule(new MutexRule());
     }
@@ -61,6 +62,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         URL url = null;
+        SubMonitor sub = SubMonitor.convert(monitor, Messages.POLL_FEED_JOB_TASK_NAME, feeds.size() * 100);
         for (FeedDescriptor feed : feeds) {
             try {
                 if (monitor.isCanceled()) {
@@ -69,9 +71,11 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
                 url = connection.getURL();
                 connection.connect();
-                updateGroupedMessages(connection, monitor, feed);
+                sub.worked(10);
+                updateGroupedMessages(connection, sub.newChild(80), feed);
                 connection.disconnect();
                 pollDates.put(feed, new Date());
+                sub.worked(10);
             } catch (IOException e) {
                 Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
             }
@@ -82,6 +86,23 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     public boolean belongsTo(Object job) {
         return Objects.equals(Constants.POLL_FEED_JOB_FAMILY, job);
+    }
+
+    private void updateGroupedMessages(HttpURLConnection connection, IProgressMonitor monitor, FeedDescriptor feed) {
+        SubMonitor sub = SubMonitor.convert(monitor,
+                MessageFormat.format(Messages.POLL_FEED_JOB_SUBTASK_POLLING_FEED, feed.getName()), 100);
+        try {
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK || monitor.isCanceled()) {
+                sub.setWorkRemaining(0);
+                return;
+            }
+            try (InputStream in = new BufferedInputStream(connection.getInputStream())) {
+                List<IFeedMessage> messages = Lists.newArrayList(readMessages(in, sub.newChild(100), feed.getId()));
+                groupedMessages.put(feed, messages);
+            }
+        } catch (IOException e) {
+            Logs.log(LogMessages.ERROR_FETCHING_MESSAGES, e, feed.getUrl());
+        }
     }
 
     private List<? extends IFeedMessage> readMessages(InputStream in, IProgressMonitor monitor, String eventId)
@@ -106,20 +127,6 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     public Map<FeedDescriptor, Date> getPollDates() {
         return pollDates;
-    }
-
-    private void updateGroupedMessages(HttpURLConnection connection, IProgressMonitor monitor, FeedDescriptor feed) {
-        try {
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK || monitor.isCanceled()) {
-                return;
-            }
-            try (InputStream in = new BufferedInputStream(connection.getInputStream())) {
-                List<IFeedMessage> messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
-                groupedMessages.put(feed, messages);
-            }
-        } catch (IOException e) {
-            Logs.log(LogMessages.ERROR_FETCHING_MESSAGES, e, feed.getUrl());
-        }
     }
 
     class MutexRule implements ISchedulingRule {
