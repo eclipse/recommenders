@@ -23,9 +23,9 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.recommenders.internal.news.rcp.BrowserUtils;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
+import org.eclipse.recommenders.internal.news.rcp.StatusFeedMessage;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
@@ -59,28 +59,12 @@ public class NewsMenuListener implements IMenuListener {
         manager.add(new Separator());
         manager.add(newMarkAllAsReadAction(eventBus));
         manager.add(new Separator());
-        manager.add(newPreferencesAction());
+        manager.add(new PreferencesAction());
     }
 
     private void addMarkAsReadAction(FeedDescriptor feed, MenuManager menu) {
         menu.add(new Separator());
         menu.add(newMarkFeedAsReadAction(eventBus, feed));
-    }
-
-    private Action newPreferencesAction() {
-        return new Action() {
-            @Override
-            public void run() {
-                PreferencesUtil
-                        .createPreferenceDialogOn(null, "org.eclipse.recommenders.news.rcp.preferencePage", null, null) //$NON-NLS-1$
-                        .open();
-            }
-
-            @Override
-            public String getText() {
-                return Messages.LABEL_PREFERENCES;
-            }
-        };
     }
 
     private void groupEntries(MenuManager menu, List<IFeedMessage> messages) {
@@ -90,7 +74,9 @@ public class NewsMenuListener implements IMenuListener {
                 Messages.LABEL_THIS_YEAR, Messages.LABEL_OLDER_ENTRIES, Messages.LABEL_UNDETERMINED_ENTRIES);
         for (int i = 0; i <= UNDETERMINED; i++) {
             if (!groupedMessages.get(i).isEmpty()) {
-                addLabel(menu, labels.get(i));
+                if (!(groupedMessages.get(i).get(0) instanceof StatusFeedMessage)) {
+                    addLabel(menu, labels.get(i));
+                }
                 addMessages(menu, groupedMessages.get(i));
             }
         }
@@ -110,6 +96,10 @@ public class NewsMenuListener implements IMenuListener {
                 action.setText(MessageFormat.format(Messages.UNREAD_MESSAGE, message.getTitle()));
             } else {
                 action.setText(MessageFormat.format(Messages.READ_MESSAGE_OR_FEED, message.getTitle()));
+            }
+            if (message instanceof StatusFeedMessage) {
+                action.setEnabled(false);
+                action.setText(message.getTitle());
             }
             menu.add(action);
         }
