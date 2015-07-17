@@ -6,7 +6,11 @@
 	<parent>
 		<groupId>org.eclipse.recommenders</groupId>
 		<artifactId>tests</artifactId>
+<<<<<<< HEAD   (1d3884 [releng] Updated documentation how to perform a maintenance )
 		<version>2.3.0-SNAPSHOT</version>
+=======
+		<version>2.2.3-SNAPSHOT</version>
+>>>>>>> BRANCH (262d91 [utils] User should have the option of specifying BrowserDia)
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
