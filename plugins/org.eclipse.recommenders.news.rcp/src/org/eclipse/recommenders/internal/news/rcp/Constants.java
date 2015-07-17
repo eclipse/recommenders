@@ -33,5 +33,7 @@ public final class Constants {
     public static final String ATTRIBUTE_POLLING_INTERVAL = "pollingInterval"; //$NON-NLS-1$
     public static final String ATTRIBUTE_ICON = "icon"; //$NON-NLS-1$
     public static final String SYSPROP_ECLIPSE_BUILD_ID = "eclipse.buildId"; //$NON-NLS-1$
+    public static final String FEED_NOT_POLLED_YET = "feedNotPolledYet"; //$NON-NLS-1$
+    public static final String FEED_NOT_FOUND_AT_URL = "feedNotFoundAtURL"; //$NON-NLS-1$
 
 }

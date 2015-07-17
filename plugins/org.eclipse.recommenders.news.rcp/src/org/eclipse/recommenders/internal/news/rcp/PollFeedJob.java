@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -58,6 +59,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         setRule(new MutexRule());
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         URL url = null;
@@ -73,6 +75,10 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 connection.disconnect();
                 pollDates.put(feed, new Date());
             } catch (IOException e) {
+                groupedMessages.put(feed,
+                        (List) Lists.newArrayList(new FeedMessage(Constants.FEED_NOT_FOUND_AT_URL, null, "",
+                                MessageFormat.format(Messages.LOG_ERROR_CONNECTING_URL, feed.getUrl()),
+                                feed.getUrl())));
                 Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
             }
         }
