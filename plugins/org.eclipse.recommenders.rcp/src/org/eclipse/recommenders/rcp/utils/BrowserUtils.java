@@ -14,6 +14,7 @@ import java.net.URL;
 
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
@@ -74,6 +75,12 @@ public final class BrowserUtils {
 
     public static void openInDialogBrowser(String url) {
         BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), url);
+        browserDialog.open();
+    }
+
+    public static void openInDialogBrowser(String url, Point size) {
+        BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), url,
+                size);
         browserDialog.open();
     }
 

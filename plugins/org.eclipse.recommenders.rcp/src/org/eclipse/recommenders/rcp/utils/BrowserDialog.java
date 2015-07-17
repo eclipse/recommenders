@@ -15,6 +15,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -24,10 +25,16 @@ public class BrowserDialog extends Dialog {
     private static final Composite NULL_COMPOSITE = null;
 
     private final String url;
+    private final Point size;
 
     protected BrowserDialog(Shell parentShell, String url) {
+        this(parentShell, url, new Point(1000, 500));
+    }
+
+    protected BrowserDialog(Shell parentShell, String url, Point size) {
         super(parentShell);
         this.url = url;
+        this.size = size;
     }
 
     @Override
@@ -43,7 +50,7 @@ public class BrowserDialog extends Dialog {
         GridDataFactory.swtDefaults().grab(true, true).applyTo(container);
 
         Browser browser = new Browser(container, SWT.NONE);
-        GridDataFactory.swtDefaults().align(SWT.FILL, SWT.FILL).hint(1000, 500).grab(true, true).applyTo(browser);
+        GridDataFactory.swtDefaults().align(SWT.FILL, SWT.FILL).hint(size.x, size.y).grab(true, true).applyTo(browser);
 
         browser.setUrl(url);
         browser.setVisible(true);
