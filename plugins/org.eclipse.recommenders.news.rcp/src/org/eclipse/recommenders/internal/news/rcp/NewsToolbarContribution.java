@@ -8,6 +8,7 @@
 package org.eclipse.recommenders.internal.news.rcp;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -38,12 +40,14 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     private final INewsService service;
     private final NewsMenuListener newsMenuListener;
+    private final NewsRcpPreferences preferences;
     private UpdatingNewsAction updatingNewsAction;
     private MenuManager menuManager;
 
     @Inject
-    public NewsToolbarContribution(INewsService service, EventBus eventBus) {
+    public NewsToolbarContribution(INewsService service, EventBus eventBus, NewsRcpPreferences preferences) {
         this.service = service;
+        this.preferences = preferences;
         eventBus.register(this);
         newsMenuListener = new NewsMenuListener(eventBus);
     }
@@ -101,15 +105,21 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             }
         }
 
+        @SuppressWarnings("unchecked")
         private void setNoAvailableNews() {
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
             clearMenu();
             messages = service.getMessages(Constants.COUNT_PER_FEED);
-            if (!messages.isEmpty() && !MessageUtils.containsUnreadMessages(messages)) {
-                clearMenu();
-                setNewsMenu(messages);
+            HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
+            for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
+                StatusFeedMessage message = new StatusFeedMessage(Constants.FEED_NOT_POLLED_YET, "", //$NON-NLS-1$
+                        Messages.FEED_NOT_POLLED_YET);
+                message.setRead(true);
+                groupedMessages.put(feed, (List) Lists.newArrayList(message));
             }
+            newsMenuListener.setMessages(groupedMessages);
+            menuManager.addMenuListener(newsMenuListener);
         }
 
         private void setAvailableNews() {
