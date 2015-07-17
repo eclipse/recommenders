@@ -7,7 +7,9 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import java.net.URL;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,7 @@ import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
+import org.eclipse.recommenders.internal.news.rcp.menus.NoNewsMenuListener;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.swt.SWT;
@@ -30,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -38,12 +42,15 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     private final INewsService service;
     private final NewsMenuListener newsMenuListener;
+    private final NoNewsMenuListener noNewsMenuListener = new NoNewsMenuListener();
+    private final NewsRcpPreferences preferences;
     private UpdatingNewsAction updatingNewsAction;
     private MenuManager menuManager;
 
     @Inject
-    public NewsToolbarContribution(INewsService service, EventBus eventBus) {
+    public NewsToolbarContribution(INewsService service, EventBus eventBus, NewsRcpPreferences preferences) {
         this.service = service;
+        this.preferences = preferences;
         eventBus.register(this);
         newsMenuListener = new NewsMenuListener(eventBus);
     }
@@ -109,7 +116,21 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             if (!messages.isEmpty() && !MessageUtils.containsUnreadMessages(messages)) {
                 clearMenu();
                 setNewsMenu(messages);
+                return;
             }
+            HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
+            for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
+                try {
+                    FeedMessage message = new FeedMessage(Constants.FEED_NOT_POLLED_YET, null, "", //$NON-NLS-1$
+                            Messages.FEED_NOT_POLLED_YET, new URL("http://eclipse.org")); //$NON-NLS-1$
+                    message.setRead(true);
+                    groupedMessages.put(feed, (List) Lists.newArrayList(message));
+                } catch (Exception e) {
+                    // never happen
+                }
+            }
+            noNewsMenuListener.setMessages(groupedMessages);
+            menuManager.addMenuListener(noNewsMenuListener);
         }
 
         private void setAvailableNews() {
@@ -127,6 +148,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         private void clearMenu() {
             menuManager.setRemoveAllWhenShown(true);
             menuManager.removeMenuListener(newsMenuListener);
+            menuManager.removeMenuListener(noNewsMenuListener);
         }
 
         private void setNewsMenu(Map<FeedDescriptor, List<IFeedMessage>> messages) {
