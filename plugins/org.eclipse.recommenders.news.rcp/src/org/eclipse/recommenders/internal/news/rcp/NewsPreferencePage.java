@@ -98,9 +98,9 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
     @Override
     public boolean performOk() {
         IPreferenceStore store = getPreferenceStore();
-        boolean result = super.performOk();
         doPerformOK(store.getBoolean(Constants.PREF_NEWS_ENABLED), enabledEditor.getBooleanValue(),
                 newsRcpPreferences.getFeedDescriptors(), feedEditor.getValue());
+        boolean result = super.performOk();
         return result;
     }
 
