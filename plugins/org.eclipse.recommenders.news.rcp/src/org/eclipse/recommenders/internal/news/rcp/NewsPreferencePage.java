@@ -98,14 +98,20 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
     @Override
     public boolean performOk() {
         IPreferenceStore store = getPreferenceStore();
-        boolean result = super.performOk();
-        doPerformOK(store.getBoolean(Constants.PREF_NEWS_ENABLED), enabledEditor.getBooleanValue(),
+        boolean[] actions = doPerformOK(store.getBoolean(Constants.PREF_NEWS_ENABLED), enabledEditor.getBooleanValue(),
                 newsRcpPreferences.getFeedDescriptors(), feedEditor.getValue());
+        boolean result = super.performOk();
+        if (actions[0]) {
+            service.start();
+        }
+        if (actions[1]) {
+            service.forceStop();
+        }
         return result;
     }
 
     @VisibleForTesting
-    void doPerformOK(boolean oldEnabledValue, boolean newEnabledValue, List<FeedDescriptor> oldFeedValue,
+    boolean[] doPerformOK(boolean oldEnabledValue, boolean newEnabledValue, List<FeedDescriptor> oldFeedValue,
             List<FeedDescriptor> newFeedValue) {
         boolean forceStop = false;
         boolean forceStart = false;
@@ -128,19 +134,15 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
             if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
                 service.removeFeed(newFeed);
             }
-            for (FeedDescriptor feed : newFeedValue) {
-                if (!oldFeedValue.contains(feed)) {
-                    forceStart = true;
-                }
+        }
+
+        for (FeedDescriptor feed : newFeedValue) {
+            if (!oldFeedValue.contains(feed)) {
+                forceStart = true;
             }
         }
 
-        if (forceStart) {
-            service.start();
-        }
-        if (forceStop) {
-            service.forceStop();
-        }
+        return new boolean[] { forceStart, forceStop };
     }
 
     private final class FeedEditor extends FieldEditor {

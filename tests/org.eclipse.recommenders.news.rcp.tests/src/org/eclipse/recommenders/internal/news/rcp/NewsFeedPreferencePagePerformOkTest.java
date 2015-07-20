@@ -8,6 +8,8 @@
 package org.eclipse.recommenders.internal.news.rcp;
 
 import static org.eclipse.recommenders.internal.news.rcp.TestUtils.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -34,17 +36,17 @@ public class NewsFeedPreferencePagePerformOkTest {
     @Test
     public void testWhenFeedIsAddedThenServiceStarts() {
         NewsPreferencePage sut = new NewsPreferencePage(service, preferences);
-        sut.doPerformOK(ENABLED, ENABLED, storedFeeds, dirtyFeeds);
+        boolean[] expected = sut.doPerformOK(ENABLED, ENABLED, storedFeeds, dirtyFeeds);
 
-        verify(service).start();
+        assertThat(expected[0], is(true));
     }
 
     @Test
     public void testWhenPluginIsDisabledServiceStops() {
         NewsPreferencePage sut = new NewsPreferencePage(service, preferences);
-        sut.doPerformOK(ENABLED, DISABLED, storedFeeds, dirtyFeeds);
+        boolean[] expected = sut.doPerformOK(ENABLED, DISABLED, storedFeeds, dirtyFeeds);
 
-        verify(service).forceStop();
+        assertThat(expected[1], is(true));
     }
 
     @Test
@@ -58,9 +60,9 @@ public class NewsFeedPreferencePagePerformOkTest {
     @Test
     public void testWhenPluginIsEnabledServiceStarts() {
         NewsPreferencePage sut = new NewsPreferencePage(service, preferences);
-        sut.doPerformOK(DISABLED, ENABLED, storedFeeds, dirtyFeeds);
+        boolean[] expected = sut.doPerformOK(DISABLED, ENABLED, storedFeeds, dirtyFeeds);
 
-        verify(service).start();
+        assertThat(expected[0], is(true));
     }
 
     @Test
@@ -74,9 +76,9 @@ public class NewsFeedPreferencePagePerformOkTest {
     @Test
     public void testServiceStartsWhenFeedIsEnabled() {
         NewsPreferencePage sut = new NewsPreferencePage(service, preferences);
-        sut.doPerformOK(ENABLED, ENABLED, storedDisabledFeeds, storedFeeds);
+        boolean[] expected = sut.doPerformOK(ENABLED, ENABLED, storedDisabledFeeds, storedFeeds);
 
-        verify(service).start();
+        assertThat(expected[0], is(true));
     }
 
     @Test
