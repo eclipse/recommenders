@@ -72,15 +72,26 @@ public final class BrowserUtils {
         });
     }
 
-    public static void openInDialogBrowser(String url) {
-        BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), url);
-        browserDialog.open();
+    public static void openInDialogBrowser(final String url) {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+                        url);
+                browserDialog.open();
+            }
+        });
     }
 
-    public static void openInDialogBrowser(String url, int width, int height) {
-        BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), url,
-                width, height);
-        browserDialog.open();
+    public static void openInDialogBrowser(final String url, final int width, final int height) {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+                        url, width, height);
+                browserDialog.open();
+            }
+        });
     }
 
     public static void openInDialogBrowser(URL url) {
