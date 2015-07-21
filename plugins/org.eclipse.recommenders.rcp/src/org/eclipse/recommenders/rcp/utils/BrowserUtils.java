@@ -15,6 +15,7 @@ import java.net.URL;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.program.Program;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
@@ -72,15 +73,28 @@ public final class BrowserUtils {
         });
     }
 
-    public static void openInDialogBrowser(String url) {
-        BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), url);
-        browserDialog.open();
+    public static void openInDialogBrowser(final String url) {
+        final Display display = PlatformUI.getWorkbench().getDisplay();
+        display.asyncExec(new Runnable() {
+
+            @Override
+            public void run() {
+                BrowserDialog browserDialog = new BrowserDialog(display.getActiveShell(), url);
+                browserDialog.open();
+            }
+        });
     }
 
-    public static void openInDialogBrowser(String url, int width, int height) {
-        BrowserDialog browserDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), url,
-                width, height);
-        browserDialog.open();
+    public static void openInDialogBrowser(final String url, final int width, final int height) {
+        final Display display = PlatformUI.getWorkbench().getDisplay();
+        display.asyncExec(new Runnable() {
+
+            @Override
+            public void run() {
+                BrowserDialog browserDialog = new BrowserDialog(display.getActiveShell(), url, width, height);
+                browserDialog.open();
+            }
+        });
     }
 
     public static void openInDialogBrowser(URL url) {
