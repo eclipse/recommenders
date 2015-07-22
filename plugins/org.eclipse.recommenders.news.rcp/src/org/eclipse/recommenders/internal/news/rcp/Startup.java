@@ -7,8 +7,15 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.ui.IStartup;
 
@@ -26,9 +33,19 @@ public class Startup implements IStartup {
 
     @Override
     public void earlyStartup() {
-        if (preferences.isEnabled()) {
-            service.start();
-        }
+        final Job job = new Job(Messages.STARTUP_JOB_NAME) {
+
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                if (preferences.isEnabled()) {
+                    service.start();
+                }
+                return Status.OK_STATUS;
+            }
+        };
+        job.setSystem(true);
+        job.setPriority(Job.DECORATE);
+        job.schedule(TimeUnit.MINUTES.toMillis(preferences.getStartupDelay()));
     }
 
 }
