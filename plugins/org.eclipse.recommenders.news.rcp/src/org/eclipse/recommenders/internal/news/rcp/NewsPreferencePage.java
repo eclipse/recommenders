@@ -59,7 +59,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
     private final NewsRcpPreferences newsRcpPreferences;
     private BooleanFieldEditor enabledEditor;
     private FeedEditor feedEditor;
-    private IntegerFieldEditor pollingIntervalEditor;
+    private IntegerFieldEditor startupEditor;
 
     @Inject
     public NewsPreferencePage(INewsService service, NewsRcpPreferences newsRcpPreferences) {
@@ -73,9 +73,9 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
         enabledEditor = new BooleanFieldEditor(Constants.PREF_NEWS_ENABLED, Messages.FIELD_LABEL_NEWS_ENABLED, 0,
                 getFieldEditorParent());
         addField(enabledEditor);
-        pollingIntervalEditor = new IntegerFieldEditor(Constants.PREF_POLLING_INTERVAL,
-                Messages.FIELD_LABEL_POLLING_INTERVAL, getFieldEditorParent(), 4);
-        addField(pollingIntervalEditor);
+        startupEditor = new IntegerFieldEditor(Constants.PREF_STARTUP_DELAY, Messages.FIELD_LABEL_STARTUP_DELAY,
+                getFieldEditorParent(), 4);
+        addField(startupEditor);
 
         final Composite bottomGroup = new Composite(getFieldEditorParent(), SWT.NONE);
         GridDataFactory.fillDefaults().grab(true, true).span(2, 1).applyTo(bottomGroup);
