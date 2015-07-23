@@ -30,6 +30,7 @@ public final class Messages extends NLS {
     public static String FIELD_LABEL_NEWS_ENABLED;
     public static String FIELD_LABEL_NOTIFICATION_ENABLED;
     public static String FIELD_LABEL_POLLING_INTERVAL;
+    public static String FIELD_LABEL_STARTUP_DELAY;
     public static String FEED_DIALOG_ERROR_EMPTY_NAME;
     public static String FEED_DIALOG_ERROR_EMPTY_URL;
     public static String FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED;
@@ -39,8 +40,8 @@ public final class Messages extends NLS {
     public static String FEED_DIALOG_DESCRIPTION;
 
     public static String POLL_FEED_JOB_SCHEDULER_NAME;
+    public static String STARTUP_JOB_NAME;
     public static String POLL_FEED_JOB_NAME;
-    public static String POLL_FEED_JOB_TASK_NAME;
     public static String POLL_FEED_JOB_SUBTASK_POLLING_FEED;
     public static String JOB_NAME_CLOSE;
     public static String JOB_NAME_FADE;
