@@ -122,7 +122,8 @@ public class NewsPreferencePageUITest {
 
         assertThat(
                 bot.text(" "
-                        + MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, INVALID_FEED_PROTOCOL)),
+                        + MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, INVALID_FEED_PROTOCOL,
+                                FeedDialog.ACCEPTED_PROTOCOLS.toString().replace("[", "").replace("]", ""))),
                 is(notNullValue()));
         assertThat(bot.button("OK").isEnabled(), is(false)); //$NON-NLS-1$
     }
