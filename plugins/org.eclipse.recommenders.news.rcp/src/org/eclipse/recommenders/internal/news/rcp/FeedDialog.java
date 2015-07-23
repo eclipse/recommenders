@@ -32,7 +32,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 public class FeedDialog extends TitleAreaDialog {
-    private static final List<String> ACCEPTED_PROTOCOLS = ImmutableList.of("http", "https"); //$NON-NLS-1$ , //$NON-NLS-2$
+    static final List<String> ACCEPTED_PROTOCOLS = ImmutableList.of("http", "https"); //$NON-NLS-1$ , //$NON-NLS-2$
     private final List<FeedDescriptor> existingDescriptors;
     private FeedDescriptor feed;
     private Text nameValue;
@@ -171,7 +171,9 @@ public class FeedDialog extends TitleAreaDialog {
         } else if (parseUriQuietly(url).orNull() == null) {
             return Messages.FEED_DIALOG_ERROR_INVALID_URL;
         } else if (!isUriProtocolSupported(parseUriQuietly(url).orNull(), ACCEPTED_PROTOCOLS)) {
-            return MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, url);
+            return MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, url,
+                    ACCEPTED_PROTOCOLS.toString().replace("[", "").replace("]", "")); //$NON-NLS-1$ , //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                                                                                      // $NON-NLS-1$ , ,
         } else if (duplicateFeed != null) {
             return MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, duplicateFeed.getName());
         } else if (!pollingInterval.matches("[0-9]+")) { //$NON-NLS-1$
