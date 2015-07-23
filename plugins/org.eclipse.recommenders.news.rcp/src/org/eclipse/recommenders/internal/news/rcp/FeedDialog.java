@@ -171,7 +171,8 @@ public class FeedDialog extends TitleAreaDialog {
         } else if (parseUriQuietly(url).orNull() == null) {
             return Messages.FEED_DIALOG_ERROR_INVALID_URL;
         } else if (!isUriProtocolSupported(parseUriQuietly(url).orNull(), ACCEPTED_PROTOCOLS)) {
-            return MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, url);
+            return MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, url,
+                    ACCEPTED_PROTOCOLS.toString().replace("[", "").replace("]", ""));
         } else if (duplicateFeed != null) {
             return MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, duplicateFeed.getName());
         } else if (!pollingInterval.matches("[0-9]+")) { //$NON-NLS-1$
