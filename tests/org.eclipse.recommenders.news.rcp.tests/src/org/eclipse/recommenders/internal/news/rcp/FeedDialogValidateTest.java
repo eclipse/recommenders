@@ -61,7 +61,8 @@ public class FeedDialogValidateTest {
         scenarios.add(new Object[] { null, VALID_FEED_NAME, EMPTY_STRING, EMPTY_STRING,
                 Messages.FEED_DIALOG_ERROR_EMPTY_URL });
         scenarios.add(new Object[] { null, VALID_FEED_NAME, INVALID_FEED_PROTOCOL, EMPTY_STRING,
-                MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, INVALID_FEED_PROTOCOL) });
+                MessageFormat.format(Messages.FEED_DIALOG_ERROR_PROTOCOL_UNSUPPORTED, INVALID_FEED_PROTOCOL,
+                        FeedDialog.ACCEPTED_PROTOCOLS.toString().replace("[", "").replace("]", "")) });
         scenarios.add(new Object[] { null, VALID_FEED_NAME, INVALID_FEED_URL, EMPTY_STRING,
                 Messages.FEED_DIALOG_ERROR_INVALID_URL });
         scenarios.add(new Object[] { null, VALID_FEED_NAME, DUPLICATE_FEED_URL, EMPTY_STRING,
