@@ -79,8 +79,8 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
         feedEditor = new FeedEditor(Constants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS, bottomGroup);
         addField(feedEditor);
 
-        addField(new NotificationEnablementEditor(Constants.PREF_NOTIFICATION_ENABLED,
-                Messages.FIELD_LABEL_NOTIFICATION_ENABLED, getFieldEditorParent()));
+        addField(new NotificationEnablementEditor(Constants.PREF_NOTIFICATION_ENABLED, "", getFieldEditorParent())); //$NON-NLS-1$
+        addField(new WebBrowserLinkEditor("", "", getFieldEditorParent())); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -452,6 +452,52 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                 public void widgetSelected(SelectionEvent event) {
                     PreferencesUtil.createPreferenceDialogOn(getShell(),
                             "org.eclipse.mylyn.commons.notifications.preferencePages.Notifications", null, null); //$NON-NLS-1$
+                }
+            });
+        }
+
+        @Override
+        protected void doLoad() {
+        }
+
+        @Override
+        protected void doLoadDefault() {
+        }
+
+        @Override
+        protected void doStore() {
+        }
+
+        @Override
+        public int getNumberOfControls() {
+            return 0;
+        }
+    }
+
+    private final class WebBrowserLinkEditor extends FieldEditor {
+
+        public WebBrowserLinkEditor(String name, String labelText, Composite parent) {
+            super(name, labelText, parent);
+        }
+
+        @Override
+        protected void adjustForNumColumns(int numColumns) {
+        }
+
+        @Override
+        protected void doFillIntoGrid(Composite parent, int numColumns) {
+            Link notificationsLink = new Link(parent, SWT.NONE | SWT.WRAP);
+            notificationsLink.setLayoutData(GridDataFactory.swtDefaults().span(2, 1).align(SWT.FILL, SWT.BEGINNING)
+                    .grab(true, false).hint(super.convertHorizontalDLUsToPixels(notificationsLink,
+                            IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+                    .create());
+            notificationsLink.setText(Messages.PREFPAGE_WEB_BROWSER_SETTINGS);
+            notificationsLink.addSelectionListener(new SelectionAdapter() {
+
+                @Override
+                public void widgetSelected(SelectionEvent event) {
+                    PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.ui.browser.preferencePage", //$NON-NLS-1$
+                            null, null);
                 }
             });
         }
