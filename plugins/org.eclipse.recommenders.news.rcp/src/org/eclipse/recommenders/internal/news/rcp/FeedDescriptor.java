@@ -12,6 +12,7 @@ import static org.eclipse.recommenders.internal.news.rcp.Constants.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -22,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 public class FeedDescriptor {
 
@@ -32,25 +34,27 @@ public class FeedDescriptor {
     private final String pollingInterval;
     private final String description;
     private final String iconPath;
+    private final List<String> parameters;
     private boolean enabled;
 
     public FeedDescriptor(FeedDescriptor that) {
         this(that.getId(), that.getUrl().toString(), that.getName(), that.isEnabled(), that.isDefaultRepository(),
-                that.getPollingInterval(), that.getDescription(), that.getIconPath());
+                that.getPollingInterval(), that.getDescription(), that.getIconPath(), that.getParameters());
     }
 
     public FeedDescriptor(IConfigurationElement config, boolean enabled) {
         this(config.getAttribute(ATTRIBUTE_ID), config.getAttribute(ATTRIBUTE_URL), config.getAttribute(ATTRIBUTE_NAME),
                 enabled, true, config.getAttribute(ATTRIBUTE_POLLING_INTERVAL),
-                config.getAttribute(ATTRIBUTE_DESCRIPTION), config.getAttribute(ATTRIBUTE_ICON));
+                config.getAttribute(ATTRIBUTE_DESCRIPTION), config.getAttribute(ATTRIBUTE_ICON),
+                getParametersFromConfig(config.getChildren(ATTRIBUTE_PARAMETERS)));
     }
 
     public FeedDescriptor(String url, String name, String pollingInterval) {
-        this(url, url, name, true, false, pollingInterval, null, null);
+        this(url, url, name, true, false, pollingInterval, null, null, null);
     }
 
     private FeedDescriptor(String id, String url, String name, boolean enabled, boolean defaultRepository,
-            String pollingInterval, String description, String iconPath) {
+            String pollingInterval, String description, String iconPath, List<String> parameters) {
         Preconditions.checkNotNull(id);
         Preconditions.checkArgument(isUrlValid(url), Messages.FEED_DESCRIPTOR_MALFORMED_URL);
 
@@ -62,6 +66,7 @@ public class FeedDescriptor {
         this.pollingInterval = pollingInterval;
         this.description = description;
         this.iconPath = iconPath;
+        this.parameters = parameters;
     }
 
     public String getId() {
@@ -101,6 +106,14 @@ public class FeedDescriptor {
             return AbstractUIPlugin.imageDescriptorFromPlugin(Constants.PLUGIN_ID, iconPath).createImage();
         }
         return null;
+    }
+
+    public List<String> getParameters() {
+        return this.parameters;
+    }
+
+    private String getIconPath() {
+        return iconPath;
     }
 
     @Override
@@ -144,7 +157,15 @@ public class FeedDescriptor {
         }
     }
 
-    private String getIconPath() {
-        return iconPath;
+    private static List<String> getParametersFromConfig(IConfigurationElement[] config) {
+        if (config == null) {
+            return Lists.newArrayList();
+        }
+        List<String> result = Lists.newArrayList();
+        for (IConfigurationElement element : config) {
+            result.add(element.getAttribute(ATTRIBUTE_PARAMETER_VALUE));
+        }
+
+        return result;
     }
 }
