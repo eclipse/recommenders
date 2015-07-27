@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -125,7 +126,11 @@ public class AstDefUseFinder extends ASTVisitor {
     }
 
     private void refineDefKindByBinding(final Name node) {
-        IVariableBinding b = Checks.castOrNull(node.resolveBinding());
+        IBinding binding = node.resolveBinding();
+        if (!(binding instanceof IVariableBinding)) {
+            return;
+        }
+        IVariableBinding b = Checks.castOrNull(binding);
         if (b == null) {
             return;
         } else if (b.isField()) {
@@ -216,7 +221,8 @@ public class AstDefUseFinder extends ASTVisitor {
                 break;
             default:
                 // when we have completely broken code, this may happen... ignore it.
-                // throwUnreachable("Did not expect this LHS expression to be possible here. Pls report this snippet: %s",
+                // throwUnreachable("Did not expect this LHS expression to be possible here. Pls report this snippet:
+                // %s",
                 // lhs);
             }
         }
