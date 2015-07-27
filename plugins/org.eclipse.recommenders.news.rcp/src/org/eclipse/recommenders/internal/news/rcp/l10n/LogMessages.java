@@ -35,6 +35,8 @@ public final class LogMessages extends DefaultLogMessage {
     public static final LogMessages ERROR_FEED_MALFORMED_URL = new LogMessages(WARNING,
             Messages.FEED_DESCRIPTOR_MALFORMED_URL);
 
+    public static final LogMessages ERROR_URL_MALFORMED = new LogMessages(ERROR, Messages.LOG_ERROR_MALFORMED_URL);
+
     private LogMessages(int severity, String message) {
         super(severity, code++, message);
     }
