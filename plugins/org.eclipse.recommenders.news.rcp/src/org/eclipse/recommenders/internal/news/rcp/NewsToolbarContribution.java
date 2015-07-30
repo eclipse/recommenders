@@ -11,8 +11,10 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -34,18 +36,32 @@ import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+@Creatable
 public class NewsToolbarContribution extends WorkbenchWindowControlContribution {
 
-    private final INewsService service;
-    private final NewsMenuListener newsMenuListener;
+    @Inject
+    private INewsService service;
+    private NewsMenuListener newsMenuListener;
     private UpdatingNewsAction updatingNewsAction;
     private MenuManager menuManager;
 
+    // old constructor won't be used anywhere
     @Inject
     public NewsToolbarContribution(INewsService service, EventBus eventBus) {
         this.service = service;
         eventBus.register(this);
         newsMenuListener = new NewsMenuListener(eventBus, service);
+    }
+
+    // this class is called by extension point so it must have default no-arg constructor
+    public NewsToolbarContribution() {
+        DIUtil.initiateContext(this);
+    }
+
+    @PostConstruct
+    public void init() {
+        DIUtil.EVENT_BUS.register(this);
+        newsMenuListener = new NewsMenuListener(DIUtil.EVENT_BUS, service);
     }
 
     @Override
