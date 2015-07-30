@@ -15,11 +15,17 @@ import org.eclipse.core.expressions.PropertyTester;
 
 public class NewsToolbarContributionTester extends PropertyTester {
 
-    private final NewsRcpPreferences preferences;
+    @Inject
+    private NewsRcpPreferences preferences;
 
+    // old constructor
     @Inject
     public NewsToolbarContributionTester(NewsRcpPreferences preferences) {
         this.preferences = preferences;
+    }
+
+    public NewsToolbarContributionTester() {
+        NewsRcpModule.initiateContext(this);
     }
 
     @Override
