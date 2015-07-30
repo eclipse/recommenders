@@ -53,16 +53,24 @@ import com.google.common.collect.Lists;
 
 public class NewsPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-    private final INewsService service;
-    private final NewsRcpPreferences newsRcpPreferences;
+    @Inject
+    private INewsService service;
+    @Inject
+    private NewsRcpPreferences newsRcpPreferences;
     private BooleanFieldEditor enabledEditor;
     private FeedEditor feedEditor;
 
+    // old constructor
     @Inject
     public NewsPreferencePage(INewsService service, NewsRcpPreferences newsRcpPreferences) {
         super(GRID);
         this.service = service;
         this.newsRcpPreferences = newsRcpPreferences;
+    }
+
+    // this class is called by extension point so it must have default no-arg constructor
+    public NewsPreferencePage() {
+        super(GRID);
     }
 
     @Override
@@ -90,6 +98,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
         setPreferenceStore(new ScopedPreferenceStore(InstanceScope.INSTANCE, Constants.PLUGIN_ID));
         setMessage(Messages.PREFPAGE_TITLE);
         setDescription(Messages.PREFPAGE_DESCRIPTION);
+        DIUtil.initiateContext(this);
     }
 
     @Override
@@ -97,6 +106,11 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
         IPreferenceStore store = getPreferenceStore();
         return doPerformOK(store.getBoolean(Constants.PREF_NEWS_ENABLED), enabledEditor.getBooleanValue(),
                 newsRcpPreferences.getFeedDescriptors(), feedEditor.getValue());
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
     }
 
     @VisibleForTesting
@@ -326,8 +340,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                 @Override
                 public String getToolTipText(Object element) {
                     FeedDescriptor feed = cast(element);
-                    return MessageFormat.format(Messages.FEED_TOOLTIP, feed.getUrl(),
-                            feed.getPollingInterval());
+                    return MessageFormat.format(Messages.FEED_TOOLTIP, feed.getUrl(), feed.getPollingInterval());
                 }
 
             });
