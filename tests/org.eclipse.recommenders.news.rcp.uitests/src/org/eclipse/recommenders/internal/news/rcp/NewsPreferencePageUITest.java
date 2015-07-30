@@ -13,11 +13,19 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -221,9 +229,20 @@ public class NewsPreferencePageUITest {
 
     @Test
     public void testWebBrowserSettingsinkLeadsToProperPreferencePage() {
-        bot.link(1).click("Web Browser");
+        bot.link(1).click();
+        bot.waitUntil(new NodeAvailableAndSelect(bot.tree(), "General", "Web Browser"));
+        bot.activeShell().activate();
+        List<String> textsAndLabels = UIThreadRunnable.syncExec(bot.activeShell().display, new Result<List<String>>() {
 
-        assertThat(bot.radio("Use internal web browser"), is(notNullValue())); //$NON-NLS-1$
+            @Override
+            public List<String> run() {
+                return getContainedText(bot.activeShell().widget, new ArrayList<String>());
+            }
+        });
+        assertThat(
+                textsAndLabels.contains("Add, remove, or edit installed web browsers."
+                        + "\nThe selected web browser will be used by default when web pages are opened, although some applications may always use the external browser."),
+                is(true));
     }
 
     private static void openPreferencePage(SWTWorkbenchBot bot) {
@@ -250,6 +269,21 @@ public class NewsPreferencePageUITest {
         bot.textWithLabel(Messages.FIELD_LABEL_FEED_NAME).setText(VALID_FEED_NAME);
         bot.textWithLabel(Messages.FIELD_LABEL_URL).setText(VALID_FEED_URL);
         bot.button("OK").click();
+    }
+
+    private List<String> getContainedText(Control c, List<String> strings) {
+        if (c instanceof Label) {
+            strings.add(((Label) c).getText());
+        } else if (c instanceof Text) {
+            strings.add(((Text) c).getText());
+        }
+
+        if (c instanceof Composite) {
+            for (Control child : ((Composite) c).getChildren()) {
+                getContainedText(child, strings);
+            }
+        }
+        return strings;
     }
 
     public static class NodeAvailableAndSelect extends DefaultCondition {
