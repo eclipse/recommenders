@@ -18,6 +18,7 @@ import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -44,6 +45,7 @@ public class NewsPreferencePageUITest {
     @Before
     public void setUp() {
         bot = new SWTWorkbenchBot();
+        SWTBotPreferences.TIMEOUT = 10000;
         openPreferencePage(bot);
     }
 
