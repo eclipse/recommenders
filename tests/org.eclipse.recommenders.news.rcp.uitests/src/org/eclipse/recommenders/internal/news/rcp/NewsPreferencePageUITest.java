@@ -214,16 +214,22 @@ public class NewsPreferencePageUITest {
 
     @Test
     public void testNotificationLinkLeadsToProperPreferencePage() {
-        bot.link().click();
+        bot.link().click("Notifications");
 
-        assertThat(bot.checkBox("Enable notifications"), is(notNullValue())); //$NON-NLS-1$
+        SWTBotTreeItem treeGeneral = bot.tree().getTreeItem("General");
+        SWTBotTreeItem treeNotifications = treeGeneral.getNode("Notifications");
+
+        assertThat(treeNotifications.isSelected(), is(true));
     }
 
     @Test
-    public void testWebBrowserSettingsinkLeadsToProperPreferencePage() {
+    public void testBrowserLinkLeadsToProperPreferencePage() {
         bot.link(1).click("Web Browser");
 
-        assertThat(bot.radio("Use internal web browser"), is(notNullValue())); //$NON-NLS-1$
+        SWTBotTreeItem treeGeneral = bot.tree().getTreeItem("General");
+        SWTBotTreeItem treeWebBrowser = treeGeneral.getNode("Web Browser");
+
+        assertThat(treeWebBrowser.isSelected(), is(true));
     }
 
     private static void openPreferencePage(SWTWorkbenchBot bot) {
