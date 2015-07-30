@@ -221,9 +221,10 @@ public class NewsPreferencePageUITest {
 
     @Test
     public void testWebBrowserSettingsinkLeadsToProperPreferencePage() {
-        bot.link(1).click("Web Browser");
+        bot.link(1).click();
+        bot.waitUntil(new NodeAvailableAndSelect(bot.tree(), "General", "Web Browser"));
 
-        assertThat(bot.radio("Use internal web browser"), is(notNullValue())); //$NON-NLS-1$
+        assertThat(bot.table().getTableItem(0).getText(), is(equalTo("Default system web browser")));
     }
 
     private static void openPreferencePage(SWTWorkbenchBot bot) {
