@@ -14,14 +14,21 @@ import org.eclipse.ui.IStartup;
 
 public class Startup implements IStartup {
 
-    private final INewsService service;
-    private final NewsRcpPreferences preferences;
+    @Inject
+    private INewsService service;
+    @Inject
+    private NewsRcpPreferences preferences;
 
+    // old constructor
     @Inject
     public Startup(INewsService service, NewsRcpPreferences preferences) {
         this.service = service;
         this.preferences = preferences;
+    }
 
+    // this class is called by extension point so it must have default no-arg constructor
+    public Startup() {
+        DIUtil.initiateContext(this);
     }
 
     @Override
