@@ -176,6 +176,13 @@ public class NewsPreferencePageUITest {
     }
 
     @Test
+    public void testNotificationLinkLeadsToProperPreferencePage() {
+        bot.link().click();
+
+        assertThat(bot.checkBox("Enable notifications"), is(notNullValue())); //$NON-NLS-1$
+    }
+
+    @Test
     public void testDisableNewsFeed() {
         bot.checkBox(Messages.FIELD_LABEL_NEWS_ENABLED).click();
         applyChangesAndReopenPreferencePage();
@@ -210,20 +217,6 @@ public class NewsPreferencePageUITest {
         applyChangesAndReopenPreferencePage();
 
         assertThat(bot.table().rowCount(), is(equalTo(2)));
-    }
-
-    @Test
-    public void testNotificationLinkLeadsToProperPreferencePage() {
-        bot.link().click();
-
-        assertThat(bot.checkBox("Enable notifications"), is(notNullValue())); //$NON-NLS-1$
-    }
-
-    @Test
-    public void testWebBrowserSettingsinkLeadsToProperPreferencePage() {
-        bot.link(1).click("Web Browser");
-
-        assertThat(bot.radio("Use internal web browser"), is(notNullValue())); //$NON-NLS-1$
     }
 
     private static void openPreferencePage(SWTWorkbenchBot bot) {
