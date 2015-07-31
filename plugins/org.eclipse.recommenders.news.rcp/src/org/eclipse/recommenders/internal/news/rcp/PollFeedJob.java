@@ -7,10 +7,13 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import static org.eclipse.recommenders.internal.news.rcp.Proxies.*;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -19,7 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.client.fluent.Response;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -35,8 +44,11 @@ import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.Urls;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -45,10 +57,12 @@ import com.google.common.collect.Sets;
 
 @SuppressWarnings("restriction")
 public class PollFeedJob extends Job implements IPollFeedJob {
+
     private final NotificationEnvironment environment;
     private final Map<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
     private final Set<FeedDescriptor> feeds = Sets.newHashSet();
     private final Map<FeedDescriptor, Date> pollDates = Maps.newHashMap();
+    private Executor executor;
 
     public PollFeedJob(Collection<FeedDescriptor> feeds) {
         super(Messages.POLL_FEED_JOB_NAME);
@@ -61,20 +75,26 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
+        SubMonitor sub = SubMonitor.convert(monitor, feeds.size() * 100);
+        // max time until a connection to the server has to be established.
+        int connectTimeout = (int) TimeUnit.SECONDS.toMillis(3);
+        // max time between two packets sent back to the client. 5 seconds of silence will kill the session
+        int socketTimeout = (int) TimeUnit.SECONDS.toMillis(5);
         try {
+            executor = Executor.newInstance();
             URL url = null;
-            SubMonitor sub = SubMonitor.convert(monitor, feeds.size() * 100);
             for (FeedDescriptor feed : feeds) {
                 try {
-                    if (monitor.isCanceled()) {
+                    if (monitor.isCanceled() || FrameworkUtil.getBundle(this.getClass()).getState() != Bundle.ACTIVE) {
                         return Status.CANCEL_STATUS;
                     }
-                    HttpURLConnection connection = (HttpURLConnection) feed.getUrl().openConnection();
-                    url = connection.getURL();
-                    connection.connect();
+                    url = feed.getUrl();
+                    URI feedUri = urlToUri(feed.getUrl()).orNull();
+                    Request request = Request.Get(feedUri).viaProxy(getProxyHost(feedUri).orNull())
+                            .connectTimeout(connectTimeout).staleConnectionCheck(true).socketTimeout(socketTimeout);
+                    Response response = proxyAuthentication(executor, feedUri).execute(request);
                     sub.worked(10);
-                    updateGroupedMessages(connection, sub.newChild(80), feed);
-                    connection.disconnect();
+                    updateGroupedMessages(response.returnResponse(), feed, sub.newChild(80));
                     pollDates.put(feed, new Date());
                     sub.worked(10);
                 } catch (IOException e) {
@@ -92,13 +112,18 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         return Objects.equals(Constants.POLL_FEED_JOB_FAMILY, job);
     }
 
-    private void updateGroupedMessages(HttpURLConnection connection, IProgressMonitor monitor, FeedDescriptor feed) {
+    private void updateGroupedMessages(HttpResponse httpResponse, FeedDescriptor feed, IProgressMonitor monitor) {
         monitor.subTask(MessageFormat.format(Messages.POLL_FEED_JOB_SUBTASK_POLLING_FEED, feed.getName()));
         try {
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK || monitor.isCanceled()) {
+            if (monitor.isCanceled() || FrameworkUtil.getBundle(this.getClass()).getState() != Bundle.ACTIVE) {
                 return;
             }
-            try (InputStream in = new BufferedInputStream(connection.getInputStream())) {
+            if (httpResponse.getStatusLine().getStatusCode() >= HttpStatus.SC_BAD_REQUEST) {
+                Logs.log(LogMessages.ERROR_CONNECTING_URL_WITH_STATUS_CODE, feed.getUrl(),
+                        httpResponse.getStatusLine().getStatusCode());
+                return;
+            }
+            try (InputStream in = new BufferedInputStream(httpResponse.getEntity().getContent())) {
                 List<IFeedMessage> messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
                 groupedMessages.put(feed, messages);
             }
@@ -131,6 +156,14 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     @Override
     public Map<FeedDescriptor, Date> getPollDates() {
         return pollDates;
+    }
+
+    private static Optional<URI> urlToUri(URL url) {
+        try {
+            return Optional.of(url.toURI());
+        } catch (URISyntaxException e) {
+            return Optional.absent();
+        }
     }
 
     class MutexRule implements ISchedulingRule {
