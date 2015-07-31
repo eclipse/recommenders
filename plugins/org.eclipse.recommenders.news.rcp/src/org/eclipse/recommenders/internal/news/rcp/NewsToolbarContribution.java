@@ -60,13 +60,15 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     @Subscribe
     public void handle(NewFeedItemsEvent event) {
-        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+        if (!PlatformUI.getWorkbench().isClosing() || !PlatformUI.getWorkbench().getDisplay().isDisposed()) {
+            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
-            @Override
-            public void run() {
-                updatingNewsAction.setAvailableNews();
-            }
-        });
+                @Override
+                public void run() {
+                    updatingNewsAction.setAvailableNews();
+                }
+            });
+        }
     }
 
     @Subscribe
