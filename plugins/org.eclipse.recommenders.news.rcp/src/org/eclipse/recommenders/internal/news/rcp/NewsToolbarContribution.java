@@ -25,6 +25,7 @@ import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
@@ -60,13 +61,17 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     @Subscribe
     public void handle(NewFeedItemsEvent event) {
-        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+        try {
+            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
-            @Override
-            public void run() {
-                updatingNewsAction.setAvailableNews();
-            }
-        });
+                @Override
+                public void run() {
+                    updatingNewsAction.setAvailableNews();
+                }
+            });
+        } catch (SWTException e) {
+            // this happens when you close the Eclipse - the device is disposed. Nothing wrong in that.
+        }
     }
 
     @Subscribe
