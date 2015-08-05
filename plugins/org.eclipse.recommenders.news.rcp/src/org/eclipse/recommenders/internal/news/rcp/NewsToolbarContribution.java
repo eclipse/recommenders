@@ -7,7 +7,10 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import static org.eclipse.recommenders.internal.news.rcp.MessageUtils.*;
+
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +25,7 @@ import org.eclipse.recommenders.internal.news.rcp.FeedEvents.AllReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
+import org.eclipse.recommenders.internal.news.rcp.StatusFeedMessage.Status;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
@@ -34,6 +38,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 
@@ -42,6 +47,8 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     @Inject
     private INewsService service;
+    @Inject
+    private NewsRcpPreferences preferences;
     private NewsMenuListener newsMenuListener;
     private UpdatingNewsAction updatingNewsAction;
     private MenuManager menuManager;
@@ -114,32 +121,55 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             setNoAvailableNews();
             messages = service.getMessages(Constants.COUNT_PER_FEED);
             menuManager.getMenu().setVisible(true);
-            if (!messages.isEmpty() && MessageUtils.containsUnreadMessages(messages)) {
+            if (!messages.isEmpty() && containsUnreadMessages(messages)) {
                 setAvailableNews();
             }
         }
 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private void setNoAvailableNews() {
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
             clearMenu();
             messages = service.getMessages(Constants.COUNT_PER_FEED);
-            if (!messages.isEmpty() && !MessageUtils.containsUnreadMessages(messages)) {
-                clearMenu();
-                setNewsMenu(messages);
+            HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
+            for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
+                StatusFeedMessage message = new StatusFeedMessage(Status.FEEDS_NOT_POLLED_YET, "", //$NON-NLS-1$
+                        Messages.FEED_NOT_POLLED_YET);
+                message.setRead(true);
+                groupedMessages.put(feed, (List) Lists.newArrayList(message));
             }
+            newsMenuListener.setMessages(toMapValuePollingResult(groupedMessages));
+            menuManager.addMenuListener(newsMenuListener);
         }
 
         private void setAvailableNews() {
             messages = service.getMessages(Constants.COUNT_PER_FEED);
-            if (messages.isEmpty() || !MessageUtils.containsUnreadMessages(messages)) {
+            if (messages.isEmpty() || !containsUnreadMessages(messages)) {
                 return;
             }
-            setImageDescriptor(CommonImages.RSS_ACTIVE);
+
+            if (allFailedToConnect()) {
+                setImageDescriptor(CommonImages.RSS_INACTIVE);
+            } else {
+                setImageDescriptor(CommonImages.RSS_ACTIVE);
+            }
+
             setToolTipText(MessageFormat.format(Messages.TOOLTIP_NEW_MESSAGES,
-                    MessageUtils.getUnreadMessagesNumber(MessageUtils.mergeMessages(messages))));
+                    getUnreadMessagesNumber(mergeMessages(messages))));
             clearMenu();
             setNewsMenu(messages);
+        }
+
+        private boolean allFailedToConnect() {
+            boolean allFailedToConnect = true;
+
+            for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
+                if (!entry.getValue().get(0).getId().equals(Status.FEED_NOT_FOUND_AT_URL.getStatus())) {
+                    allFailedToConnect = false;
+                }
+            }
+            return allFailedToConnect;
         }
 
         private void clearMenu() {
@@ -148,13 +178,13 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
         }
 
         private void setNewsMenu(Map<FeedDescriptor, List<IFeedMessage>> messages) {
-            newsMenuListener.setMessages(messages);
+            newsMenuListener.setMessages(toMapValuePollingResult(messages));
             menuManager.addMenuListener(newsMenuListener);
         }
 
         public void checkForNews() {
             messages = service.getMessages(Constants.COUNT_PER_FEED);
-            if (messages.isEmpty() || !MessageUtils.containsUnreadMessages(messages)) {
+            if (messages.isEmpty() || !containsUnreadMessages(messages)) {
                 setNoAvailableNews();
             }
         }
