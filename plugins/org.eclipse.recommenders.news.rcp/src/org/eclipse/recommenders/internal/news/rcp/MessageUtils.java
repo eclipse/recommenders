@@ -96,6 +96,9 @@ public class MessageUtils {
         }
         int counter = 0;
         for (IFeedMessage message : messages) {
+            if (message instanceof StatusFeedMessage) {
+                break;
+            }
             if (!message.isRead()) {
                 counter++;
             }
@@ -203,6 +206,26 @@ public class MessageUtils {
             calendar.set(Calendar.DAY_OF_MONTH, 31);
         }
         return calendar.getTime();
+    }
+
+    public static Map<FeedDescriptor, List<IFeedMessage>> removeStatusFeedMessages(
+            Map<FeedDescriptor, List<IFeedMessage>> messages) {
+        if (messages == null) {
+            return Maps.newHashMap();
+        }
+        Map<FeedDescriptor, List<IFeedMessage>> result = Maps.newHashMap();
+        for (Map.Entry<FeedDescriptor, List<IFeedMessage>> entry : messages.entrySet()) {
+            boolean containsStatusFeedMessage = false;
+            for (IFeedMessage message : entry.getValue()) {
+                if (message instanceof StatusFeedMessage) {
+                    containsStatusFeedMessage = true;
+                }
+            }
+            if (!containsStatusFeedMessage) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 
 }

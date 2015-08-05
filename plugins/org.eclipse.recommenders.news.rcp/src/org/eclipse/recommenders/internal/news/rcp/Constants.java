@@ -39,5 +39,7 @@ public final class Constants {
     public static final String ATTRIBUTE_PARAMETER = "urlParameter"; //$NON-NLS-1$
     public static final String ATTRIBUTE_PARAMETER_KEY = "key"; //$NON-NLS-1$
     public static final String ATTRIBUTE_PARAMETER_VALUE = "value"; //$NON-NLS-1$
+    public static final String FEED_NOT_POLLED_YET = "feedNotPolledYet"; //$NON-NLS-1$
+    public static final String FEED_NOT_FOUND_AT_URL = "feedNotFoundAtURL"; //$NON-NLS-1$
 
 }
