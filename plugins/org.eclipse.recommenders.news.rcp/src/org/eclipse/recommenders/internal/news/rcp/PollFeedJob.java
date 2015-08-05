@@ -71,6 +71,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         setRule(new MutexRule());
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         SubMonitor sub = SubMonitor.convert(monitor, feeds.size() * 100);
@@ -100,6 +101,10 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                         Logs.log(LogMessages.ERROR_CONNECTING_URL, url);
                     }
                 } catch (IOException e) {
+                    groupedMessages.put(feed,
+                            (List) Lists.newArrayList(new StatusFeedMessage(Constants.FEED_NOT_FOUND_AT_URL, "",
+                                    MessageFormat.format(Messages.LOG_ERROR_CONNECTING_URL, feed.getUrl()),
+                                    feed.getUrl())));
                     Logs.log(LogMessages.ERROR_CONNECTING_URL, e, url);
                 }
             }
@@ -127,6 +132,10 @@ public class PollFeedJob extends Job implements IPollFeedJob {
             }
             try (InputStream in = new BufferedInputStream(httpResponse.getEntity().getContent())) {
                 List<IFeedMessage> messages = Lists.newArrayList(readMessages(in, monitor, feed.getId()));
+                if (messages.isEmpty()) {
+                    messages.add(new StatusFeedMessage(Constants.FEED_NOT_FOUND_AT_URL, "",
+                            MessageFormat.format(Messages.FEED_EMPTY, feed.getName()), feed.getUrl()));
+                }
                 groupedMessages.put(feed, messages);
             }
         } catch (IOException e) {

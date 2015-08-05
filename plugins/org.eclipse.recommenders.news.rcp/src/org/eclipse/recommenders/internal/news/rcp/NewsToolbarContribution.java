@@ -8,6 +8,7 @@
 package org.eclipse.recommenders.internal.news.rcp;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 
@@ -42,6 +44,8 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
 
     @Inject
     private INewsService service;
+    @Inject
+    private NewsRcpPreferences preferences;
     private NewsMenuListener newsMenuListener;
     private UpdatingNewsAction updatingNewsAction;
     private MenuManager menuManager;
@@ -119,15 +123,21 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             }
         }
 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private void setNoAvailableNews() {
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
             clearMenu();
             messages = service.getMessages(Constants.COUNT_PER_FEED);
-            if (!messages.isEmpty() && !MessageUtils.containsUnreadMessages(messages)) {
-                clearMenu();
-                setNewsMenu(messages);
+            HashMap<FeedDescriptor, List<IFeedMessage>> groupedMessages = Maps.newHashMap();
+            for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
+                StatusFeedMessage message = new StatusFeedMessage(Constants.FEED_NOT_POLLED_YET, "", //$NON-NLS-1$
+                        Messages.FEED_NOT_POLLED_YET);
+                message.setRead(true);
+                groupedMessages.put(feed, (List) Lists.newArrayList(message));
             }
+            newsMenuListener.setMessages(groupedMessages);
+            menuManager.addMenuListener(newsMenuListener);
         }
 
         private void setAvailableNews() {
