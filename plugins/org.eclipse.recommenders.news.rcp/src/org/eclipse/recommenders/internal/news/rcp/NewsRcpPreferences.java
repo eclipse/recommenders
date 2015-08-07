@@ -39,12 +39,20 @@ public class NewsRcpPreferences extends AbstractPreferenceInitializer {
     @Preference(Constants.PREF_POLLING_INTERVAL)
     private Long pollingInterval;
 
+    @Inject
+    @Preference(Constants.PREF_STARTUP_DELAY)
+    private Long startupDelay;
+
     public boolean isEnabled() {
         return enabled;
     }
 
     public Long getPollingInterval() {
         return pollingInterval;
+    }
+
+    public Long getStartupDelay() {
+        return startupDelay;
     }
 
     @Override
