@@ -12,17 +12,38 @@ import java.util.Date;
 
 public interface IFeedMessage {
 
+    /**
+     * @return Unique identifier of the message.
+     */
     String getId();
 
+    /**
+     * @return Date of item's publishing.
+     */
     Date getDate();
 
+    /**
+     * @return Item synopsis.
+     */
     String getDescription();
 
+    /**
+     * @return Title of the message.
+     */
     String getTitle();
 
+    /**
+     * @return URL of the message.
+     */
     URL getUrl();
 
+    /**
+     * @return States whether message has been read by user or not.
+     */
     boolean isRead();
 
+    /**
+     * Sets the message as read/unread
+     */
     void setRead(boolean read);
 }
