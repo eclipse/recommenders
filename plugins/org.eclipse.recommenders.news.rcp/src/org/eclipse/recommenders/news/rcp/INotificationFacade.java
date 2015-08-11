@@ -16,6 +16,14 @@ import com.google.common.eventbus.EventBus;
 
 public interface INotificationFacade {
 
+    /**
+     * Displays notification.
+     *
+     * @param messages
+     *            New (that has been polled for the first time) messages
+     * @param bus
+     *            EventBus that will handle message events
+     */
     void displayNotification(Map<FeedDescriptor, PollingResult> messages, EventBus bus);
 
 }

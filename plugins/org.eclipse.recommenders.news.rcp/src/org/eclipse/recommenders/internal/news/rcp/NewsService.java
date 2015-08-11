@@ -219,11 +219,6 @@ public class NewsService implements INewsService {
         jobFacade.cancelPollFeeds();
     }
 
-    @Override
-    public void updateFeedDates(Map<FeedDescriptor, Date> map) {
-        newsFeedProperties.writeDates(map, Constants.FILENAME_FEED_DATES);
-    }
-
     private void updateReadIds() {
         Set<String> result = Sets.newHashSet();
         Set<String> allMessages = Sets.newHashSet();
@@ -251,7 +246,7 @@ public class NewsService implements INewsService {
             for (Map.Entry<FeedDescriptor, PollingResult> entry : messages.entrySet()) {
                 feedDates.put(entry.getKey(), Calendar.getInstance().getTime());
             }
-            updateFeedDates(feedDates);
+            newsFeedProperties.writeDates(feedDates, Constants.FILENAME_FEED_DATES);
         }
     }
 
