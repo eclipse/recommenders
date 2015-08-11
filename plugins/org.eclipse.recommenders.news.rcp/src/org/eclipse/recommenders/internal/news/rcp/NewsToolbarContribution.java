@@ -24,10 +24,10 @@ import org.eclipse.recommenders.internal.news.rcp.FeedEvents.AllReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
-import org.eclipse.recommenders.internal.news.rcp.PollingResult.Status;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
 import org.eclipse.recommenders.news.rcp.INewsService;
+import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -107,7 +107,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     }
 
     private class UpdatingNewsAction extends Action {
-        Map<FeedDescriptor, PollingResult> messages = Maps.newHashMap();
+        Map<FeedDescriptor, IPollingResult> messages = Maps.newHashMap();
 
         private UpdatingNewsAction() {
             setNoAvailableNews();
@@ -127,9 +127,9 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
             clearMenu();
-            HashMap<FeedDescriptor, PollingResult> groupedMessages = Maps.newHashMap();
+            HashMap<FeedDescriptor, IPollingResult> groupedMessages = Maps.newHashMap();
             for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
-                groupedMessages.put(feed, new PollingResult(Status.FEEDS_NOT_POLLED_YET));
+                groupedMessages.put(feed, new PollingResult(IPollingResult.Status.FEEDS_NOT_POLLED_YET));
             }
             newsMenuListener.setMessages(groupedMessages);
             menuManager.addMenuListener(newsMenuListener);
@@ -155,7 +155,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             menuManager.removeMenuListener(newsMenuListener);
         }
 
-        private void setNewsMenu(Map<FeedDescriptor, PollingResult> messages) {
+        private void setNewsMenu(Map<FeedDescriptor, IPollingResult> messages) {
             newsMenuListener.setMessages(messages);
             menuManager.addMenuListener(newsMenuListener);
         }
