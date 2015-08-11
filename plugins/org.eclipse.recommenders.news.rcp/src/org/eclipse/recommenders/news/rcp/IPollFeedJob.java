@@ -15,8 +15,16 @@ import org.eclipse.recommenders.internal.news.rcp.PollingResult;
 
 public interface IPollFeedJob {
 
+    /**
+     *
+     * @return Messages that has been polled
+     */
     Map<FeedDescriptor, PollingResult> getMessages();
 
+    /**
+     *
+     * @return Map of Feed and its polling date.
+     */
     Map<FeedDescriptor, Date> getPollDates();
 
 }
