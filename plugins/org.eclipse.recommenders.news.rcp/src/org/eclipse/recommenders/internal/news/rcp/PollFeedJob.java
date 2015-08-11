@@ -42,6 +42,7 @@ import org.eclipse.recommenders.internal.news.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
+import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -58,7 +59,7 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("restriction")
 public class PollFeedJob extends Job implements IPollFeedJob {
     private final NotificationEnvironment environment;
-    private final Map<FeedDescriptor, PollingResult> groupedMessages = Maps.newHashMap();
+    private final Map<FeedDescriptor, IPollingResult> groupedMessages = Maps.newHashMap();
     private final Set<FeedDescriptor> feeds = Sets.newHashSet();
     private final Map<FeedDescriptor, Date> pollDates = Maps.newHashMap();
 
@@ -157,7 +158,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     }
 
     @Override
-    public Map<FeedDescriptor, PollingResult> getMessages() {
+    public Map<FeedDescriptor, IPollingResult> getMessages() {
         return groupedMessages;
     }
 
