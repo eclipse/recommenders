@@ -101,7 +101,6 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                         groupedMessages.put(feed, PollingResult.newConnectionErrorResult());
                     }
                 } catch (IOException e) {
-                    Logs.log(LogMessages.WARNING_CONNECTING_URL, url);
                     groupedMessages.put(feed, PollingResult.newConnectionErrorResult());
                 }
             }
