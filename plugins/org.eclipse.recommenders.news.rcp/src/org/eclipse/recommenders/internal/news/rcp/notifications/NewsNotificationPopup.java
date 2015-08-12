@@ -31,8 +31,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Text;
 
 import com.google.common.eventbus.EventBus;
 
@@ -53,16 +53,19 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
     }
 
     @Override
-    protected void createContentArea(Composite composite) {
-        super.createContentArea(composite);
+    protected void createContentArea(Composite parent) {
+        // super.createContentArea(composite);
+        Composite composite = new Composite(parent, SWT.NO_FOCUS);
         composite.setLayout(new GridLayout(1, true));
         Map<FeedDescriptor, PollingResult> sortedMap = MessageUtils.sortByDate(messages);
 
         processNotificationData(composite, sortedMap);
 
-        Label hint = new Label(composite, SWT.NONE);
+        final Text hint = new Text(composite, SWT.BEGINNING | SWT.READ_ONLY | SWT.MULTI | SWT.WRAP | SWT.NO_FOCUS);
+        hint.setFont(CommonFonts.BOLD);
         GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(hint);
         hint.setText(Messages.HINT_MORE_MESSAGES);
+        hint.setFont(CommonFonts.BOLD);
     }
 
     private void processNotificationData(Composite composite, Map<FeedDescriptor, PollingResult> sortedMap) {
@@ -71,11 +74,10 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
                 : DEFAULT_NOTIFICATION_MESSAGES / sortedMap.size();
         for (Entry<FeedDescriptor, PollingResult> entry : sortedMap.entrySet()) {
             if (feedCounter < DEFAULT_NOTIFICATION_MESSAGES) {
-                Label feedTitle = new Label(composite, SWT.NONE);
-                GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT)
-                        .applyTo(feedTitle);
-                feedTitle.setFont(CommonFonts.BOLD);
-                feedTitle.setText(entry.getKey().getName());
+                final Text labelText = new Text(composite, SWT.READ_ONLY);
+                labelText.setFont(CommonFonts.BOLD);
+                labelText.setText(entry.getKey().getName());
+                GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(labelText);
 
                 feedCounter = feedCounter
                         + processMessages(composite, entry.getValue().getMessages(), messagesPerFeed, entry.getKey());
