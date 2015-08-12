@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
@@ -200,7 +201,8 @@ public abstract class AbstractNotificationPopup extends Window {
         Label titleImageLabel = new Label(parent, SWT.NONE);
         titleImageLabel.setImage(getPopupShellImage(TITLE_HEIGHT));
 
-        Label titleTextLabel = new Label(parent, SWT.NONE);
+        final Text titleTextLabel = new Text(parent,
+                SWT.BEGINNING | SWT.READ_ONLY | SWT.MULTI | SWT.WRAP | SWT.NO_FOCUS);
         titleTextLabel.setText(getPopupShellTitle());
         titleTextLabel.setFont(CommonFonts.BOLD);
         titleTextLabel.setForeground(getTitleForeground());
@@ -504,8 +506,8 @@ public abstract class AbstractNotificationPopup extends Window {
         int width = Math.min(initialSize.x, MAX_WIDTH);
 
         Point size = new Point(width, height);
-        shell.setLocation(clArea.width + clArea.x - size.x - PADDING_EDGE, clArea.height + clArea.y - size.y
-                - PADDING_EDGE);
+        shell.setLocation(clArea.width + clArea.x - size.x - PADDING_EDGE,
+                clArea.height + clArea.y - size.y - PADDING_EDGE);
         shell.setSize(size);
     }
 
