@@ -200,10 +200,10 @@ public abstract class AbstractNotificationPopup extends Window {
         Label titleImageLabel = new Label(parent, SWT.NONE);
         titleImageLabel.setImage(getPopupShellImage(TITLE_HEIGHT));
 
-        Label titleTextLabel = new Label(parent, SWT.NONE);
+        final Label titleTextLabel = new Label(parent, SWT.NONE);
         titleTextLabel.setText(getPopupShellTitle());
         titleTextLabel.setFont(CommonFonts.BOLD);
-        titleTextLabel.setForeground(getTitleForeground());
+        titleTextLabel.setForeground(new Color(Display.getDefault(), 232, 33, 33));
         titleTextLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         titleTextLabel.setCursor(parent.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 
@@ -504,8 +504,8 @@ public abstract class AbstractNotificationPopup extends Window {
         int width = Math.min(initialSize.x, MAX_WIDTH);
 
         Point size = new Point(width, height);
-        shell.setLocation(clArea.width + clArea.x - size.x - PADDING_EDGE, clArea.height + clArea.y - size.y
-                - PADDING_EDGE);
+        shell.setLocation(clArea.width + clArea.x - size.x - PADDING_EDGE,
+                clArea.height + clArea.y - size.y - PADDING_EDGE);
         shell.setSize(size);
     }
 

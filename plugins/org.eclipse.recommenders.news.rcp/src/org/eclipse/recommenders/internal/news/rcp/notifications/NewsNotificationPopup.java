@@ -28,12 +28,16 @@ import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
 public class NewsNotificationPopup extends AbstractNotificationPopup {
@@ -53,16 +57,42 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
     }
 
     @Override
-    protected void createContentArea(Composite composite) {
-        super.createContentArea(composite);
+    protected void createContentArea(Composite parent) {
+        // super.createContentArea(composite);
+        Composite composite = new Composite(parent, SWT.NO_FOCUS);
         composite.setLayout(new GridLayout(1, true));
         Map<FeedDescriptor, PollingResult> sortedMap = MessageUtils.sortByDate(messages);
 
         processNotificationData(composite, sortedMap);
 
         Label hint = new Label(composite, SWT.NONE);
+        hint.setForeground(new Color(Display.getDefault(), 232, 33, 33));
+        hint.setFont(CommonFonts.BOLD);
         GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT).applyTo(hint);
         hint.setText(Messages.HINT_MORE_MESSAGES);
+        hint.setForeground(new Color(Display.getDefault(), 232, 33, 33));
+        hint.setFont(CommonFonts.BOLD);
+        System.out.println(hint.getForeground());
+        PopupNotification elo = new PopupNotification(PlatformUI.getWorkbench().getDisplay());
+        elo.setNotification(new Notification("yo", eventBus) {
+
+            @Override
+            public List<NotificationAction> getActions() {
+                return Lists.newArrayList();
+            }
+
+            @Override
+            public String getDescription() {
+                return "heee";
+            }
+
+            @Override
+            public String getLabel() {
+                return "meee";
+            }
+
+        });
+        elo.open();
     }
 
     private void processNotificationData(Composite composite, Map<FeedDescriptor, PollingResult> sortedMap) {
@@ -71,11 +101,18 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
                 : DEFAULT_NOTIFICATION_MESSAGES / sortedMap.size();
         for (Entry<FeedDescriptor, PollingResult> entry : sortedMap.entrySet()) {
             if (feedCounter < DEFAULT_NOTIFICATION_MESSAGES) {
-                Label feedTitle = new Label(composite, SWT.NONE);
-                GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT)
-                        .applyTo(feedTitle);
-                feedTitle.setFont(CommonFonts.BOLD);
-                feedTitle.setText(entry.getKey().getName());
+                // Label feedTitle = new Label(composite, SWT.NONE);
+                // GridDataFactory.fillDefaults().hint(AbstractNotificationPopup.MAX_WIDTH, SWT.DEFAULT)
+                // .applyTo(feedTitle);
+                // feedTitle.setFont(CommonFonts.BOLD);
+                // feedTitle.setText(entry.getKey().getName());
+                final Text labelText = new Text(composite,
+                        SWT.BEGINNING | SWT.READ_ONLY | SWT.MULTI | SWT.WRAP | SWT.NO_FOCUS);
+                labelText.setForeground(new Color(Display.getDefault(), 232, 33, 33));
+                labelText.setFont(CommonFonts.BOLD);
+                labelText.setText(entry.getKey().getName());
+                labelText.setBackground(composite.getBackground());
+                GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(labelText);
 
                 feedCounter = feedCounter
                         + processMessages(composite, entry.getValue().getMessages(), messagesPerFeed, entry.getKey());
