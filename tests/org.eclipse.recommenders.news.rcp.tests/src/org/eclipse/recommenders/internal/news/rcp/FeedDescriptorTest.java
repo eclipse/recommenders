@@ -25,6 +25,7 @@ public class FeedDescriptorTest {
         IConfigurationElement config = Mockito.mock(IConfigurationElement.class);
         when(config.getAttribute("id")).thenReturn(FIRST_ELEMENT);
         when(config.getAttribute("url")).thenReturn("abc");
+        @SuppressWarnings("unused")
         FeedDescriptor feed = new FeedDescriptor(config, true);
     }
 }
