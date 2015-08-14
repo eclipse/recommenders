@@ -124,7 +124,20 @@ public class IntelligentCompletionProposalComputer extends JavaAllCompletionProp
         storeContext(context);
 
         if (!isTriggeredInJavaProject()) {
-            return Collections.emptyList();
+            // We can't make recommendations. Fall back to JDT.
+            if (!isContentAssistConfigurationOkay()) {
+                // JDT is still active, don't add any proposals
+                return Collections.emptyList();
+            } else {
+                // JDT is inactive. Return all proposals JDT would have made
+                List<ICompletionProposal> res = Lists.newLinkedList();
+                for (Entry<IJavaCompletionProposal, CompletionProposal> pair : crContext.getProposals().entrySet()) {
+                    IJavaCompletionProposal jdtProposal = create(pair.getValue(), pair.getKey(), jdtContext,
+                            proposalFactory);
+                    res.add(jdtProposal);
+                }
+                return res;
+            }
         }
 
         if (!isContentAssistConfigurationOkay()) {
