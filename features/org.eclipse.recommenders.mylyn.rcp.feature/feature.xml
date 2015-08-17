@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.mylyn.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (324cf7 Merge "[news] addressed teamscale findings")
       version="2.3.0.qualifier"
+=======
+      version="2.2.4.qualifier"
+>>>>>>> BRANCH (c46cab [completion] Fall back to JDT if in unsupported editor)
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -21,7 +25,11 @@
 
    <requires>
       <import feature="org.eclipse.mylyn.java_feature" version="3.8.0"/>
+<<<<<<< HEAD   (324cf7 Merge "[news] addressed teamscale findings")
       <import feature="org.eclipse.recommenders.rcp.feature" version="2.3.0" match="equivalent"/>
+=======
+      <import feature="org.eclipse.recommenders.rcp.feature" version="2.2.4" match="equivalent"/>
+>>>>>>> BRANCH (c46cab [completion] Fall back to JDT if in unsupported editor)
    </requires>
 
    <plugin

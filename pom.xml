@@ -5,7 +5,11 @@
 
 	<groupId>org.eclipse.recommenders</groupId>
 	<artifactId>org.eclipse.recommenders</artifactId>
+<<<<<<< HEAD   (324cf7 Merge "[news] addressed teamscale findings")
 	<version>2.3.0-SNAPSHOT</version>
+=======
+	<version>2.2.4-SNAPSHOT</version>
+>>>>>>> BRANCH (c46cab [completion] Fall back to JDT if in unsupported editor)
 	<packaging>pom</packaging>
 
 	<organization>
@@ -64,7 +68,11 @@
 	</distributionManagement>
 
 	<properties>
+<<<<<<< HEAD   (324cf7 Merge "[news] addressed teamscale findings")
 		<recommendersVersion>2.3.0-SNAPSHOT</recommendersVersion>
+=======
+		<recommendersVersion>2.2.4-SNAPSHOT</recommendersVersion>
+>>>>>>> BRANCH (c46cab [completion] Fall back to JDT if in unsupported editor)
 		<javaVersion>1.7</javaVersion>
 		<tychoVersion>0.23.1</tychoVersion>
 		<!-- The default simultaneous release used to base the target platform on. (Override with -Dsimrel=...) -->
