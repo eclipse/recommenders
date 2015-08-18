@@ -9,6 +9,7 @@ package org.eclipse.recommenders.internal.news.rcp;
 
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -372,6 +373,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                     checkedElements.add(feed);
                 }
             }
+            Collections.sort(input);
 
             tableViewer.setInput(input);
             tableViewer.setCheckedElements(checkedElements.toArray());
@@ -390,6 +392,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                 }
 
             });
+            Collections.sort(feeds);
 
             tableViewer.setInput(feeds);
             tableViewer.setCheckedElements(checkedFeeds.toArray());
