@@ -22,7 +22,9 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.recommenders.internal.news.rcp.BrowserUtils;
+import org.eclipse.recommenders.internal.news.rcp.CommonImages;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.MessageUtils.MessageAge;
 import org.eclipse.recommenders.internal.news.rcp.PollingResult;
@@ -74,7 +76,10 @@ public class NewsMenuListener implements IMenuListener {
 
         manager.add(new Separator());
         manager.add(newMarkAllAsReadAction(eventBus));
-        manager.add(pollFeedsAction());
+        Action pollNow = newPollFeedsAction();
+        ImageRegistry imageRegistry = new ImageRegistry();
+        pollNow.setImageDescriptor(CommonImages.REFRESH);
+        manager.add(pollNow);
         manager.add(new Separator());
         manager.add(new PreferenceAction());
     }
@@ -84,7 +89,7 @@ public class NewsMenuListener implements IMenuListener {
         menu.add(newMarkFeedAsReadAction(eventBus, feed));
     }
 
-    private Action pollFeedsAction() {
+    private Action newPollFeedsAction() {
         return new Action() {
             @Override
             public void run() {

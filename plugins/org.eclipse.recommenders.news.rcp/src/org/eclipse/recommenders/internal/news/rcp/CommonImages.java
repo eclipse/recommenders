@@ -31,7 +31,9 @@ public class CommonImages {
 
     public static final ImageDescriptor RSS_ACTIVE = create(T_EVIEW, "rss-active.gif"); //$NON-NLS-1$
 
-    public static final ImageDescriptor RSS_INACTIVE = create(T_EVIEW, "rss-inactive.gif"); //$NON-NLS-1$ ;
+    public static final ImageDescriptor RSS_INACTIVE = create(T_EVIEW, "rss-inactive.gif"); //$NON-NLS-1$
+
+    public static final ImageDescriptor REFRESH = create(T_EVIEW, "refresh.gif"); //$NON-NLS-1$
 
     public static final ImageDescriptor RSS_DIALOG_TITLE = create(T_WIZBAN, "rss-wizban.png"); //$NON-NLS-1$
 
