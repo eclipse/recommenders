@@ -30,6 +30,8 @@ import org.eclipse.recommenders.internal.news.rcp.PollingResult.Status;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.INewsService;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
@@ -70,7 +72,10 @@ public class NewsMenuListener implements IMenuListener {
 
         manager.add(newMarkAllAsReadAction(eventBus));
         manager.add(new Separator());
-        manager.add(pollFeedsAction());
+        Action pollNow = newPollFeedsAction();
+        pollNow.setImageDescriptor(
+                PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
+        manager.add(pollNow);
         manager.add(new Separator());
         manager.add(new PreferenceAction());
     }
@@ -80,7 +85,7 @@ public class NewsMenuListener implements IMenuListener {
         menu.add(newMarkFeedAsReadAction(eventBus, feed));
     }
 
-    private Action pollFeedsAction() {
+    private Action newPollFeedsAction() {
         return new Action() {
             @Override
             public void run() {
