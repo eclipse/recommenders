@@ -13,8 +13,8 @@ import java.util.Map;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NewsNotificationPopup;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.INotificationFacade;
-import org.eclipse.recommenders.rcp.utils.Shells;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.eventbus.EventBus;
 
@@ -22,7 +22,7 @@ public class NotificationFacade implements INotificationFacade {
 
     @Override
     public void displayNotification(final Map<FeedDescriptor, List<IFeedMessage>> messages, final EventBus eventBus) {
-        final Display display = Shells.getDisplay();
+        final Display display = PlatformUI.getWorkbench().getDisplay();
         display.asyncExec(new Runnable() {
 
             @Override
