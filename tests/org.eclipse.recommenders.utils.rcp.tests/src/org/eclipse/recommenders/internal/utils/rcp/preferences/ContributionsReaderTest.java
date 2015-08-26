@@ -8,7 +8,7 @@
  * Contributors:
  *    Yasser Aziza - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.rcp.links;
+package org.eclipse.recommenders.internal.utils.rcp.preferences;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.CoreMatchers.notNullValue;
