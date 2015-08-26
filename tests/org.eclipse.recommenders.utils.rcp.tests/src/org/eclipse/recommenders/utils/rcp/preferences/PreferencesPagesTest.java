@@ -8,44 +8,44 @@
  * Contributors:
  *    Olav Lenz - initial API and implementation.
  */
-package org.eclipse.recommenders.rcp.utils;
+package org.eclipse.recommenders.utils.rcp.preferences;
 
-import static junit.framework.Assert.assertEquals;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
-public class PreferencesHelperTest {
+public class PreferencesPagesTest {
 
-    private static final String PREFPAGE_ID_EMPTY = "";
-    private static final String PREFPAGE_ID_NON_EXISTING = "non.existing";
+    private static final String PREFPAGE_ID_NON_EXISTING = "invalid";
     private static final String PREFPAGE_ID_JAVA_BASE = "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage";
     private static final String PREFPAGE_ID_EDITORS = "org.eclipse.ui.preferencePages.Editors";
     private static final String PREFPAGE_ID_SPELLING = "org.eclipse.ui.editors.preferencePages.Spelling";
 
     @Test
     public void emptyLinkStringForEmptyPrefPageID() {
-        assertEquals("", PreferencesHelper.createLinkLabelToPreferencePage(PREFPAGE_ID_EMPTY));
+        assertThat(PreferencePages.createLinkLabelToPreferencePage(""), isEmptyString());
     }
 
     @Test
     public void emptyLinkStringForNonExistingPrefPageID() {
-        assertEquals("", PreferencesHelper.createLinkLabelToPreferencePage(PREFPAGE_ID_NON_EXISTING));
+        assertThat(PreferencePages.createLinkLabelToPreferencePage(PREFPAGE_ID_NON_EXISTING), isEmptyString());
     }
 
     @Test
     public void correctLinkStringForPrefPageWithoutTopCategory() {
-        assertEquals("Java", PreferencesHelper.createLinkLabelToPreferencePage(PREFPAGE_ID_JAVA_BASE));
+        assertThat(PreferencePages.createLinkLabelToPreferencePage(PREFPAGE_ID_JAVA_BASE), is(equalTo("Java")));
     }
 
     @Test
     public void correctLinkStringForPrefPageWithOneTopCategory() {
-        assertEquals("General > Editors", PreferencesHelper.createLinkLabelToPreferencePage(PREFPAGE_ID_EDITORS));
+        assertThat(PreferencePages.createLinkLabelToPreferencePage(PREFPAGE_ID_EDITORS),
+                is(equalTo("General > Editors")));
     }
 
     @Test
     public void correctLinkStringForPrefPageWithMoreTopCategory() {
-        assertEquals("General > Editors > Text Editors > Spelling",
-                PreferencesHelper.createLinkLabelToPreferencePage(PREFPAGE_ID_SPELLING));
+        assertThat(PreferencePages.createLinkLabelToPreferencePage(PREFPAGE_ID_SPELLING),
+                is(equalTo("General > Editors > Text Editors > Spelling")));
     }
 }
