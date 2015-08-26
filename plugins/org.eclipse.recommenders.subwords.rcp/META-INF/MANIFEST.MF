@@ -12,10 +12,18 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui,
  org.eclipse.jface.text,
+<<<<<<< HEAD   (df7e01 [news] added sync icon for "Poll Now" menu item)
  org.eclipse.recommenders.completion.rcp;bundle-version="[2.3.0,2.3.1)",
  org.eclipse.recommenders.injection;bundle-version="[2.3.0,2.3.1)",
  org.eclipse.recommenders.rcp;bundle-version="[2.3.0,2.3.1)",
  org.eclipse.recommenders.utils;bundle-version="[2.3.0,2.3.1)",
+=======
+ org.eclipse.recommenders.completion.rcp;bundle-version="[2.2.4,2.2.5)",
+ org.eclipse.recommenders.injection;bundle-version="[2.2.4,2.2.5)",
+ org.eclipse.recommenders.rcp;bundle-version="[2.2.4,2.2.5)",
+ org.eclipse.recommenders.utils;bundle-version="[2.2.4,2.2.5)",
+ org.eclipse.recommenders.utils.rcp;bundle-version="[2.2.4,2.2.5)",
+>>>>>>> BRANCH (3c532e [utils] Introduce org.eclipse.recommenders.utils.rcp bundle)
  org.eclipse.ui
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  com.google.common.base;version="[15.0.0,16.0.0)",
