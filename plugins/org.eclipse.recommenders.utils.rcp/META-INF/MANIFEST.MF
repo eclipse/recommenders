@@ -1,12 +1,26 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+<<<<<<< HEAD   (dcddf7 [news] added documentation for interfaces and feed schema)
 Bundle-SymbolicName: org.eclipse.recommenders.utils.rcp
 Bundle-Version: 2.3.0.qualifier
+=======
+Bundle-SymbolicName: org.eclipse.recommenders.utils.rcp;singleton:=true
+Bundle-Version: 2.2.4.qualifier
+>>>>>>> BRANCH (33e0a7 Merge "[core] Create InjectionModule providing EventBus" int)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
+Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.recommenders.utils,
  org.eclipse.ui
-Import-Package: com.google.common.base;version="[15.0.0,16.0.0)",
- com.google.common.collect;version="[15.0.0,16.0.0)"
-Export-Package: org.eclipse.recommenders.utils.rcp
+Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
+ com.google.common.base;version="[15.0.0,16.0.0)",
+ com.google.common.collect;version="[15.0.0,16.0.0)",
+ com.google.common.primitives;version="[15.0.0,16.0.0)"
+Export-Package: org.eclipse.recommenders.utils.rcp;
+  uses:="org.eclipse.core.runtime,
+   com.google.common.base,
+   org.eclipse.swt.widgets,
+   org.eclipse.jface.viewers",
+ org.eclipse.recommenders.utils.rcp.preferences;uses:="org.eclipse.ui,org.eclipse.swt.widgets,org.eclipse.jface.preference"
