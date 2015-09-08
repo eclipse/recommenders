@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -96,7 +97,7 @@ public class NewsFeedPropertiesTest {
 
     @Test
     public void testWritePollDate() throws ParseException {
-        Map<FeedDescriptor, Date> writePollDates = Maps.newHashMap();
+        Map<IFeed, Date> writePollDates = Maps.newHashMap();
         Date date = dateFormat.parse(dateFormat.format(new Date()));
         FeedDescriptor feed = enabled(testId);
         writePollDates.put(feed, date);
@@ -110,7 +111,7 @@ public class NewsFeedPropertiesTest {
 
     @Test
     public void testdWriteMultiplePollDates() throws ParseException {
-        Map<FeedDescriptor, Date> writePollDates = Maps.newHashMap();
+        Map<IFeed, Date> writePollDates = Maps.newHashMap();
         Date date = dateFormat.parse(dateFormat.format(new Date()));
         FeedDescriptor feed = enabled(testId);
         FeedDescriptor secondFeed = enabled(testIdTwo);
@@ -127,7 +128,7 @@ public class NewsFeedPropertiesTest {
 
     @Test
     public void testWriteEmptyMap() {
-        Map<FeedDescriptor, Date> writePollDates = Maps.newHashMap();
+        Map<IFeed, Date> writePollDates = Maps.newHashMap();
 
         sut.writeDates(writePollDates, Constants.FILENAME_POLL_DATES);
         Map<String, Date> readPollDates = sut.getDates(Constants.FILENAME_POLL_DATES);
@@ -137,7 +138,7 @@ public class NewsFeedPropertiesTest {
 
     @Test
     public void testWriteNullMap() {
-        Map<FeedDescriptor, Date> writePollDates = null;
+        Map<IFeed, Date> writePollDates = null;
 
         sut.writeDates(writePollDates, Constants.FILENAME_POLL_DATES);
         Map<String, Date> readPollDates = sut.getDates(Constants.FILENAME_POLL_DATES);

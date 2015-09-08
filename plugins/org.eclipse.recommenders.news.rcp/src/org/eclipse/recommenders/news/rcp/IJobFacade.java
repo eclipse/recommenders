@@ -9,8 +9,6 @@ package org.eclipse.recommenders.news.rcp;
 
 import java.util.Set;
 
-import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
-
 public interface IJobFacade {
     /**
      * Schedules an update of all feeds after the given delay (in miliseconds)
@@ -30,7 +28,7 @@ public interface IJobFacade {
      * @param feeds
      *            {@code Set} of feeds to be polled
      */
-    void schedulePollFeeds(INewsService service, Set<FeedDescriptor> feeds);
+    void schedulePollFeeds(INewsService service, Set<IFeed> feeds);
 
     /**
      * Cancels polling feeds.

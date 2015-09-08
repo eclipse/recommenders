@@ -7,41 +7,42 @@
  */
 package org.eclipse.recommenders.internal.news.rcp.menus;
 
-import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.*;
-
 import org.eclipse.jface.action.Action;
-import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.recommenders.news.rcp.IFeed;
+import org.eclipse.recommenders.news.rcp.IFeedEvents;
 
 import com.google.common.eventbus.EventBus;
 
 public class MarkAsReadAction extends Action {
     private final EventBus eventBus;
     private final Boolean allFeeds;
-    private final FeedDescriptor feed;
+    private final IFeed feed;
+    private final IFeedEvents feedEvents;
 
-    private MarkAsReadAction(EventBus eventBus, FeedDescriptor feed, boolean allFeeds) {
+    private MarkAsReadAction(EventBus eventBus, IFeed feed, boolean allFeeds, IFeedEvents feedEvents) {
         super();
         this.eventBus = eventBus;
         this.allFeeds = allFeeds;
         this.feed = feed;
+        this.feedEvents = feedEvents;
     }
 
-    public static MarkAsReadAction newMarkFeedAsReadAction(EventBus eventBus, FeedDescriptor feed) {
-        return new MarkAsReadAction(eventBus, feed, false);
+    public static MarkAsReadAction newMarkFeedAsReadAction(EventBus eventBus, IFeed feed, IFeedEvents feedEvents) {
+        return new MarkAsReadAction(eventBus, feed, false, feedEvents);
     }
 
-    public static MarkAsReadAction newMarkAllAsReadAction(EventBus eventBus) {
-        return new MarkAsReadAction(eventBus, null, true);
+    public static MarkAsReadAction newMarkAllAsReadAction(EventBus eventBus, IFeedEvents feedEvents) {
+        return new MarkAsReadAction(eventBus, null, true, feedEvents);
     }
 
     @Override
     public void run() {
         if (allFeeds) {
-            eventBus.post(createAllReadEvent());
+            eventBus.post(feedEvents.createAllReadEvent());
             return;
         }
-        eventBus.post(createFeedReadEvent(feed));
+        eventBus.post(feedEvents.createFeedReadEvent(feed));
     }
 
     @Override

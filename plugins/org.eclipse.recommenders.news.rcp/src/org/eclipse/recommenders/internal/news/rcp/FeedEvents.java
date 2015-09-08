@@ -7,53 +7,34 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-public class FeedEvents {
+import javax.inject.Singleton;
 
-    public static NewFeedItemsEvent createNewFeedItemsEvent() {
+import org.eclipse.e4.core.di.annotations.Creatable;
+import org.eclipse.recommenders.news.rcp.IFeed;
+import org.eclipse.recommenders.news.rcp.IFeedEvents;
+
+@Creatable
+@Singleton
+public class FeedEvents implements IFeedEvents {
+
+    @Override
+    public NewFeedItemsEvent createNewFeedItemsEvent() {
         return new NewFeedItemsEvent();
     }
 
-    public static FeedMessageReadEvent createFeedMessageReadEvent(String id) {
+    @Override
+    public FeedMessageReadEvent createFeedMessageReadEvent(String id) {
         return new FeedMessageReadEvent(id);
     }
 
-    public static FeedReadEvent createFeedReadEvent(FeedDescriptor feed) {
+    @Override
+    public FeedReadEvent createFeedReadEvent(IFeed feed) {
         return new FeedReadEvent(feed);
     }
 
-    public static AllReadEvent createAllReadEvent() {
+    @Override
+    public AllReadEvent createAllReadEvent() {
         return new AllReadEvent();
-    }
-
-    public static class NewFeedItemsEvent {
-    }
-
-    public static class FeedMessageReadEvent {
-        private final String id;
-
-        public FeedMessageReadEvent(String id) {
-            this.id = id;
-        }
-
-        public String getId() {
-            return id;
-        }
-    }
-
-    public static class FeedReadEvent {
-        private final FeedDescriptor feed;
-
-        public FeedReadEvent(FeedDescriptor feed) {
-            this.feed = feed;
-        }
-
-        public FeedDescriptor getFeed() {
-            return feed;
-        }
-    }
-
-    public static class AllReadEvent {
-
     }
 
 }

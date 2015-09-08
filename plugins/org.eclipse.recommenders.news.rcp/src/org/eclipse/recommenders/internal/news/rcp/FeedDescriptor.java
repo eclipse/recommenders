@@ -19,13 +19,14 @@ import java.util.Objects;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.recommenders.internal.news.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-public class FeedDescriptor implements Comparable<FeedDescriptor> {
+public class FeedDescriptor implements Comparable<IFeed>, IFeed {
 
     private final boolean defaultRepository;
     private final String id;
@@ -69,22 +70,27 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
         this.parameters = parameters;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public URL getUrl() {
         return url;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public String getPollingInterval() {
         return pollingInterval;
     }
@@ -101,6 +107,7 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
         this.enabled = enabled;
     }
 
+    @Override
     public Image getIcon() {
         if (iconPath != null) {
             return AbstractUIPlugin.imageDescriptorFromPlugin(Constants.PLUGIN_ID, iconPath).createImage();
@@ -178,7 +185,7 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
     }
 
     @Override
-    public int compareTo(FeedDescriptor that) {
+    public int compareTo(IFeed that) {
         return this.getName().compareTo(that.getName());
     }
 }

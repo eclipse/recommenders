@@ -20,12 +20,14 @@ import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.AllReadEvent;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
+import org.eclipse.recommenders.news.rcp.IFeed;
+import org.eclipse.recommenders.news.rcp.IFeedEvents;
+import org.eclipse.recommenders.news.rcp.IFeedEvents.AllReadEvent;
+import org.eclipse.recommenders.news.rcp.IFeedEvents.FeedMessageReadEvent;
+import org.eclipse.recommenders.news.rcp.IFeedEvents.FeedReadEvent;
+import org.eclipse.recommenders.news.rcp.IFeedEvents.NewFeedItemsEvent;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.eclipse.recommenders.news.rcp.IPollingResult.Status;
@@ -47,6 +49,8 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     private INewsService service;
     @Inject
     private NewsRcpPreferences preferences;
+    @Inject
+    private IFeedEvents feedEvents;
     private NewsMenuListener newsMenuListener;
     private UpdatingNewsAction updatingNewsAction;
     private MenuManager menuManager;
@@ -58,7 +62,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     @PostConstruct
     public void init() {
         NewsRcpModule.EVENT_BUS.register(this);
-        newsMenuListener = new NewsMenuListener(NewsRcpModule.EVENT_BUS, service);
+        newsMenuListener = new NewsMenuListener(NewsRcpModule.EVENT_BUS, service, feedEvents);
     }
 
     @Override
@@ -108,7 +112,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     }
 
     private class UpdatingNewsAction extends Action {
-        Map<FeedDescriptor, IPollingResult> messages = Maps.newHashMap();
+        Map<IFeed, IPollingResult> messages = Maps.newHashMap();
 
         private UpdatingNewsAction() {
             setNoAvailableNews();
@@ -128,7 +132,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
             clearMenu();
-            HashMap<FeedDescriptor, IPollingResult> groupedMessages = Maps.newHashMap();
+            HashMap<IFeed, IPollingResult> groupedMessages = Maps.newHashMap();
             for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
                 if (feed.isEnabled()) {
                     groupedMessages.put(feed, new PollingResult(Status.FEEDS_NOT_POLLED_YET));
@@ -158,7 +162,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             menuManager.removeMenuListener(newsMenuListener);
         }
 
-        private void setNewsMenu(Map<FeedDescriptor, IPollingResult> messages) {
+        private void setNewsMenu(Map<IFeed, IPollingResult> messages) {
             newsMenuListener.setMessages(messages);
             menuManager.addMenuListener(newsMenuListener);
         }
