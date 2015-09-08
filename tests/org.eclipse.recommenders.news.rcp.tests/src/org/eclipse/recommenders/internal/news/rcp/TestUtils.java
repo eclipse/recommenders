@@ -12,6 +12,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IPollingResult.Status;
 import org.mockito.Mockito;
@@ -58,7 +59,7 @@ public class TestUtils {
         return feedMessages;
     }
 
-    public static FeedDescriptor mockFeed(String name) {
+    public static IFeed mockFeed(String name) {
         return enabled(name);
     }
 

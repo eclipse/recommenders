@@ -9,7 +9,6 @@ package org.eclipse.recommenders.news.rcp;
 
 import java.util.Map;
 
-import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.AllReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
@@ -21,7 +20,7 @@ public interface INewsService {
      *            limit of messages per each entry
      * @return Map of Feed and PollingResult (Wrapper for polling status and feed messages)
      */
-    Map<FeedDescriptor, IPollingResult> getMessages(int countPerFeed);
+    Map<IFeed, IPollingResult> getMessages(int countPerFeed);
 
     /**
      * Starts polling feeds
@@ -35,7 +34,7 @@ public interface INewsService {
      * @param feed
      *            Feed to be removed
      */
-    void removeFeed(FeedDescriptor feed);
+    void removeFeed(IFeed feed);
 
     /**
      * Handles situation when job is done (i.e. grouping and filtering polled messages)

@@ -28,6 +28,7 @@ import org.eclipse.recommenders.internal.news.rcp.CommonImages;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.MessageUtils.MessageAge;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
@@ -39,7 +40,7 @@ import com.google.common.eventbus.EventBus;
 public class NewsMenuListener implements IMenuListener {
     private final EventBus eventBus;
     private final INewsService service;
-    private Map<FeedDescriptor, IPollingResult> messages;
+    private Map<IFeed, IPollingResult> messages;
 
     public NewsMenuListener(EventBus eventBus, INewsService service) {
         super();
@@ -47,14 +48,14 @@ public class NewsMenuListener implements IMenuListener {
         this.service = service;
     }
 
-    public void setMessages(Map<FeedDescriptor, IPollingResult> messages) {
+    public void setMessages(Map<IFeed, IPollingResult> messages) {
         this.messages = messages;
     }
 
     @Override
     public void menuAboutToShow(IMenuManager manager) {
-        messages = new TreeMap<FeedDescriptor, IPollingResult>(messages);
-        for (Entry<FeedDescriptor, IPollingResult> entry : messages.entrySet()) {
+        messages = new TreeMap<IFeed, IPollingResult>(messages);
+        for (Entry<IFeed, IPollingResult> entry : messages.entrySet()) {
             String menuName = getMenuEntryTitle(entry.getKey().getName(), entry.getValue().getMessages());
             MenuManager menu = new MenuManager(menuName, entry.getKey().getId());
             if (entry.getKey().getIcon() != null) {
@@ -81,7 +82,7 @@ public class NewsMenuListener implements IMenuListener {
         manager.add(new PreferenceAction());
     }
 
-    private void addMarkAsReadAction(FeedDescriptor feed, MenuManager menu) {
+    private void addMarkAsReadAction(IFeed feed, MenuManager menu) {
         menu.add(new Separator());
         menu.add(newMarkFeedAsReadAction(eventBus, feed));
     }
@@ -105,7 +106,7 @@ public class NewsMenuListener implements IMenuListener {
         };
     }
 
-    private void groupEntries(MenuManager menu, Entry<FeedDescriptor, IPollingResult> entry) {
+    private void groupEntries(MenuManager menu, Entry<IFeed, IPollingResult> entry) {
         List<List<IFeedMessage>> groupedMessages = splitMessagesByAge(entry.getValue().getMessages());
         List<String> labels = ImmutableList.of(Messages.LABEL_TODAY, Messages.LABEL_YESTERDAY, Messages.LABEL_THIS_WEEK,
                 Messages.LABEL_LAST_WEEK, Messages.LABEL_THIS_MONTH, Messages.LABEL_LAST_MONTH,
@@ -118,13 +119,13 @@ public class NewsMenuListener implements IMenuListener {
         }
     }
 
-    private void addMessages(MenuManager menu, List<IFeedMessage> messages, final FeedDescriptor feed) {
+    private void addMessages(MenuManager menu, List<IFeedMessage> messages, final IFeed feed) {
         for (final IFeedMessage message : messages) {
             Action action = new Action() {
 
                 @Override
                 public void run() {
-                    BrowserUtils.openInDefaultBrowser(message.getUrl(), feed.getParameters());
+                    BrowserUtils.openInDefaultBrowser(message.getUrl(), ((FeedDescriptor) feed).getParameters());
                     eventBus.post(createFeedMessageReadEvent(message.getId()));
                 }
             };
@@ -154,7 +155,7 @@ public class NewsMenuListener implements IMenuListener {
         return action;
     }
 
-    private void addStatusLabel(MenuManager menu, Status status, FeedDescriptor feed) {
+    private void addStatusLabel(MenuManager menu, Status status, IFeed feed) {
         Action action = new Action() {
         };
         if (status.equals(Status.FEEDS_NOT_POLLED_YET)) {
