@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.eclipse.recommenders.news.rcp.IPollingResult.Status;
@@ -34,11 +35,10 @@ import com.google.common.collect.Lists;
 @RunWith(Parameterized.class)
 public class MessageUtilsMergeMessagesTest {
 
-    private final Map<FeedDescriptor, IPollingResult> inputMap;
+    private final Map<IFeed, IPollingResult> inputMap;
     private final List<IFeedMessage> expectedMessages;
 
-    public MessageUtilsMergeMessagesTest(Map<FeedDescriptor, IPollingResult> inputMap,
-            List<IFeedMessage> expectedMessages) {
+    public MessageUtilsMergeMessagesTest(Map<IFeed, IPollingResult> inputMap, List<IFeedMessage> expectedMessages) {
         this.inputMap = inputMap;
         this.expectedMessages = expectedMessages;
     }

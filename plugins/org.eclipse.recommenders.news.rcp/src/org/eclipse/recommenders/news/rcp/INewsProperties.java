@@ -11,8 +11,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
-
 public interface INewsProperties {
     /**
      * @return Set of message IDs read by user.
@@ -41,5 +39,5 @@ public interface INewsProperties {
      * @param filename
      *            name of file to save data to
      */
-    void writeDates(Map<FeedDescriptor, Date> map, String filename);
+    void writeDates(Map<IFeed, Date> map, String filename);
 }
