@@ -1,0 +1,7 @@
+Verified+1: Hudson CI
+Code-Review+2: Andreas Sewe <andreas.sewe@codetrails.com>
+Submitted-by: Andreas Sewe <andreas.sewe@codetrails.com>
+Submitted-at: Mon, 14 Sep 2015 05:24:50 -0400
+Reviewed-on: https://git.eclipse.org/r/55832
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/master
