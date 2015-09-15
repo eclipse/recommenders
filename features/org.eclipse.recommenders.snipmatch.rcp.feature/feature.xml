@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.snipmatch.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (178adc [releng] Merge maintenance (2.2.4) into master (2.3.0))
       version="2.3.0.qualifier"
+=======
+      version="2.2.5.qualifier"
+>>>>>>> BRANCH (bcdf4b [releng] 2.2.5-SNAPSHOT)
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
