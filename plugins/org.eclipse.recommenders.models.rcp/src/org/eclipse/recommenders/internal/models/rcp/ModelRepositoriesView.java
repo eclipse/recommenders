@@ -372,11 +372,9 @@ public class ModelRepositoriesView extends ViewPart {
 
     private Multimap<String, ModelCoordinate> fetchCoordinatesGroupedByRepo() {
         Multimap<String, ModelCoordinate> coordinatesGroupedByRepo = LinkedListMultimap.create();
-
         for (String classifier : modelClassifiers) {
             addCoordinateToIndex(coordinatesGroupedByRepo, classifier);
         }
-
         return coordinatesGroupedByRepo;
     }
 
