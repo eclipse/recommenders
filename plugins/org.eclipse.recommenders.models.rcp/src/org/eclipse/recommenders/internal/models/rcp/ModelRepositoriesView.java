@@ -108,7 +108,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -372,11 +371,9 @@ public class ModelRepositoriesView extends ViewPart {
 
     private Multimap<String, ModelCoordinate> fetchCoordinatesGroupedByRepo() {
         Multimap<String, ModelCoordinate> coordinatesGroupedByRepo = LinkedListMultimap.create();
-
         for (String classifier : modelClassifiers) {
             addCoordinateToIndex(coordinatesGroupedByRepo, classifier);
         }
-
         return coordinatesGroupedByRepo;
     }
 
@@ -397,7 +394,8 @@ public class ModelRepositoriesView extends ViewPart {
         for (ProjectCoordinate pc : coordinatesGroupedByProjectCoordinate.keySet()) {
             coordinates.add(new KnownCoordinate(url, pc, coordinatesGroupedByProjectCoordinate.get(pc)));
         }
-        return Ordering.natural().onResultOf(toStringRepresentation).sortedCopy(coordinates);
+        Collections.sort(coordinates, new KnownCoordinateComparator());
+        return coordinates;
     }
 
     private Multimap<ProjectCoordinate, ModelCoordinate> groupByProjectCoordinate(
