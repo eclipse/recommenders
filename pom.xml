@@ -68,7 +68,7 @@
 		<javaVersion>1.7</javaVersion>
 		<tychoVersion>0.23.1</tychoVersion>
 		<!-- The default simultaneous release used to base the target platform on. (Override with -Dsimrel=...) -->
-		<simrel>mars</simrel>
+		<simrel>neon</simrel>
 		<!-- Use HTTP, as it provides the most firewall-friendly access to the Git repository. -->
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/recommenders/org.eclipse.recommenders.git</tycho.scmUrl>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -206,7 +206,7 @@
 					<version>${tychoVersion}</version>
 					<configuration>
 						<executionEnvironmentDefault>JavaSE-${javaVersion}</executionEnvironmentDefault>
-						<includePackedArtifacts>true</includePackedArtifacts>
+						<includePackedArtifacts>false</includePackedArtifacts>
 						<target>
 							<artifact>
 								<groupId>org.eclipse.recommenders</groupId>
