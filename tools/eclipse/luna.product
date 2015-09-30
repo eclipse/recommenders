@@ -83,11 +83,11 @@
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.platform.source"/>
       <feature id="org.eclipse.recommenders.3rd.feature"/>
-      <feature id="org.eclipse.recommenders.devel.feature"/>
       <feature id="org.eclipse.recommenders.feature.rcp"/>
       <feature id="org.eclipse.recommenders.rcp.feature"/>
       <feature id="org.eclipse.recommenders.news.rcp.feature"/>
       <feature id="org.eclipse.recommenders.snipmatch.rcp.feature"/>
    </features>
+
 
 </product>
