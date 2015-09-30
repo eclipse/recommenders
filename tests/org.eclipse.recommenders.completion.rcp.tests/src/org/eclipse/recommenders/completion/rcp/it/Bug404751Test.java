@@ -40,7 +40,7 @@ public class Bug404751Test {
         this.typeArguments = typeArguments;
     }
 
-    @Parameters
+    @Parameters(name = "{index}")
     public static Collection<Object[]> scenarios() {
         LinkedList<Object[]> scenarios = Lists.newLinkedList();
 
