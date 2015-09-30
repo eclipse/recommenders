@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Target Definition for Eclipse Kepler (4.3)" sequenceNumber="154">
+<?pde version="3.8"?><target name="Target Definition for Eclipse Kepler (4.3)" sequenceNumber="155">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.egit.feature.group" version="0.0.0"/>
@@ -80,8 +80,6 @@
 <unit id="com.google.inject.multibindings" version="3.0.0.v201402270930"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7766 -->
 <unit id="com.google.guava" version="15.0.0.v201403281430"/>
-<!-- http://dev.eclipse.org/ipzilla/show_bug.cgi?id=8271 -->
-<unit id="org.apache.commons.codec" version="1.6.0.v201305230611"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=5902 -->
 <unit id="org.apache.commons.lang3" version="3.1.0.v201403281430"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=9005 -->

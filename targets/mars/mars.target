@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Target Definition for Eclipse Mars (4.5)" sequenceNumber="157">
+<?pde version="3.8"?><target name="Target Definition for Eclipse Mars (4.5)" sequenceNumber="158">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.e4.rcp.feature.group" version="0.0.0"/>
@@ -86,8 +86,6 @@
 <unit id="com.google.inject.multibindings" version="3.0.0.v201402270930"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=5969 -->
 <unit id="javax.inject" version="1.0.0.v20091030"/>
-<!-- http://dev.eclipse.org/ipzilla/show_bug.cgi?id=8271 -->
-<unit id="org.apache.commons.codec" version="1.6.0.v201305230611"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7437 -->
 <unit id="org.apache.commons.httpclient" version="3.1.0.v201012070820"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=9073 -->
