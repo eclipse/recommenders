@@ -7,7 +7,6 @@
 	<artifactId>org.eclipse.recommenders</artifactId>
 	<version>2.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-
 	<organization>
 		<name>Eclipse Foundation</name>
 		<url>http://www.eclipse.org/</url>
@@ -349,7 +348,9 @@
 									<validHeader>header-tu-darmstadt-2011.txt</validHeader>
 									<validHeader>header-tu-darmstadt-2012.txt</validHeader>
 									<validHeader>header-tu-darmstadt-2013.txt</validHeader>
-									<validHeader>header-tu-darmstadt-2014.txt</validHeader>
+									<validHeader>header-tu-darmstadt-2014.txt</validHeader>		<validHeader>
+
+header-varun-2015.txt</validHeader>
 								</validHeaders>
 								<includes>
 									<include>src/**/*.java</include>
