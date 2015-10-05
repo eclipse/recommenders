@@ -42,6 +42,7 @@ import org.eclipse.mylyn.internal.commons.notifications.feed.FeedEntry;
 import org.eclipse.mylyn.internal.commons.notifications.feed.FeedReader;
 import org.eclipse.recommenders.internal.news.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IPollFeedJob;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
@@ -61,11 +62,11 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("restriction")
 public class PollFeedJob extends Job implements IPollFeedJob {
     private final NotificationEnvironment environment;
-    private final Map<FeedDescriptor, IPollingResult> groupedMessages = Maps.newHashMap();
-    private final Set<FeedDescriptor> feeds = Sets.newHashSet();
-    private final Map<FeedDescriptor, Date> pollDates = Maps.newHashMap();
+    private final Map<IFeed, IPollingResult> groupedMessages = Maps.newHashMap();
+    private final Set<IFeed> feeds = Sets.newHashSet();
+    private final Map<IFeed, Date> pollDates = Maps.newHashMap();
 
-    public PollFeedJob(Collection<FeedDescriptor> feeds) {
+    public PollFeedJob(Collection<IFeed> feeds) {
         super(Messages.POLL_FEED_JOB_NAME);
         Preconditions.checkNotNull(feeds);
         this.environment = new NotificationEnvironment();
@@ -79,7 +80,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         SubMonitor sub = SubMonitor.convert(monitor, feeds.size() * 100);
         try {
             Executor executor = Executor.newInstance();
-            for (FeedDescriptor feed : feeds) {
+            for (IFeed feed : feeds) {
                 if (monitor.isCanceled() || FrameworkUtil.getBundle(this.getClass()).getState() != Bundle.ACTIVE) {
                     return Status.CANCEL_STATUS;
                 }
@@ -91,7 +92,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         }
     }
 
-    private void pollFeed(IProgressMonitor monitor, SubMonitor sub, Executor executor, FeedDescriptor feed) {
+    private void pollFeed(IProgressMonitor monitor, SubMonitor sub, Executor executor, IFeed feed) {
         try {
             URI feedUri = urlToUri(feed.getUrl()).orNull();
             if (feedUri != null) {
@@ -114,7 +115,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         }
     }
 
-    private Response connectToUrl(FeedDescriptor feed, Executor executor, URI feedUri)
+    private Response connectToUrl(IFeed feed, Executor executor, URI feedUri)
             throws ClientProtocolException, IOException {
         Request request = Request.Get(feedUri).viaProxy(getProxyHost(feedUri).orNull())
                 .connectTimeout((int) Constants.CONNECTION_TIMEOUT).staleConnectionCheck(true)
@@ -128,7 +129,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
         return Objects.equals(Constants.POLL_FEED_JOB_FAMILY, job);
     }
 
-    private void updateGroupedMessages(HttpResponse httpResponse, FeedDescriptor feed, IProgressMonitor monitor) {
+    private void updateGroupedMessages(HttpResponse httpResponse, IFeed feed, IProgressMonitor monitor) {
         monitor.subTask(MessageFormat.format(Messages.POLL_FEED_JOB_SUBTASK_POLLING_FEED, feed.getName()));
         try {
             if (monitor.isCanceled() || FrameworkUtil.getBundle(this.getClass()).getState() != Bundle.ACTIVE) {
@@ -169,12 +170,12 @@ public class PollFeedJob extends Job implements IPollFeedJob {
     }
 
     @Override
-    public Map<FeedDescriptor, IPollingResult> getMessages() {
+    public Map<IFeed, IPollingResult> getMessages() {
         return groupedMessages;
     }
 
     @Override
-    public Map<FeedDescriptor, Date> getPollDates() {
+    public Map<IFeed, Date> getPollDates() {
         return pollDates;
     }
 

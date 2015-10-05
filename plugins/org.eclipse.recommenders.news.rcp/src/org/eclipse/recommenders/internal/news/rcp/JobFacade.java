@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.recommenders.news.rcp.IJobFacade;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.osgi.framework.Bundle;
@@ -49,7 +50,7 @@ public class JobFacade implements IJobFacade {
     }
 
     @Override
-    public void schedulePollFeeds(final INewsService service, Set<FeedDescriptor> feeds) {
+    public void schedulePollFeeds(final INewsService service, Set<IFeed> feeds) {
         final PollFeedJob job = new PollFeedJob(feeds);
         job.addJobChangeListener(new JobChangeAdapter() {
             @Override
