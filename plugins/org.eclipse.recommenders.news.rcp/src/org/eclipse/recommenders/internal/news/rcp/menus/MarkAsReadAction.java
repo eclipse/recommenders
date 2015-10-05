@@ -10,24 +10,24 @@ package org.eclipse.recommenders.internal.news.rcp.menus;
 import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.*;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.recommenders.news.rcp.IFeed;
 
 import com.google.common.eventbus.EventBus;
 
 public class MarkAsReadAction extends Action {
     private final EventBus eventBus;
     private final Boolean allFeeds;
-    private final FeedDescriptor feed;
+    private final IFeed feed;
 
-    private MarkAsReadAction(EventBus eventBus, FeedDescriptor feed, boolean allFeeds) {
+    private MarkAsReadAction(EventBus eventBus, IFeed feed, boolean allFeeds) {
         super();
         this.eventBus = eventBus;
         this.allFeeds = allFeeds;
         this.feed = feed;
     }
 
-    public static MarkAsReadAction newMarkFeedAsReadAction(EventBus eventBus, FeedDescriptor feed) {
+    public static MarkAsReadAction newMarkFeedAsReadAction(EventBus eventBus, IFeed feed) {
         return new MarkAsReadAction(eventBus, feed, false);
     }
 

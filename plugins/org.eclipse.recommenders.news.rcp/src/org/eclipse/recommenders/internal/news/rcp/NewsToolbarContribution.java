@@ -26,6 +26,7 @@ import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.internal.news.rcp.menus.NewsMenuListener;
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.eclipse.recommenders.news.rcp.IPollingResult.Status;
@@ -108,7 +109,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
     }
 
     private class UpdatingNewsAction extends Action {
-        Map<FeedDescriptor, IPollingResult> messages = Maps.newHashMap();
+        Map<IFeed, IPollingResult> messages = Maps.newHashMap();
 
         private UpdatingNewsAction() {
             setNoAvailableNews();
@@ -128,7 +129,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             setImageDescriptor(CommonImages.RSS_INACTIVE);
             setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
             clearMenu();
-            HashMap<FeedDescriptor, IPollingResult> groupedMessages = Maps.newHashMap();
+            HashMap<IFeed, IPollingResult> groupedMessages = Maps.newHashMap();
             for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
                 if (feed.isEnabled()) {
                     groupedMessages.put(feed, new PollingResult(Status.FEEDS_NOT_POLLED_YET));
@@ -158,7 +159,7 @@ public class NewsToolbarContribution extends WorkbenchWindowControlContribution 
             menuManager.removeMenuListener(newsMenuListener);
         }
 
-        private void setNewsMenu(Map<FeedDescriptor, IPollingResult> messages) {
+        private void setNewsMenu(Map<IFeed, IPollingResult> messages) {
             newsMenuListener.setMessages(messages);
             menuManager.addMenuListener(newsMenuListener);
         }

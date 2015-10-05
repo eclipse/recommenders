@@ -7,6 +7,8 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
+import org.eclipse.recommenders.news.rcp.IFeed;
+
 public class FeedEvents {
 
     public static NewFeedItemsEvent createNewFeedItemsEvent() {
@@ -17,7 +19,7 @@ public class FeedEvents {
         return new FeedMessageReadEvent(id);
     }
 
-    public static FeedReadEvent createFeedReadEvent(FeedDescriptor feed) {
+    public static FeedReadEvent createFeedReadEvent(IFeed feed) {
         return new FeedReadEvent(feed);
     }
 
@@ -41,13 +43,13 @@ public class FeedEvents {
     }
 
     public static class FeedReadEvent {
-        private final FeedDescriptor feed;
+        private final IFeed feed;
 
-        public FeedReadEvent(FeedDescriptor feed) {
+        public FeedReadEvent(IFeed feed) {
             this.feed = feed;
         }
 
-        public FeedDescriptor getFeed() {
+        public IFeed getFeed() {
             return feed;
         }
     }

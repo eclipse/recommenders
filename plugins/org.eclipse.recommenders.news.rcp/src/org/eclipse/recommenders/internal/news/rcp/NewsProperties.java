@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.recommenders.internal.news.rcp.l10n.LogMessages;
+import org.eclipse.recommenders.news.rcp.IFeed;
 import org.eclipse.recommenders.news.rcp.INewsProperties;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -128,7 +129,7 @@ public class NewsProperties implements INewsProperties {
     /**
      * Stores last feed poll date, however it doesn't overwrite it, just add new entries.
      */
-    public void writeDates(Map<FeedDescriptor, Date> map, String filename) {
+    public void writeDates(Map<IFeed, Date> map, String filename) {
         if (map == null) {
             return;
         }
@@ -147,7 +148,7 @@ public class NewsProperties implements INewsProperties {
             }
         }
         List<String> propertyNames = (List<String>) Collections.list(properties.propertyNames());
-        for (Map.Entry<FeedDescriptor, Date> entry : map.entrySet()) {
+        for (Map.Entry<IFeed, Date> entry : map.entrySet()) {
             if (!propertyNames.contains(entry.getKey().getId())) {
                 properties.put(entry.getKey().getId(), dateFormat.format(entry.getValue()));
             } else {

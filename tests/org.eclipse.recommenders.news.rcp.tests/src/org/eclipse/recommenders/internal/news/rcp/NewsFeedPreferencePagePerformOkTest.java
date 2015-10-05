@@ -27,9 +27,9 @@ public class NewsFeedPreferencePagePerformOkTest {
     private static final boolean DISABLED = false;
     private final NewsService service = mock(NewsService.class);
     private final NewsRcpPreferences preferences = mock(NewsRcpPreferences.class);
-    private final List<FeedDescriptor> storedFeeds = Lists.newArrayList(mockFeed(FIRST));
+    private final List<FeedDescriptor> storedFeeds = Lists.newArrayList(enabled(FIRST));
     private final List<FeedDescriptor> storedDisabledFeeds = Lists.newArrayList(disabled(FIRST));
-    private final List<FeedDescriptor> dirtyFeeds = Lists.newArrayList(mockFeed(FIRST), mockFeed(SECOND));
+    private final List<FeedDescriptor> dirtyFeeds = Lists.newArrayList(enabled(FIRST), enabled(SECOND));
 
     @Test
     public void testWhenFeedIsAddedThenServiceStarts() {
