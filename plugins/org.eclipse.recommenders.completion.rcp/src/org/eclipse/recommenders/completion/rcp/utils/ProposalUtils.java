@@ -24,12 +24,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionProposal;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.recommenders.internal.completion.rcp.Constants;
 import org.eclipse.recommenders.internal.completion.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.rcp.utils.CompilerBindings;
 import org.eclipse.recommenders.utils.Reflections;
@@ -45,6 +47,8 @@ public final class ProposalUtils {
 
     private ProposalUtils() {
     }
+
+    private static final boolean DEBUG = Boolean.parseBoolean(Platform.getDebugOption(Constants.DEBUG_COMPLETION_RCP));
 
     private static final IMethodName OBJECT_CLONE = VmMethodName.get("Ljava/lang/Object.clone()Ljava/lang/Object;"); //$NON-NLS-1$
 
@@ -103,7 +107,7 @@ public final class ProposalUtils {
 
         builder.append('.');
 
-        // Method nane
+        // Method name
         builder.append(proposal.isConstructor() ? INIT : proposal.getName());
 
         builder.append('(');
@@ -122,10 +126,14 @@ public final class ProposalUtils {
         appendType(builder, Signature.getReturnType(signature), typeParameters);
 
         String methodName = builder.toString();
+        String logString = toLogString(proposal);
         try {
+            if (DEBUG) {
+                log(LogMessages.INFO_FALLBACK_METHOD_NAME_CREATION, methodName, logString);
+            }
             return Optional.<IMethodName>of(VmMethodName.get(methodName));
         } catch (Exception e) {
-            log(LogMessages.ERROR_SYNTATICALLY_INCORRECT_METHOD_NAME, e, methodName, toLogString(proposal));
+            log(LogMessages.ERROR_SYNTATICALLY_INCORRECT_METHOD_NAME, e, methodName, logString);
             return absent();
         }
     }
