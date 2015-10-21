@@ -25,13 +25,13 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
+import org.eclipse.recommenders.internal.calls.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.Recommendations;
 import org.eclipse.recommenders.utils.names.IMethodName;
 import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.swt.graphics.Image;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -39,7 +39,6 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("restriction")
 public class ProposalBuilder {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
     private List<PatternRecommendation> patterns = Lists.newLinkedList();
     private Image icon;
     private IRecommendersCompletionContext rCtx;
@@ -97,7 +96,7 @@ public class ProposalBuilder {
             try {
                 result.add(new JavaTemplateProposal(createTemplate(pattern), documentContext, icon, pattern));
             } catch (Exception e) {
-                log.warn("Failed to create proposals", e); //$NON-NLS-1$
+                Logs.log(LogMessages.ERROR_FAILED_TO_CREATE_PROPOSALS, e);
             }
         }
         return result;
@@ -132,7 +131,7 @@ public class ProposalBuilder {
                 return jdtMethod.getParameterNames();
             }
         } catch (JavaModelException e) {
-            log.warn("Failed to lookup method arguments names for {}", jdtMethod, e); //$NON-NLS-1$
+            Logs.log(LogMessages.ERROR_FAILED_TO_FIND_ARGUMENTS_FOR_METHODS, e, jdtMethod);
         }
 
         ITypeName[] parameterTypes = method.getParameterTypes();

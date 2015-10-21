@@ -20,8 +20,8 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.recommenders.internal.chain.rcp.l10n.LogMessages;
+import org.eclipse.recommenders.utils.Logs;
 
 /**
  * Represents a transition from Type A to Type B by some chain element ( {@link IField} access, {@link IMethod} call, or
@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("restriction")
 public class ChainElement {
-    private Logger log = LoggerFactory.getLogger(getClass());
 
     public enum ElementType {
         METHOD,
@@ -67,7 +66,7 @@ public class ChainElement {
             elementType = ElementType.METHOD;
             break;
         default:
-            log.warn("Can't handle %s as return type.", element); //$NON-NLS-1$
+            Logs.log(LogMessages.WARNING_CANNOT_HANDLE_RETURN_TYPE, element);
         }
         dimension = returnType.dimensions();
     }

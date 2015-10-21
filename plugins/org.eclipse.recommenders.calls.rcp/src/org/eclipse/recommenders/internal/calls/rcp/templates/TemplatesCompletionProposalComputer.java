@@ -59,10 +59,12 @@ import org.eclipse.recommenders.completion.rcp.ICompletionContextFunction;
 import org.eclipse.recommenders.completion.rcp.IRecommendersCompletionContext;
 import org.eclipse.recommenders.completion.rcp.RecommendersCompletionContext;
 import org.eclipse.recommenders.coordinates.ProjectCoordinate;
+import org.eclipse.recommenders.internal.calls.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.models.UniqueTypeName;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.rcp.IAstProvider;
 import org.eclipse.recommenders.rcp.JavaElementResolver;
+import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.Recommendation;
 import org.eclipse.recommenders.utils.Recommendations;
 import org.eclipse.recommenders.utils.Throws;
@@ -71,8 +73,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -85,8 +85,6 @@ import com.google.common.collect.Sets;
  */
 @SuppressWarnings({ "restriction", "rawtypes", "unchecked" })
 public class TemplatesCompletionProposalComputer implements IJavaCompletionProposalComputer {
-
-    private Logger log = LoggerFactory.getLogger(getClass());
 
     public static enum CompletionMode {
         TYPE_NAME,
@@ -207,8 +205,8 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         // set override-context:
         IMethod overrides = rCtx.get(ENCLOSING_METHOD_FIRST_DECLARATION, null);
         if (overrides != null) {
-            IMethodName crOverrides = elementResolver.toRecMethod(overrides).or(
-                    org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD);
+            IMethodName crOverrides = elementResolver.toRecMethod(overrides)
+                    .or(org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD);
             model.setObservedOverrideContext(crOverrides);
         }
 
@@ -242,8 +240,8 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
         IMethod overrides = rCtx.get(ENCLOSING_METHOD_FIRST_DECLARATION, null);
         model.setObservedDefinitionKind(DefinitionKind.NEW);
         if (overrides != null) {
-            IMethodName crOverrides = elementResolver.toRecMethod(overrides).or(
-                    org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD);
+            IMethodName crOverrides = elementResolver.toRecMethod(overrides)
+                    .or(org.eclipse.recommenders.utils.Constants.UNKNOWN_METHOD);
             model.setObservedOverrideContext(crOverrides);
         }
 
@@ -359,8 +357,8 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
     }
 
     private Optional<IType> getSupertypeOfThis() {
+        IMethod m = rCtx.getEnclosingMethod().orNull();
         try {
-            IMethod m = rCtx.getEnclosingMethod().orNull();
             if (m == null || JdtFlags.isStatic(m)) {
                 return Optional.absent();
             }
@@ -368,7 +366,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
             ITypeHierarchy hierarchy = SuperTypeHierarchyCache.getTypeHierarchy(type);
             return Optional.fromNullable(hierarchy.getSuperclass(type));
         } catch (Exception e) {
-            log.error("Failed to resolve super type of " + rCtx.getEnclosingElement(), e);
+            Logs.log(LogMessages.ERROR_FAILED_TO_RESOLVE_SUPER_TYPE, e, m);
             return Optional.absent();
         }
     }
@@ -436,7 +434,7 @@ public class TemplatesCompletionProposalComputer implements IJavaCompletionPropo
                             result.add(res);
                         }
                     } catch (JavaModelException e) {
-                        log.error("Received an error while searching.", e);
+                        Logs.log(LogMessages.ERROR_FAILED_TO_FIND_TYPE, e, packageName, typeName);
                     }
                 }
 
