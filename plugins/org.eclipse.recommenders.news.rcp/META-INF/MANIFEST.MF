@@ -15,7 +15,13 @@ Require-Bundle: com.google.inject;bundle-version="[3.0.0,4.0.0)",
  org.eclipse.e4.core.di.extensions,
  org.eclipse.mylyn.commons.notifications.core,
  org.eclipse.mylyn.commons.notifications.feed,
+<<<<<<< HEAD   (b25abc [releng] Merge maintenance (2.2.5) into master (2.3.0))
  org.eclipse.mylyn.commons.notifications.ui,
+=======
+ org.eclipse.recommenders.injection,
+ org.eclipse.recommenders.rcp,
+ org.eclipse.recommenders.utils,
+>>>>>>> BRANCH (efa469 [releng] Add Target Definition for Neon)
  org.eclipse.ui
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  com.google.common.base;version="[15.0.0,16.0.0)",

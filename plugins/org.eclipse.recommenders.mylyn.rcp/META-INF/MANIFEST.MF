@@ -10,5 +10,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.ui;bundle-version="[3.9.0,4.0.0)",
  org.eclipse.jface.text,
  org.eclipse.mylyn.context.core,
+<<<<<<< HEAD   (b25abc [releng] Merge maintenance (2.2.5) into master (2.3.0))
  org.eclipse.recommenders.injection;bundle-version="[2.3.0,2.3.1)",
  org.eclipse.recommenders.completion.rcp;bundle-version="[2.3.0,2.3.1)"
+=======
+ org.eclipse.recommenders.completion.rcp;bundle-version="[2.2.5,2.2.6)"
+>>>>>>> BRANCH (efa469 [releng] Add Target Definition for Neon)
