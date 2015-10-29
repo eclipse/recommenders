@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -109,7 +110,7 @@ public class GsonUtil {
         ensureIsNotNull(classOfT);
         Reader reader = null;
         try {
-            reader = new InputStreamReader(jsonStream, "UTF-8");
+            reader = new InputStreamReader(jsonStream, StandardCharsets.UTF_8);
             return getInstance().fromJson(reader, classOfT);
         } catch (final Exception e) {
             throw throwUnhandledException(e);
@@ -168,7 +169,7 @@ public class GsonUtil {
         ensureIsNotNull(out);
         Writer writer = null;
         try {
-            writer = new OutputStreamWriter(out, "UTF-8");
+            writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
             getInstance().toJson(obj, writer);
         } catch (final Exception e) {
             throw throwUnhandledException(e);

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,7 +40,6 @@ import org.eclipse.recommenders.utils.names.VmMethodName;
 import org.eclipse.recommenders.utils.names.VmTypeName;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
@@ -209,7 +209,7 @@ public final class Zips {
     public static void append(ZipOutputStream zos, String path, String data) throws IOException {
         ZipEntry e = new ZipEntry(path);
         zos.putNextEntry(e);
-        zos.write(data.getBytes(Charsets.UTF_8));
+        zos.write(data.getBytes(StandardCharsets.UTF_8));
         zos.closeEntry();
     }
 
