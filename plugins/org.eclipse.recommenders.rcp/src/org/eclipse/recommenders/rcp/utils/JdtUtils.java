@@ -13,7 +13,7 @@ package org.eclipse.recommenders.rcp.utils;
 import static com.google.common.base.Optional.*;
 import static org.eclipse.jdt.internal.corext.util.JdtFlags.*;
 import static org.eclipse.jdt.ui.SharedASTProvider.*;
-import static org.eclipse.recommenders.internal.rcp.l10n.LogMessages.ERROR_FAILED_TO_RESOLVE_TYPE_PARAMETER;
+import static org.eclipse.recommenders.internal.rcp.l10n.Messages.UNKNOWN_TYPE;
 import static org.eclipse.recommenders.utils.Checks.*;
 import static org.eclipse.recommenders.utils.Throws.*;
 
@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -217,6 +218,10 @@ public final class JdtUtils {
         IType type = null;
         try {
             final IJavaProject project = t.getJavaProject();
+            if (project == null) {
+                return fromNullable(type);
+            }
+
             final String[] bounds = t.getBoundsSignatures();
             if (ArrayUtils.isEmpty(bounds)) {
                 type = project.findType("java.lang.Object"); //$NON-NLS-1$
@@ -228,8 +233,10 @@ public final class JdtUtils {
                     type = project.findType(typename.get());
                 }
             }
+        } catch (final JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_RESOLVE_TYPE_PARAMETER, e, t.getElementName());
         } catch (final Exception e) {
-            Logs.log(ERROR_FAILED_TO_RESOLVE_TYPE_PARAMETER, t.getElementName(), e);
+            Logs.log(LogMessages.ERROR_FAILED_TO_RESOLVE_TYPE_PARAMETER, e, t.getElementName());
         }
         return fromNullable(type);
     }
@@ -241,9 +248,9 @@ public final class JdtUtils {
             final IType type) {
         final LinkedHashMap<String, IMember> tmp = new LinkedHashMap<String, IMember>();
 
-        try {
-            final IType[] returnTypeAndSupertypes = findAllSupertypesIncludeingArgument(type);
-            for (final IType cur : returnTypeAndSupertypes) {
+        final IType[] returnTypeAndSupertypes = findAllSupertypesIncludingArgument(type);
+        for (final IType cur : returnTypeAndSupertypes) {
+            try {
                 for (final IMethod m : cur.getMethods()) {
                     if (isVoid(m) || !isPublic(m) || m.isConstructor() || isStatic(m) || hasPrimitiveReturnType(m)) {
                         continue;
@@ -253,6 +260,13 @@ public final class JdtUtils {
                         tmp.put(key, m);
                     }
                 }
+            } catch (final JavaModelException e) {
+                Logs.log(LogMessages.WARNING_FAILED_TO_FIND_METHODS_FOR_TYPE, e, cur.getFullyQualifiedName());
+            } catch (final Exception e) {
+                Logs.log(LogMessages.ERROR_FAILED_TO_FIND_METHODS_FOR_TYPE, e, cur.getFullyQualifiedName());
+            }
+
+            try {
                 for (final IField field : cur.getFields()) {
                     if (!isPublic(field) || isStatic(field)) {
                         continue;
@@ -262,15 +276,19 @@ public final class JdtUtils {
                         tmp.put(key, field);
                     }
                 }
+            } catch (final JavaModelException e) {
+                Logs.log(LogMessages.WARNING_FAILED_TO_FIND_FIELDS_FOR_TYPE, e, cur.getFullyQualifiedName());
+            } catch (final Exception e) {
+                Logs.log(LogMessages.ERROR_FAILED_TO_FIND_FIELDS_FOR_TYPE, e, cur.getFullyQualifiedName());
             }
-        } catch (final Exception e) {
-            log(e);
         }
+
         return tmp.values();
+
     }
 
     public static Collection<IMember> findAllPublicInstanceFieldsAndPublicInstanceMethods(final IType type) {
-        return findAllRelevanFieldsAndMethods(type, PUBLIC_FIELDS_ONLY_FILTER, PUBLIC_INSTANCE_METHODS_ONLY_FILTER);
+        return findAllRelevantFieldsAndMethods(type, PUBLIC_FIELDS_ONLY_FILTER, PUBLIC_INSTANCE_METHODS_ONLY_FILTER);
     }
 
     /**
@@ -278,15 +296,15 @@ public final class JdtUtils {
      */
     public static Collection<IMember> findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods(final IType type) {
 
-        return findAllRelevanFieldsAndMethods(type, STATIC_PUBLIC_FIELDS_ONLY_FILTER,
+        return findAllRelevantFieldsAndMethods(type, STATIC_PUBLIC_FIELDS_ONLY_FILTER,
                 STATIC_NON_VOID_NON_PRIMITIVE_PUBLIC_METHODS_FILTER);
     }
 
-    public static Collection<IMember> findAllRelevanFieldsAndMethods(final IType type,
+    public static Collection<IMember> findAllRelevantFieldsAndMethods(final IType type,
             final Predicate<IField> fieldFilter, final Predicate<IMethod> methodFilter) {
         final LinkedHashMap<String, IMember> tmp = new LinkedHashMap<String, IMember>();
-        for (final IType cur : findAllSupertypesIncludeingArgument(type)) {
 
+        for (final IType cur : findAllSupertypesIncludingArgument(type)) {
             try {
                 for (final IMethod method : cur.getMethods()) {
                     if (methodFilter.apply(method)) {
@@ -297,6 +315,13 @@ public final class JdtUtils {
                         tmp.put(key, method);
                     }
                 }
+            } catch (final JavaModelException e) {
+                Logs.log(LogMessages.WARNING_FAILED_TO_FIND_METHODS_FOR_TYPE, e, cur.getFullyQualifiedName());
+            } catch (final Exception e) {
+                Logs.log(LogMessages.ERROR_FAILED_TO_FIND_METHODS_FOR_TYPE, e, cur.getFullyQualifiedName());
+            }
+
+            try {
                 for (final IField field : cur.getFields()) {
                     if (fieldFilter.apply(field)) {
                         continue;
@@ -306,8 +331,10 @@ public final class JdtUtils {
                         tmp.put(key, field);
                     }
                 }
+            } catch (final JavaModelException e) {
+                Logs.log(LogMessages.WARNING_FAILED_TO_FIND_FIELDS_FOR_TYPE, e, cur.getFullyQualifiedName());
             } catch (final Exception e) {
-                log(e);
+                Logs.log(LogMessages.ERROR_FAILED_TO_FIND_FIELDS_FOR_TYPE, e, cur.getFullyQualifiedName());
             }
         }
 
@@ -316,20 +343,22 @@ public final class JdtUtils {
     }
 
     public static Collection<IMember> findAllPublicStaticFieldsAndStaticMethods(final IType type) {
-        return findAllRelevanFieldsAndMethods(type, STATIC_PUBLIC_FIELDS_ONLY_FILTER,
+        return findAllRelevantFieldsAndMethods(type, STATIC_PUBLIC_FIELDS_ONLY_FILTER,
                 STATIC_PUBLIC_METHODS_ONLY_FILTER);
     }
 
-    private static IType[] findAllSupertypesIncludeingArgument(final IType returnType) {
+    private static IType[] findAllSupertypesIncludingArgument(final IType returnType) {
         try {
             ITypeHierarchy typeHierarchy;
             typeHierarchy = SuperTypeHierarchyCache.getTypeHierarchy(returnType);
             final IType[] allSupertypes = typeHierarchy.getAllSupertypes(returnType);
             return ArrayUtils.add(allSupertypes, 0, returnType);
+        } catch (final JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_FIND_TYPE_HIERARCHY_OF_TYPE, e, returnType.getFullyQualifiedName());
         } catch (final Exception e) {
-            log(e);
-            return new IType[0];
+            Logs.log(LogMessages.ERROR_FAILED_TO_FIND_TYPE_HIERARCHY_OF_TYPE, e, returnType.getFullyQualifiedName());
         }
+        return new IType[0];
     }
 
     public static ASTNode findClosestMethodOrTypeDeclarationAroundOffset(final CompilationUnit cuNode,
@@ -362,16 +391,23 @@ public final class JdtUtils {
     }
 
     public static Optional<IMethod> findOverriddenMethod(final IMethod jdtMethod) {
+        IType jdtDeclaringType = null;
         try {
-            final IType jdtDeclaringType = jdtMethod.getDeclaringType();
+            jdtDeclaringType = jdtMethod.getDeclaringType();
             final MethodOverrideTester methodOverrideTester = SuperTypeHierarchyCache
                     .getMethodOverrideTester(jdtDeclaringType);
             final IMethod overriddenMethod = methodOverrideTester.findOverriddenMethod(jdtMethod, false);
             return fromNullable(overriddenMethod);
+        } catch (final JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_FIND_OVERRIDDEN_METHOD_OF_METHOD, e,
+                    jdtDeclaringType == null ? UNKNOWN_TYPE : jdtDeclaringType.getFullyQualifiedName(),
+                    jdtMethod.getElementName());
         } catch (final Exception e) {
-            log(e);
-            return absent();
+            Logs.log(LogMessages.ERROR_FAILED_TO_FIND_OVERRIDDEN_METHOD_OF_METHOD, e,
+                    jdtDeclaringType == null ? UNKNOWN_TYPE : jdtDeclaringType.getFullyQualifiedName(),
+                    jdtMethod.getElementName());
         }
+        return absent();
     }
 
     public static Optional<ITypeName> findSuperclassName(final IType type) {
@@ -388,13 +424,16 @@ public final class JdtUtils {
             final String vmSuperclassName = toVMTypeDescriptor(opt.get());
             final ITypeName vmTypeName = VmTypeName.get(vmSuperclassName);
             return of(vmTypeName);
+        } catch (final JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_FIND_SUPERTYPE_NAME_OF_TYPE, e, type.getFullyQualifiedName());
         } catch (final Exception e) {
-            log(e);
-            return absent();
+            Logs.log(LogMessages.ERROR_FAILED_TO_FIND_SUPERTYPE_NAME_OF_TYPE, e, type.getFullyQualifiedName());
         }
+        return absent();
     }
 
     public static Optional<ITypeName> resolveUnqualifiedJDTType(String qName, final IJavaElement parent) {
+        IType type = null;
         try {
             qName = Signature.getTypeErasure(qName);
             qName = StringUtils.removeEnd(qName, ";"); //$NON-NLS-1$
@@ -408,7 +447,7 @@ public final class JdtUtils {
                 return of(t);
             }
 
-            final IType type = findClosestTypeOrThis(parent);
+            type = findClosestTypeOrThis(parent);
             if (type == null) {
                 return absent();
             }
@@ -431,10 +470,12 @@ public final class JdtUtils {
             qName = qName.replace('.', '/');
             final ITypeName typeName = VmTypeName.get(qName);
             return of(typeName);
+        } catch (final JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_RESOLVE_UNQUALIFIED_JDT_TYPE, e, type.getFullyQualifiedName());
         } catch (final Exception e) {
-            log(e);
-            return absent();
+            Logs.log(LogMessages.ERROR_FAILED_TO_RESOLVE_UNQUALIFIED_JDT_TYPE, e, parent.getElementName(), qName);
         }
+        return absent();
     }
 
     private static String toVMTypeDescriptor(final String fqjdtName) {
@@ -449,36 +490,52 @@ public final class JdtUtils {
                 return absent();
             }
             return findTypeFromSignature(superclassTypeSignature, type);
+        } catch (final JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_FIND_SUPERTYPE_OF_TYPE, e, type.getFullyQualifiedName());
         } catch (final Exception e) {
-            log(e);
-            return absent();
+            Logs.log(LogMessages.ERROR_FAILED_TO_FIND_SUPERTYPE_OF_TYPE, e, type.getFullyQualifiedName());
         }
+        return absent();
     }
 
     public static Optional<IType> findTypeFromSignature(final String typeSignature, final IJavaElement parent) {
         ensureIsNotNull(typeSignature);
         ensureIsNotNull(parent);
-        try {
-            final Optional<String> opt = resolveUnqualifiedTypeNamesAndStripOffGenericsAndArrayDimension(typeSignature,
-                    parent);
-            if (!opt.isPresent()) {
-                return absent();
-            }
-            final IType res = parent.getJavaProject().findType(opt.get());
-            return Optional.fromNullable(res);
-        } catch (final Exception e) {
-            log(e);
-            return Optional.absent();
+        final String bareTypeName = resolveUnqualifiedTypeNamesAndStripOffGenericsAndArrayDimension(typeSignature,
+                parent).orNull();
+        if (bareTypeName == null) {
+            return absent();
         }
+
+        try {
+            final IType res = parent.getJavaProject().findType(bareTypeName);
+            return Optional.fromNullable(res);
+        } catch (final JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_FIND_TYPE_FROM_SIGNATURE, e, bareTypeName);
+        } catch (final Exception e) {
+            Logs.log(LogMessages.ERROR_FAILED_TO_FIND_TYPE_FROM_SIGNATURE, e, bareTypeName);
+        }
+        return Optional.absent();
     }
 
     public static Optional<IType> findTypeOfField(final IField field) {
+        ensureIsNotNull(field);
         try {
-            return findTypeFromSignature(field.getTypeSignature(), field);
+            String fieldSignature = field.getTypeSignature();
+
+            return findTypeFromSignature(fieldSignature, field);
+        } catch (final JavaModelException e) {
+            IType declaringType = field.getDeclaringType();
+            Logs.log(LogMessages.WARNING_FAILED_TO_FIND_TYPE_OF_FIELD, e,
+                    declaringType == null ? UNKNOWN_TYPE : declaringType.getFullyQualifiedName(),
+                    field.getElementName());
         } catch (final Exception e) {
-            log(e);
-            return Optional.absent();
+            IType declaringType = field.getDeclaringType();
+            Logs.log(LogMessages.ERROR_FAILED_TO_FIND_TYPE_OF_FIELD, e,
+                    declaringType == null ? UNKNOWN_TYPE : declaringType.getFullyQualifiedName(),
+                    field.getElementName());
         }
+        return Optional.absent();
     }
 
     public static Optional<ITypeRoot> findTypeRoot(final IEditorPart editor) {
@@ -508,7 +565,7 @@ public final class JdtUtils {
     public static boolean isAssignable(final IType lhsType, final IType rhsType) {
         ensureIsNotNull(lhsType);
         ensureIsNotNull(rhsType);
-        final IType[] supertypes = findAllSupertypesIncludeingArgument(rhsType);
+        final IType[] supertypes = findAllSupertypesIncludingArgument(rhsType);
         for (final IType supertype : supertypes) {
             if (supertype.equals(lhsType)) {
                 return true;
@@ -523,10 +580,6 @@ public final class JdtUtils {
         } catch (final Exception e) {
             throw throwUnhandledException(e);
         }
-    }
-
-    public static void log(final Exception e) {
-        Logs.log(LogMessages.ERROR_AN_ERROR_OCCURRED, e);
     }
 
     public static Optional<IMethod> resolveMethod(@Nullable final MethodDeclaration node) {
@@ -553,13 +606,16 @@ public final class JdtUtils {
             final IJavaElement parent) {
         ensureIsNotNull(typeSignature);
         ensureIsNotNull(parent);
+
         // remove generics information if available:
         typeSignature = Signature.getTypeErasure(typeSignature);
 
         if (isPrimitiveTypeSignature(typeSignature)) {
             return of(Names.vm2srcTypeName(typeSignature));
         }
+
         IType type = null;
+
         try {
             typeSignature = typeSignature.replace('/', '.');
             type = findClosestTypeOrThis(parent);
@@ -574,6 +630,9 @@ public final class JdtUtils {
             } else {
                 return of(resolvedTypeSignature);
             }
+        } catch (JavaModelException e) {
+            Logs.log(LogMessages.WARNING_FAILED_TO_RESOLVE_UNQUALIFIED_TYPE_NAME, e, typeSignature, type);
+            return absent();
         } catch (Exception e) {
             Logs.log(LogMessages.ERROR_FAILED_TO_RESOLVE_UNQUALIFIED_TYPE_NAME, e, typeSignature, type);
             return absent();
