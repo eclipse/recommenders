@@ -379,11 +379,12 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
             if (type != null) {
                 return postConstruct(ProcessableMethodDeclarationCompletionProposal.newProposal(coreProposal, type,
                         uiProposal.getRelevance()), uiProposal);
+            } else {
+                throw Throws.throwIllegalArgumentException("No type found for enclosing element %s", enclosingElement); //$NON-NLS-1$
             }
         } catch (CoreException e) {
             throw Throwables.propagate(e);
         }
-        throw Throws.throwIllegalArgumentException("No type found"); //$NON-NLS-1$
     }
 
     @Override
