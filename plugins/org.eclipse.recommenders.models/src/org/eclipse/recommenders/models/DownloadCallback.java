@@ -14,13 +14,14 @@ public class DownloadCallback {
 
     public static final DownloadCallback NULL = new DownloadCallback();
 
-    public void downloadInitiated(String path) {
+    public void downloadInitiated(String path) throws DownloadCallbackException {
     }
 
     public void downloadStarted(String path) {
     }
 
-    public void downloadProgressed(String path, long transferredBytes, long totalBytes) {
+    public void downloadProgressed(String path, long transferredBytes, long totalBytes)
+            throws DownloadCallbackException {
     }
 
     public void downloadSucceeded(String path) {
@@ -30,5 +31,9 @@ public class DownloadCallback {
     }
 
     public void downloadCorrupted(String path) {
+    }
+
+    @SuppressWarnings("serial")
+    public class DownloadCallbackException extends Exception {
     }
 }

@@ -83,7 +83,7 @@ public class DownloadModelArchiveJob extends Job {
             // Returns null if the model coordinate could not be resolved. This may because we are requesting an mc that
             // does not exist in the repository or because of the network being down.
             // Moreover, we can get *cached* null answers, i.e., the same negative result over and over again.
-            if (result == null) {
+            if (result == null && !downloadCallback.isDownloadCancelled()) {
                 if (isIndex(mc)) {
                     // Failure to download the index is serious; display an error message.
                     final Display display = PlatformUI.getWorkbench().getDisplay();

@@ -50,6 +50,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.repository.AuthenticationBuilder;
 import org.eclipse.aether.util.repository.SimpleArtifactDescriptorPolicy;
 import org.eclipse.aether.util.repository.SimpleResolutionErrorPolicy;
+import org.eclipse.recommenders.models.DownloadCallback.DownloadCallbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,7 +224,11 @@ public class ModelRepository implements IModelRepository {
 
             @Override
             public void transferInitiated(TransferEvent e) throws TransferCancelledException {
-                callback.downloadInitiated(e.getResource().getResourceName());
+                try {
+                    callback.downloadInitiated(e.getResource().getResourceName());
+                } catch (DownloadCallbackException e1) {
+                    throw new TransferCancelledException();
+                }
             }
 
             @Override
@@ -233,8 +238,12 @@ public class ModelRepository implements IModelRepository {
 
             @Override
             public void transferProgressed(TransferEvent e) throws TransferCancelledException {
-                callback.downloadProgressed(e.getResource().getResourceName(), e.getTransferredBytes(),
-                        e.getResource().getContentLength());
+                try {
+                    callback.downloadProgressed(e.getResource().getResourceName(), e.getTransferredBytes(),
+                            e.getResource().getContentLength());
+                } catch (DownloadCallbackException e1) {
+                    throw new TransferCancelledException();
+                }
             }
 
             @Override

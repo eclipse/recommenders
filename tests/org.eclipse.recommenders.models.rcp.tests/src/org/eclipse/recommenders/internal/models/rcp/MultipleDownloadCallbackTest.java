@@ -107,7 +107,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testAllWorkDoneIfFinishedWithOneDownload() {
+    public void testAllWorkDoneIfFinishedWithOneDownload() throws Exception {
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 MAXIMUM_DOWNLOADS);
 
@@ -131,7 +131,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testDownloadSucceeded() {
+    public void testDownloadSucceeded() throws Exception {
         int maximumNumberOfDownloads = 1;
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 maximumNumberOfDownloads);
@@ -145,7 +145,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testSucceededWithOneFailedDownload() {
+    public void testSucceededWithOneFailedDownload() throws Exception {
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 MAXIMUM_DOWNLOADS);
 
@@ -161,7 +161,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testNoDetailedProgressIfDownloadSizeNotKnown() {
+    public void testNoDetailedProgressIfDownloadSizeNotKnown() throws Exception {
         int numberOfDownloads = 1;
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 numberOfDownloads);
@@ -178,7 +178,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testFinishWithAllDownloads() {
+    public void testFinishWithAllDownloads() throws Exception {
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 MAXIMUM_DOWNLOADS);
 
@@ -207,7 +207,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testDownloadProgressIfSizeKnown() {
+    public void testDownloadProgressIfSizeKnown() throws Exception {
         int maximumNumberOfDownloads = 1;
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 maximumNumberOfDownloads);
@@ -224,7 +224,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testDownloadProgressWithMultipleDownloads() {
+    public void testDownloadProgressWithMultipleDownloads() throws Exception {
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 MAXIMUM_DOWNLOADS);
         sut.downloadInitiated(MAVEN_METADATA_XML);
@@ -244,7 +244,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testFinishedWorkWithFailedDownload() {
+    public void testFinishedWorkWithFailedDownload() throws Exception {
         int maximumNumberOfDownloads = 1;
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 maximumNumberOfDownloads);
@@ -259,7 +259,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testWorkUnitRemainderSplit() {
+    public void testWorkUnitRemainderSplit() throws Exception {
         int oneHundredPercentUnits = 17;
         int maximumNumberOfDownloads = 3;
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, oneHundredPercentUnits,
@@ -282,7 +282,7 @@ public class MultipleDownloadCallbackTest {
     }
 
     @Test
-    public void testMaximumDownloadsFinishWork() {
+    public void testMaximumDownloadsFinishWork() throws Exception {
         MultipleDownloadCallback sut = new MultipleDownloadCallback(monitor, MESSAGE, ONE_HUNDRED_PERCENT_UNITS,
                 MAXIMUM_DOWNLOADS);
 

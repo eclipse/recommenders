@@ -30,39 +30,54 @@ import com.google.common.collect.Maps;
 public class MultipleDownloadCallback extends DownloadCallback {
 
     private final Map<String, IProgressMonitor> downloads = Maps.newHashMap();
+
     private boolean downloadSucceeded;
+    private boolean cancelled;
     private long lastTransferred;
     private int finishedWorkUnits;
 
-    private final IProgressMonitor monitor;
+    private final IProgressMonitor masterMonitor;
     private final int maximumNumberOfDownloads;
     private final int workUnitsPerDownloadTask;
     private int workUnitsRemainder;
 
     public MultipleDownloadCallback(IProgressMonitor monitor, String message, int totalWorkUnits,
             int maximumNumberOfDownloads) {
-        this.monitor = monitor;
+        this.masterMonitor = monitor;
         this.maximumNumberOfDownloads = maximumNumberOfDownloads;
-        workUnitsPerDownloadTask = totalWorkUnits / maximumNumberOfDownloads;
-        workUnitsRemainder = totalWorkUnits % maximumNumberOfDownloads;
+        this.workUnitsPerDownloadTask = totalWorkUnits / maximumNumberOfDownloads;
+        this.workUnitsRemainder = totalWorkUnits % maximumNumberOfDownloads;
         monitor.beginTask(message, totalWorkUnits);
     }
 
     @Override
-    public synchronized void downloadInitiated(String path) {
+    public synchronized void downloadInitiated(String path) throws DownloadCallbackException {
+        checkForCancellation();
+
         int workUnits = workUnitsPerDownloadTask;
         if (workUnitsRemainder >= 1) {
             workUnits++;
         }
-        SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor, workUnits);
+
+        SubProgressMonitor subProgressMonitor = new SubProgressMonitor(masterMonitor, workUnits);
         subProgressMonitor.beginTask(path, workUnits);
         downloads.put(path, subProgressMonitor);
         lastTransferred = 0;
         finishedWorkUnits = 0;
     }
 
+    private void checkForCancellation() throws DownloadCallbackException {
+        if (masterMonitor.isCanceled()) {
+            cancelled = true;
+            throw new DownloadCallbackException();
+        }
+    }
+
     @Override
-    public synchronized void downloadProgressed(String path, long transferred, long total) {
+    public synchronized void downloadProgressed(String path, long transferred, long total)
+            throws DownloadCallbackException {
+        checkForCancellation();
+
         IProgressMonitor submonitor = downloads.get(path);
         final String message;
         // If no total size is known, total might be -1.
@@ -137,6 +152,10 @@ public class MultipleDownloadCallback extends DownloadCallback {
         return downloadSucceeded;
     }
 
+    public boolean isDownloadCancelled() {
+        return cancelled;
+    }
+
     public void finish() {
         finishWorkForSkippedTasks();
         finishWorkForRemainder();
@@ -145,13 +164,13 @@ public class MultipleDownloadCallback extends DownloadCallback {
     private void finishWorkForSkippedTasks() {
         int skippedDownloadTasks = maximumNumberOfDownloads - downloads.size();
         for (int i = 0; i < skippedDownloadTasks; i++) {
-            monitor.worked(workUnitsPerDownloadTask);
+            masterMonitor.worked(workUnitsPerDownloadTask);
         }
     }
 
     private void finishWorkForRemainder() {
         if (workUnitsRemainder > 0) {
-            monitor.worked(workUnitsRemainder);
+            masterMonitor.worked(workUnitsRemainder);
         }
     }
 }
