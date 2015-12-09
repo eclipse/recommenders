@@ -6,7 +6,11 @@
 	<parent>
 		<groupId>org.eclipse.recommenders</groupId>
 		<artifactId>repositories</artifactId>
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
 		<version>2.3.0-SNAPSHOT</version>
+=======
+		<version>2.2.6-SNAPSHOT</version>
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 

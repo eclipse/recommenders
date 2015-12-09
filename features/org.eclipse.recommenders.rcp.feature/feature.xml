@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
       version="2.3.0.qualifier"
+=======
+      version="2.2.6.qualifier"
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
       provider-name="%provider-name"
       plugin="org.eclipse.recommenders.rcp"
       license-feature="org.eclipse.license"

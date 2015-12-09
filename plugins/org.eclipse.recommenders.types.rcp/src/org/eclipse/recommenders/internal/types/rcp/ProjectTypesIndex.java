@@ -10,7 +10,6 @@
  */
 package org.eclipse.recommenders.internal.types.rcp;
 
-import static com.google.common.base.Objects.equal;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.lucene.document.Field.Index.NOT_ANALYZED;
 import static org.apache.lucene.search.NumericRangeQuery.newLongRange;
@@ -23,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.lucene.analysis.KeywordAnalyzer;
@@ -402,6 +402,7 @@ public class ProjectTypesIndex extends AbstractIdleService implements IProjectTy
         if (location != null) {
             doc.add(new Field(F_LOCATION, location.getAbsolutePath(), Store.NO, Index.NOT_ANALYZED));
         }
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
 
         // extends:
         doc.add(new Field(F_INSTANCEOF, type.getFullyQualifiedName(), Store.NO, NOT_ANALYZED));
@@ -411,6 +412,18 @@ public class ProjectTypesIndex extends AbstractIdleService implements IProjectTy
                 String fullyQualifiedName = supertypes.getFullyQualifiedName();
                 if (equal(V_JAVA_LANG_OBJECT, fullyQualifiedName)) {
                     continue;
+=======
+        {
+            // extends:
+            try {
+                ITypeHierarchy h = type.newSupertypeHierarchy(null);
+                for (IType supertypes : h.getAllSupertypes(type)) {
+                    String fullyQualifiedName = supertypes.getFullyQualifiedName();
+                    if (Objects.equals(V_JAVA_LANG_OBJECT, fullyQualifiedName)) {
+                        continue;
+                    }
+                    doc.add(new Field(F_INSTANCEOF, fullyQualifiedName, Store.NO, NOT_ANALYZED));
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
                 }
                 doc.add(new Field(F_INSTANCEOF, fullyQualifiedName, Store.NO, NOT_ANALYZED));
             }

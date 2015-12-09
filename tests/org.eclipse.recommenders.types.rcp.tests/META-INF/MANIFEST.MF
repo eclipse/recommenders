@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.types.rcp.tests;singleton:=true
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
 Bundle-Version: 2.3.0.qualifier
+=======
+Bundle-Version: 2.2.6.qualifier
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

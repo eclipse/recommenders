@@ -1,12 +1,21 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.constructors
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
 Bundle-Version: 2.3.0.qualifier
+=======
+Bundle-Version: 2.2.6.qualifier
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
 Require-Bundle: org.eclipse.recommenders.utils;bundle-version="[2.3.0,2.3.1)",
  org.eclipse.recommenders.models;bundle-version="[2.3.0,2.3.1)"
+=======
+Require-Bundle: org.eclipse.recommenders.utils;bundle-version="[2.2.6,2.2.7)",
+ org.eclipse.recommenders.models;bundle-version="[2.2.6,2.2.7)"
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
 Import-Package: com.google.common.collect;version="[15.0.0,16.0.0)",
  com.google.gson.annotations;version="[2.0.0,3.0.0)",
  org.apache.commons.pool;version="[1.6.0,2.0.0)",

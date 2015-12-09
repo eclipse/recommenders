@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.testing.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
       version="2.3.0.qualifier"
+=======
+      version="2.2.6.qualifier"
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -20,7 +24,11 @@
    </license>
 
    <requires>
+<<<<<<< HEAD   (52b0bb [releng] Merge maintenance (2.2.5) into master (2.3.0))
       <import feature="org.eclipse.recommenders.rcp.feature" version="2.3.0" match="equivalent"/>
+=======
+      <import feature="org.eclipse.recommenders.rcp.feature" version="2.2.6" match="equivalent"/>
+>>>>>>> BRANCH (ed6a26 Merge "[misc] Apply modernizer-maven-plugin" into maintenanc)
    </requires>
 
    <plugin
