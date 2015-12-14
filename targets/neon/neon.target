@@ -6,8 +6,13 @@
 <unit id="org.eclipse.ecf.filetransfer.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.sdk.ide" version="0.0.0"/>
+<<<<<<< HEAD   (8eb010 [releng] Switch to latest M-builds/I-builds for Mars/Neon, r)
 <!-- Latest platform integration build for Neon -->
 <repository location="http://download.eclipse.org/eclipse/updates/4.6-I-builds/"/>
+=======
+<!-- Stable platform build for Neon M4 -->
+<repository location="http://download.eclipse.org/eclipse/updates/4.6milestones/S-4.6M4-201512092300/"/>
+>>>>>>> BRANCH (000ce4 [releng] Use dedicated branding plugins for all three core f)
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
@@ -95,8 +100,13 @@
 <unit id="org.objenesis" version="1.0.0.v201505121915"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7274 -->
 <unit id="org.slf4j.api" version="1.7.2.v20121108-1250"/>
+<<<<<<< HEAD   (8eb010 [releng] Switch to latest M-builds/I-builds for Mars/Neon, r)
 <!-- Latest Orbit integration build for Neon -->
 <repository location="http://download.eclipse.org/modeling/emf/cdo/orbit/latest-I/"/>
+=======
+<!-- Stable Orbit build for Neon M4 -->
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20151204220443/repository/"/>
+>>>>>>> BRANCH (000ce4 [releng] Use dedicated branding plugins for all three core f)
 </location>
 <!-- Needed for the code generated with Xtend 2.7.3 -->
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
