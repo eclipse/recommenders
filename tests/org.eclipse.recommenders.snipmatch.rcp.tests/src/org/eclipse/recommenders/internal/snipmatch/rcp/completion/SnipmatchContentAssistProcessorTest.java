@@ -1,4 +1,4 @@
-package org.eclipse.recommenders.internal.snipmatch.rcp;
+package org.eclipse.recommenders.internal.snipmatch.rcp.completion;
 
 import static org.eclipse.recommenders.coordinates.DependencyInfo.PROJECT_NAME;
 import static org.eclipse.recommenders.snipmatch.rcp.util.RepositoryProposalMatcher.repository;
@@ -28,6 +28,8 @@ import org.eclipse.recommenders.coordinates.DependencyInfo;
 import org.eclipse.recommenders.coordinates.DependencyType;
 import org.eclipse.recommenders.coordinates.IDependencyListener;
 import org.eclipse.recommenders.coordinates.ProjectCoordinate;
+import org.eclipse.recommenders.internal.snipmatch.rcp.Repositories;
+import org.eclipse.recommenders.internal.snipmatch.rcp.completion.JavaContentAssistProcessor;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.snipmatch.ISnippet;
@@ -75,7 +77,7 @@ public class SnipmatchContentAssistProcessorTest {
 
     private SnippetRepositoryConfigurations configs;
     private Repositories repos;
-    private SnipmatchContentAssistProcessor sut;
+    private JavaContentAssistProcessor sut;
     private ITextViewer viewer;
 
     public void setUp(Document document, Point selectedRange, ImmutableSet<DependencyInfo> dependencies) {
@@ -105,7 +107,7 @@ public class SnipmatchContentAssistProcessorTest {
                 new JavaContentAssistInvocationContext(viewer, 0, mock(IEditorPart.class)));
         doReturn(compilationUnit).when(context).getCompilationUnit();
 
-        sut = new SnipmatchContentAssistProcessor(configs, repos, pcProvider, dependencyListener, new SharedImages());
+        sut = new JavaContentAssistProcessor(configs, repos, pcProvider, dependencyListener, new SharedImages());
 
         sut.setContext(context);
     }

@@ -271,8 +271,8 @@ public class FileSnippetRepositoryTest {
     public void testSearchByDescription() throws Exception {
         String snippetName = "New Snippet";
         String snippetDescription = "description";
-        ISnippet snippet = createAndStoreSnippet(FIRST_UUID, snippetName, "description", NO_EXTRA_SEARCH_TERMS,
-                NO_TAGS, "", FILE);
+        ISnippet snippet = createAndStoreSnippet(FIRST_UUID, snippetName, "description", NO_EXTRA_SEARCH_TERMS, NO_TAGS,
+                "", FILE);
 
         sut.open();
 
@@ -325,8 +325,8 @@ public class FileSnippetRepositoryTest {
         ISnippet javaTypeMembersSnippet = createAndStoreSnippet(UUID.randomUUID(), "Java Type Members Snippet", "",
                 NO_EXTRA_SEARCH_TERMS, NO_TAGS, "", JAVA_TYPE_MEMBERS);
 
-        ISnippet javadocSnippet = createAndStoreSnippet(UUID.randomUUID(), "Javadoc Snippet", "",
-                NO_EXTRA_SEARCH_TERMS, NO_TAGS, "", JAVADOC);
+        ISnippet javadocSnippet = createAndStoreSnippet(UUID.randomUUID(), "Javadoc Snippet", "", NO_EXTRA_SEARCH_TERMS,
+                NO_TAGS, "", JAVADOC);
 
         sut.open();
 
@@ -337,9 +337,6 @@ public class FileSnippetRepositoryTest {
         assertThat(noneSearch, hasItem(recommendation(javaTypeMembersSnippet, 0.0)));
         assertThat(noneSearch, hasItem(recommendation(javadocSnippet, 0.0)));
         assertThat(noneSearch.size(), is(5));
-
-        List<Recommendation<ISnippet>> unknownSearch = sut.search(new SearchContext("", UNKNOWN));
-        assertThat(unknownSearch.isEmpty(), is(true));
 
         List<Recommendation<ISnippet>> fileSearch = sut.search(new SearchContext("", FILE));
         assertThat(fileSearch, hasItem(recommendation(fileSnippet, 1.0)));

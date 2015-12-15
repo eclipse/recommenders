@@ -319,9 +319,6 @@ public class FileSnippetRepository implements ISnippetRepository {
         readLock.lock();
         try {
             Preconditions.checkState(isOpen());
-            if (context.getLocation() == UNKNOWN) {
-                return Collections.emptyList();
-            }
             List<Recommendation<ISnippet>> results = Lists.newLinkedList();
 
             try {
@@ -373,10 +370,6 @@ public class FileSnippetRepository implements ISnippetRepository {
     }
 
     private boolean snippetApplicable(Document doc, ISearchContext context) {
-        if (context.getDependencies().isEmpty()) {
-            return true;
-        }
-
         String[] snippetDependencies = doc.getValues(F_DEPENDENCY);
         for (String snippetDependency : snippetDependencies) {
             boolean applicable = false;
