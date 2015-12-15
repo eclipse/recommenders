@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -36,6 +37,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.recommenders.coordinates.DependencyInfo;
@@ -71,7 +73,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
     private final Image snippetImage;
     private final TemplateContextType snipmatchContextType;
 
-    private JavaContentAssistInvocationContext context;
+    private ContentAssistInvocationContext context;
     private ImmutableSet<DependencyInfo> availableDependencies;
     private String terms;
     private ContextLoadingProposal contextLoadingProposal;
@@ -88,10 +90,16 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
         snipmatchContextType = SnipmatchTemplateContextType.getInstance();
     }
 
-    public void setContext(JavaContentAssistInvocationContext context) {
-        IJavaProject project = context.getCompilationUnit().getJavaProject();
-        availableDependencies = dependencyListener
-                .getDependenciesForProject(DependencyInfos.createDependencyInfoForProject(project));
+    public void setContext(ContentAssistInvocationContext context) {
+        if (context instanceof JavaContentAssistInvocationContext) {
+            JavaContentAssistInvocationContext javaContext = (JavaContentAssistInvocationContext) context;
+            ICompilationUnit compilationUnit = javaContext.getCompilationUnit();
+            IJavaProject project = compilationUnit.getJavaProject();
+            availableDependencies = dependencyListener
+                    .getDependenciesForProject(DependencyInfos.createDependencyInfoForProject(project));
+        } else {
+            availableDependencies = ImmutableSet.of();
+        }
         if (!allProjectCoordinatesCached(pcProvider, availableDependencies)) {
             contextLoadingProposal = new ContextLoadingProposal(pcProvider, availableDependencies, contextLoadingImage);
             contextLoadingProposal.schedule();
@@ -138,10 +146,18 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
             }
         }
 
-        ICompilationUnit cu = context.getCompilationUnit();
-        JavaContext javaContext = new JavaContext(snipmatchContextType, document, p, cu);
-        javaContext.setVariable("selection", selectedText); //$NON-NLS-1$
-        javaContext.setForceEvaluation(true);
+        DocumentTemplateContext templateContext;
+        if (context instanceof JavaContentAssistInvocationContext) {
+            JavaContentAssistInvocationContext javaContext = (JavaContentAssistInvocationContext) context;
+            ICompilationUnit cu = javaContext.getCompilationUnit();
+            JavaContext javaTemplateContext = new JavaContext(snipmatchContextType, document, p, cu);
+            javaTemplateContext.setForceEvaluation(true);
+            templateContext = javaTemplateContext;
+        } else {
+            templateContext = new DocumentTemplateContext(snipmatchContextType, document, p);
+        }
+
+        templateContext.setVariable("selection", selectedText); //$NON-NLS-1$
 
         for (int repositoryPriority = 0; repositoryPriority < sortedConfigs.size(); repositoryPriority++) {
             Optional<ISnippetRepository> repo = repos.getRepository(sortedConfigs.get(repositoryPriority).getId());
@@ -159,7 +175,7 @@ public class SnipmatchContentAssistProcessor implements IContentAssistProcessor 
 
                         try {
                             proposals.add(SnippetProposal.newSnippetProposal(recommendation, repositoryPriority,
-                                    template, javaContext, region, snippetImage));
+                                    template, templateContext, region, snippetImage));
                         } catch (Exception e) {
                             log(LogMessages.ERROR_CREATING_SNIPPET_PROPOSAL_FAILED, e);
                         }

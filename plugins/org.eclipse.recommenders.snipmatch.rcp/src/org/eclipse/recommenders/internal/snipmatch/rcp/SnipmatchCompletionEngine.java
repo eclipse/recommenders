@@ -17,7 +17,7 @@ import javax.inject.Inject;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateInformationControlCreator;
-import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
@@ -70,7 +70,7 @@ public class SnipmatchCompletionEngine {
     private final ContentAssistant assistant;
 
     private Shell searchShell;
-    private JavaContentAssistInvocationContext context;
+    private ContentAssistInvocationContext context;
     private ICompletionProposal selectedProposal;
     private StyledText searchText;
     private AssistantControlState state;
@@ -137,7 +137,7 @@ public class SnipmatchCompletionEngine {
         return assistant;
     }
 
-    public void show(final JavaContentAssistInvocationContext context) {
+    public void show(ContentAssistInvocationContext context) {
         this.context = context;
         processor.setContext(context);
         assistant.install(context.getViewer());

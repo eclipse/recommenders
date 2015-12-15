@@ -10,15 +10,22 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.recommenders.injection.InjectionService;
+import org.eclipse.recommenders.utils.Reflections;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 @SuppressWarnings("restriction")
 public class CompletionHandler extends AbstractHandler {
@@ -32,20 +39,38 @@ public class CompletionHandler extends AbstractHandler {
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         IEditorPart editor = HandlerUtil.getActiveEditor(event);
-        if (!(editor instanceof JavaEditor)) {
+
+        IEditorInput input = editor.getEditorInput();
+        if (input.getPersistable() == null) {
             return null;
         }
-        JavaEditor ed = (JavaEditor) editor;
-        if (ed.isEditorInputReadOnly()) {
+
+        if (!(editor instanceof AbstractTextEditor)) {
             return null;
         }
-        ISourceViewer viewer = ed.getViewer();
+        Method getSourceViewerMethod = Reflections.getDeclaredMethod(AbstractTextEditor.class, "getSourceViewer")
+                .orNull();
+        if (getSourceViewerMethod == null) {
+            throw new ExecutionException("TODO");
+        }
+        ISourceViewer viewer;
+        try {
+            viewer = (ISourceViewer) getSourceViewerMethod.invoke(editor);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new ExecutionException("TODO", e);
+        }
+
         int offset = viewer.getSelectedRange().x;
-        JavaContentAssistInvocationContext ctx = new JavaContentAssistInvocationContext(viewer, offset, ed);
+        ContentAssistInvocationContext context;
+        if (editor instanceof JavaEditor) {
+            context = new JavaContentAssistInvocationContext(viewer, offset, editor);
+        } else {
+            context = new ContentAssistInvocationContext(viewer, offset);
+        }
         if (engine == null) {
             engine = request(SnipmatchCompletionEngine.class);
         }
-        engine.show(ctx);
+        engine.show(context);
         return null;
     }
 }
