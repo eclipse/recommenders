@@ -162,7 +162,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
         @Override
         public String apply(KnownSnippet input) {
-            return SnippetProposal.createDisplayString(input.snippet);
+            return SnippetProposals.createDisplayString(input.snippet);
         }
     };
 

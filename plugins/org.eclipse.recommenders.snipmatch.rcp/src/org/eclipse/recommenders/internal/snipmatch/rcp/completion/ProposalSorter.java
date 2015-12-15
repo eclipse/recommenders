@@ -8,7 +8,7 @@
  * Contributors:
  *    Johannes Dorn - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.snipmatch.rcp;
+package org.eclipse.recommenders.internal.snipmatch.rcp.completion;
 
 import java.util.Comparator;
 
@@ -16,6 +16,7 @@ import org.eclipse.jdt.internal.ui.text.java.RelevanceSorter;
 import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
+import org.eclipse.recommenders.internal.snipmatch.rcp.RepositoryProposal;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
