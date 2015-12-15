@@ -24,12 +24,12 @@ public class SearchContext implements ISearchContext {
 
     private final String searchText;
     private final Location location;
-    private final Set<ProjectCoordinate> pcs;
+    private final Set<ProjectCoordinate> availableDependencies;
 
-    public SearchContext(String searchText, Location location, Set<ProjectCoordinate> pcs) {
+    public SearchContext(String searchText, Location location, Set<ProjectCoordinate> availableDependencies) {
         this.searchText = searchText;
         this.location = location;
-        this.pcs = pcs;
+        this.availableDependencies = availableDependencies;
     }
 
     public SearchContext(String searchText, Location location) {
@@ -52,7 +52,7 @@ public class SearchContext implements ISearchContext {
 
     @Override
     public Set<ProjectCoordinate> getDependencies() {
-        return pcs;
+        return availableDependencies;
     }
 
     @Override

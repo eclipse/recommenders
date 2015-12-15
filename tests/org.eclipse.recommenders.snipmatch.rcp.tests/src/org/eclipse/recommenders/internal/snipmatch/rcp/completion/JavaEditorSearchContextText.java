@@ -1,4 +1,4 @@
-package org.eclipse.recommenders.internal.snipmatch.rcp;
+package org.eclipse.recommenders.internal.snipmatch.rcp.completion;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.recommenders.internal.snipmatch.rcp.completion.JavaEditorSearchContext;
 import org.eclipse.recommenders.snipmatch.Location;
 import org.junit.Test;
 
