@@ -13,11 +13,9 @@ package org.eclipse.recommenders.internal.snipmatch.rcp;
 import static org.eclipse.jface.text.IDocument.DEFAULT_CONTENT_TYPE;
 import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.PREF_SEARCH_BOX_BACKGROUND;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateInformationControlCreator;
-import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
@@ -54,7 +52,7 @@ import com.google.common.eventbus.EventBus;
  * for trouble later.
  */
 @SuppressWarnings("restriction")
-public class SnipmatchCompletionEngine {
+public class SnipmatchCompletionEngine<T extends ContentAssistInvocationContext> {
 
     private static enum AssistantControlState {
         KEEP_OPEN,
@@ -63,20 +61,20 @@ public class SnipmatchCompletionEngine {
 
     private static final int SEARCH_BOX_WIDTH = 273;
 
-    private final SnipmatchContentAssistProcessor processor;
+    private final AbstractSnipmatchContentAssistProcessor<T> processor;
     private final EventBus bus;
     private final ColorRegistry colorRegistry;
     private final FontRegistry fontRegistry;
     private final ContentAssistant assistant;
 
     private Shell searchShell;
-    private JavaContentAssistInvocationContext context;
+    private ContentAssistInvocationContext context;
     private ICompletionProposal selectedProposal;
     private StyledText searchText;
     private AssistantControlState state;
 
-    @Inject
-    public SnipmatchCompletionEngine(SnipmatchContentAssistProcessor processor, EventBus bus,
+    public SnipmatchCompletionEngine(
+            AbstractSnipmatchContentAssistProcessor<T> processor, EventBus bus,
             ColorRegistry colorRegistry, FontRegistry fontRegistry) {
         this.processor = processor;
         this.bus = bus;
@@ -137,7 +135,7 @@ public class SnipmatchCompletionEngine {
         return assistant;
     }
 
-    public void show(final JavaContentAssistInvocationContext context) {
+    public void show(T context) {
         this.context = context;
         processor.setContext(context);
         assistant.install(context.getViewer());

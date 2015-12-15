@@ -75,7 +75,7 @@ public class SnipmatchContentAssistProcessorTest {
 
     private SnippetRepositoryConfigurations configs;
     private Repositories repos;
-    private SnipmatchContentAssistProcessor sut;
+    private SnipmatchJavaEditorContentAssistProcessor sut;
     private ITextViewer viewer;
 
     public void setUp(Document document, Point selectedRange, ImmutableSet<DependencyInfo> dependencies) {
@@ -105,7 +105,7 @@ public class SnipmatchContentAssistProcessorTest {
                 new JavaContentAssistInvocationContext(viewer, 0, mock(IEditorPart.class)));
         doReturn(compilationUnit).when(context).getCompilationUnit();
 
-        sut = new SnipmatchContentAssistProcessor(configs, repos, pcProvider, dependencyListener, new SharedImages());
+        sut = new SnipmatchJavaEditorContentAssistProcessor(configs, repos, pcProvider, dependencyListener, new SharedImages());
 
         sut.setContext(context);
     }

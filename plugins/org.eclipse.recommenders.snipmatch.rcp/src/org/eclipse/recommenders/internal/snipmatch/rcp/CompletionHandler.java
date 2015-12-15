@@ -10,20 +10,32 @@
  */
 package org.eclipse.recommenders.internal.snipmatch.rcp;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.recommenders.injection.InjectionService;
+import org.eclipse.recommenders.utils.Reflections;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+
+import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("restriction")
 public class CompletionHandler extends AbstractHandler {
 
-    private SnipmatchCompletionEngine engine;
+    private SnipmatchCompletionEngine<JavaContentAssistInvocationContext> javaEditorEngine;
+    private SnipmatchCompletionEngine<ContentAssistInvocationContext> textEditorEngine;
 
     private <T> T request(Class<T> clazz) {
         return InjectionService.getInstance().requestInstance(clazz);
@@ -32,20 +44,55 @@ public class CompletionHandler extends AbstractHandler {
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         IEditorPart editor = HandlerUtil.getActiveEditor(event);
-        if (!(editor instanceof JavaEditor)) {
+
+        IEditorInput input = editor.getEditorInput();
+        if (input.getPersistable() == null) {
             return null;
         }
-        JavaEditor ed = (JavaEditor) editor;
-        if (ed.isEditorInputReadOnly()) {
+
+        if (!(editor instanceof AbstractTextEditor)) {
             return null;
         }
-        ISourceViewer viewer = ed.getViewer();
+        Method getSourceViewerMethod = Reflections.getDeclaredMethod(AbstractTextEditor.class, "getSourceViewer")
+                .orNull();
+        if (getSourceViewerMethod == null) {
+            throw new ExecutionException("TODO");
+        }
+        ISourceViewer viewer;
+        try {
+            viewer = (ISourceViewer) getSourceViewerMethod.invoke(editor);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new ExecutionException("TODO", e);
+        }
+
         int offset = viewer.getSelectedRange().x;
-        JavaContentAssistInvocationContext ctx = new JavaContentAssistInvocationContext(viewer, offset, ed);
-        if (engine == null) {
-            engine = request(SnipmatchCompletionEngine.class);
+        if (editor instanceof JavaEditor) {
+            JavaContentAssistInvocationContext context = new JavaContentAssistInvocationContext(viewer, offset, editor);
+            getJavaEditorEngine().show(context);
+        } else {
+            ContentAssistInvocationContext context = new ContentAssistInvocationContext(viewer, offset);
+            
+            getTextEditorEngine().show(context);
         }
-        engine.show(ctx);
         return null;
     }
+
+    private SnipmatchCompletionEngine<JavaContentAssistInvocationContext> getJavaEditorEngine() {
+        if (javaEditorEngine == null) {
+            SnipmatchJavaEditorContentAssistProcessor processor = request(SnipmatchJavaEditorContentAssistProcessor.class);
+            javaEditorEngine = new SnipmatchCompletionEngine<JavaContentAssistInvocationContext>(processor, request(EventBus.class),
+                    request(ColorRegistry.class), request(FontRegistry.class));
+        }
+        return javaEditorEngine;
+    }
+
+    private SnipmatchCompletionEngine<ContentAssistInvocationContext> getTextEditorEngine() {
+        if (textEditorEngine == null) {
+            SnipmatchTextEditorContentAssistProcessor processor = request(SnipmatchTextEditorContentAssistProcessor.class);
+            textEditorEngine = new SnipmatchCompletionEngine<ContentAssistInvocationContext>(processor, request(EventBus.class),
+                    request(ColorRegistry.class), request(FontRegistry.class));
+        }
+        return textEditorEngine;
+    }
+
 }
