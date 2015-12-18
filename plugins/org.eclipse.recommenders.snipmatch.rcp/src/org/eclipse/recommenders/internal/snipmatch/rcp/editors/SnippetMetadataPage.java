@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -38,6 +39,7 @@ import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.set.IObservableSet;
 import org.eclipse.core.databinding.observable.set.ISetChangeListener;
 import org.eclipse.core.databinding.observable.set.SetChangeEvent;
+import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.property.INativePropertyListener;
 import org.eclipse.core.databinding.property.ISimplePropertyListener;
@@ -46,6 +48,7 @@ import org.eclipse.core.internal.databinding.property.value.SelfValueProperty;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
+import org.eclipse.jface.databinding.viewers.ViewersObservables;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -66,6 +69,7 @@ import org.eclipse.recommenders.internal.models.rcp.ProjectCoordinateSelectionDi
 import org.eclipse.recommenders.internal.snipmatch.rcp.SnippetsView;
 import org.eclipse.recommenders.internal.snipmatch.rcp.l10n.Messages;
 import org.eclipse.recommenders.rcp.SharedImages;
+import org.eclipse.recommenders.rcp.utils.EnumValueToBooleanConverter;
 import org.eclipse.recommenders.rcp.utils.ObjectToBooleanConverter;
 import org.eclipse.recommenders.snipmatch.ISnippet;
 import org.eclipse.recommenders.snipmatch.Location;
@@ -117,20 +121,25 @@ public class SnippetMetadataPage extends FormPage {
     private ComboViewer comboLocation;
     private Text txtUuid;
 
-    private ListViewer listViewerDependencies;
+    private ListViewer listViewerFileExtensions;
     private ListViewer listViewerExtraSearchTerms;
     private ListViewer listViewerTags;
+    private ListViewer listViewerDependencies;
 
-    private Composite btnContainerDependencies;
+    private Composite btnContainerFileExtensions;
     private Composite btnContainerExtraSearchTerms;
     private Composite btnContainerTags;
+    private Composite btnContainerDependencies;
 
-    private Button btnRemoveDependency;
+    private Button btnAddFileExtension;
+    private Button btnRemoveFileExtension;
     private Button btnRemoveExtraSearchTerm;
     private Button btnRemoveTag;
+    private Button btnRemoveDependency;
 
     private IObservableSet ppDependencies;
     private IObservableList ppExtraSearchTerms;
+    private IObservableList ppFileExtensions;
     private IObservableList ppTags;
     private DataBindingContext context;
 
@@ -195,8 +204,8 @@ public class SnippetMetadataPage extends FormPage {
 
                 txtDescription = managedForm.getToolkit().createText(managedForm.getForm().getBody(),
                         snippet.getDescription(), SWT.NONE);
-                txtDescription.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
-                        .span(2, 1).indent(horizontalIndent, 0).create());
+                txtDescription.setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER)
+                        .grab(true, false).span(2, 1).indent(horizontalIndent, 0).create());
                 txtDescription.setMessage(Messages.EDITOR_TEXT_MESSAGE_SNIPPET_DESCRIPTION);
 
                 Label lblLocation = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
@@ -231,8 +240,9 @@ public class SnippetMetadataPage extends FormPage {
                         return super.getText(element);
                     }
                 });
-                comboLocation.getCombo().setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER)
-                        .grab(true, false).span(2, 1).indent(horizontalIndent, 0).create());
+                comboLocation.getCombo().setLayoutData(
+                        GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+                                .indent(horizontalIndent, 0).create());
 
                 final ControlDecoration locationErrorDecoration = new ControlDecoration(comboLocation.getCombo(),
                         SWT.LEFT);
@@ -243,8 +253,8 @@ public class SnippetMetadataPage extends FormPage {
 
                 final ControlDecoration locationDescriptionDecoration = new ControlDecoration(comboLocation.getCombo(),
                         SWT.LEFT);
-                FieldDecoration infoDecoration = FieldDecorationRegistry.getDefault()
-                        .getFieldDecoration(DEC_INFORMATION);
+                FieldDecoration infoDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(
+                        DEC_INFORMATION);
                 locationDescriptionDecoration.setImage(infoDecoration.getImage());
                 locationDescriptionDecoration.setDescriptionText(Messages.EDITOR_DESCRIPTION_LOCATION);
                 locationDescriptionDecoration.setMarginWidth(1);
@@ -264,14 +274,61 @@ public class SnippetMetadataPage extends FormPage {
                 });
                 comboLocation.setSelection(new StructuredSelection(snippet.getLocation()));
 
+                Label lblFileExtensions = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
+                        Messages.EDITOR_LABEL_SNIPPET_FILE_EXTENSIONS, SWT.NONE);
+                lblFileExtensions.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+
+                listViewerFileExtensions = new ListViewer(managedForm.getForm().getBody(), SWT.BORDER | SWT.V_SCROLL);
+                List lstFileExtensions = listViewerFileExtensions.getList();
+                lstFileExtensions.setLayoutData(GridDataFactory.fillDefaults().grab(true, false)
+                        .indent(horizontalIndent, 0).create());
+
+                final ControlDecoration extraFileExtensionsDescriptionDecoration = new ControlDecoration(
+                        listViewerFileExtensions.getList(), SWT.TOP | SWT.LEFT);
+                extraFileExtensionsDescriptionDecoration.setImage(infoDecoration.getImage());
+                extraFileExtensionsDescriptionDecoration
+                        .setDescriptionText(Messages.EDITOR_DESCRIPTION_FILE_EXTENSIONS);
+                extraFileExtensionsDescriptionDecoration.setMarginWidth(1);
+
+                btnContainerFileExtensions = managedForm.getToolkit().createComposite(managedForm.getForm().getBody(),
+                        SWT.NONE);
+                btnContainerFileExtensions.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
+                managedForm.getToolkit().paintBordersFor(btnContainerFileExtensions);
+                btnContainerFileExtensions.setLayout(new GridLayout(1, false));
+
+                btnAddFileExtension = managedForm.getToolkit().createButton(btnContainerFileExtensions,
+                        Messages.EDITOR_BUTTON_ADD, SWT.NONE);
+                btnAddFileExtension.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        createFileExtensionInputDialog(btnContainerFileExtensions.getShell()).open();
+                    }
+                });
+                btnAddFileExtension.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+                btnAddFileExtension.setEnabled(snippet.getLocation() == Location.FILE);
+
+                btnRemoveFileExtension = managedForm.getToolkit().createButton(btnContainerFileExtensions,
+                        Messages.EDITOR_BUTTON_REMOVE, SWT.NONE);
+                btnRemoveFileExtension.setEnabled(false);
+                btnRemoveFileExtension.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        Optional<String> o = Selections.getFirstSelected(listViewerFileExtensions);
+                        if (o.isPresent()) {
+                            ppFileExtensions.remove(o.get());
+                        }
+                    }
+                });
+                btnRemoveFileExtension.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+
                 Label lblExtraSearchTerms = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
-                        Messages.EDITOR_LABEL_SNIPPETS_EXTRA_SEARCH_TERMS, SWT.NONE);
+                        Messages.EDITOR_LABEL_SNIPPET_EXTRA_SEARCH_TERMS, SWT.NONE);
                 lblExtraSearchTerms.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
 
                 listViewerExtraSearchTerms = new ListViewer(managedForm.getForm().getBody(), SWT.BORDER | SWT.V_SCROLL);
                 List lstExtraSearchTerm = listViewerExtraSearchTerms.getList();
-                lstExtraSearchTerm.setLayoutData(
-                        GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0).create());
+                lstExtraSearchTerm.setLayoutData(GridDataFactory.fillDefaults().grab(true, false)
+                        .indent(horizontalIndent, 0).create());
 
                 final ControlDecoration extraSearchTermsDescriptionDecoration = new ControlDecoration(
                         listViewerExtraSearchTerms.getList(), SWT.TOP | SWT.LEFT);
@@ -280,14 +337,14 @@ public class SnippetMetadataPage extends FormPage {
                         .setDescriptionText(Messages.EDITOR_DESCRIPTION_EXTRA_SEARCH_TERMS);
                 extraSearchTermsDescriptionDecoration.setMarginWidth(1);
 
-                btnContainerExtraSearchTerms = managedForm.getToolkit().createComposite(managedForm.getForm().getBody(),
-                        SWT.NONE);
+                btnContainerExtraSearchTerms = managedForm.getToolkit().createComposite(
+                        managedForm.getForm().getBody(), SWT.NONE);
                 btnContainerExtraSearchTerms.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
                 managedForm.getToolkit().paintBordersFor(btnContainerExtraSearchTerms);
                 btnContainerExtraSearchTerms.setLayout(new GridLayout(1, false));
 
                 Button btnAddExtraSearchTerm = managedForm.getToolkit().createButton(btnContainerExtraSearchTerms,
-                        Messages.EDITOR_BUTTON_ADD_EXTRASEARCH_TERM, SWT.NONE);
+                        Messages.EDITOR_BUTTON_ADD, SWT.NONE);
                 btnAddExtraSearchTerm.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -296,7 +353,7 @@ public class SnippetMetadataPage extends FormPage {
                 });
                 btnAddExtraSearchTerm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
                 btnRemoveExtraSearchTerm = managedForm.getToolkit().createButton(btnContainerExtraSearchTerms,
-                        Messages.EDITOR_BUTTON_REMOVE_EXTRA_SEARCH_TERM, SWT.NONE);
+                        Messages.EDITOR_BUTTON_REMOVE, SWT.NONE);
                 btnRemoveExtraSearchTerm.setEnabled(false);
                 btnRemoveExtraSearchTerm.addSelectionListener(new SelectionAdapter() {
                     @Override
@@ -310,13 +367,13 @@ public class SnippetMetadataPage extends FormPage {
                 btnRemoveExtraSearchTerm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
                 Label lblTag = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
-                        Messages.EDITOR_LABEL_SNIPPETS_TAG, SWT.NONE);
+                        Messages.EDITOR_LABEL_SNIPPET_TAG, SWT.NONE);
                 lblTag.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
 
                 listViewerTags = new ListViewer(managedForm.getForm().getBody(), SWT.BORDER | SWT.V_SCROLL);
                 List lstTags = listViewerTags.getList();
-                lstTags.setLayoutData(
-                        GridDataFactory.fillDefaults().grab(true, true).indent(horizontalIndent, 0).create());
+                lstTags.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).indent(horizontalIndent, 0)
+                        .create());
 
                 final ControlDecoration tagsDescriptionDecoration = new ControlDecoration(listViewerTags.getList(),
                         SWT.TOP | SWT.LEFT);
@@ -329,8 +386,8 @@ public class SnippetMetadataPage extends FormPage {
                 managedForm.getToolkit().paintBordersFor(btnContainerExtraSearchTerms);
                 btnContainerTags.setLayout(new GridLayout(1, false));
 
-                Button btnAddTag = managedForm.getToolkit().createButton(btnContainerTags,
-                        Messages.EDITOR_BUTTON_ADD_TAGS, SWT.NONE);
+                Button btnAddTag = managedForm.getToolkit().createButton(btnContainerTags, Messages.EDITOR_BUTTON_ADD,
+                        SWT.NONE);
                 btnAddTag.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -338,8 +395,8 @@ public class SnippetMetadataPage extends FormPage {
                     }
                 });
                 btnAddTag.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-                btnRemoveTag = managedForm.getToolkit().createButton(btnContainerTags,
-                        Messages.EDITOR_BUTTON_REMOVE_TAGS, SWT.NONE);
+                btnRemoveTag = managedForm.getToolkit().createButton(btnContainerTags, Messages.EDITOR_BUTTON_REMOVE,
+                        SWT.NONE);
                 btnRemoveTag.setEnabled(false);
                 btnRemoveTag.addSelectionListener(new SelectionAdapter() {
                     @Override
@@ -353,13 +410,13 @@ public class SnippetMetadataPage extends FormPage {
                 btnRemoveTag.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
                 Label lblDependencies = managedForm.getToolkit().createLabel(managedForm.getForm().getBody(),
-                        Messages.EDITOR_LABEL_SNIPPET_DEPENENCIES, SWT.NONE);
+                        Messages.EDITOR_LABEL_SNIPPET_DEPENDENCIES, SWT.NONE);
                 lblDependencies.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
 
                 listViewerDependencies = new ListViewer(managedForm.getForm().getBody(), SWT.BORDER | SWT.V_SCROLL);
                 List lstDependencies = listViewerDependencies.getList();
-                lstDependencies.setLayoutData(
-                        GridDataFactory.fillDefaults().grab(true, true).indent(horizontalIndent, 0).create());
+                lstDependencies.setLayoutData(GridDataFactory.fillDefaults().grab(true, true)
+                        .indent(horizontalIndent, 0).create());
 
                 final ControlDecoration dependencyDescriptionDecoration = new ControlDecoration(
                         listViewerDependencies.getList(), SWT.TOP | SWT.LEFT);
@@ -374,7 +431,7 @@ public class SnippetMetadataPage extends FormPage {
                 btnContainerDependencies.setLayout(new GridLayout(1, false));
 
                 Button btnAddDependency = managedForm.getToolkit().createButton(btnContainerDependencies,
-                        Messages.EDITOR_BUTTON_ADD_DEPENDENCY, SWT.NONE);
+                        Messages.EDITOR_BUTTON_ADD, SWT.NONE);
                 btnAddDependency.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -415,7 +472,7 @@ public class SnippetMetadataPage extends FormPage {
                 });
                 btnAddDependency.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
                 btnRemoveDependency = managedForm.getToolkit().createButton(btnContainerDependencies,
-                        Messages.EDITOR_BUTTON_REMOVE_TAGS, SWT.NONE);
+                        Messages.EDITOR_BUTTON_REMOVE, SWT.NONE);
                 btnRemoveDependency.setEnabled(false);
                 btnRemoveDependency.addSelectionListener(new SelectionAdapter() {
                     @Override
@@ -434,8 +491,8 @@ public class SnippetMetadataPage extends FormPage {
 
                 txtUuid = managedForm.getToolkit().createText(managedForm.getForm().getBody(),
                         snippet.getUuid().toString(), SWT.READ_ONLY);
-                txtUuid.setLayoutData(
-                        GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0).create());
+                txtUuid.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0)
+                        .create());
             }
 
             @Override
@@ -497,10 +554,36 @@ public class SnippetMetadataPage extends FormPage {
     private Set<ProjectCoordinate> changeVersionsToZero(Set<ProjectCoordinate> resolved) {
         Set<ProjectCoordinate> result = Sets.newHashSet();
         for (ProjectCoordinate projectCoordinate : resolved) {
-            result.add(
-                    new ProjectCoordinate(projectCoordinate.getGroupId(), projectCoordinate.getArtifactId(), "0.0.0")); //$NON-NLS-1$
+            result.add(new ProjectCoordinate(projectCoordinate.getGroupId(), projectCoordinate.getArtifactId(), "0.0.0")); //$NON-NLS-1$
         }
         return result;
+    }
+
+    private InputDialog createFileExtensionInputDialog(Shell shell) {
+        IInputValidator validator = new IInputValidator() {
+
+            @Override
+            public String isValid(String newText) {
+                if (isNullOrEmpty(newText)) {
+                    return ""; //$NON-NLS-1$
+                }
+                if (!StringUtils.isAlphanumeric(newText)) {
+                    return Messages.DIALOG_VALIDATOR_FILE_EXTENSION_CONTAINS_ILLEGAL_CHARACTER;
+                }
+                if (snippet.getFileExtensions().contains(newText)) {
+                    return Messages.DIALOG_VALIDATOR_FILE_EXTENSION_ALREADY_ADDED;
+                }
+                return null;
+            }
+        };
+        return new InputDialog(shell, Messages.DIALOG_TITLE_ENTER_NEW_FILE_EXTENSION,
+                Messages.DIALOG_MESSAGE_ENTER_NEW_FILE_EXTENSION, "", validator) { //$NON-NLS-1$
+            @Override
+            protected void okPressed() {
+                ppFileExtensions.add(getValue());
+                super.okPressed();
+            }
+        };
     }
 
     private InputDialog createExtraSearchTermInputDialog(Shell shell) {
@@ -601,14 +684,30 @@ public class SnippetMetadataPage extends FormPage {
         });
 
         // Extra search terms
+        ppFileExtensions = BeanProperties.list(Snippet.class, "fileExtensions", String.class).observe(snippet); //$NON-NLS-1$
+        ViewerSupport.bind(listViewerFileExtensions, ppFileExtensions, new SelfValueProperty(String.class));
+        ppFileExtensions.addListChangeListener(new IListChangeListener() {
+
+            @Override
+            public void handleListChange(ListChangeEvent event) {
+                if (!Arrays
+                        .equals(listViewerFileExtensions.getList().getItems(), snippet.getFileExtensions().toArray())) {
+                    contentsPart.markStale();
+                } else {
+                    contentsPart.markDirty();
+                }
+            }
+        });
+
+        // Extra search terms
         ppExtraSearchTerms = BeanProperties.list(Snippet.class, "extraSearchTerms", String.class).observe(snippet); //$NON-NLS-1$
         ViewerSupport.bind(listViewerExtraSearchTerms, ppExtraSearchTerms, new SelfValueProperty(String.class));
         ppExtraSearchTerms.addListChangeListener(new IListChangeListener() {
 
             @Override
             public void handleListChange(ListChangeEvent event) {
-                if (!Arrays.equals(listViewerExtraSearchTerms.getList().getItems(),
-                        snippet.getExtraSearchTerms().toArray())) {
+                if (!Arrays.equals(listViewerExtraSearchTerms.getList().getItems(), snippet.getExtraSearchTerms()
+                        .toArray())) {
                     contentsPart.markStale();
                 } else {
                     contentsPart.markDirty();
@@ -696,12 +795,37 @@ public class SnippetMetadataPage extends FormPage {
             }
         });
 
-        // enable buttons
-        IObservableValue vpExtraSearchTermsSelection = singleSelection().observe(listViewerExtraSearchTerms);
-        IObservableValue wpBtnRemoveExtraSearchTermEnable = enabled().observe(btnRemoveExtraSearchTerm);
-
+        // enable widgets
         UpdateValueStrategy strategy = new UpdateValueStrategy();
         strategy.setConverter(new ObjectToBooleanConverter());
+
+        final IObservableValue vpFileExtensionsSelection = singleSelection().observe(listViewerFileExtensions);
+        IObservableValue wpBtnRemoveFileExtensionsEnable = enabled().observe(btnRemoveFileExtension);
+
+        IObservableValue vpLocationSelection = ViewersObservables.observeSingleSelection(comboLocation);
+        IObservableValue wpListViewerFileExtensionsEnabled = enabled().observe(listViewerFileExtensions.getControl());
+        final IObservableValue wpBtnAddFileExtensionsEnabled = enabled().observe(btnAddFileExtension);
+
+        UpdateValueStrategy locationEnablementStrategy = new UpdateValueStrategy();
+        EnumValueToBooleanConverter<Location> locationToBooleanConverter = new EnumValueToBooleanConverter<Location>(
+                Location.FILE);
+        locationEnablementStrategy.setConverter(locationToBooleanConverter);
+
+        context.bindValue(vpLocationSelection, wpListViewerFileExtensionsEnabled, locationEnablementStrategy, null);
+        context.bindValue(vpLocationSelection, wpBtnAddFileExtensionsEnabled, locationEnablementStrategy, null);
+
+        ComputedValue computedRemoveButtonEnablement = new ComputedValue() {
+
+            @Override
+            protected Object calculate() {
+                boolean addButtonEnabled = (boolean) wpBtnAddFileExtensionsEnabled.getValue();
+                return (vpFileExtensionsSelection.getValue() != null && addButtonEnabled);
+            }
+        };
+        context.bindValue(wpBtnRemoveFileExtensionsEnable, computedRemoveButtonEnablement);
+
+        IObservableValue vpExtraSearchTermsSelection = singleSelection().observe(listViewerExtraSearchTerms);
+        IObservableValue wpBtnRemoveExtraSearchTermEnable = enabled().observe(btnRemoveExtraSearchTerm);
         context.bindValue(vpExtraSearchTermsSelection, wpBtnRemoveExtraSearchTermEnable, strategy, null);
 
         IObservableValue vpTagSelection = singleSelection().observe(listViewerTags);
