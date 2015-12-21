@@ -8,7 +8,7 @@
  * Contributors:
  *    Johannes Dorn - initial API and implementation.
  */
-package org.eclipse.recommenders.internal.snipmatch;
+package org.eclipse.recommenders.snipmatch;
 
 import static org.eclipse.recommenders.snipmatch.Snippet.FORMAT_VERSION;
 import static org.junit.Assert.assertTrue;
