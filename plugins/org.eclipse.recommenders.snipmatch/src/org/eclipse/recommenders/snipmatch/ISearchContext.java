@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.snipmatch;
 
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.recommenders.coordinates.ProjectCoordinate;
@@ -19,6 +20,8 @@ public interface ISearchContext {
     String getSearchText();
 
     Location getLocation();
+
+    List<String> getFileExtensionRestrictions();
 
     boolean isRestrictedByDependencies();
 

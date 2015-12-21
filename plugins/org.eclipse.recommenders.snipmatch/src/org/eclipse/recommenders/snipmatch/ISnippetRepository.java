@@ -21,6 +21,8 @@ import org.eclipse.recommenders.utils.Recommendation;
 
 public interface ISnippetRepository extends Openable, Closeable {
 
+    static final String NO_FILE_EXTENSION_RESTRICTION = "<<no file extension restriction>>";
+
     /**
      * Returns <b>all</b> snippets matching the search query. Does not use timeouts or relevance thresholds. In case of
      * an empty query, <b>all</b> snippets are returned.
