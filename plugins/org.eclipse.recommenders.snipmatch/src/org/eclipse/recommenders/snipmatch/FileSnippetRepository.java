@@ -26,6 +26,7 @@ import java.nio.channels.OverlappingFileLockException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -86,6 +87,8 @@ import com.google.common.collect.Maps;
 
 public class FileSnippetRepository implements ISnippetRepository {
 
+    public static final String NO_FILENAME_RESTRICTION = "*no filename restriction*";
+
     private static final int MAX_SEARCH_RESULTS = 100;
     private static final int CACHE_SIZE = 200;
 
@@ -99,12 +102,14 @@ public class FileSnippetRepository implements ISnippetRepository {
     private static final String F_UUID = "uuid";
     private static final String F_LOCATION = "location";
     private static final String F_DEPENDENCY = "dependency";
+    private static final String F_FILENAME_RESTRICTION = "filenameRestriction";
 
     private static final float NAME_BOOST = 4.0f;
     private static final float DESCRIPTION_BOOST = 2.0f;
     private static final float EXTRA_SEARCH_TERM_BOOST = DESCRIPTION_BOOST;
     private static final float TAG_BOOST = 1.0f;
     private static final float DEPENDENCY_BOOST = 1.0f;
+    private static final float NO_RESTRICTION_BOOST = 0.5f;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -261,6 +266,13 @@ public class FileSnippetRepository implements ISnippetRepository {
             doc.add(new Field(F_DEPENDENCY, getDependencyString(dependency), Store.YES, Index.ANALYZED));
         }
 
+        if (snippet.getFilenameRestrictions().isEmpty()) {
+            doc.add(new Field(F_FILENAME_RESTRICTION, NO_FILENAME_RESTRICTION, Store.NO, Index.NOT_ANALYZED));
+        }
+        for (String restriction : snippet.getFilenameRestrictions()) {
+            doc.add(new Field(F_FILENAME_RESTRICTION, restriction.toLowerCase(), Store.NO, Index.NOT_ANALYZED));
+        }
+
         writer.addDocument(doc);
     }
 
@@ -335,6 +347,24 @@ public class FileSnippetRepository implements ISnippetRepository {
                 query.add(new TermQuery(new Term(F_LOCATION, getIndexString(context.getLocation()))), Occur.MUST);
             }
 
+            String filename = context.getFilename();
+            if (context.getLocation() == Location.FILE && filename != null) {
+                BooleanQuery filenameRestrictionsQuery = new BooleanQuery();
+                TermQuery noRestrictionQuery = new TermQuery(new Term(F_FILENAME_RESTRICTION, NO_FILENAME_RESTRICTION));
+                noRestrictionQuery.setBoost(NO_RESTRICTION_BOOST);
+                filenameRestrictionsQuery.add(noRestrictionQuery, Occur.SHOULD);
+
+                int i = 1;
+                for (String restriction : getFilenameRestrictions(filename)) {
+                    TermQuery restrictionQuery = new TermQuery(new Term(F_FILENAME_RESTRICTION, restriction));
+                    float boost = (float) (0.5f + Math.pow(0.5, i));
+                    restrictionQuery.setBoost(boost);
+                    filenameRestrictionsQuery.add(restrictionQuery, Occur.SHOULD);
+                    i++;
+                }
+                query.add(filenameRestrictionsQuery, Occur.MUST);
+            }
+
             searcher = new IndexSearcher(reader);
             searcher.setSimilarity(similarity);
             float maxScore = 0;
@@ -360,6 +390,38 @@ public class FileSnippetRepository implements ISnippetRepository {
             IOUtils.closeQuietly(searcher);
         }
         return results;
+    }
+
+    /**
+     * Splits a filename into a sorted list of filename restrictions. The first entry is the name itself, followed by
+     * all possible sub-extensions including their dot.
+     *
+     * e.g. filename.extension becomes "filename.extension" & ".extension"
+     *
+     * @return empty list if filename is <code>null</code>
+     */
+    @VisibleForTesting
+    public static List<String> getFilenameRestrictions(String filename) {
+        if (filename == null) {
+            return Collections.emptyList();
+        }
+
+        List<String> restrictions = new LinkedList<>();
+
+        StringBuilder sb = new StringBuilder();
+        String[] split = filename.split("\\.");
+        for (int i = split.length - 1; i >= 0; i--) {
+            if (i == 0 && split[i].isEmpty()) {
+                // filename starts with a dot, ignore first split
+                continue;
+            }
+            sb.insert(0, split[i]);
+            if (i > 0) {
+                sb.insert(0, '.');
+            }
+            restrictions.add(0, sb.toString());
+        }
+        return restrictions;
     }
 
     private boolean snippetApplicable(Document doc, ISearchContext context) {
