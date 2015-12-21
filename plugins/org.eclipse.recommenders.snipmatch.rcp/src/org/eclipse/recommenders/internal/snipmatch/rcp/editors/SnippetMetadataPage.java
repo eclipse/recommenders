@@ -21,11 +21,11 @@ import static org.eclipse.recommenders.internal.snipmatch.rcp.SnippetEditorDisco
 import static org.eclipse.recommenders.snipmatch.Location.*;
 import static org.eclipse.recommenders.utils.Checks.cast;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -228,13 +228,13 @@ public class SnippetMetadataPage extends FormPage {
                         return super.getText(element);
                     }
                 });
-                comboLocation.getCombo().setLayoutData(GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER)
-                        .grab(true, false).span(2, 1).indent(horizontalIndent, 0).create());
+                comboLocation.getCombo().setLayoutData(
+                        GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+                                .indent(horizontalIndent, 0).create());
 
                 final ControlDecoration locationErrorDecoration = createDecoration(comboLocation.getCombo(),
                         Messages.ERROR_SNIPPET_LOCATION_CANNOT_BE_EMPTY + "\n" //$NON-NLS-1$
-                                + Messages.EDITOR_DESCRIPTION_LOCATION,
-                        errorDecorationImage, SWT.LEFT);
+                                + Messages.EDITOR_DESCRIPTION_LOCATION, errorDecorationImage, SWT.LEFT);
 
                 final ControlDecoration locationDescriptionDecoration = createDecoration(comboLocation.getCombo(),
                         Messages.EDITOR_DESCRIPTION_LOCATION, infoDecorationImage, SWT.LEFT);
@@ -262,22 +262,22 @@ public class SnippetMetadataPage extends FormPage {
                 fileExtensionsButtonContainer = createButtonContainer(managedForm);
                 btnAddFileExtension = createButton(managedForm, fileExtensionsButtonContainer,
                         Messages.EDITOR_BUTTON_ADD, new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        createFileExtensionInputDialog(fileExtensionsButtonContainer.getShell()).open();
-                    }
-                });
+                            @Override
+                            public void widgetSelected(SelectionEvent e) {
+                                createFileExtensionInputDialog(fileExtensionsButtonContainer.getShell()).open();
+                            }
+                        });
                 btnAddFileExtension.setEnabled(snippet.getLocation() == Location.FILE);
                 btnRemoveFileExtension = createButton(managedForm, fileExtensionsButtonContainer,
                         Messages.EDITOR_BUTTON_REMOVE, new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        Optional<String> o = Selections.getFirstSelected(listViewerFileExtensions);
-                        if (o.isPresent()) {
-                            ppFileExtensions.remove(o.get());
-                        }
-                    }
-                });
+                            @Override
+                            public void widgetSelected(SelectionEvent e) {
+                                Optional<String> o = Selections.getFirstSelected(listViewerFileExtensions);
+                                if (o.isPresent()) {
+                                    ppFileExtensions.remove(o.get());
+                                }
+                            }
+                        });
 
                 createLabel(managedForm, Messages.EDITOR_LABEL_SNIPPET_EXTRA_SEARCH_TERMS);
                 listViewerExtraSearchTerms = createListViewer(managedForm, horizontalIndent);
@@ -287,21 +287,21 @@ public class SnippetMetadataPage extends FormPage {
                 extraSearchTermsButtonContainer = createButtonContainer(managedForm);
                 createButton(managedForm, extraSearchTermsButtonContainer, Messages.EDITOR_BUTTON_ADD,
                         new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        createExtraSearchTermInputDialog(extraSearchTermsButtonContainer.getShell()).open();
-                    }
-                });
+                            @Override
+                            public void widgetSelected(SelectionEvent e) {
+                                createExtraSearchTermInputDialog(extraSearchTermsButtonContainer.getShell()).open();
+                            }
+                        });
                 btnRemoveExtraSearchTerm = createButton(managedForm, extraSearchTermsButtonContainer,
                         Messages.EDITOR_BUTTON_REMOVE, new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        Optional<String> o = Selections.getFirstSelected(listViewerExtraSearchTerms);
-                        if (o.isPresent()) {
-                            ppExtraSearchTerms.remove(o.get());
-                        }
-                    }
-                });
+                            @Override
+                            public void widgetSelected(SelectionEvent e) {
+                                Optional<String> o = Selections.getFirstSelected(listViewerExtraSearchTerms);
+                                if (o.isPresent()) {
+                                    ppExtraSearchTerms.remove(o.get());
+                                }
+                            }
+                        });
 
                 createLabel(managedForm, Messages.EDITOR_LABEL_SNIPPET_TAG);
                 listViewerTags = createListViewer(managedForm, horizontalIndent);
@@ -317,14 +317,14 @@ public class SnippetMetadataPage extends FormPage {
                 });
                 btnRemoveTag = createButton(managedForm, tagsButtonContainer, Messages.EDITOR_BUTTON_REMOVE,
                         new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        Optional<String> o = Selections.getFirstSelected(listViewerTags);
-                        if (o.isPresent()) {
-                            ppTags.remove(o.get());
-                        }
-                    }
-                });
+                            @Override
+                            public void widgetSelected(SelectionEvent e) {
+                                Optional<String> o = Selections.getFirstSelected(listViewerTags);
+                                if (o.isPresent()) {
+                                    ppTags.remove(o.get());
+                                }
+                            }
+                        });
 
                 createLabel(managedForm, Messages.EDITOR_LABEL_SNIPPET_DEPENDENCIES);
                 listViewerDependencies = createListViewer(managedForm, horizontalIndent);
@@ -334,59 +334,60 @@ public class SnippetMetadataPage extends FormPage {
                 dependenciesButtonContainer = createButtonContainer(managedForm);
                 createButton(managedForm, dependenciesButtonContainer, Messages.EDITOR_BUTTON_ADD,
                         new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        Shell shell = dependenciesButtonContainer.getShell();
-                        ProjectCoordinateSelectionDialog dialog = new ProjectCoordinateSelectionDialog(shell) {
                             @Override
-                            public String createLabelForProjectCoordinate(ProjectCoordinate element) {
-                                return getStringForDependency(element);
-                            }
-
-                            private final Set<String> alreadyAddedPcLabels = Sets.newHashSet();
-
-                            @Override
-                            public boolean filter(ProjectCoordinate pc) {
-                                for (String dependencylistItem : fetchDependencyListItems()) {
-                                    if (dependencylistItem.equals(getStringForDependency(pc))) {
-                                        return true;
+                            public void widgetSelected(SelectionEvent e) {
+                                Shell shell = dependenciesButtonContainer.getShell();
+                                ProjectCoordinateSelectionDialog dialog = new ProjectCoordinateSelectionDialog(shell) {
+                                    @Override
+                                    public String createLabelForProjectCoordinate(ProjectCoordinate element) {
+                                        return getStringForDependency(element);
                                     }
-                                }
 
-                                String labelForPc = createLabelForProjectCoordinate(pc);
-                                if (alreadyAddedPcLabels.contains(labelForPc)) {
-                                    return true;
-                                } else {
-                                    alreadyAddedPcLabels.add(labelForPc);
-                                    return false;
-                                }
+                                    private final Set<String> alreadyAddedPcLabels = Sets.newHashSet();
+
+                                    @Override
+                                    public boolean filter(ProjectCoordinate pc) {
+                                        for (String dependencylistItem : fetchDependencyListItems()) {
+                                            if (dependencylistItem.equals(getStringForDependency(pc))) {
+                                                return true;
+                                            }
+                                        }
+
+                                        String labelForPc = createLabelForProjectCoordinate(pc);
+                                        if (alreadyAddedPcLabels.contains(labelForPc)) {
+                                            return true;
+                                        } else {
+                                            alreadyAddedPcLabels.add(labelForPc);
+                                            return false;
+                                        }
+                                    }
+                                };
+                                dialog.setInitialPattern(""); //$NON-NLS-1$
+                                dialog.setTitle(Messages.DIALOG_TITLE_SELECT_DEPENDENCY);
+                                dialog.setMessage(Messages.DIALOG_MESSAGE_SELECT_DEPENDENCY);
+                                dialog.open();
+
+                                Set<ProjectCoordinate> selectedElements = changeVersionsToZero(dialog
+                                        .getSelectedElements());
+                                ppDependencies.addAll(selectedElements);
                             }
-                        };
-                        dialog.setInitialPattern(""); //$NON-NLS-1$
-                        dialog.setTitle(Messages.DIALOG_TITLE_SELECT_DEPENDENCY);
-                        dialog.setMessage(Messages.DIALOG_MESSAGE_SELECT_DEPENDENCY);
-                        dialog.open();
-
-                        Set<ProjectCoordinate> selectedElements = changeVersionsToZero(dialog.getSelectedElements());
-                        ppDependencies.addAll(selectedElements);
-                    }
-                });
+                        });
                 btnRemoveDependency = createButton(managedForm, dependenciesButtonContainer,
                         Messages.EDITOR_BUTTON_REMOVE, new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        Optional<String> o = Selections.getFirstSelected(listViewerDependencies);
-                        if (o.isPresent()) {
-                            ppDependencies.remove(o.get());
-                        }
-                    }
-                });
+                            @Override
+                            public void widgetSelected(SelectionEvent e) {
+                                Optional<String> o = Selections.getFirstSelected(listViewerDependencies);
+                                if (o.isPresent()) {
+                                    ppDependencies.remove(o.get());
+                                }
+                            }
+                        });
 
                 createLabel(managedForm, Messages.EDITOR_LABEL_SNIPPET_UUID);
                 txtUuid = managedForm.getToolkit().createText(managedForm.getForm().getBody(),
                         snippet.getUuid().toString(), SWT.READ_ONLY);
-                txtUuid.setLayoutData(
-                        GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0).create());
+                txtUuid.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).indent(horizontalIndent, 0)
+                        .create());
             }
 
             private void createLabel(IManagedForm managedForm, String text) {
@@ -414,8 +415,8 @@ public class SnippetMetadataPage extends FormPage {
             private ListViewer createListViewer(IManagedForm managedForm, int horizontalIndent) {
                 ListViewer listViewer = new ListViewer(managedForm.getForm().getBody(), SWT.BORDER | SWT.V_SCROLL);
                 List lstFileExtensions = listViewer.getList();
-                lstFileExtensions.setLayoutData(
-                        GridDataFactory.fillDefaults().grab(true, true).indent(horizontalIndent, 0).create());
+                lstFileExtensions.setLayoutData(GridDataFactory.fillDefaults().grab(true, true)
+                        .indent(horizontalIndent, 0).create());
                 return listViewer;
             }
 
@@ -495,8 +496,7 @@ public class SnippetMetadataPage extends FormPage {
     private Set<ProjectCoordinate> changeVersionsToZero(Set<ProjectCoordinate> resolved) {
         Set<ProjectCoordinate> result = Sets.newHashSet();
         for (ProjectCoordinate projectCoordinate : resolved) {
-            result.add(
-                    new ProjectCoordinate(projectCoordinate.getGroupId(), projectCoordinate.getArtifactId(), "0.0.0")); //$NON-NLS-1$
+            result.add(new ProjectCoordinate(projectCoordinate.getGroupId(), projectCoordinate.getArtifactId(), "0.0.0")); //$NON-NLS-1$
         }
         return result;
     }
@@ -506,13 +506,18 @@ public class SnippetMetadataPage extends FormPage {
 
             @Override
             public String isValid(String newText) {
-                if (isNullOrEmpty(newText)) {
+                if (newText == null) {
                     return ""; //$NON-NLS-1$
                 }
-                if (!StringUtils.isAlphanumeric(newText)) {
-                    return Messages.DIALOG_VALIDATOR_FILE_EXTENSION_CONTAINS_ILLEGAL_CHARACTER;
+                String trimmed = newText.trim();
+                if (trimmed.isEmpty()) {
+                    return ""; //$NON-NLS-1$
                 }
-                if (snippet.getFileExtensionRestrictions().contains(newText)) {
+                if (trimmed.contains("*")) { //$NON-NLS-1$
+                    return MessageFormat.format(Messages.DIALOG_VALIDATOR_FILE_EXTENSION_CONTAINS_ILLEGAL_CHARACTER,
+                            "*"); //$NON-NLS-1$ 
+                }
+                if (snippet.getFileExtensionRestrictions().contains(newText.toLowerCase())) {
                     return Messages.DIALOG_VALIDATOR_FILE_EXTENSION_ALREADY_ADDED;
                 }
                 return null;
@@ -522,7 +527,7 @@ public class SnippetMetadataPage extends FormPage {
                 Messages.DIALOG_MESSAGE_ENTER_NEW_FILE_EXTENSION, "", validator) { //$NON-NLS-1$
             @Override
             protected void okPressed() {
-                ppFileExtensions.add(getValue());
+                ppFileExtensions.add(getValue().toLowerCase());
                 super.okPressed();
             }
         };
@@ -601,8 +606,9 @@ public class SnippetMetadataPage extends FormPage {
         // File extensions
         ppFileExtensions = BeanProperties.list(Snippet.class, "fileExtensionRestrictions", String.class) //$NON-NLS-1$
                 .observe(snippet);
-        ViewerSupport.bind(listViewerFileExtensions, ppFileExtensions, new SelfValueProperty(String.class));
         ppFileExtensions.addChangeListener(new ContentsPartDirtyListener());
+        ViewerSupport.bind(listViewerFileExtensions, ppFileExtensions, new ExtensionLabelProperty());
+
 
         // Extra search terms
         ppExtraSearchTerms = BeanProperties.list(Snippet.class, "extraSearchTerms", String.class).observe(snippet); //$NON-NLS-1$
@@ -743,5 +749,31 @@ public class SnippetMetadataPage extends FormPage {
     public void dispose() {
         context.dispose();
         super.dispose();
+    }
+
+    private final class ExtensionLabelProperty extends SimpleValueProperty {
+        @Override
+        public Object getValueType() {
+            return String.class;
+        }
+
+        @Override
+        protected Object doGetValue(Object source) {
+            String text = (String) source;
+            if (text.startsWith(".")) {
+                return "*" + text; //$NON-NLS-1$
+            } else {
+                return text;
+            }
+        }
+
+        @Override
+        protected void doSetValue(Object source, Object value) {
+        }
+
+        @Override
+        public INativePropertyListener adaptListener(ISimplePropertyListener listener) {
+            return null;
+        }
     }
 }

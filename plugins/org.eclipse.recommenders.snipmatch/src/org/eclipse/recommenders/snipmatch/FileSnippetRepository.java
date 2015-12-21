@@ -86,6 +86,8 @@ import com.google.common.collect.Maps;
 
 public class FileSnippetRepository implements ISnippetRepository {
 
+    public static final String NO_FILE_EXTENSION_RESTRICTION = "<<no file extension restriction>>";
+
     private static final int MAX_SEARCH_RESULTS = 100;
     private static final int CACHE_SIZE = 200;
 
@@ -99,12 +101,14 @@ public class FileSnippetRepository implements ISnippetRepository {
     private static final String F_UUID = "uuid";
     private static final String F_LOCATION = "location";
     private static final String F_DEPENDENCY = "dependency";
+    private static final String F_FILE_EXTENSION_RESTRICTION = "fileExtensionRestriction";
 
     private static final float NAME_BOOST = 4.0f;
     private static final float DESCRIPTION_BOOST = 2.0f;
     private static final float EXTRA_SEARCH_TERM_BOOST = DESCRIPTION_BOOST;
     private static final float TAG_BOOST = 1.0f;
     private static final float DEPENDENCY_BOOST = 1.0f;
+    private static final float NO_RESTRICTION_BOOST = 0.5f;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -261,6 +265,14 @@ public class FileSnippetRepository implements ISnippetRepository {
             doc.add(new Field(F_DEPENDENCY, getDependencyString(dependency), Store.YES, Index.ANALYZED));
         }
 
+        if (snippet.getFileExtensionRestrictions().isEmpty()) {
+            doc.add(new Field(F_FILE_EXTENSION_RESTRICTION, NO_FILE_EXTENSION_RESTRICTION, Store.NO,
+                    Index.NOT_ANALYZED));
+        }
+        for (String restriction : snippet.getFileExtensionRestrictions()) {
+            doc.add(new Field(F_FILE_EXTENSION_RESTRICTION, restriction.toLowerCase(), Store.NO, Index.NOT_ANALYZED));
+        }
+
         writer.addDocument(doc);
     }
 
@@ -333,6 +345,24 @@ public class FileSnippetRepository implements ISnippetRepository {
             }
             if (context.getLocation() != NONE) {
                 query.add(new TermQuery(new Term(F_LOCATION, getIndexString(context.getLocation()))), Occur.MUST);
+            }
+
+            if (!context.getFileExtensionRestrictions().isEmpty()) {
+                BooleanQuery fileExtensionRestrictionsQuery = new BooleanQuery();
+                TermQuery noRestrictionQuery = new TermQuery(
+                        new Term(F_FILE_EXTENSION_RESTRICTION, NO_FILE_EXTENSION_RESTRICTION));
+                noRestrictionQuery.setBoost(NO_RESTRICTION_BOOST);
+                fileExtensionRestrictionsQuery.add(noRestrictionQuery, Occur.SHOULD);
+
+                int i = 1;
+                for (String restriction : context.getFileExtensionRestrictions()) {
+                    TermQuery restrictionQuery = new TermQuery(new Term(F_FILE_EXTENSION_RESTRICTION, restriction));
+                    float boost = (float) (0.5f + Math.pow(0.5, i));
+                    restrictionQuery.setBoost(boost);
+                    fileExtensionRestrictionsQuery.add(restrictionQuery, Occur.SHOULD);
+                    i++;
+                }
+                query.add(fileExtensionRestrictionsQuery, Occur.MUST);
             }
 
             searcher = new IndexSearcher(reader);

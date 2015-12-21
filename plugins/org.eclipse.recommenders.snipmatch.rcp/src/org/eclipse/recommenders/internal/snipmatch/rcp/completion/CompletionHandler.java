@@ -29,7 +29,9 @@ import org.eclipse.recommenders.internal.snipmatch.rcp.l10n.Messages;
 import org.eclipse.recommenders.utils.Reflections;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.google.common.eventbus.EventBus;
@@ -46,7 +48,8 @@ public class CompletionHandler extends AbstractHandler {
         IEditorPart editor = HandlerUtil.getActiveEditor(event);
 
         IEditorInput input = editor.getEditorInput();
-        if (input.getPersistable() == null) {
+        IPersistableElement persistable = input.getPersistable();
+        if (persistable == null) {
             return null;
         }
 
@@ -75,6 +78,12 @@ public class CompletionHandler extends AbstractHandler {
         } else {
             engine = createCompletionEngineForText(input, viewer, offset);
         }
+
+        if (persistable instanceof FileEditorInput) {
+            FileEditorInput fileInput = (FileEditorInput) persistable;
+            engine.setFileName(fileInput.getFile().getName());
+        }
+
         engine.show();
 
         return null;

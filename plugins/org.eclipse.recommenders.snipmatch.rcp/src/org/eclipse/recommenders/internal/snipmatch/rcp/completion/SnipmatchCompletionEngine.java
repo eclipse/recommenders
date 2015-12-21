@@ -73,6 +73,8 @@ public class SnipmatchCompletionEngine<T extends ContentAssistInvocationContext>
     private StyledText searchText;
     private AssistantControlState state;
 
+    private String filename;
+
     public SnipmatchCompletionEngine(T context, AbstractContentAssistProcessor<T> processor, EventBus bus,
             ColorRegistry colorRegistry, FontRegistry fontRegistry) {
         this.context = context;
@@ -137,6 +139,7 @@ public class SnipmatchCompletionEngine<T extends ContentAssistInvocationContext>
 
     public void show() {
         processor.setContext(context);
+        processor.setFilename(filename);
         assistant.install(context.getViewer());
         state = AssistantControlState.KEEP_OPEN;
         createSearchPopup();
@@ -280,5 +283,9 @@ public class SnipmatchCompletionEngine<T extends ContentAssistInvocationContext>
         String repoUri = null;
         // TODO How to get the repo uri?
         bus.post(new SnippetAppliedEvent(snippet.getUuid(), repoUri));
+    }
+
+    public void setFileName(String filename) {
+        this.filename = filename;
     }
 }

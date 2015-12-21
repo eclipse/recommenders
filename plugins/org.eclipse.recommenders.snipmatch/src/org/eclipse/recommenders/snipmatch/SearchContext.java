@@ -13,6 +13,8 @@ package org.eclipse.recommenders.snipmatch;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.recommenders.snipmatch.Location.NONE;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -23,17 +25,21 @@ public class SearchContext implements ISearchContext {
 
     private final String searchText;
     private final Location location;
+    private final List<String> fileExtensionRestrictions;
     private final Set<ProjectCoordinate> availableDependencies;
 
-    public SearchContext(String searchText, Location location, Set<ProjectCoordinate> availableDependencies) {
+    public SearchContext(String searchText, Location location, List<String> fileExtensionRestrictions,
+            Set<ProjectCoordinate> availableDependencies) {
         this.searchText = requireNonNull(searchText);
         this.location = requireNonNull(location);
+        this.fileExtensionRestrictions = fileExtensionRestrictions;
         this.availableDependencies = requireNonNull(availableDependencies);
     }
 
     public SearchContext(String searchText) {
         this.searchText = requireNonNull(searchText);
         this.location = NONE;
+        this.fileExtensionRestrictions = Collections.emptyList();
         this.availableDependencies = null;
     }
 
@@ -45,6 +51,11 @@ public class SearchContext implements ISearchContext {
     @Override
     public Location getLocation() {
         return location;
+    }
+
+    @Override
+    public List<String> getFileExtensionRestrictions() {
+        return fileExtensionRestrictions;
     }
 
     @Override
