@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -42,6 +41,7 @@ import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.property.INativePropertyListener;
 import org.eclipse.core.databinding.property.ISimplePropertyListener;
+import org.eclipse.core.databinding.property.value.IValueProperty;
 import org.eclipse.core.databinding.property.value.SimpleValueProperty;
 import org.eclipse.core.internal.databinding.property.value.SelfValueProperty;
 import org.eclipse.jface.action.Action;
@@ -504,13 +504,13 @@ public class SnippetMetadataPage extends FormPage {
 
             @Override
             public String isValid(String newText) {
-                if (isNullOrEmpty(newText)) {
+                if (newText == null) {
                     return ""; //$NON-NLS-1$
                 }
-                if (!StringUtils.isAlphanumeric(newText)) {
-                    return Messages.DIALOG_VALIDATOR_FILE_EXTENSION_CONTAINS_ILLEGAL_CHARACTER;
+                if (newText.trim().isEmpty()) {
+                    return ""; //$NON-NLS-1$
                 }
-                if (snippet.getFileExtensionRestrictions().contains(newText)) {
+                if (snippet.getFileExtensionRestrictions().contains(newText.toLowerCase())) {
                     return Messages.DIALOG_VALIDATOR_FILE_EXTENSION_ALREADY_ADDED;
                 }
                 return null;
@@ -520,7 +520,7 @@ public class SnippetMetadataPage extends FormPage {
                 Messages.DIALOG_MESSAGE_ENTER_NEW_FILE_EXTENSION, "", validator) { //$NON-NLS-1$
             @Override
             protected void okPressed() {
-                ppFileExtensions.add(getValue());
+                ppFileExtensions.add(getValue().toLowerCase());
                 super.okPressed();
             }
         };
@@ -627,7 +627,10 @@ public class SnippetMetadataPage extends FormPage {
         // File extensions
         ppFileExtensions = BeanProperties.list(Snippet.class, "fileExtensionRestrictions", String.class) //$NON-NLS-1$
                 .observe(snippet);
-        ViewerSupport.bind(listViewerFileExtensions, ppFileExtensions, new SelfValueProperty(String.class));
+
+        IValueProperty extensionLabelProperty = new ExtensionLabelProperty();
+
+        ViewerSupport.bind(listViewerFileExtensions, ppFileExtensions, extensionLabelProperty);
         ppFileExtensions.addListChangeListener(new IListChangeListener() {
 
             @Override
@@ -829,5 +832,31 @@ public class SnippetMetadataPage extends FormPage {
     public void dispose() {
         context.dispose();
         super.dispose();
+    }
+
+    private final class ExtensionLabelProperty extends SimpleValueProperty {
+        @Override
+        public Object getValueType() {
+            return String.class;
+        }
+
+        @Override
+        protected Object doGetValue(Object source) {
+            String text = (String) source;
+            if (text.startsWith(".")) {
+                return "*" + text; //$NON-NLS-1$
+            } else {
+                return text;
+            }
+        }
+
+        @Override
+        protected void doSetValue(Object source, Object value) {
+        }
+
+        @Override
+        public INativePropertyListener adaptListener(ISimplePropertyListener listener) {
+            return null;
+        }
     }
 }

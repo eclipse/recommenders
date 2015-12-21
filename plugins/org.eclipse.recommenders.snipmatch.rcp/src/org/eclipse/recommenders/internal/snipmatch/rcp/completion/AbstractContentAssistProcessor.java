@@ -74,6 +74,7 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
     protected Set<DependencyInfo> availableDependencies;
     private String terms;
     private ContextLoadingProposal contextLoadingProposal;
+    private String filename;
 
     @Inject
     public AbstractContentAssistProcessor(TemplateContextType templateContextType,
@@ -97,6 +98,10 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
         }
     }
 
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
     protected abstract Set<DependencyInfo> calculateAvailableDependencies(T context);
 
     public void setTerms(String terms) {
@@ -111,8 +116,10 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
         }
 
         Set<ProjectCoordinate> projectCoordinates = tryResolve(pcProvider, availableDependencies);
+        List<String> fileExtensionRestrictions = getFileExtensionRestrictions();
 
-        SearchContext searchContext = new SearchContext(terms, getLocation(), projectCoordinates);
+        SearchContext searchContext = new SearchContext(terms, getLocation(), fileExtensionRestrictions,
+                projectCoordinates);
 
         LinkedList<ICompletionProposal> proposals = Lists.newLinkedList();
 
@@ -175,6 +182,21 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
     }
 
     protected abstract Location getLocation();
+
+    public List<String> getFileExtensionRestrictions() {
+        List<String> restrictions = new LinkedList<>();
+
+        String[] split = StringUtils.splitPreserveAllTokens(filename, ".");
+        StringBuilder sb = new StringBuilder();
+        for (int i = split.length - 1; i >= 0; i--) {
+            sb.insert(0, split[i]);
+            if (i > 0) {
+                sb.insert(0, '.');
+            }
+            restrictions.add(sb.toString());
+        }
+        return restrictions;
+    }
 
     protected abstract TemplateContext getTemplateContext(IDocument document, Position position);
 
