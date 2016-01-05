@@ -31,9 +31,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
@@ -97,7 +99,10 @@ public class CompletionHandler extends AbstractHandler {
             return Optional.absent();
         }
 
-        if (editor instanceof MultiPageEditorPart) {
+        if (editor instanceof FormEditor) {
+            FormEditor fe = (FormEditor) editor;
+            editor = fe.getActiveEditor();
+        } else if (editor instanceof MultiPageEditorPart) {
             MultiPageEditorPart mp = (MultiPageEditorPart) editor;
             Object selectedPage = mp.getSelectedPage();
             if (selectedPage instanceof IEditorPart) {
@@ -106,10 +111,11 @@ public class CompletionHandler extends AbstractHandler {
         }
 
         if (editor instanceof AbstractTextEditor) {
-            return Optional.of(editor);
-        } else {
-            return Optional.absent();
+            if (((ITextEditor) editor).isEditable()) {
+                return Optional.of(editor);
+            }
         }
+        return Optional.absent();
     }
 
     private SnipmatchCompletionEngine<? extends ContentAssistInvocationContext> createCompletionEngineForJava(
@@ -125,7 +131,8 @@ public class CompletionHandler extends AbstractHandler {
             IEditorInput input, ISourceViewer viewer, int offset, String filename) {
         IJavaProject javaProject = EditorUtility.getJavaProject(input);
 
-        TextContentAssistInvocationContext context = new TextContentAssistInvocationContext(viewer, offset, javaProject);
+        TextContentAssistInvocationContext context = new TextContentAssistInvocationContext(viewer, offset,
+                javaProject);
         TextContentAssistProcessor processor = request(TextContentAssistProcessor.class);
 
         return new SnipmatchCompletionEngine<TextContentAssistInvocationContext>(context, processor, filename,
