@@ -45,7 +45,7 @@ public class Filenames {
             if (i > 0) {
                 sb.insert(0, '.');
             }
-            restrictions.add(0, sb.toString());
+            restrictions.add(0, sb.toString().toLowerCase());
         }
         return restrictions;
     }
