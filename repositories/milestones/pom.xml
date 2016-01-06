@@ -1,4 +1,3 @@
-<<<<<<< HEAD   (b05782 [snipmatch] Allow Snippet completion in MavenPomEditor)
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,14 +6,18 @@
 	<parent>
 		<groupId>org.eclipse.recommenders</groupId>
 		<artifactId>repositories</artifactId>
-		<version>2.3.0-SNAPSHOT</version>
+		<version>2.2.6-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>main</artifactId>
+	<artifactId>milestones</artifactId>
 	<packaging>eclipse-repository</packaging>
 
-	<name>Code Recommenders Main Update Site</name>
+	<name>Code Recommenders Milestones Update Site</name>
+
+	<properties>
+		<downloadPath>/recommenders/updates/maintenance-${project.artifactId}</downloadPath>
+	</properties>
 
 	<profiles>
 		<profile>
@@ -30,5 +33,3 @@
 		</profile>
 	</profiles>
 </project>
-=======
->>>>>>> BRANCH (0933e9 [releng] No download mirrors are used, as p2.mirrorsURL inco)
