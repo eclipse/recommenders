@@ -168,7 +168,9 @@ public class MessageUtils {
             if (message.getDate() != null
                     && (message.getDate().before(getPeriodStartDate(MessageAge.OLDER, today, locale))
                             || message.getDate().equals(getPeriodStartDate(MessageAge.OLDER, today, locale)))) {
-                result.get(MessageAge.OLDER.getIndex()).add(message);
+                if (!result.contains(message)) {
+                    result.get(MessageAge.OLDER.getIndex()).add(message);
+                }
             }
         }
         return result;
@@ -205,5 +207,4 @@ public class MessageUtils {
         }
         return calendar.getTime();
     }
-
 }
