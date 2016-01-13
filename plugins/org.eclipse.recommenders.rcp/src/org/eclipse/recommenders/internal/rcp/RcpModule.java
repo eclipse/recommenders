@@ -129,7 +129,7 @@ public class RcpModule extends AbstractModule implements Module {
             @Override
             public IStatus runInUIThread(final IProgressMonitor monitor) {
                 final IWorkbenchWindow ww = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-                final ISelectionService service = (ISelectionService) ww.getService(ISelectionService.class);
+                final ISelectionService service = ww.getService(ISelectionService.class);
                 service.addPostSelectionListener(provider);
                 return Status.OK_STATUS;
             }
@@ -261,7 +261,7 @@ public class RcpModule extends AbstractModule implements Module {
         JavaElementSelectionService provider;
 
         @Inject
-        JavaModelEventsService JavaModelEventsService;
+        JavaModelEventsService javaModelEventsService;
     }
 
     static class Listener implements TypeListener {
