@@ -13,28 +13,6 @@
 	<artifactId>org.eclipse.recommenders.jdt.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.xtend</groupId>
-				<artifactId>xtend-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-surefire-plugin</artifactId>
-				<configuration>
-					<useUIHarness>true</useUIHarness>
-					<dependencies>
-						<dependency>
-							<artifactId>org.eclipse.e4.rcp</artifactId>
-							<type>eclipse-feature</type>
-						</dependency>
-					</dependencies>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
 	<profiles>
 		<profile>
 			<id>mac</id>
