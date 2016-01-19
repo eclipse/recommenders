@@ -6,8 +6,13 @@
 <unit id="org.eclipse.ecf.filetransfer.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.sdk.ide" version="0.0.0"/>
+<<<<<<< HEAD   (7f8f9d Merge "[releng] Add Oomph configuration for Snipmatch incuba)
 <!-- Latest platform maintenance build for Mars -->
 <repository location="http://download.eclipse.org/eclipse/updates/4.5-M-builds/"/>
+=======
+<!-- Stable build for Mars.2 RC1 -->
+<repository location="http://download.eclipse.org/eclipse/updates/4.5-M-builds/M20160113-1000/"/>
+>>>>>>> BRANCH (dfce9d Merge "[snipmatch] Allow replacement of subtrees with {$var})
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
