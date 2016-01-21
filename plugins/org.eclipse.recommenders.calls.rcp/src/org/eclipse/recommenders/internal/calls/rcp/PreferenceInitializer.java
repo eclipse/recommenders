@@ -10,6 +10,7 @@
  */
 package org.eclipse.recommenders.internal.calls.rcp;
 
+import static org.eclipse.recommenders.completion.rcp.Constants.*;
 import static org.eclipse.recommenders.internal.calls.rcp.Constants.*;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
