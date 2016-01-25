@@ -43,7 +43,7 @@ public class SnippetCodeBuilderTest {
     private JavaProjectFixture fixture = new JavaProjectFixture(ResourcesPlugin.getWorkspace(), getClass().getName());
 
     private final CharSequence code;
-    private final String marker;
+    private final String customMarker;
     private final String expectedResult;
     private final List<String> nodeNames;
 
@@ -54,10 +54,10 @@ public class SnippetCodeBuilderTest {
 
     private static int testCount;
 
-    public SnippetCodeBuilderTest(String description, CharSequence code, String marker, List<String> nodeNames,
+    public SnippetCodeBuilderTest(String description, CharSequence code, String customMarker, List<String> nodeNames,
             String expectedResult) {
         this.code = code;
-        this.marker = marker;
+        this.customMarker = customMarker;
         this.expectedResult = expectedResult;
         this.nodeNames = nodeNames;
     }
@@ -268,6 +268,21 @@ public class SnippetCodeBuilderTest {
                 HASH_MARKER,
                 multiLine("${var_name:var(java.lang.String)} = ${var_name1:var(java.lang.String)};",
                           "${cursor}")));
+        
+        scenarios.add(scenario("Badly formatted code",
+                multiLine("class Example {",
+                          "    void m() {",
+                          "    $    int var;",
+                          "        var = 1;",
+                          "            var = 2;",
+                          "     var = 3;    $",
+                          "    }",
+                          "}"),
+                multiLine("    int ${var:newName(int)};",
+                          "${var} = 1;",
+                          "    ${var} = 2;",
+                          "     ${var} = 3;    ",
+                          "${cursor}")));
 
         scenarios.add(scenario("Single line file selected",
                 "$class Example { }$",
@@ -384,8 +399,8 @@ public class SnippetCodeBuilderTest {
                 SnippetCodeBuilderTest.class.getName() + testCount++);
 
         Pair<ICompilationUnit, List<Integer>> struct;
-        if (marker != null) {
-            struct = fixture.createFileAndParseWithMarkers(code, marker);
+        if (customMarker != null) {
+            struct = fixture.createFileAndParseWithMarkers(code, customMarker);
         } else {
             struct = fixture.createFileAndPackageAndParseWithMarkers(code);
         }

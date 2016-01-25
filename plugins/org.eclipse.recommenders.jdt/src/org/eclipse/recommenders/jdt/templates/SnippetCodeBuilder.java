@@ -72,6 +72,8 @@ public class SnippetCodeBuilder {
 
     private final StringBuilder code = new StringBuilder();
 
+    private int nonWhitespaceStart;
+
     /**
      * A convenience constructor calling
      * {@link SnippetCodeBuilder#SnippetCodeBuilder(CompilationUnit, IDocument, IRegion, Map) with an empty map, i.e.,
@@ -135,6 +137,8 @@ public class SnippetCodeBuilder {
     public String build() {
         final int start = textSelection.getOffset();
         final int length = textSelection.getLength();
+        nonWhitespaceStart = 0;
+        boolean nonWhitespaceAdded = false;
         String text;
         try {
             text = document.get(start, length);
@@ -190,7 +194,12 @@ public class SnippetCodeBuilder {
             // associates a whitespace with a previous AST node (not exactly understood yet).
             if (!Character.isJavaIdentifierPart(c)) {
                 code.append(c);
+                if (!nonWhitespaceAdded && Character.isWhitespace(c)) {
+                    nonWhitespaceStart++;
+                }
                 continue;
+            } else {
+                nonWhitespaceAdded = true;
             }
 
             NodeFinder nodeFinder = new NodeFinder(enclosingNode, offset, 0);
@@ -488,25 +497,23 @@ public class SnippetCodeBuilder {
             // fetch the selection's starting line from the editor document to
             // determine the number of leading
             // whitespace characters to remove from the snippet:
-            IRegion firstLineInfo = document.getLineInformationOfOffset(textSelection.getOffset());
-            String line = document.get(firstLineInfo.getOffset(), firstLineInfo.getLength());
+            int selectionOffset = textSelection.getOffset();
+            IRegion firstLineInfo = document.getLineInformationOfOffset(selectionOffset);
+            int firstLineOffset = firstLineInfo.getOffset();
+            String line = document.get(firstLineOffset, firstLineInfo.getLength());
 
-            int index = 0;
-            for (; index < line.length(); index++) {
-                if (!Character.isWhitespace(line.charAt(index))) {
-                    break;
-                }
-            }
-            String wsPrefix = line.substring(0, index);
+            String wsPrefix = line.substring(0, selectionOffset - firstLineOffset + nonWhitespaceStart);
 
             // rewrite the buffer and try to remove the leading whitespace. This
             // is a simple heuristic only...
             String[] lines = code.toString().split("\\r?\\n"); //$NON-NLS-1$
             code.setLength(0);
-            for (String l : lines) {
+            for (int i = 0; i < lines.length - 1; i++) {
+                String l = lines[i];
                 String clean = StringUtils.removeStart(l, wsPrefix);
                 code.append(clean).append(LINE_SEPARATOR);
             }
+            code.append(lines[lines.length-1]).append(LINE_SEPARATOR);
         } catch (BadLocationException e) {
             log(ERROR_SNIPPET_REPLACE_LEADING_WHITESPACE_FAILED, e);
         }
