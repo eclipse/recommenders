@@ -22,16 +22,25 @@ import org.eclipse.recommenders.internal.completion.rcp.l10n.Messages;
 @SuppressWarnings("restriction")
 public class EmptyCompletionProposal extends AbstractJavaCompletionProposal {
 
-    // leave a bit space for other, maybe more important proposals
-    private static final int RELEVANCE = Integer.MAX_VALUE - 9000;
+    private static final int RELEVANCE = Integer.MAX_VALUE;
 
+    /**
+     * @see {@linkplain org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#JavaCompletionProposal(String, int, int, org.eclipse.swt.graphics.Image, StyledString, int, boolean, org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
+     *      The constructor of JavaCompletionProposal} for hints on the setters to call here.
+     */
     public EmptyCompletionProposal(int invocationOffset) {
-        StyledString text = new StyledString(Messages.PROPOSAL_LABEL_NO_PROPOSALS, QUALIFIER_STYLER);
-        setStyledDisplayString(text);
-        setRelevance(RELEVANCE);
-        setSortString(text.getString());
-        setCursorPosition(invocationOffset);
+        setReplacementOffset(invocationOffset);
         setReplacementString(""); //$NON-NLS-1$
+        setReplacementLength(0);
+
+        setStyledDisplayString(new StyledString(Messages.PROPOSAL_LABEL_NO_PROPOSALS, QUALIFIER_STYLER));
+
+        setRelevance(RELEVANCE);
+
+        // Don't sort this proposal based on its label, but always show it before all other proposals.
+        setSortString("");
+
+        setCursorPosition(0);
     }
 
     @Override

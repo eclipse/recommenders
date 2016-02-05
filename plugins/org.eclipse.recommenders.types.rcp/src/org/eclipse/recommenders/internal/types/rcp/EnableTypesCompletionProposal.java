@@ -35,7 +35,6 @@ import org.eclipse.recommenders.internal.types.rcp.l10n.Messages;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.rcp.SharedImages.Images;
 import org.eclipse.recommenders.utils.names.ITypeName;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
 import com.google.common.collect.ImmutableList;
@@ -61,12 +60,17 @@ public class EnableTypesCompletionProposal extends AbstractCompletionTipProposal
     @Inject
     public EnableTypesCompletionProposal(SharedImages images, CompletionRcpPreferences completionPreferences) {
         this.preferences = completionPreferences;
-        Image image = images.getImage(Images.OBJ_LIGHTBULB);
+
+        setImage(images.getImage(Images.OBJ_LIGHTBULB));
+
+        setStyledDisplayString(new StyledString(Messages.PROPOSAL_LABEL_ENABLE_TYPES_COMPLETION, DECORATIONS_STYLER));
+
         setRelevance(ENABLE_TYPE_COMPLETION_RELEVANCE);
-        setImage(image);
-        StyledString text = new StyledString(Messages.PROPOSAL_LABEL_ENABLE_TYPES_COMPLETION, DECORATIONS_STYLER);
-        setStyledDisplayString(text);
-        setSortString(text.getString());
+
+        // Don't sort this proposal based on its label, but always show it before all other proposals except
+        // EnabledCompletionProposal (and EmptyCompletionProposal).
+        setSortString("\u0001");
+
         suppressProposal(TIME_DELAY_IN_MINUTES, TimeUnit.MINUTES);
     }
 
