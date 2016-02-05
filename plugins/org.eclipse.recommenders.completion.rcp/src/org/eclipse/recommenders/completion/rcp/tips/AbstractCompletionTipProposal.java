@@ -34,9 +34,21 @@ public abstract class AbstractCompletionTipProposal extends AbstractJavaCompleti
     private long suppressProposalDeadlineMillis = 0;
 
     public AbstractCompletionTipProposal() {
-        setRelevance(RELEVANCE);
-        setCursorPosition(0);
+        // setReplacementOffset called during setInvocationOffset below
         setReplacementString(""); //$NON-NLS-1$
+        setReplacementLength(0);
+
+        setRelevance(RELEVANCE);
+
+        // Don't sort this proposal based on its label, but always show it after all other proposals.
+        setSortString("\uFFFF");
+
+        setCursorPosition(0);
+    }
+
+    @Override
+    public void setInvocationOffset(int invocationOffset) {
+        setReplacementOffset(invocationOffset);
     }
 
     @Override
