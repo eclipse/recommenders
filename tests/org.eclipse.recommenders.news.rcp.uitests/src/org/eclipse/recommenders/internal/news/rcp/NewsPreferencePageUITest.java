@@ -235,6 +235,20 @@ public class NewsPreferencePageUITest {
         assertThat(treeWebBrowser.isSelected(), is(true));
     }
 
+    @Test
+    public void testFeedProvidedByExtensionPointContainsContributedBySuffix() {
+        assertThat(bot.table().getTableItem(0).getText().contains("contributed by Code Recommenders News Feed UI"),
+                is(true));
+    }
+
+    @Test
+    public void testCustomFeedDoesNotContainContributedBySuffix() {
+        addCustomFeed(bot);
+
+        assertThat(bot.table().getTableItem(1).getText().contains("contributed by Code Recommenders News Feed UI"),
+                is(false));
+    }
+
     private static void openPreferencePage(SWTWorkbenchBot bot) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 
