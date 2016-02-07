@@ -342,7 +342,12 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                 @Override
                 public String getText(Object element) {
                     FeedDescriptor feed = (FeedDescriptor) element;
-                    return feed.getName();
+
+                    if (feed.getContributedBy() == null) {
+                        return feed.getName();
+                    }
+
+                    return MessageFormat.format(Messages.FEED_CONTRIBUTED_BY, feed.getName(), feed.getContributedBy());
                 }
 
                 @Override
