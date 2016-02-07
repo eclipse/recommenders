@@ -10,6 +10,7 @@ package org.eclipse.recommenders.internal.news.rcp;
 import static com.google.common.base.Strings.nullToEmpty;
 
 import java.lang.reflect.Type;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.recommenders.internal.news.rcp.l10n.LogMessages;
+import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
@@ -46,7 +48,9 @@ public class FeedDescriptors {
         final List<FeedDescriptor> feeds = Lists.newLinkedList();
         for (final IConfigurationElement element : elements) {
             boolean enabled = true;
-            FeedDescriptor feed = new FeedDescriptor(element, enabled);
+            FeedDescriptor feed = new FeedDescriptor(element, enabled, MessageFormat.format(
+                    Messages.FEED_CONTRIBUTED_BY, " ",
+                    Platform.getBundle(element.getContributor().getName()).getHeaders().get(Constants.BUNDLE_NAME)));
             if (!feeds.contains(feed)) {
                 feeds.add(feed);
             } else {
