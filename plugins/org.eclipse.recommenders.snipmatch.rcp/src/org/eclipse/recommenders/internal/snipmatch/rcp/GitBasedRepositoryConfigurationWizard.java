@@ -14,6 +14,7 @@ import static org.eclipse.recommenders.internal.snipmatch.rcp.Constants.*;
 import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -23,6 +24,9 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.jgit.transport.Transport;
+import org.eclipse.jgit.transport.TransportProtocol;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.recommenders.internal.snipmatch.rcp.l10n.Messages;
 import org.eclipse.recommenders.snipmatch.Snippet;
 import org.eclipse.recommenders.snipmatch.model.SnippetRepositoryConfiguration;
@@ -187,8 +191,8 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
             });
 
             Label lblPushSettingsDescription = new Label(group, SWT.NONE);
-            lblPushSettingsDescription.setText(MessageFormat.format(
-                    Messages.WIZARD_GIT_REPOSITORY_PUSH_SETTINGS_DESCRIPTION, Snippet.FORMAT_VERSION));
+            lblPushSettingsDescription.setText(MessageFormat
+                    .format(Messages.WIZARD_GIT_REPOSITORY_PUSH_SETTINGS_DESCRIPTION, Snippet.FORMAT_VERSION));
             GridDataFactory.fillDefaults().grab(true, false).span(3, 1).applyTo(lblPushSettingsDescription);
 
             Label lblPushBranchPrefix = new Label(group, SWT.NONE);
@@ -220,8 +224,8 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
             } else if (Strings.isNullOrEmpty(txtFetchUri.getText())) {
                 setErrorMessage(Messages.WIZARD_GIT_REPOSITORY_ERROR_EMPTY_FETCH_URL);
             } else if (fetchUri == null) {
-                setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_URL,
-                        txtFetchUri.getText()));
+                setErrorMessage(
+                        MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_URL, txtFetchUri.getText()));
             } else if (!fetchUri.isAbsolute()) {
                 setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_ABSOLUTE_URL_REQUIRED,
                         txtFetchUri.getText()));
@@ -231,8 +235,8 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
             } else if (Strings.isNullOrEmpty(txtPushUri.getText())) {
                 setErrorMessage(Messages.WIZARD_GIT_REPOSITORY_ERROR_EMPTY_PUSH_URL);
             } else if (pushUri == null) {
-                setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_URL,
-                        txtPushUri.getText()));
+                setErrorMessage(
+                        MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_URL, txtPushUri.getText()));
             } else if (!pushUri.isAbsolute()) {
                 setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_ABSOLUTE_URL_REQUIRED,
                         txtPushUri.getText()));
@@ -243,9 +247,41 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
                 setErrorMessage(Messages.WIZARD_GIT_REPOSITORY_ERROR_EMPTY_BRANCH_PREFIX);
             } else if (pushBranchPrefixValid != null) {
                 setErrorMessage(pushBranchPrefixValid);
+            } else {
+                String errorMessage = verifyValidUri(txtFetchUri.getText());
+
+                if (Strings.isNullOrEmpty(errorMessage)) {
+                    errorMessage = verifyValidUri(txtPushUri.getText());
+
+                    if (!Strings.isNullOrEmpty(errorMessage)) {
+                        setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_PUSH_URI,
+                                errorMessage));
+                    }
+
+                } else {
+                    setErrorMessage(
+                            MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_FETCH_URI, errorMessage));
+                }
+
             }
 
             setPageComplete(getErrorMessage() == null);
+        }
+
+        public String verifyValidUri(String repoUri) {
+            try {
+                URIish uri = new URIish(repoUri);
+
+                for (TransportProtocol protocol : Transport.getTransportProtocols()) {
+                    if (protocol.canHandle(uri)) {
+                        return null;
+                    }
+                }
+            } catch (URISyntaxException e) {
+                return e.getLocalizedMessage();
+            }
+
+            return Messages.WIZARD_GIT_REPOSITORY_ERROR_NO_PROTOCOL_CAN_HANDLE;
         }
 
         public boolean canFinish() {
