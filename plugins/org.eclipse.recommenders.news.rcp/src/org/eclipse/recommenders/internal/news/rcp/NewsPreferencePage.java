@@ -46,7 +46,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.eclipse.ui.services.IEvaluationService;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
@@ -58,6 +62,8 @@ import com.google.common.collect.Lists;
 
 public class NewsPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+    private static final String PROPERTY_NAMESPACE = "org.eclipse.recommenders.news.rcp.newsToolbarContributionTester";
+    private static final String PROPERTY_NEWS_ENABLED = "newsEnabled";
     @Inject
     private INewsService service;
     @Inject
@@ -133,12 +139,30 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
 
         if (forceStart) {
             service.start();
+            callPropertyTester();
+            IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+            ICommandService commandService = (ICommandService) window.getService(ICommandService.class);
+            if (commandService != null) {
+                commandService.getDefinedCommandIds().iterator().next();
+                commandService.refreshElements(commandService.getDefinedCommandIds().iterator().next().toString(),
+                        null);
+            }
         }
         if (forceStop) {
             service.forceStop();
+            callPropertyTester();
+
         }
 
         return result;
+    }
+
+    private void callPropertyTester() {
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        IEvaluationService evaluationService = (IEvaluationService) window.getService(IEvaluationService.class);
+        if (evaluationService != null) {
+            evaluationService.requestEvaluation(PROPERTY_NAMESPACE + "." + PROPERTY_NEWS_ENABLED);
+        }
     }
 
     private boolean chceckFeedsConsistency(List<FeedDescriptor> oldFeedValue, List<FeedDescriptor> newFeedValue,

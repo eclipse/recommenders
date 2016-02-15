@@ -14,6 +14,11 @@
             <keywordReference id="org.eclipse.recommenders.news.rcp.keywords.news"/>
         </page>
     </extension>
+       <extension
+         id="org.eclipse.recommenders.rcp.toolbar.contributions.news.command"
+         name="News Toolbar Contribution"
+         point="org.eclipse.ui.commands">
+   </extension>
     <extension point="org.eclipse.ui.keywords">
         <keyword id="org.eclipse.recommenders.news.rcp.keywords.news"
             label="%keywords.news.label"/>
@@ -30,6 +35,11 @@
    <extension point="org.eclipse.ui.menus">
       <menuContribution allPopups="true" locationURI="toolbar:org.eclipse.ui.trim.status">
          <toolbar id="org.eclipse.recommenders.trim.rcp.status.contributions">
+            <command
+                  commandId="org.eclipse.recommenders.rcp.toolbar.contributions.news.command"
+                  label="RSS"
+                  style="push">
+            </command>
             <control class="org.eclipse.recommenders.internal.news.rcp.NewsToolbarContribution" id="org.eclipse.recommenders.rcp.toolbar.contributions.news">
                <visibleWhen checkEnabled="false">
                   <test
