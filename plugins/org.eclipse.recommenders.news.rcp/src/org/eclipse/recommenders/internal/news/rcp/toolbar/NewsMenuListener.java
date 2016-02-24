@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -25,6 +26,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.BrowserUtils;
 import org.eclipse.recommenders.internal.news.rcp.CommonImages;
+import org.eclipse.recommenders.internal.news.rcp.Constants;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.MessageUtils.MessageAge;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
@@ -34,16 +36,16 @@ import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.eclipse.recommenders.news.rcp.IPollingResult.Status;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.eventbus.EventBus;
 
 public class NewsMenuListener implements IMenuListener {
-    private final EventBus eventBus;
+
+    private final IEventBroker eventBroker;
     private final INewsService service;
+
     private Map<FeedDescriptor, IPollingResult> messages;
 
-    public NewsMenuListener(EventBus eventBus, INewsService service) {
-        super();
-        this.eventBus = eventBus;
+    public NewsMenuListener(IEventBroker eventBroker, INewsService service) {
+        this.eventBroker = eventBroker;
         this.service = service;
     }
 
@@ -75,7 +77,7 @@ public class NewsMenuListener implements IMenuListener {
         }
 
         manager.add(new Separator());
-        manager.add(newMarkAllAsReadAction(eventBus));
+        manager.add(newMarkAllAsReadAction(eventBroker));
         manager.add(newPollFeedsAction());
         manager.add(new Separator());
         manager.add(new PreferenceAction());
@@ -83,7 +85,7 @@ public class NewsMenuListener implements IMenuListener {
 
     private void addMarkAsReadAction(FeedDescriptor feed, MenuManager menu) {
         menu.add(new Separator());
-        menu.add(newMarkFeedAsReadAction(eventBus, feed));
+        menu.add(newMarkFeedAsReadAction(eventBroker, feed));
     }
 
     private Action newPollFeedsAction() {
@@ -125,7 +127,7 @@ public class NewsMenuListener implements IMenuListener {
                 @Override
                 public void run() {
                     BrowserUtils.openInDefaultBrowser(message.getUrl(), feed.getParameters());
-                    eventBus.post(createFeedMessageReadEvent(message.getId()));
+                    eventBroker.post(Constants.TOPIC_FEED_ITEM_READ, createFeedMessageReadEvent(message.getId()));
                 }
             };
             String title = preserveAtSign(message.getTitle());

@@ -18,7 +18,10 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.core.di.extensions.Preference;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
@@ -45,7 +48,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.Subscribe;
 
 public class NewsToolControl {
 
@@ -60,7 +62,7 @@ public class NewsToolControl {
     private MenuManager menuManager;
 
     @Inject
-    public NewsToolControl(MToolControl modelElement, NewsRcpPreferences preferences) {
+    public NewsToolControl(MToolControl modelElement, NewsRcpPreferences preferences, IEventBroker eventBroker) {
         this.modelElement = modelElement;
         this.preferences = preferences;
 
@@ -68,9 +70,8 @@ public class NewsToolControl {
 
         service = (INewsService) ContextInjectionFactory.make(INewsService.class,
                 (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class));
-        NewsRcpInjection.EVENT_BUS.register(this);
 
-        newsMenuListener = new NewsMenuListener(NewsRcpInjection.EVENT_BUS, service);
+        newsMenuListener = new NewsMenuListener(eventBroker, service);
     }
 
     @Inject
@@ -89,8 +90,9 @@ public class NewsToolControl {
         return manager.createControl(parent);
     }
 
-    @Subscribe
-    public void handle(NewFeedItemsEvent event) {
+    @Inject
+    @Optional
+    public void handle(@EventTopic(Constants.TOPIC_NEW_FEED_ITEMS) NewFeedItemsEvent event) {
         final IWorkbench workbench = PlatformUI.getWorkbench();
         if (workbench.isClosing()) {
             return;
@@ -110,18 +112,21 @@ public class NewsToolControl {
         });
     }
 
-    @Subscribe
-    public void handleAllRead(AllReadEvent event) {
+    @Inject
+    @Optional
+    public void handleAllRead(@EventTopic(Constants.TOPIC_ALL_FEEDS_READ) AllReadEvent event) {
         updatingNewsAction.checkForNews();
     }
 
-    @Subscribe
-    public void handleFeedRead(FeedReadEvent event) {
+    @Inject
+    @Optional
+    public void handleFeedRead(@EventTopic(Constants.TOPIC_FEED_READ) FeedReadEvent event) {
         updatingNewsAction.checkForNews();
     }
 
-    @Subscribe
-    public void handleMessageRead(FeedMessageReadEvent event) {
+    @Inject
+    @Optional
+    public void handleMessageRead(@EventTopic FeedMessageReadEvent event) {
         updatingNewsAction.checkForNews();
     }
 

@@ -43,4 +43,9 @@ public final class Constants {
     public static final String ATTRIBUTE_PARAMETER_VALUE = "value"; //$NON-NLS-1$
     public static final String NEWS_NOTIFICATION_ID = "org.eclipse.recommenders.news.rcp.NewMessages"; //$NON-NLS-1$
     public static final String BUNDLE_HEADER_NAME = "Bundle-Name"; //$NON-NLS-1$
+
+    public static final String TOPIC_NEW_FEED_ITEMS = "org_eclipse_recommenders_news_rcp/newFeedItems"; //$NON-NLS-1$
+    public static final String TOPIC_FEED_ITEM_READ = "org_eclipse_recommenders_news_rcp/feedItemRead"; //$NON-NLS-1$
+    public static final String TOPIC_ALL_FEEDS_READ = "org_eclipse_recommenders_news_rcp/allFeedsRead"; //$NON-NLS-1$
+    public static final String TOPIC_FEED_READ = "org_eclipse_recommenders_news_rcp/feedRead"; //$NON-NLS-1$
 }
