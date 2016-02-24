@@ -9,40 +9,40 @@ package org.eclipse.recommenders.internal.news.rcp.toolbar;
 
 import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.*;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.action.Action;
+import org.eclipse.recommenders.internal.news.rcp.Constants;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 
-import com.google.common.eventbus.EventBus;
-
 public final class MarkAsReadAction extends Action {
 
-    private final EventBus eventBus;
+    private final IEventBroker eventBroker;
     private final Boolean allFeeds;
     private final FeedDescriptor feed;
 
-    private MarkAsReadAction(EventBus eventBus, FeedDescriptor feed, boolean allFeeds) {
+    private MarkAsReadAction(IEventBroker eventBroker, FeedDescriptor feed, boolean allFeeds) {
         super();
-        this.eventBus = eventBus;
+        this.eventBroker = eventBroker;
         this.allFeeds = allFeeds;
         this.feed = feed;
     }
 
-    public static MarkAsReadAction newMarkFeedAsReadAction(EventBus eventBus, FeedDescriptor feed) {
-        return new MarkAsReadAction(eventBus, feed, false);
+    public static MarkAsReadAction newMarkFeedAsReadAction(IEventBroker eventBroker, FeedDescriptor feed) {
+        return new MarkAsReadAction(eventBroker, feed, false);
     }
 
-    public static MarkAsReadAction newMarkAllAsReadAction(EventBus eventBus) {
-        return new MarkAsReadAction(eventBus, null, true);
+    public static MarkAsReadAction newMarkAllAsReadAction(IEventBroker eventBroker) {
+        return new MarkAsReadAction(eventBroker, null, true);
     }
 
     @Override
     public void run() {
         if (allFeeds) {
-            eventBus.post(createAllReadEvent());
+            eventBroker.post(Constants.TOPIC_ALL_FEEDS_READ, createAllReadEvent());
             return;
         }
-        eventBus.post(createFeedReadEvent(feed));
+        eventBroker.post(Constants.TOPIC_FEED_READ, createFeedReadEvent(feed));
     }
 
     @Override

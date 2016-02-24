@@ -9,11 +9,11 @@ package org.eclipse.recommenders.news.rcp;
 
 import java.util.Map;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 
-import com.google.common.eventbus.EventBus;
-
 public interface INotificationFacade {
+
     /**
      * Displays notification.
      *
@@ -22,6 +22,5 @@ public interface INotificationFacade {
      * @param bus
      *            EventBus that will handle message events
      */
-    void displayNotification(Map<FeedDescriptor, IPollingResult> messages, EventBus bus);
-
+    void displayNotification(Map<FeedDescriptor, IPollingResult> messages, IEventBroker eventBroker);
 }

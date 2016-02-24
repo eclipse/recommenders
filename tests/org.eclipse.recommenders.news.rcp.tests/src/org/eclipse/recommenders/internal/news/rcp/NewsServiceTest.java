@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IJobFacade;
 import org.eclipse.recommenders.news.rcp.INewsProperties;
@@ -39,7 +40,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.EventBus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NewsServiceTest {
@@ -53,7 +53,7 @@ public class NewsServiceTest {
     private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     private NewsRcpPreferences preferences;
-    private EventBus bus;
+    private IEventBroker bus;
     private IJobFacade jobFacade;
     private INewsProperties properties;
     private PollFeedJob job;
@@ -62,7 +62,7 @@ public class NewsServiceTest {
     @Before
     public void setUp() {
         preferences = mock(NewsRcpPreferences.class);
-        bus = mock(EventBus.class);
+        bus = mock(IEventBroker.class);
         jobFacade = mock(JobFacade.class);
         properties = mock(NewsProperties.class);
         job = mock(PollFeedJob.class);

@@ -13,12 +13,11 @@ import java.util.Map;
 import javax.inject.Singleton;
 
 import org.eclipse.e4.core.di.annotations.Creatable;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.mylyn.commons.notifications.ui.NotificationsUi;
 import org.eclipse.recommenders.internal.news.rcp.notifications.NewMessageNotification;
 import org.eclipse.recommenders.news.rcp.INotificationFacade;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
-
-import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("restriction")
 @Creatable
@@ -26,8 +25,7 @@ import com.google.common.eventbus.EventBus;
 public class NotificationFacade implements INotificationFacade {
 
     @Override
-    public void displayNotification(final Map<FeedDescriptor, IPollingResult> messages, final EventBus eventBus) {
-        NotificationsUi.getService().notify(Arrays.asList(new NewMessageNotification(eventBus, messages)));
+    public void displayNotification(Map<FeedDescriptor, IPollingResult> messages, IEventBroker eventBroker) {
+        NotificationsUi.getService().notify(Arrays.asList(new NewMessageNotification(eventBroker, messages)));
     }
-
 }

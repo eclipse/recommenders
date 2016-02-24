@@ -17,18 +17,12 @@ import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.recommenders.news.rcp.INotificationFacade;
 import org.eclipse.ui.PlatformUI;
 
-import com.google.common.eventbus.EventBus;
-
 @SuppressWarnings("restriction")
 public class NewsRcpInjection {
-
-    public static final EventBus EVENT_BUS = new EventBus();
 
     public static void initiateContext(Object object) {
         addBindings();
         ContextInjectionFactory.inject(object,
-                (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class));
-        ContextInjectionFactory.inject(EVENT_BUS,
                 (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class));
     }
 
