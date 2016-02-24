@@ -11,6 +11,7 @@ package org.eclipse.recommenders.internal.news.rcp.notifications;
 
 import java.util.Map;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.mylyn.commons.notifications.core.AbstractNotification;
 import org.eclipse.mylyn.commons.notifications.core.NotificationSink;
 import org.eclipse.mylyn.commons.notifications.core.NotificationSinkEvent;
@@ -18,8 +19,6 @@ import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-
-import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("restriction")
 public class NewsPopupNotificationSink extends NotificationSink {
@@ -32,16 +31,16 @@ public class NewsPopupNotificationSink extends NotificationSink {
             @Override
             public void run() {
                 Map<FeedDescriptor, IPollingResult> messages = null;
-                EventBus eventBus = null;
+                IEventBroker eventBroker = null;
                 for (AbstractNotification notification : event.getNotifications()) {
                     if (notification instanceof NewMessageNotification) {
                         messages = ((NewMessageNotification) notification).getMessages();
-                        eventBus = ((NewMessageNotification) notification).getBus();
+                        eventBroker = ((NewMessageNotification) notification).getBus();
                         break;
                     }
                 }
-                if (messages != null && eventBus != null) {
-                    new NewsNotificationPopup(display, messages, eventBus).open();
+                if (messages != null && eventBroker != null) {
+                    new NewsNotificationPopup(display, messages, eventBroker).open();
                 }
             }
         });

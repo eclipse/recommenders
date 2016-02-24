@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.mylyn.commons.ui.compatibility.CommonFonts;
 import org.eclipse.mylyn.commons.ui.dialogs.AbstractNotificationPopup;
 import org.eclipse.recommenders.internal.news.rcp.BrowserUtils;
+import org.eclipse.recommenders.internal.news.rcp.Constants;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.MessageUtils;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
@@ -36,8 +38,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
-import com.google.common.eventbus.EventBus;
-
 public class NewsNotificationPopup extends AbstractNotificationPopup {
 
     private static final int DELAY_CLOSE_MS = 4000;
@@ -45,12 +45,13 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
     private static final int MAX_WIDTH = 400; // Taken from AbstractNotificationPopup.MAX_WIDTH
 
     private final Map<FeedDescriptor, IPollingResult> messages;
-    private final EventBus eventBus;
+    private final IEventBroker eventBroker;
 
-    public NewsNotificationPopup(Display display, Map<FeedDescriptor, IPollingResult> messages, EventBus eventBus) {
+    public NewsNotificationPopup(Display display, Map<FeedDescriptor, IPollingResult> messages,
+            IEventBroker eventBroker) {
         super(display);
         this.messages = messages;
-        this.eventBus = eventBus;
+        this.eventBroker = eventBroker;
         setFadingEnabled(true);
         setDelayClose(DELAY_CLOSE_MS);
     }
@@ -97,7 +98,7 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
                         BrowserUtils.openInDefaultBrowser(message.getUrl(), feed.getParameters());
-                        eventBus.post(createFeedMessageReadEvent(message.getId()));
+                        eventBroker.post(Constants.TOPIC_FEED_ITEM_READ, createFeedMessageReadEvent(message.getId()));
                     }
                 });
                 messagesPerFeed++;

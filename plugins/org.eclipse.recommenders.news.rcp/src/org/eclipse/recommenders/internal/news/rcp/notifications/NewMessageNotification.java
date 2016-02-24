@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.mylyn.commons.notifications.ui.AbstractUiNotification;
 import org.eclipse.recommenders.internal.news.rcp.Constants;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
@@ -20,22 +21,20 @@ import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
 import org.eclipse.swt.graphics.Image;
 
-import com.google.common.eventbus.EventBus;
-
 @SuppressWarnings("restriction")
 public class NewMessageNotification extends AbstractUiNotification {
 
-    private final EventBus bus;
+    private final IEventBroker eventBroker;
     private final Map<FeedDescriptor, IPollingResult> messages;
 
-    public NewMessageNotification(EventBus bus, Map<FeedDescriptor, IPollingResult> messages) {
+    public NewMessageNotification(IEventBroker eventBroker, Map<FeedDescriptor, IPollingResult> messages) {
         super(Constants.NEWS_NOTIFICATION_ID);
-        this.bus = bus;
+        this.eventBroker = eventBroker;
         this.messages = messages;
     }
 
-    public EventBus getBus() {
-        return bus;
+    public IEventBroker getBus() {
+        return eventBroker;
     }
 
     public Map<FeedDescriptor, IPollingResult> getMessages() {
@@ -75,5 +74,4 @@ public class NewMessageNotification extends AbstractUiNotification {
     public String getLabel() {
         return Messages.LABEL_DESKTOP_NOTIFICATION_LABEL;
     }
-
 }
