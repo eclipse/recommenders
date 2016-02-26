@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.recommenders.news.impl.newsservice">
+   <implementation class="org.eclipse.recommenders.news.impl.DefaultNewsService"/>
+   <service>
+      <provide interface="org.eclipse.recommenders.news.api.INewsService"/>
+   </service>
+</scr:component>
