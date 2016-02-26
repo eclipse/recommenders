@@ -31,4 +31,6 @@ Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  org.apache.http.client;version="[4.3.0,5.0.0)",
  org.apache.http.client.fluent;version="[4.3.0,5.0.0)",
  org.apache.http.client.utils;version="[4.3.0,5.0.0)",
- org.apache.http.message;version="[4.3.0,5.0.0)"
+ org.apache.http.message;version="[4.3.0,5.0.0)",
+ org.eclipse.jdt.annotation;resolution:=optional
+Service-Component: OSGI-INF/newsservice.xml

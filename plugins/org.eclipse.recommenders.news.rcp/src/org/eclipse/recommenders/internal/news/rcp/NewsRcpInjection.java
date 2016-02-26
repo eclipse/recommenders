@@ -13,7 +13,8 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.InjectorFactory;
 import org.eclipse.recommenders.news.rcp.IJobFacade;
 import org.eclipse.recommenders.news.rcp.INewsProperties;
-import org.eclipse.recommenders.news.rcp.INewsService;
+import org.eclipse.recommenders.news.api.INewsService;
+import org.eclipse.recommenders.news.core.NewsService;
 import org.eclipse.recommenders.news.rcp.INotificationFacade;
 import org.eclipse.ui.PlatformUI;
 
