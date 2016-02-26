@@ -102,7 +102,7 @@ public class NewsPreferencePageUITest {
         bot.textWithLabel(Messages.FIELD_LABEL_URL).setText(VALID_FEED_URL);
         bot.textWithLabel(Messages.FIELD_LABEL_POLLING_INTERVAL).setText(CHARACTERS_AND_DIGITS);
 
-        assertThat(bot.text(" " + Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_DIGITS_ONLY), is(notNullValue())); //$NON-NLS-1$
+        assertThat(bot.text(" " + Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_INVALID), is(notNullValue())); //$NON-NLS-1$
         assertThat(bot.button("OK").isEnabled(), is(false)); //$NON-NLS-1$
     }
 
@@ -237,8 +237,7 @@ public class NewsPreferencePageUITest {
 
     @Test
     public void testFeedProvidedByExtensionPointContainsContributedBySuffix() {
-        assertThat(bot.table().getTableItem(0).getText()
-                .equals("Eclipse Marketplace (contributed by Code Recommenders News Feed UI)"), is(true));
+        assertThat(bot.table().getTableItem(0).getText(), containsString("(contributed "));
     }
 
     private static void openPreferencePage(SWTWorkbenchBot bot) {
@@ -247,7 +246,7 @@ public class NewsPreferencePageUITest {
             @Override
             public void run() {
                 PreferencesUtil
-                        .createPreferenceDialogOn(null, "org.eclipse.recommenders.news.rcp.preferencePage", null, null) //$NON-NLS-1$
+                        .createPreferenceDialogOn(null, Constants.PREF_PAGE_ID, null, null)
                         .open();
             }
 
