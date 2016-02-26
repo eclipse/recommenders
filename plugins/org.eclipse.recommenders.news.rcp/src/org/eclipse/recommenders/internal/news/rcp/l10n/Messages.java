@@ -46,9 +46,7 @@ public final class Messages extends NLS {
     public static String STARTUP_JOB_NAME;
     public static String POLL_FEED_JOB_NAME;
     public static String POLL_FEED_JOB_SUBTASK_POLLING_FEED;
-    public static String JOB_NAME_CLOSE;
-    public static String JOB_NAME_FADE;
-    public static String LABEL_NOTIFICATION_NAME;
+    public static String JOB_NAME_READ_NEWS_ITEMS;
     public static String LABEL_MARK_AS_READ;
     public static String LABEL_PREFERENCES;
     public static String LABEL_POLL_FEEDS;
@@ -72,6 +70,11 @@ public final class Messages extends NLS {
     public static String UNREAD_MESSAGE;
     public static String READ_MESSAGE_OR_FEED;
     public static String UNREAD_FEED;
+
+    public static String LABEL_READ_FEED;
+    public static String LABEL_READ_ITEM;
+    public static String LABEL_UNREAD_FEED;
+    public static String LABEL_UNREAD_ITEM;
 
     public static String LOG_ERROR_READING_PROPERTIES;
     public static String LOG_ERROR_WRITING_PROPERTIES;

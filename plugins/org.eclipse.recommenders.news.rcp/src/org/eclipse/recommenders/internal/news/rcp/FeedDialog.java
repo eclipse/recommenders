@@ -102,7 +102,7 @@ public class FeedDialog extends TitleAreaDialog {
         String pollingIntervalInputValue = String.valueOf(Constants.DEFAULT_POLLING_INTERVAL);
         if (feed != null) {
             nameInputValue = feed.getName();
-            urlInputValue = feed.getUrl().toString();
+            urlInputValue = feed.getUri().toString();
             pollingIntervalInputValue = feed.getPollingInterval();
         }
         nameValue = createLabelInputFieldPair(container, gridData, nameValue, Messages.FIELD_LABEL_FEED_NAME,
@@ -213,7 +213,7 @@ public class FeedDialog extends TitleAreaDialog {
                 continue;
             }
 
-            if (url.equals(compare.getUrl().toString())) {
+            if (url.equals(compare.getUri().toString())) {
                 return Optional.of(compare);
             }
         }

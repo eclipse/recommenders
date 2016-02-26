@@ -11,8 +11,6 @@
  */
 package org.eclipse.recommenders.internal.news.rcp.notifications;
 
-import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createFeedMessageReadEvent;
-
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +19,6 @@ import java.util.Map.Entry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.mylyn.commons.ui.compatibility.CommonFonts;
 import org.eclipse.mylyn.commons.ui.dialogs.AbstractNotificationPopup;
-import org.eclipse.recommenders.internal.news.rcp.BrowserUtils;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.MessageUtils;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
@@ -96,8 +93,7 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
                 link.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
-                        BrowserUtils.openInDefaultBrowser(message.getUrl(), feed.getParameters());
-                        eventBus.post(createFeedMessageReadEvent(message.getId()));
+                        // TODO
                     }
                 });
                 messagesPerFeed++;

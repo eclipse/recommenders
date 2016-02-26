@@ -2,9 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.eclipse.recommenders.news.rcp.feed" name="%extension-point.feed.name" schema="schema/feed.exsd"/>
-   <extension point="org.eclipse.ui.startup">
-      <startup class="org.eclipse.recommenders.internal.news.rcp.Startup"/>
-   </extension>
    <extension point="org.eclipse.ui.preferencePages">
       <page
             category="org.eclipse.ui.preferencePages.Workbench"
@@ -63,5 +60,18 @@
    </extension>
    <extension point="org.eclipse.e4.workbench.model" id="org.eclipse.recommenders.news.rcp.model.news">
       <fragment uri="fragment.e4xmi"/>
+   </extension>
+   <extension point="org.eclipse.ui.commands">
+      <!-- Not expressible in fragment.e4xmi yet -->
+      <commandParameterType
+            converter="org.eclipse.recommenders.internal.news.rcp.v2.command.NewsItemsParameterValueConverter"
+            id="org.eclipse.recommenders.news.rcp.commandParameterType.newsItems"
+            type="java.util.List">
+      </commandParameterType>
+      <commandParameterType
+            converter="org.eclipse.recommenders.internal.news.rcp.v2.command.BooleanParameterValueConverter"
+            id="org.eclipse.recommenders.news.rcp.commandParameterType.boolean"
+            type="java.lang.Boolean">
+      </commandParameterType>
    </extension>
 </plugin>

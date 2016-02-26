@@ -15,14 +15,12 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.recommenders.news.rcp.IFeedMessage;
 import org.eclipse.recommenders.news.rcp.IPollingResult;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -64,31 +62,6 @@ public class MessageUtils {
         return false;
     }
 
-    public static Map<FeedDescriptor, IPollingResult> getLatestMessages(Map<FeedDescriptor, IPollingResult> messages) {
-        Preconditions.checkNotNull(messages);
-        Map<FeedDescriptor, IPollingResult> result = Maps.newHashMap();
-        for (Entry<FeedDescriptor, IPollingResult> entry : messages.entrySet()) {
-            List<IFeedMessage> list = updateMessages(entry);
-            if (!list.isEmpty()) {
-                result.put(entry.getKey(), new PollingResult(entry.getValue().getStatus(), list));
-            }
-        }
-        return sortByDate(result);
-    }
-
-    public static List<IFeedMessage> updateMessages(Entry<FeedDescriptor, IPollingResult> entry) {
-        NewsProperties properties = new NewsProperties();
-        List<IFeedMessage> feedMessages = Lists.newArrayList();
-        for (IFeedMessage message : entry.getValue().getMessages()) {
-            if (properties.getDates(Constants.FILENAME_FEED_DATES).get(entry.getKey().getId()) == null) {
-                feedMessages.add(message);
-            } else if (message.getDate() != null && message.getDate()
-                    .after(properties.getDates(Constants.FILENAME_FEED_DATES).get(entry.getKey().getId()))) {
-                feedMessages.add(message);
-            }
-        }
-        return feedMessages;
-    }
 
     public static int getUnreadMessagesNumber(List<IFeedMessage> messages) {
         if (messages == null) {
