@@ -2,14 +2,11 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.eclipse.recommenders.news.rcp.feed" name="%extension-point.feed.name" schema="schema/feed.exsd"/>
-   <extension point="org.eclipse.ui.startup">
-      <startup class="org.eclipse.recommenders.internal.news.rcp.Startup"/>
-   </extension>
    <extension point="org.eclipse.ui.preferencePages">
       <page
+            id="org.eclipse.recommenders.news.rcp.preferencePages.news"
             category="org.eclipse.ui.preferencePages.Workbench"
             class="org.eclipse.recommenders.internal.news.rcp.NewsPreferencePage"
-            id="org.eclipse.recommenders.news.rcp.preferencePage"
             name="%preferencePage.newsFeed.name">
             <keywordReference id="org.eclipse.recommenders.news.rcp.keywords.news"/>
         </page>
@@ -20,22 +17,20 @@
    </extension>
    <extension point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.eclipse.recommenders.internal.news.rcp.NewsRcpPreferences">
+            class="org.eclipse.recommenders.internal.news.rcp.PreferenceInitializer">
       </initializer>
    </extension>
    <extension point="org.eclipse.recommenders.news.rcp.feed">
       <feed
             id="org.eclipse.recommenders.news.rcp.planet.eclipse"
             name="%feed.planet.eclipse.name"
-            url="http://planeteclipse.org/planet/rss20.xml"
-            pollingInterval="480">
-      </feed>
+            uri="http://planeteclipse.org/planet/rss20.xml"
+            pollingInterval="480"/>
       <feed
             id="org.eclipse.recommenders.news.rcp.marketplace"
             name="%feed.marketplace.name"
-            pollingInterval="480"
-            url="http://marketplace.eclipse.org/rss.xml">
-      </feed>
+            uri="http://marketplace.eclipse.org/rss.xml"
+            pollingInterval="480"/>
    </extension>
    <extension
          point="org.eclipse.mylyn.commons.notifications.ui.notifications">
@@ -63,5 +58,18 @@
    </extension>
    <extension point="org.eclipse.e4.workbench.model" id="org.eclipse.recommenders.news.rcp.model.news">
       <fragment uri="fragment.e4xmi"/>
+   </extension>
+   <extension point="org.eclipse.ui.commands">
+      <!-- Not expressible in fragment.e4xmi yet -->
+      <commandParameterType
+            converter="org.eclipse.recommenders.internal.news.rcp.command.NewsItemsParameterValueConverter"
+            id="org.eclipse.recommenders.news.rcp.commandParameterType.newsItems"
+            type="java.util.List">
+      </commandParameterType>
+      <commandParameterType
+            converter="org.eclipse.recommenders.internal.news.rcp.command.BooleanParameterValueConverter"
+            id="org.eclipse.recommenders.news.rcp.commandParameterType.boolean"
+            type="java.lang.Boolean">
+      </commandParameterType>
    </extension>
 </plugin>

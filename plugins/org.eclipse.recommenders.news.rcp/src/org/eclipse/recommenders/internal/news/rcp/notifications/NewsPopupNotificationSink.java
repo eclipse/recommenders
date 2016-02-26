@@ -15,11 +15,9 @@ import org.eclipse.mylyn.commons.notifications.core.AbstractNotification;
 import org.eclipse.mylyn.commons.notifications.core.NotificationSink;
 import org.eclipse.mylyn.commons.notifications.core.NotificationSinkEvent;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
-import org.eclipse.recommenders.news.rcp.IPollingResult;
+import org.eclipse.recommenders.news.api.poll.PollingResult;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-
-import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("restriction")
 public class NewsPopupNotificationSink extends NotificationSink {
@@ -31,17 +29,15 @@ public class NewsPopupNotificationSink extends NotificationSink {
 
             @Override
             public void run() {
-                Map<FeedDescriptor, IPollingResult> messages = null;
-                EventBus eventBus = null;
+                Map<FeedDescriptor, PollingResult> messages = null;
                 for (AbstractNotification notification : event.getNotifications()) {
                     if (notification instanceof NewMessageNotification) {
                         messages = ((NewMessageNotification) notification).getMessages();
-                        eventBus = ((NewMessageNotification) notification).getBus();
                         break;
                     }
                 }
-                if (messages != null && eventBus != null) {
-                    new NewsNotificationPopup(display, messages, eventBus).open();
+                if (messages != null) {
+                    new NewsNotificationPopup(display, messages).open();
                 }
             }
         });
