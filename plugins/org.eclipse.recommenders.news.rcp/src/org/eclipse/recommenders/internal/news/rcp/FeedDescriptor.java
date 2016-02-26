@@ -10,6 +10,7 @@ package org.eclipse.recommenders.internal.news.rcp;
 import static org.eclipse.recommenders.internal.news.rcp.Constants.*;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
@@ -29,7 +30,7 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
 
     private final boolean defaultRepository;
     private final String id;
-    private final URL url;
+    private final URI uri;
     private final String name;
     private final String pollingInterval;
     private final String description;
@@ -39,7 +40,7 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
     private boolean enabled;
 
     public FeedDescriptor(FeedDescriptor that) {
-        this(that.getId(), that.getUrl().toString(), that.getName(), that.isEnabled(), that.isDefaultRepository(),
+        this(that.getId(), that.getUri().toString(), that.getName(), that.isEnabled(), that.isDefaultRepository(),
                 that.getPollingInterval(), that.getDescription(), that.getIconPath(), that.getParameters(),
                 that.getContributedBy());
     }
@@ -51,18 +52,18 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
                 getParametersFromConfig(config), contributedBy);
     }
 
-    public FeedDescriptor(String url, String name, String pollingInterval) {
-        this(url, url, name, true, false, pollingInterval, null, null, null, null);
+    public FeedDescriptor(String uri, String name, String pollingInterval) {
+        this(uri, uri, name, true, false, pollingInterval, null, null, null, null);
     }
 
-    private FeedDescriptor(String id, String url, String name, boolean enabled, boolean defaultRepository,
+    private FeedDescriptor(String id, String uri, String name, boolean enabled, boolean defaultRepository,
             String pollingInterval, String description, String iconPath, Map<String, String> parameters,
             String contributedBy) {
         Preconditions.checkNotNull(id);
-        Preconditions.checkArgument(isUrlValid(url), Messages.FEED_DESCRIPTOR_MALFORMED_URL);
+        Preconditions.checkArgument(isUrlValid(uri), Messages.FEED_DESCRIPTOR_MALFORMED_URL);
 
         this.id = id;
-        this.url = stringToUrl(url);
+        this.uri = stringToUrl(uri);
         this.name = name;
         this.enabled = enabled;
         this.defaultRepository = defaultRepository;
@@ -85,8 +86,8 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
         return name;
     }
 
-    public URL getUrl() {
-        return url;
+    public URI getUri() {
+        return uri;
     }
 
     public String getDescription() {
@@ -155,11 +156,10 @@ public class FeedDescriptor implements Comparable<FeedDescriptor> {
         return true;
     }
 
-    private static URL stringToUrl(String url) {
+    private static URI stringToUrl(String url) {
         try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            // should never happen
+            return new URI(url);
+        } catch (URISyntaxException e) {
             Logs.log(LogMessages.ERROR_FEED_MALFORMED_URL, url);
             return null;
         }
