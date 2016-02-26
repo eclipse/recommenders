@@ -7,16 +7,10 @@
  */
 package org.eclipse.recommenders.internal.news.rcp;
 
-import static org.mockito.Mockito.*;
-
-import java.util.List;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.recommenders.news.rcp.IFeedMessage;
-import org.eclipse.recommenders.news.rcp.IPollingResult.Status;
 import org.mockito.Mockito;
-
-import com.google.common.collect.Lists;
 
 public class TestUtils {
 
@@ -38,28 +32,7 @@ public class TestUtils {
         return new FeedDescriptor(config, false, null);
     }
 
-    public static PollingResult mockMessages(boolean... readMessages) {
-        List<IFeedMessage> feedMessages = Lists.newArrayList();
-        for (boolean isRead : readMessages) {
-            IFeedMessage message = mock(IFeedMessage.class);
-            when(message.isRead()).thenReturn(isRead);
-            feedMessages.add(message);
-        }
-        return new PollingResult(Status.OK, feedMessages);
-    }
-
-    public static List<IFeedMessage> mockMessagesAsList(boolean... readMessages) {
-        List<IFeedMessage> feedMessages = Lists.newArrayList();
-        for (boolean isRead : readMessages) {
-            IFeedMessage message = mock(IFeedMessage.class);
-            when(message.isRead()).thenReturn(isRead);
-            feedMessages.add(message);
-        }
-        return feedMessages;
-    }
-
     public static FeedDescriptor mockFeed(String name) {
         return enabled(name);
     }
-
 }
