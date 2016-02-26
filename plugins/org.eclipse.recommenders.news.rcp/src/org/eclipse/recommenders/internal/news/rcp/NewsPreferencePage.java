@@ -11,8 +11,6 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -21,7 +19,6 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -33,7 +30,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
-import org.eclipse.recommenders.news.rcp.INewsService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -49,7 +45,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
@@ -59,20 +54,9 @@ import com.google.common.collect.Lists;
 
 public class NewsPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-    @Inject
-    private INewsService service;
-    @Inject
-    private NewsRcpPreferences newsRcpPreferences;
     private BooleanFieldEditor enabledEditor;
     private FeedEditor feedEditor;
     private IntegerFieldEditor startupEditor;
-
-    @VisibleForTesting
-    public NewsPreferencePage(INewsService service, NewsRcpPreferences newsRcpPreferences) {
-        super(GRID);
-        this.service = service;
-        this.newsRcpPreferences = newsRcpPreferences;
-    }
 
     public NewsPreferencePage() {
         super(GRID);
@@ -83,16 +67,15 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
         setPreferenceStore(new ScopedPreferenceStore(InstanceScope.INSTANCE, Constants.PLUGIN_ID));
         setMessage(Messages.PREFPAGE_TITLE);
         setDescription(Messages.PREFPAGE_DESCRIPTION);
-        NewsRcpInjection.initiateContext(this);
     }
 
     @Override
     protected void createFieldEditors() {
-        enabledEditor = new BooleanFieldEditor(Constants.PREF_NEWS_ENABLED, Messages.FIELD_LABEL_NEWS_ENABLED, 0,
+        enabledEditor = new BooleanFieldEditor(PreferenceConstants.NEWS_ENABLED, Messages.FIELD_LABEL_NEWS_ENABLED, 0,
                 getFieldEditorParent());
         addField(enabledEditor);
 
-        startupEditor = new IntegerFieldEditor(Constants.PREF_STARTUP_DELAY, Messages.FIELD_LABEL_STARTUP_DELAY,
+        startupEditor = new IntegerFieldEditor(PreferenceConstants.POLLING_DELAY, Messages.FIELD_LABEL_STARTUP_DELAY,
                 getFieldEditorParent(), 4);
         addField(startupEditor);
 
@@ -100,7 +83,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
         GridDataFactory.fillDefaults().grab(true, true).span(2, 1).applyTo(bottomGroup);
         GridLayoutFactory.fillDefaults().numColumns(1).applyTo(bottomGroup);
 
-        feedEditor = new FeedEditor(Constants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS, bottomGroup);
+        feedEditor = new FeedEditor(PreferenceConstants.PREF_FEED_LIST_SORTED, Messages.FIELD_LABEL_FEEDS, bottomGroup);
         addField(feedEditor);
 
         addField(new LinkEditor(Messages.PREFPAGE_NOTIFICATION_ENABLEMENT,
@@ -110,63 +93,6 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                 getFieldEditorParent()));
 
         Dialog.applyDialogFont(getControl());
-    }
-
-    @Override
-    public boolean performOk() {
-        IPreferenceStore store = getPreferenceStore();
-        return doPerformOK(store.getBoolean(Constants.PREF_NEWS_ENABLED), enabledEditor.getBooleanValue(),
-                newsRcpPreferences.getFeedDescriptors(), feedEditor.getValue());
-    }
-
-    @VisibleForTesting
-    boolean doPerformOK(boolean oldEnabledValue, boolean newEnabledValue, List<FeedDescriptor> oldFeedValue,
-            List<FeedDescriptor> newFeedValue) {
-        boolean forceStop = false;
-        boolean forceStart = false;
-        if (!oldEnabledValue && newEnabledValue) {
-            // News has been activated
-            forceStart = true;
-        } else if (oldEnabledValue && !newEnabledValue) {
-            forceStop = true;
-        }
-
-        forceStart = chceckFeedsConsistency(oldFeedValue, newFeedValue, forceStart);
-
-        boolean result = super.performOk();
-
-        if (forceStart) {
-            service.start();
-        }
-        if (forceStop) {
-            service.forceStop();
-        }
-
-        return result;
-    }
-
-    private boolean chceckFeedsConsistency(List<FeedDescriptor> oldFeedValue, List<FeedDescriptor> newFeedValue,
-            boolean forceStart) {
-        for (FeedDescriptor oldFeed : oldFeedValue) {
-            if (!newFeedValue.contains(oldFeed)) {
-                service.removeFeed(oldFeed);
-                break;
-            }
-            FeedDescriptor newFeed = newFeedValue.get(newFeedValue.indexOf(oldFeed));
-            if (!oldFeed.isEnabled() && newFeed.isEnabled()) {
-                forceStart = true;
-            }
-            if (oldFeed.isEnabled() && !newFeed.isEnabled()) {
-                service.removeFeed(newFeed);
-            }
-        }
-
-        for (FeedDescriptor feed : newFeedValue) {
-            if (!oldFeedValue.contains(feed)) {
-                forceStart = true;
-            }
-        }
-        return forceStart;
     }
 
     private final class FeedEditor extends FieldEditor {
@@ -357,7 +283,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                 @Override
                 public String getToolTipText(Object element) {
                     FeedDescriptor feed = (FeedDescriptor) element;
-                    return MessageFormat.format(Messages.FEED_TOOLTIP, feed.getUrl(), feed.getPollingInterval());
+                    return MessageFormat.format(Messages.FEED_TOOLTIP, feed.getUri(), feed.getPollingInterval());
                 }
 
             });
@@ -376,7 +302,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
             List<FeedDescriptor> input = FeedDescriptors.load(value, FeedDescriptors.getRegisteredFeeds());
             if (!loadDefaults) {
                 input.addAll(FeedDescriptors
-                        .getFeeds(getPreferenceStore().getString(Constants.PREF_CUSTOM_FEED_LIST_SORTED)));
+                        .getFeeds(getPreferenceStore().getString(PreferenceConstants.PREF_CUSTOM_FEED_LIST_SORTED)));
             }
             List<FeedDescriptor> checkedElements = Lists.newArrayList();
             for (FeedDescriptor feed : input) {
@@ -457,7 +383,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
 
             String newValue = FeedDescriptors.feedsToString(feeds);
             getPreferenceStore().setValue(getPreferenceName(), newValue);
-            getPreferenceStore().setValue(Constants.PREF_CUSTOM_FEED_LIST_SORTED,
+            getPreferenceStore().setValue(PreferenceConstants.PREF_CUSTOM_FEED_LIST_SORTED,
                     FeedDescriptors.customFeedsToString(customFeeds));
         }
 

@@ -11,8 +11,6 @@
  */
 package org.eclipse.recommenders.internal.news.rcp.notifications;
 
-import static org.eclipse.recommenders.internal.news.rcp.FeedEvents.createFeedMessageReadEvent;
-
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +19,10 @@ import java.util.Map.Entry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.mylyn.commons.ui.compatibility.CommonFonts;
 import org.eclipse.mylyn.commons.ui.dialogs.AbstractNotificationPopup;
-import org.eclipse.recommenders.internal.news.rcp.BrowserUtils;
 import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
-import org.eclipse.recommenders.internal.news.rcp.MessageUtils;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
-import org.eclipse.recommenders.news.rcp.IFeedMessage;
-import org.eclipse.recommenders.news.rcp.IPollingResult;
+import org.eclipse.recommenders.news.api.NewsItem;
+import org.eclipse.recommenders.news.api.poll.PollingResult;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -36,21 +32,17 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
-import com.google.common.eventbus.EventBus;
-
 public class NewsNotificationPopup extends AbstractNotificationPopup {
 
     private static final int DELAY_CLOSE_MS = 4000;
     private static final int DEFAULT_NOTIFICATION_MESSAGES = 6;
     private static final int MAX_WIDTH = 400; // Taken from AbstractNotificationPopup.MAX_WIDTH
 
-    private final Map<FeedDescriptor, IPollingResult> messages;
-    private final EventBus eventBus;
+    private final Map<FeedDescriptor, PollingResult> messages;
 
-    public NewsNotificationPopup(Display display, Map<FeedDescriptor, IPollingResult> messages, EventBus eventBus) {
+    public NewsNotificationPopup(Display display, Map<FeedDescriptor, PollingResult> messages) {
         super(display);
         this.messages = messages;
-        this.eventBus = eventBus;
         setFadingEnabled(true);
         setDelayClose(DELAY_CLOSE_MS);
     }
@@ -59,20 +51,19 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
     protected void createContentArea(Composite composite) {
         super.createContentArea(composite);
         composite.setLayout(new GridLayout(1, true));
-        Map<FeedDescriptor, IPollingResult> sortedMap = MessageUtils.sortByDate(messages);
 
-        processNotificationData(composite, sortedMap);
+        processNotificationData(composite, messages);
 
         Label hint = new Label(composite, SWT.NONE);
         GridDataFactory.fillDefaults().hint(MAX_WIDTH, SWT.DEFAULT).applyTo(hint);
         hint.setText(Messages.HINT_MORE_MESSAGES);
     }
 
-    private void processNotificationData(Composite composite, Map<FeedDescriptor, IPollingResult> sortedMap) {
+    private void processNotificationData(Composite composite, Map<FeedDescriptor, PollingResult> sortedMap) {
         int feedCounter = 0;
         int messagesPerFeed = DEFAULT_NOTIFICATION_MESSAGES < sortedMap.size() ? 1
                 : DEFAULT_NOTIFICATION_MESSAGES / sortedMap.size();
-        for (Entry<FeedDescriptor, IPollingResult> entry : sortedMap.entrySet()) {
+        for (Entry<FeedDescriptor, PollingResult> entry : sortedMap.entrySet()) {
             if (feedCounter < DEFAULT_NOTIFICATION_MESSAGES) {
                 Label feedTitle = new Label(composite, SWT.NONE);
                 GridDataFactory.fillDefaults().hint(MAX_WIDTH, SWT.DEFAULT).applyTo(feedTitle);
@@ -80,24 +71,23 @@ public class NewsNotificationPopup extends AbstractNotificationPopup {
                 feedTitle.setText(entry.getKey().getName());
 
                 feedCounter = feedCounter
-                        + processMessages(composite, entry.getValue().getMessages(), messagesPerFeed, entry.getKey());
+                        + processMessages(composite, entry.getValue().getAllNewsItems(), messagesPerFeed, entry.getKey());
             }
         }
     }
 
-    private int processMessages(Composite composite, List<IFeedMessage> messages, int calculatedMessagesPerFeed,
+    private int processMessages(Composite composite, List<NewsItem> list, int calculatedMessagesPerFeed,
             final FeedDescriptor feed) {
         int messagesPerFeed = 0;
-        for (final IFeedMessage message : messages) {
+        for (final NewsItem message : list) {
             if (messagesPerFeed < calculatedMessagesPerFeed) {
                 Link link = new Link(composite, SWT.WRAP);
-                link.setText(MessageFormat.format("<a href=\"{1}\">{0}</a>", message.getTitle(), message.getUrl())); //$NON-NLS-1$
+                link.setText(MessageFormat.format("<a href=\"{1}\">{0}</a>", message.getTitle(), message.getUri())); //$NON-NLS-1$
                 GridDataFactory.fillDefaults().hint(MAX_WIDTH, SWT.DEFAULT).applyTo(link);
                 link.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
-                        BrowserUtils.openInDefaultBrowser(message.getUrl(), feed.getParameters());
-                        eventBus.post(createFeedMessageReadEvent(message.getId()));
+                        // TODO
                     }
                 });
                 messagesPerFeed++;

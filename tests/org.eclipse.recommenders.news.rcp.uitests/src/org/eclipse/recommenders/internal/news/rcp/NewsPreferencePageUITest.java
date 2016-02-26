@@ -102,7 +102,7 @@ public class NewsPreferencePageUITest {
         bot.textWithLabel(Messages.FIELD_LABEL_URL).setText(VALID_FEED_URL);
         bot.textWithLabel(Messages.FIELD_LABEL_POLLING_INTERVAL).setText(CHARACTERS_AND_DIGITS);
 
-        assertThat(bot.text(" " + Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_DIGITS_ONLY), is(notNullValue())); //$NON-NLS-1$
+        assertThat(bot.text(" " + Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_INVALID), is(notNullValue())); //$NON-NLS-1$
         assertThat(bot.button("OK").isEnabled(), is(false)); //$NON-NLS-1$
     }
 
