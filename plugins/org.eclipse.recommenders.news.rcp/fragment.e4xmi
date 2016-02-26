@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_8I47gNrkEeWx1NC92N4qRw">
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_8I47gNrkEeWx1NC92N4qRw">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_QIRbENrlEeWx1NC92N4qRw" featurename="trimContributions" parentElementId="org.eclipse.e4.legacy.ide.application">
     <elements xsi:type="menu:TrimContribution" xmi:id="_VJSd4NrlEeWx1NC92N4qRw" elementId="org.eclipse.recommenders.news.rcp.trimConstribution.news" parentId="org.eclipse.ui.trim.status">
-      <children xsi:type="menu:ToolControl" xmi:id="_cn6yoNrlEeWx1NC92N4qRw" elementId="org.eclipse.recommenders.news.rcp.toolControl.news" contributionURI="bundleclass://org.eclipse.recommenders.news.rcp/org.eclipse.recommenders.internal.news.rcp.toolbar.NewsToolControl"/>
+      <children xsi:type="menu:ToolControl" xmi:id="_cn6yoNrlEeWx1NC92N4qRw" elementId="org.eclipse.recommenders.news.rcp.toolControl.legacyNews" contributionURI="bundleclass://org.eclipse.recommenders.news.rcp/org.eclipse.recommenders.internal.news.rcp.toolbar.LegacyNewsToolControl"/>
+      <children xsi:type="menu:ToolControl" xmi:id="_ckfB0OFAEeWdb5xZgv0Dbw" elementId="org.eclipse.recommenders.news.rcp.toolControl.news" contributionURI="bundleclass://org.eclipse.recommenders.news.rcp/org.eclipse.recommenders.internal.news.rcp.v2.toolbar.NewsToolControl"/>
     </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_VIChgOIIEeWDJvu3hU0AuQ" featurename="commands" parentElementId="xpath:/">
+    <elements xsi:type="commands:Command" xmi:id="_b1nMwOIIEeWDJvu3hU0AuQ" elementId="org.eclipse.recommenders.news.rcp.commands.pollNow" commandName="Poll Now"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_iQtn8OIIEeWDJvu3hU0AuQ" featurename="handlers" parentElementId="xpath:/">
+    <elements xsi:type="commands:Handler" xmi:id="_ldAk0OIIEeWDJvu3hU0AuQ" elementId="org.eclipse.recommenders.news.rcp.handlers.pollNow" contributionURI="bundleclass://org.eclipse.recommenders.news.rcp/org.eclipse.recommenders.internal.news.rcp.v2.handlers.PollNowHandler" command="_b1nMwOIIEeWDJvu3hU0AuQ"/>
   </fragments>
 </fragment:ModelFragments>

@@ -2,9 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.eclipse.recommenders.news.rcp.feed" name="%extension-point.feed.name" schema="schema/feed.exsd"/>
-   <extension point="org.eclipse.ui.startup">
-      <startup class="org.eclipse.recommenders.internal.news.rcp.Startup"/>
-   </extension>
    <extension point="org.eclipse.ui.preferencePages">
       <page
             category="org.eclipse.ui.preferencePages.Workbench"

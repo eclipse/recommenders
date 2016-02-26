@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class Constants {
 
+    public static final String PREF_PAGE_ID = "org.eclipse.recommenders.news.rcp.preferencePage";
     private Constants() {
         throw new IllegalStateException("Not meant to be instantiated"); //$NON-NLS-1$
     }

@@ -47,7 +47,7 @@ import org.eclipse.ui.PlatformUI;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 
-public class NewsToolControl {
+public class LegacyNewsToolControl {
 
     private MToolControl modelElement;
 
@@ -60,7 +60,7 @@ public class NewsToolControl {
     private MenuManager menuManager;
 
     @Inject
-    public NewsToolControl(MToolControl modelElement, NewsRcpPreferences preferences) {
+    public LegacyNewsToolControl(MToolControl modelElement, NewsRcpPreferences preferences) {
         this.modelElement = modelElement;
         this.preferences = preferences;
 
