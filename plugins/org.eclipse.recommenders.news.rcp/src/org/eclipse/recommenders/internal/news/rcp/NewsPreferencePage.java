@@ -357,7 +357,7 @@ public class NewsPreferencePage extends FieldEditorPreferencePage implements IWo
                 @Override
                 public String getToolTipText(Object element) {
                     FeedDescriptor feed = (FeedDescriptor) element;
-                    return MessageFormat.format(Messages.FEED_TOOLTIP, feed.getUrl(), feed.getPollingInterval());
+                    return MessageFormat.format(Messages.FEED_TOOLTIP, feed.getUri(), feed.getPollingInterval());
                 }
 
             });
