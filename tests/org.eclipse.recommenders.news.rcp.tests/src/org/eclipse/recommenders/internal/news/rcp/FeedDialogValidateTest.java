@@ -69,7 +69,7 @@ public class FeedDialogValidateTest {
         scenarios.add(new Object[] { null, VALID_FEED_NAME, DUPLICATE_FEED_URL, EMPTY_STRING,
                 MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, VALID_FEED_ID) });
         scenarios.add(new Object[] { null, VALID_FEED_NAME, VALID_FEED_URL, INVALID_FEED_POLLING_INTERVAL,
-                Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_DIGITS_ONLY });
+                Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_INVALID });
         scenarios.add(new Object[] { null, VALID_FEED_NAME, VALID_FEED_URL, VALID_FEED_POLLING_INTERVAL, NO_ERROR });
         scenarios.add(new Object[] { TestUtils.enabled(VALID_FEED_ID), VALID_FEED_NAME, VALID_FEED_URL,
                 VALID_FEED_POLLING_INTERVAL, NO_ERROR });

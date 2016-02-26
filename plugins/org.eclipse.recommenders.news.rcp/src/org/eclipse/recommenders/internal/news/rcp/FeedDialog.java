@@ -102,8 +102,8 @@ public class FeedDialog extends TitleAreaDialog {
         String pollingIntervalInputValue = String.valueOf(Constants.DEFAULT_POLLING_INTERVAL);
         if (feed != null) {
             nameInputValue = feed.getName();
-            urlInputValue = feed.getUrl().toString();
-            pollingIntervalInputValue = feed.getPollingInterval();
+            urlInputValue = feed.getUri().toString();
+            pollingIntervalInputValue = Long.toString(feed.getPollingInterval());
         }
         nameValue = createLabelInputFieldPair(container, gridData, nameValue, Messages.FIELD_LABEL_FEED_NAME,
                 nameInputValue);
@@ -145,7 +145,7 @@ public class FeedDialog extends TitleAreaDialog {
 
     @Override
     protected void okPressed() {
-        feed = new FeedDescriptor(urlValue.getText(), nameValue.getText(), pollingIntervalValue.getText());
+        feed = new FeedDescriptor(urlValue.getText(), nameValue.getText(), parsePollingIntervalQuietly(pollingIntervalValue.getText()).or(0L));
         super.okPressed();
     }
 
@@ -179,8 +179,8 @@ public class FeedDialog extends TitleAreaDialog {
                     Joiner.on(", ").join(ACCEPTED_PROTOCOLS)); //$NON-NLS-1$
         } else if (duplicateFeed != null) {
             return MessageFormat.format(Messages.FEED_DIALOG_ERROR_DUPLICATE_FEED, duplicateFeed.getName());
-        } else if (!pollingInterval.matches("[0-9]+")) { //$NON-NLS-1$
-            return Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_DIGITS_ONLY;
+        } else if (!parsePollingIntervalQuietly(pollingInterval).isPresent()) {
+            return Messages.FEED_DIALOG_ERROR_POLLING_INTERVAL_INVALID;
         }
 
         return null;
@@ -190,6 +190,19 @@ public class FeedDialog extends TitleAreaDialog {
         try {
             return Optional.of(new URI(uriString));
         } catch (URISyntaxException e) {
+            return Optional.absent();
+        }
+    }
+
+    private static Optional<Long> parsePollingIntervalQuietly(String longString) {
+        try {
+            long pollingInterval = Long.parseLong(longString);
+            if (pollingInterval > 0) {
+                return Optional.of(pollingInterval);
+            } else {
+                return Optional.absent();
+            }
+        } catch (NumberFormatException e) {
             return Optional.absent();
         }
     }
@@ -213,7 +226,7 @@ public class FeedDialog extends TitleAreaDialog {
                 continue;
             }
 
-            if (url.equals(compare.getUrl().toString())) {
+            if (url.equals(compare.getUri().toString())) {
                 return Optional.of(compare);
             }
         }
