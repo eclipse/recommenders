@@ -8,6 +8,7 @@
 package org.eclipse.recommenders.internal.news.rcp.toolbar;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.recommenders.internal.news.rcp.Constants;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
@@ -15,7 +16,7 @@ public class PreferenceAction extends Action {
 
     @Override
     public void run() {
-        PreferencesUtil.createPreferenceDialogOn(null, "org.eclipse.recommenders.news.rcp.preferencePage", null, null) //$NON-NLS-1$
+        PreferencesUtil.createPreferenceDialogOn(null, Constants.PREF_PAGE_ID, null, null) //$NON-NLS-1$
                 .open();
     }
 

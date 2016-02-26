@@ -93,7 +93,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
 
     private void pollFeed(IProgressMonitor monitor, SubMonitor sub, Executor executor, FeedDescriptor feed) {
         try {
-            URI feedUri = urlToUri(feed.getUrl()).orNull();
+            URI feedUri = feed.getUri();
             if (feedUri != null) {
                 Response response = connectToUrl(feed, executor, feedUri);
                 sub.worked(10);
@@ -101,7 +101,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 pollDates.put(feed, new Date());
                 sub.worked(10);
             } else {
-                Logs.log(LogMessages.WARNING_CONNECTING_URL, feed.getUrl());
+                Logs.log(LogMessages.WARNING_CONNECTING_URL, feed.getUri());
                 groupedMessages.put(feed, PollingResult.newConnectionErrorResult());
             }
         } catch (UnknownHostException e) {
@@ -109,7 +109,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
             // See <https://bugs.eclipse.org/bugs/show_bug.cgi?id=474785>
             groupedMessages.put(feed, PollingResult.newConnectionErrorResult());
         } catch (IOException e) {
-            Logs.log(LogMessages.WARNING_CONNECTING_URL, feed.getUrl());
+            Logs.log(LogMessages.WARNING_CONNECTING_URL, feed.getUri());
             groupedMessages.put(feed, PollingResult.newConnectionErrorResult());
         }
     }
@@ -135,7 +135,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 return;
             }
             if (httpResponse.getStatusLine().getStatusCode() >= HttpStatus.SC_BAD_REQUEST) {
-                Logs.log(LogMessages.ERROR_CONNECTING_URL_WITH_STATUS_CODE, feed.getUrl(),
+                Logs.log(LogMessages.ERROR_CONNECTING_URL_WITH_STATUS_CODE, feed.getUri(),
                         httpResponse.getStatusLine().getStatusCode());
                 return;
             }
@@ -148,7 +148,7 @@ public class PollFeedJob extends Job implements IPollFeedJob {
                 groupedMessages.put(feed, new PollingResult(status, messages));
             }
         } catch (IOException e) {
-            Logs.log(LogMessages.ERROR_FETCHING_MESSAGES, e, feed.getUrl());
+            Logs.log(LogMessages.ERROR_FETCHING_MESSAGES, e, feed.getUri());
         } finally {
             monitor.done();
         }
