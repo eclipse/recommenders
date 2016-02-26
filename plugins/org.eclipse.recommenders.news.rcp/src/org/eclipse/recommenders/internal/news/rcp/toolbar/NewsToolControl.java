@@ -1,191 +1,68 @@
-/**
- * Copyright (c) 2016 Codetrails GmbH. All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors: Andreas Sewe - initial API and implementation.
- */
 package org.eclipse.recommenders.internal.news.rcp.toolbar;
-
-import static org.eclipse.recommenders.internal.news.rcp.MessageUtils.*;
-
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.extensions.Preference;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.recommenders.internal.news.rcp.CommonImages;
 import org.eclipse.recommenders.internal.news.rcp.Constants;
-import org.eclipse.recommenders.internal.news.rcp.FeedDescriptor;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.AllReadEvent;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedMessageReadEvent;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.FeedReadEvent;
-import org.eclipse.recommenders.internal.news.rcp.FeedEvents.NewFeedItemsEvent;
-import org.eclipse.recommenders.internal.news.rcp.NewsRcpInjection;
-import org.eclipse.recommenders.internal.news.rcp.NewsRcpPreferences;
-import org.eclipse.recommenders.internal.news.rcp.PollingResult;
-import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
-import org.eclipse.recommenders.news.rcp.INewsService;
-import org.eclipse.recommenders.news.rcp.IPollingResult;
-import org.eclipse.recommenders.news.rcp.IPollingResult.Status;
+import org.eclipse.recommenders.news.api.INewsService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.menus.CommandContributionItem;
+import org.eclipse.ui.menus.CommandContributionItemParameter;
 
-import com.google.common.collect.Maps;
-import com.google.common.eventbus.Subscribe;
+import com.google.common.collect.ImmutableMap;
 
+@SuppressWarnings("restriction")
 public class NewsToolControl {
 
-    private MToolControl modelElement;
-
-    private final NewsRcpPreferences preferences;
-
-    private final INewsService service;
-    private final NewsMenuListener newsMenuListener;
-
-    private UpdatingNewsAction updatingNewsAction;
-    private MenuManager menuManager;
+    private final MToolControl modelElement;
+    private final INewsService newsService;
 
     @Inject
-    public NewsToolControl(MToolControl modelElement, NewsRcpPreferences preferences) {
+    public NewsToolControl(MToolControl modelElement, INewsService newsService) {
         this.modelElement = modelElement;
-        this.preferences = preferences;
-
-        NewsRcpInjection.addBindings();
-
-        service = (INewsService) ContextInjectionFactory.make(INewsService.class,
-                (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class));
-        NewsRcpInjection.EVENT_BUS.register(this);
-
-        newsMenuListener = new NewsMenuListener(NewsRcpInjection.EVENT_BUS, service);
+        this.newsService = newsService;
     }
 
     @Inject
-    @SuppressWarnings("restriction")
     public void setEnabled(@Preference(Constants.PREF_NEWS_ENABLED) boolean enabled) {
         modelElement.setVisible(enabled);
     }
 
     @PostConstruct
-    public Control createGui(Composite parent) {
-        menuManager = new MenuManager();
-        updatingNewsAction = new UpdatingNewsAction();
-        ToolBarManager manager = new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
-        manager.add(updatingNewsAction);
-        manager.setContextMenuManager(menuManager);
-        return manager.createControl(parent);
-    }
+    public void createGui(Composite parent, IWorkbenchWindow serviceLocator) {
+        MenuManager contextMenu = new MenuManager();
 
-    @Subscribe
-    public void handle(NewFeedItemsEvent event) {
-        final IWorkbench workbench = PlatformUI.getWorkbench();
-        if (workbench.isClosing()) {
-            return;
-        }
+        final ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
+        toolBarManager.setContextMenuManager(contextMenu);
 
-        final Display display = workbench.getDisplay();
-        if (display.isDisposed()) {
-            return;
-        }
+        CommandContributionItemParameter contributionParameters = new CommandContributionItemParameter(serviceLocator,
+                null, "org.eclipse.ui.browser.openBrowser", SWT.NONE);
+        contributionParameters.label = "Open Manual...";
+        contributionParameters.parameters = ImmutableMap.of("url", "http://www.eclipse.org/recommenders/manual/");
+        contextMenu.add(new CommandContributionItem(contributionParameters));
 
-        display.asyncExec(new Runnable() {
+        toolBarManager.add(new Action() {
 
             @Override
             public void run() {
-                updatingNewsAction.setAvailableNews();
+                toolBarManager.getContextMenuManager().getMenu().setVisible(true);
+            }
+
+            @Override
+            public ImageDescriptor getImageDescriptor() {
+                return CommonImages.RSS_ACTIVE;
             }
         });
-    }
 
-    @Subscribe
-    public void handleAllRead(AllReadEvent event) {
-        updatingNewsAction.checkForNews();
-    }
-
-    @Subscribe
-    public void handleFeedRead(FeedReadEvent event) {
-        updatingNewsAction.checkForNews();
-    }
-
-    @Subscribe
-    public void handleMessageRead(FeedMessageReadEvent event) {
-        updatingNewsAction.checkForNews();
-    }
-
-    private class UpdatingNewsAction extends Action {
-        Map<FeedDescriptor, IPollingResult> messages = Maps.newHashMap();
-
-        private UpdatingNewsAction() {
-            setNoAvailableNews();
-        }
-
-        @Override
-        public void run() {
-            setNoAvailableNews();
-            messages = service.getMessages(Constants.COUNT_PER_FEED);
-            menuManager.getMenu().setVisible(true);
-            if (!messages.isEmpty() || containsUnreadMessages(messages)) {
-                setAvailableNews();
-            }
-        }
-
-        private void setNoAvailableNews() {
-            setImageDescriptor(CommonImages.RSS_INACTIVE);
-            setToolTipText(Messages.TOOLTIP_NO_NEW_MESSAGES);
-            clearMenu();
-            HashMap<FeedDescriptor, IPollingResult> groupedMessages = Maps.newHashMap();
-            for (FeedDescriptor feed : preferences.getFeedDescriptors()) {
-                if (feed.isEnabled()) {
-                    groupedMessages.put(feed, new PollingResult(Status.FEEDS_NOT_POLLED_YET));
-                }
-            }
-            newsMenuListener.setMessages(groupedMessages);
-            menuManager.addMenuListener(newsMenuListener);
-        }
-
-        private void setAvailableNews() {
-            messages = service.getMessages(Constants.COUNT_PER_FEED);
-
-            if (!containsUnreadMessages(messages)) {
-                setImageDescriptor(CommonImages.RSS_INACTIVE);
-            } else {
-                setImageDescriptor(CommonImages.RSS_ACTIVE);
-            }
-
-            setToolTipText(MessageFormat.format(Messages.TOOLTIP_NEW_MESSAGES,
-                    getUnreadMessagesNumber(mergeMessages(messages))));
-            clearMenu();
-            setNewsMenu(messages);
-        }
-
-        private void clearMenu() {
-            menuManager.setRemoveAllWhenShown(true);
-            menuManager.removeMenuListener(newsMenuListener);
-        }
-
-        private void setNewsMenu(Map<FeedDescriptor, IPollingResult> messages) {
-            newsMenuListener.setMessages(messages);
-            menuManager.addMenuListener(newsMenuListener);
-        }
-
-        public void checkForNews() {
-            messages = service.getMessages(Constants.COUNT_PER_FEED);
-            if (messages.isEmpty() || !containsUnreadMessages(messages)) {
-                setNoAvailableNews();
-            }
-        }
+        toolBarManager.createControl(parent);
     }
 }
