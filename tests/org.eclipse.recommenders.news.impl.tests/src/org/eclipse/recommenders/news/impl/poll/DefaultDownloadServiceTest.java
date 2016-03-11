@@ -11,6 +11,7 @@
 package org.eclipse.recommenders.news.impl.poll;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.recommenders.news.impl.poll.TestUtils.now;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -21,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
@@ -83,7 +83,7 @@ public class DefaultDownloadServiceTest {
         serveResource("present.txt", "content");
         URI uri = serverUri.resolve("present.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         InputStream stream = sut.download(uri, null);
 
@@ -96,7 +96,7 @@ public class DefaultDownloadServiceTest {
         serveResource("empty.txt", "");
         URI uri = serverUri.resolve("empty.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         sut.download(uri, null);
     }
@@ -105,7 +105,7 @@ public class DefaultDownloadServiceTest {
     public void testDownloadMissingResource() throws Exception {
         URI uri = serverUri.resolve("missing.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         sut.download(uri, null);
     }
@@ -115,7 +115,7 @@ public class DefaultDownloadServiceTest {
         serveResource("present.txt", "content");
         URI uri = serverUri.resolve("present.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         sut.download(uri, null);
 
@@ -130,7 +130,7 @@ public class DefaultDownloadServiceTest {
         Path presentTxt = serveResource("present.txt", "content");
         URI uri = serverUri.resolve("present.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         sut.download(uri, null);
 
@@ -154,7 +154,7 @@ public class DefaultDownloadServiceTest {
         serveResource("empty.txt", "");
         URI uri = serverUri.resolve("empty.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         try {
             sut.download(uri, null);
@@ -170,7 +170,7 @@ public class DefaultDownloadServiceTest {
     public void testReadMissingResource() throws Exception {
         URI uri = serverUri.resolve("missing.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         try {
             sut.download(uri, null);
@@ -186,7 +186,7 @@ public class DefaultDownloadServiceTest {
     public void testReadNeverDownloadedResource() throws Exception {
         URI uri = serverUri.resolve("never.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         InputStream stream = sut.read(uri);
 
@@ -198,7 +198,7 @@ public class DefaultDownloadServiceTest {
         serveResource("present.txt", "content");
         URI uri = serverUri.resolve("present.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         Date beforeDownload = now(-2, SECONDS); // Adjust by 2s to account for coarse-grained file system timestamps
         sut.download(uri, null);
@@ -215,7 +215,7 @@ public class DefaultDownloadServiceTest {
         Path presentTxt = serveResource("present.txt", "content");
         URI uri = serverUri.resolve("present.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         sut.download(uri, null);
 
@@ -242,7 +242,7 @@ public class DefaultDownloadServiceTest {
         serveResource("empty.txt", "");
         URI uri = serverUri.resolve("empty.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         Date beforeDownload = now(-2, SECONDS); // Adjust by 2s to account for coarse-grained file system timestamps
         try {
@@ -263,7 +263,7 @@ public class DefaultDownloadServiceTest {
     public void testGetLastAttemptDateMissingResource() throws Exception {
         URI uri = serverUri.resolve("missing.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         Date beforeDownload = now(-2, SECONDS); // Adjust by 2s to account for coarse-grained file system timestamps
         try {
@@ -284,7 +284,7 @@ public class DefaultDownloadServiceTest {
     public void testGetLastAttemptDateNeverDownloadedResource() throws Exception {
         URI uri = serverUri.resolve("never.txt");
 
-        DefaultDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
+        IDownloadService sut = new DefaultDownloadService(temp.getRoot().toPath());
 
         Date lastAttemptDate = sut.getLastAttemptDate(uri);
 
@@ -300,10 +300,5 @@ public class DefaultDownloadServiceTest {
         Path file = serverRoot.getRoot().toPath().resolve(path);
         Files.newBufferedWriter(file, StandardCharsets.UTF_8).append(content).close();
         return file;
-    }
-
-    private Date now(long delta, TimeUnit timeUnit) {
-        long now = System.currentTimeMillis();
-        return new Date(now + timeUnit.toMillis(delta));
     }
 }

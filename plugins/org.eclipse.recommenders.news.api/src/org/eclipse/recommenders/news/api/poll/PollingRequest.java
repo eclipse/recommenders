@@ -10,7 +10,12 @@
  */
 package org.eclipse.recommenders.news.api.poll;
 
+import static java.util.Objects.requireNonNull;
+
 import java.net.URI;
+import java.util.Objects;
+
+import org.eclipse.jdt.annotation.Nullable;
 
 public final class PollingRequest {
 
@@ -18,8 +23,8 @@ public final class PollingRequest {
     private final PollingPolicy pollingPolicy;
 
     public PollingRequest(URI feedUri, PollingPolicy pollingPolicy) {
-        this.feedUri = feedUri;
-        this.pollingPolicy = pollingPolicy;
+        this.feedUri = requireNonNull(feedUri);
+        this.pollingPolicy = requireNonNull(pollingPolicy);
     }
 
     public URI getFeedUri() {
@@ -28,5 +33,25 @@ public final class PollingRequest {
 
     public PollingPolicy getPollingPolicy() {
         return pollingPolicy;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(feedUri, pollingPolicy);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (getClass() != other.getClass()) {
+            return false;
+        }
+        PollingRequest that = (PollingRequest) other;
+        return this.feedUri.equals(that.feedUri) && this.pollingPolicy.equals(that.pollingPolicy);
     }
 }

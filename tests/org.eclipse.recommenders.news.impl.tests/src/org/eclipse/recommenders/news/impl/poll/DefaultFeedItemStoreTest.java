@@ -27,7 +27,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testUpdateWithAddedItems() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
 
         List<NewsItem> newItems = sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
@@ -38,7 +38,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testUpdateWithRemovedItems() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
 
         List<NewsItem> newItems = sut.udpate(FEED_URI, asInputStream(SECOND_ITEM), null);
@@ -48,7 +48,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testUpdateWithoutChanges() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
 
         List<NewsItem> newItems = sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
@@ -58,7 +58,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsWithoutUpdate() {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
 
         List<NewsItem> items = sut.getNewsItems(FEED_URI);
 
@@ -67,7 +67,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterEmptyUpdate() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(), null);
 
         List<NewsItem> items = sut.getNewsItems(FEED_URI);
@@ -77,7 +77,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterSingleUpdate() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
 
         List<NewsItem> items = sut.getNewsItems(FEED_URI);
@@ -88,7 +88,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterTwoComplementaryUpdates() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
         sut.udpate(FEED_URI, asInputStream(SECOND_ITEM), null);
 
@@ -100,7 +100,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterTwoIncrementalUpdates() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
 
