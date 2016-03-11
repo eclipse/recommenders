@@ -130,15 +130,22 @@ public class DefaultNewsPollingService implements INewsPollingService {
         List<NewsItem> allItems;
         Status status;
 
-        InputStream in = downloadService.read(feedUri);
-        if (in != null) {
-            feedItemStore.udpate(feedUri, in, progress.newChild(1));
-            allItems = feedItemStore.getNewsItems(feedUri);
+        List<NewsItem> cachedItems = feedItemStore.getNewsItems(feedUri);
+        if (cachedItems != null) {
+            progress.worked(1);
+            allItems = cachedItems;
             status = DOWNLOADED;
         } else {
-            progress.worked(1);
-            allItems = Collections.emptyList();
-            status = NOT_DOWNLOADED;
+            InputStream in = downloadService.read(feedUri);
+            if (in != null) {
+                feedItemStore.udpate(feedUri, in, progress.newChild(1));
+                allItems = feedItemStore.getNewsItems(feedUri);
+                status = DOWNLOADED;
+            } else {
+                progress.worked(1);
+                allItems = Collections.emptyList();
+                status = NOT_DOWNLOADED;
+            }
         }
 
         return new PollingResult(feedUri, newItems, allItems, status);

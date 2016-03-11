@@ -34,5 +34,6 @@ public interface IFeedItemStore {
      */
     List<NewsItem> udpate(URI feedUri, InputStream stream, @Nullable IProgressMonitor monitor) throws IOException;
 
+    @Nullable
     List<NewsItem> getNewsItems(URI feedUri);
 }

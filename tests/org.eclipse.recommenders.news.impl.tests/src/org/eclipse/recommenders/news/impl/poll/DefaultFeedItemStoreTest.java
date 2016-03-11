@@ -1,17 +1,12 @@
 package org.eclipse.recommenders.news.impl.poll;
 
+import static org.eclipse.recommenders.news.impl.poll.TestUtils.asInputStream;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.recommenders.news.api.NewsItem;
 import org.junit.Test;
@@ -27,7 +22,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testUpdateWithAddedItems() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
 
         List<NewsItem> newItems = sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
@@ -38,7 +33,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testUpdateWithRemovedItems() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
 
         List<NewsItem> newItems = sut.udpate(FEED_URI, asInputStream(SECOND_ITEM), null);
@@ -48,7 +43,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testUpdateWithoutChanges() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
 
         List<NewsItem> newItems = sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
@@ -58,7 +53,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsWithoutUpdate() {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
 
         List<NewsItem> items = sut.getNewsItems(FEED_URI);
 
@@ -67,7 +62,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterEmptyUpdate() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(), null);
 
         List<NewsItem> items = sut.getNewsItems(FEED_URI);
@@ -77,7 +72,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterSingleUpdate() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
 
         List<NewsItem> items = sut.getNewsItems(FEED_URI);
@@ -88,7 +83,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterTwoComplementaryUpdates() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
         sut.udpate(FEED_URI, asInputStream(SECOND_ITEM), null);
 
@@ -100,7 +95,7 @@ public class DefaultFeedItemStoreTest {
 
     @Test
     public void testGetFeedItemsAfterTwoIncrementalUpdates() throws Exception {
-        DefaultFeedItemStore sut = new DefaultFeedItemStore();
+        IFeedItemStore sut = new DefaultFeedItemStore();
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM), null);
         sut.udpate(FEED_URI, asInputStream(FIRST_ITEM, SECOND_ITEM), null);
 
@@ -108,27 +103,5 @@ public class DefaultFeedItemStoreTest {
 
         assertThat(items, contains(FIRST_ITEM, SECOND_ITEM));
         assertThat(items, hasSize(2));
-    }
-
-    private static InputStream asInputStream(NewsItem... items) {
-        DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
-
-        StringBuilder rss = new StringBuilder();
-        rss.append("<?xml version='1.0' encoding='UTF-8'?>");
-        rss.append("<rss version='2.0'>");
-        rss.append("<channel>");
-        rss.append("<title>Feed</title>");
-
-        for (NewsItem item : items) {
-            rss.append("<item>");
-            rss.append("<title>").append(item.getTitle()).append("</title>");
-            rss.append("<pubDate>").append(formatter.format(item.getDate())).append("</pubDate>");
-            rss.append("<link>").append(item.getUri().toString()).append("</link>");
-            rss.append("</item>");
-        }
-        rss.append("</channel>");
-        rss.append("</rss>");
-
-        return new ByteArrayInputStream(rss.toString().getBytes(StandardCharsets.UTF_8));
     }
 }
