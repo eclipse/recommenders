@@ -44,13 +44,7 @@ public class DefaultFeedItemStore implements IFeedItemStore {
         SubMonitor progress = SubMonitor.convert(monitor, 1);
         try {
             List<NewsItem> updatedItems = parseNewsItems(stream, feedUri.toString(), progress.newChild(1));
-
-            List<NewsItem> oldItems;
-            if (updatedItems.isEmpty()) {
-                oldItems = cache.remove(feedUri);
-            } else {
-                oldItems = cache.put(feedUri, updatedItems);
-            }
+            List<NewsItem> oldItems = cache.put(feedUri, updatedItems);
 
             Set<String> oldIds = getIds(oldItems);
             List<NewsItem> newItems = new ArrayList<>();
@@ -72,9 +66,9 @@ public class DefaultFeedItemStore implements IFeedItemStore {
     }
 
     @Override
+    @Nullable
     public List<NewsItem> getNewsItems(URI feedUri) {
-        List<NewsItem> cachedItems = cache.get(feedUri);
-        return cachedItems != null ? cachedItems : Collections.<NewsItem>emptyList();
+        return cache.get(feedUri);
     }
 
     private List<NewsItem> parseNewsItems(InputStream in, String eventId, SubMonitor monitor) throws IOException {

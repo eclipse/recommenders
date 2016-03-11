@@ -10,9 +10,13 @@
  */
 package org.eclipse.recommenders.news.api.poll;
 
+import static java.util.Objects.requireNonNull;
+
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.recommenders.news.api.NewsItem;
 
 public final class PollingResult {
@@ -29,10 +33,10 @@ public final class PollingResult {
     private final Status status;
 
     public PollingResult(URI feedUri, List<NewsItem> newNewsItems, List<NewsItem> allNewsItems, Status status) {
-        this.feedUri = feedUri;
-        this.newNewsItems = newNewsItems;
-        this.allNewsItems = allNewsItems;
-        this.status = status;
+        this.feedUri = requireNonNull(feedUri);
+        this.newNewsItems = requireNonNull(newNewsItems);
+        this.allNewsItems = requireNonNull(allNewsItems);
+        this.status = requireNonNull(status);
     }
 
     public URI getFeedUri() {
@@ -49,5 +53,26 @@ public final class PollingResult {
 
     public Status getStatus() {
         return status;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (getClass() != other.getClass()) {
+            return false;
+        }
+        PollingResult that = (PollingResult) other;
+        return this.feedUri.equals(that.feedUri) && this.newNewsItems.equals(that.newNewsItems)
+                && this.allNewsItems.equals(that.allNewsItems) && this.status.equals(that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(feedUri, newNewsItems, allNewsItems, status);
     }
 }

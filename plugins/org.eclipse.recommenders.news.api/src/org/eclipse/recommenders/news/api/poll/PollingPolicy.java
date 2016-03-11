@@ -10,6 +10,8 @@
  */
 package org.eclipse.recommenders.news.api.poll;
 
+import static java.util.concurrent.TimeUnit.*;
+
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -17,32 +19,46 @@ import org.eclipse.jdt.annotation.Nullable;
 
 public abstract class PollingPolicy {
 
-    public abstract boolean shouldPoll(@Nullable Date lastPolledDate, Date pollingDate);
+    private static final class FixedPollingPolicy extends PollingPolicy {
 
-    private static final class AlwaysPollingPolicy extends PollingPolicy {
+        private final boolean shouldPoll;
 
-        @Override
-        public boolean shouldPoll(@Nullable Date lastPolledDate, Date pollingDate) {
-            return true;
+        public FixedPollingPolicy(boolean shouldPoll) {
+            this.shouldPoll = shouldPoll;
         }
-    }
-
-    private static final class NeverPollingPolicy extends PollingPolicy {
 
         @Override
         public boolean shouldPoll(@Nullable Date lastPolledDate, Date pollingDate) {
-            return false;
+            return shouldPoll;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null) {
+                return false;
+            }
+            if (getClass() != other.getClass()) {
+                return false;
+            }
+            FixedPollingPolicy that = (FixedPollingPolicy) other;
+            return this.shouldPoll == that.shouldPoll;
+        }
+
+        @Override
+        public int hashCode() {
+            return shouldPoll ? 23 : 223;
         }
     }
 
     private static final class IntervalBasedPollingPolicy extends PollingPolicy {
 
-        private final long pollingInterval;
-        private final TimeUnit timeUnit;
+        private final long pollingIntervalNanos;
 
         private IntervalBasedPollingPolicy(long pollingInterval, TimeUnit timeUnit) {
-            this.pollingInterval = pollingInterval;
-            this.timeUnit = timeUnit;
+            pollingIntervalNanos = NANOSECONDS.convert(pollingInterval, timeUnit);
         }
 
         @Override
@@ -50,18 +66,44 @@ public abstract class PollingPolicy {
             if (lastPolledDate == null) {
                 return true;
             }
-            long intervalMillis = timeUnit.toMillis(pollingInterval);
-            Date nextPollingDate = new Date(lastPolledDate.getTime() + intervalMillis);
-            return nextPollingDate.before(pollingDate);
+            long lastPolledNanos = NANOSECONDS.convert(lastPolledDate.getTime(), MILLISECONDS);
+            long pollingNanos = NANOSECONDS.convert(pollingDate.getTime(), MILLISECONDS);
+            return lastPolledNanos + pollingIntervalNanos < pollingNanos;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null) {
+                return false;
+            }
+            if (getClass() != other.getClass()) {
+                return false;
+            }
+            IntervalBasedPollingPolicy that = (IntervalBasedPollingPolicy) other;
+            return this.pollingIntervalNanos == that.pollingIntervalNanos;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (pollingIntervalNanos ^ pollingIntervalNanos >>> 32);
         }
     }
 
+    private static final PollingPolicy ALWAYS_POLLING_POLICY = new FixedPollingPolicy(true);
+
+    private static final PollingPolicy NEVER_POLLING_POLICY = new FixedPollingPolicy(false);
+
+    public abstract boolean shouldPoll(@Nullable Date lastPolledDate, Date pollingDate);
+
     public static PollingPolicy always() {
-        return new AlwaysPollingPolicy();
+        return ALWAYS_POLLING_POLICY;
     }
 
     public static PollingPolicy never() {
-        return new NeverPollingPolicy();
+        return NEVER_POLLING_POLICY;
     }
 
     public static PollingPolicy every(long pollingInterval, TimeUnit timeUnit) {
