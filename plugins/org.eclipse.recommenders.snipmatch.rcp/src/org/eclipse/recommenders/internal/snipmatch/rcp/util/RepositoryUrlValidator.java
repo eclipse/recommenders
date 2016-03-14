@@ -142,10 +142,12 @@ public class RepositoryUrlValidator {
     }
 
     private static SortedSet<String> getSupportedSchemes() {
+
         SortedSet<String> supportedSchemes = new TreeSet<String>();
         for (TransportProtocol protocol : Transport.getTransportProtocols()) {
             supportedSchemes.addAll(protocol.getSchemes());
         }
+
         return supportedSchemes;
     }
 }
