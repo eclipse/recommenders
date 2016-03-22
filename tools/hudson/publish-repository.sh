@@ -1,10 +1,10 @@
 #! /bin/bash -e
 
 if [ -z "$1" ]; then
-    echo "No release JDK (e.g., 'jdk-1.8.0-latest') supplied."
+    echo "No release toolchain (e.g., 'JavaSE-1.7') supplied."
     exit 1
 else
-    JDK=$1
+    TOOLCHAIN=$1
 fi
 
 if [ -z "$2" ]; then
@@ -28,10 +28,10 @@ else
     DOWNLOAD_PATH=$4
 fi
 
-echo "Publishing '${REPOSITORY}' repository of '${JDK}'/'${SIMREL}' configuration at http://${DOWNLOAD_PATH}"
+echo "Publishing '${REPOSITORY}' repository of '${TOOLCHAIN}'/'${SIMREL}' configuration at http://${DOWNLOAD_PATH}"
 echo
 
-SOURCE=${HUDSON_HOME}/jobs/${PROMOTED_JOB_NAME}/configurations/axis-jdk/${JDK}/axis-simrel/${SIMREL}/builds/${PROMOTED_ID}/archive/repositories/${REPOSITORY}/target/repository
+SOURCE=${HUDSON_HOME}/jobs/${PROMOTED_JOB_NAME}/configurations/axis-toolchain/${TOOLCHAIN}/axis-simrel/${SIMREL}/builds/${PROMOTED_ID}/archive/repositories/${REPOSITORY}/target/repository
 TARGET=/home/data/httpd/${DOWNLOAD_PATH}
 
 mkdir -p ${TARGET}
