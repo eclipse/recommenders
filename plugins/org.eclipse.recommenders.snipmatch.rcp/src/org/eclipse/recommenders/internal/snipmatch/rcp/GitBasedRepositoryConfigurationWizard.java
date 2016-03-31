@@ -210,7 +210,7 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
                 }
             });
 
-            Label lblPushSettingsDescription = new Label(group, SWT.NONE);
+            Label lblPushSettingsDescription = new Label(group, SWT.NONE | SWT.WRAP);
             lblPushSettingsDescription.setText(MessageFormat
                     .format(Messages.WIZARD_GIT_REPOSITORY_PUSH_SETTINGS_DESCRIPTION, Snippet.FORMAT_VERSION));
             GridDataFactory.fillDefaults().grab(true, false).span(4, 1).applyTo(lblPushSettingsDescription);
