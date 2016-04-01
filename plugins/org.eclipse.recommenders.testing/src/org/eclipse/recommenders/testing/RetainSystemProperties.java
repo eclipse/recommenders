@@ -10,21 +10,26 @@
  */
 package org.eclipse.recommenders.testing;
 
-import java.util.Properties;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.junit.rules.ExternalResource;
 
 public class RetainSystemProperties extends ExternalResource {
 
-    private Properties properties;
+    private final ConcurrentMap<String, String> originalProperties = new ConcurrentHashMap<>();
 
-    @Override
-    protected void before() {
-        properties = (Properties) System.getProperties().clone();
+    public String setProperty(String key, String value) {
+        String previousValue = System.setProperty(key, value);
+        originalProperties.putIfAbsent(key, value);
+        return previousValue;
     }
 
     @Override
     protected void after() {
-        System.setProperties(properties);
+        for (Entry<String, String> entry : originalProperties.entrySet()) {
+            System.setProperty(entry.getKey(), entry.getValue());
+        }
     }
 }

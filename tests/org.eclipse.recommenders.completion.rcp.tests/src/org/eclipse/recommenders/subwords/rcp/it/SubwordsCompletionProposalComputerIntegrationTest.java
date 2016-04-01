@@ -48,7 +48,7 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
     public static final TemporaryWorkspace WORKSPACE = new TemporaryWorkspace();
 
     @Rule
-    public final RetainSystemProperties retainSystemProperties = new RetainSystemProperties();
+    public final RetainSystemProperties systemProperties = new RetainSystemProperties();
 
     private static final int MIN_SUBWORDS_MATCH_RELEVANCE = Integer.MIN_VALUE;
     private static final int MAX_SUBWORDS_MATCH_RELEVANCE = -1;
@@ -93,7 +93,7 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
                 method("Object obj = null; obj.hc$"),
                 COMPREHENSIVE,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
-                "hashCode"));
+                "hashCe"));
 
         scenarios.add(scenario("Methods of local variable (upper-case)",
                 method("Object obj = null; obj.C$"),
@@ -231,7 +231,7 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
 
     @Before
     public void setUp() throws CoreException {
-        System.setProperty("org.eclipse.jdt.ui.codeAssistTimeout", "30000");
+        systemProperties.setProperty("org.eclipse.jdt.ui.codeAssistTimeout", "30000");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
