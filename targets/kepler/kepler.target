@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Target Definition for Eclipse Kepler (4.3)" sequenceNumber="154">
+<?pde version="3.8"?><target name="Target Definition for Eclipse Kepler (4.3)" sequenceNumber="155">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.egit.feature.group" version="0.0.0"/>
@@ -12,6 +12,13 @@
 <unit id="org.eclipse.sdk.ide" version="0.0.0"/>
 <!-- Stable repository for Kepler SR2 -->
 <repository location="http://download.eclipse.org/releases/kepler/201402280900/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<!-- https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler -->
+<unit id="org.eclipse.jdt.a2.java8patch.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.jdt.java8patch.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.pde.java8patch.feature.group" version="0.0.0"/>
+<repository location="http://download.eclipse.org/eclipse/updates/4.3-P-builds/P20140317-1600/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.aether.feature.feature.group" version="0.0.0"/>
