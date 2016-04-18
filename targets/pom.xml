@@ -6,7 +6,11 @@
 	<parent>
 		<groupId>org.eclipse.recommenders</groupId>
 		<artifactId>org.eclipse.recommenders</artifactId>
+<<<<<<< HEAD   (cb6294 [releng] Merge maintenance into master)
 		<version>2.4.0-SNAPSHOT</version>
+=======
+		<version>2.3.2-SNAPSHOT</version>
+>>>>>>> BRANCH (78f71e [releng] 2.3.2-SNAPSHOT)
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -22,4 +26,21 @@
 		<module>mars</module>
 		<module>neon</module>
 	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>target-platform-validation-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>validate-target-platform</id>
+						<goals>
+							<goal>validate-target-platform</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

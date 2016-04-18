@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.mylyn.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (cb6294 [releng] Merge maintenance into master)
       version="2.4.0.qualifier"
+=======
+      version="2.3.2.qualifier"
+>>>>>>> BRANCH (78f71e [releng] 2.3.2-SNAPSHOT)
       provider-name="%provider-name"
       plugin="org.eclipse.recommenders.mylyn.rcp"
       license-feature="org.eclipse.license"
@@ -22,7 +26,11 @@
 
    <requires>
       <import feature="org.eclipse.mylyn.java_feature" version="3.8.0"/>
+<<<<<<< HEAD   (cb6294 [releng] Merge maintenance into master)
       <import feature="org.eclipse.recommenders.rcp.feature" version="2.4.0" match="equivalent"/>
+=======
+      <import feature="org.eclipse.recommenders.rcp.feature" version="2.3.2" match="equivalent"/>
+>>>>>>> BRANCH (78f71e [releng] 2.3.2-SNAPSHOT)
    </requires>
 
    <plugin
