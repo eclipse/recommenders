@@ -61,6 +61,12 @@
 			icon="icons/obj16/newsletter.png"
 			preferencePageId="org.eclipse.recommenders.rcp.preferencePages.root"
 			priority="60"/>
+					<linkContribution
+			commandId="org.eclipse.recommenders.utils.rcp.commands.openHelp"
+			label="%linkContribution.help.label"
+			icon="icons/obj16/newsletter.png"
+			preferencePageId="org.eclipse.recommenders.rcp.preferencePages.root"
+			priority="60"/>
 	</extension>
 	<extension point="org.eclipse.ui.commands">
 		<command id="org.eclipse.recommenders.rcp.commands.extensionDiscovery"
