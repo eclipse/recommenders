@@ -23,6 +23,7 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.FontRegistry;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.recommenders.injection.InjectionService;
 import org.eclipse.recommenders.internal.snipmatch.rcp.l10n.Messages;
@@ -82,6 +83,14 @@ public class CompletionHandler extends AbstractHandler {
         }
 
         int offset = viewer.getSelectedRange().x;
+        int line = 0;
+        int initialOffset = 0;
+
+        try {
+            line = viewer.getDocument().getLineOfOffset(offset);
+            initialOffset = viewer.getDocument().getLineOffset(line);
+        } catch (BadLocationException e) {
+        }
 
         String filename = null;
         if (persistable instanceof IPathEditorInput) {
@@ -91,9 +100,9 @@ public class CompletionHandler extends AbstractHandler {
 
         SnipmatchCompletionEngine<? extends ContentAssistInvocationContext> engine;
         if (textEditor instanceof JavaEditor) {
-            engine = createCompletionEngineForJava(textEditor, viewer, offset, filename);
+            engine = createCompletionEngineForJava(textEditor, viewer, initialOffset, filename);
         } else {
-            engine = createCompletionEngineForText(textEditor.getEditorInput(), viewer, offset, filename);
+            engine = createCompletionEngineForText(textEditor.getEditorInput(), viewer, initialOffset, filename);
         }
 
         engine.show();
