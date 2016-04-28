@@ -37,6 +37,7 @@ import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.snipmatch.Location;
 import org.eclipse.recommenders.snipmatch.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.recommenders.utils.Logs;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -64,15 +65,23 @@ public class JavaContentAssistProcessor extends AbstractContentAssistProcessor<J
     }
 
     @Override
-    protected Location getLocation() {
+    protected Location[] getLocation(int initialOffset) {
         try {
             String partition = TextUtilities.getContentType(context.getDocument(), JAVA_PARTITIONING,
                     context.getInvocationOffset(), true);
-            return getLocation(context, partition);
+
+            JavaContentAssistInvocationContext initialOffsetContext = new JavaContentAssistInvocationContext(
+                    context.getViewer(), initialOffset,
+                    PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor());
+
+            Location location = getLocation(context, partition);
+            Location initialOffsetLocation = getLocation(initialOffsetContext, partition);
+            return new Location[] { location, initialOffsetLocation };
         } catch (BadLocationException e) {
             Logs.log(LogMessages.ERROR_CANNOT_COMPUTE_LOCATION, e);
-            return Location.JAVA_FILE;
+            return new Location[] { Location.JAVA_FILE, Location.JAVA_FILE };
         }
+
     }
 
     @VisibleForTesting

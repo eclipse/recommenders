@@ -13,6 +13,9 @@ package org.eclipse.recommenders.utils;
 import static com.google.common.base.Objects.toStringHelper;
 import static org.eclipse.recommenders.utils.Checks.*;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.google.common.annotations.Beta;
 
 @Beta
@@ -22,8 +25,8 @@ public class Recommendation<T> {
      * TODO: This generic return type seems to cause compile errors with javac.
      */
     public static <S, T extends S> Recommendation<S> newRecommendation(T proposal, double relevance) {
-        return new Recommendation<S>(ensureIsNotNull(proposal, "proposal cannot be null"), ensureIsInRange(relevance,
-                0, 1, "relevance '%f' must be in range [0..1]", relevance));
+        return new Recommendation<S>(ensureIsNotNull(proposal, "proposal cannot be null"),
+                ensureIsInRange(relevance, 0, 1, "relevance '%f' must be in range [0..1]", relevance));
     }
 
     private final T proposal;
@@ -46,5 +49,22 @@ public class Recommendation<T> {
     public String toString() {
         return toStringHelper(this).add("proposal", proposal).add("probability", String.format("%.4f", relevance))
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Recommendation)) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+
+        return new EqualsBuilder().append(getProposal(), ((Recommendation<?>) obj).getProposal()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

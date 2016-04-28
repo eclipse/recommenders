@@ -55,7 +55,7 @@ public class TextContentAssistProcessor extends AbstractContentAssistProcessor<T
     }
 
     @Override
-    protected Location getLocation() {
-        return Location.FILE;
+    protected Location[] getLocation(int initialOffset) {
+        return new Location[] { Location.JAVA_FILE, Location.JAVA_FILE };
     }
 }

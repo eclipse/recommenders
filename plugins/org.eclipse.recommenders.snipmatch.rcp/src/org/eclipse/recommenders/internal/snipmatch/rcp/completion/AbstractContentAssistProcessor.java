@@ -68,6 +68,7 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
     protected final IDependencyListener dependencyListener;
     private final Image contextLoadingImage;
     private final Image snippetImage;
+    private final Image warningImage;
     protected final TemplateContextType templateContextType;
 
     protected T context;
@@ -87,6 +88,7 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
         this.pcProvider = pcProvider;
         contextLoadingImage = images.getImage(SharedImages.Images.OBJ_HOURGLASS);
         snippetImage = images.getImage(SharedImages.Images.OBJ_BULLET_BLUE);
+        warningImage = images.getImage(SharedImages.Images.OBJ_WARNING);
     }
 
     public void setContext(T context) {
@@ -115,22 +117,6 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
             return new ICompletionProposal[0];
         }
 
-        Set<ProjectCoordinate> projectCoordinates = tryResolve(pcProvider, availableDependencies);
-
-        SearchContext searchContext = new SearchContext(terms, getLocation(), filename, projectCoordinates);
-
-        LinkedList<ICompletionProposal> proposals = Lists.newLinkedList();
-
-        List<SnippetRepositoryConfiguration> sortedConfigs = Lists.newArrayList();
-        sortedConfigs.addAll(configs.getRepos());
-
-        Collections.sort(sortedConfigs, new Comparator<SnippetRepositoryConfiguration>() {
-            @Override
-            public int compare(SnippetRepositoryConfiguration o1, SnippetRepositoryConfiguration o2) {
-                return Integer.compare(o1.getPriority(), o2.getPriority());
-            }
-        });
-
         Point selection = viewer.getSelectedRange();
         IRegion region = new Region(selection.x, selection.y);
         Position position = new Position(selection.x, selection.y);
@@ -144,6 +130,34 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
             }
         }
 
+        int line = 0;
+        int initialOffset = 0;
+
+        try {
+            line = document.getLineOfOffset(offset);
+            initialOffset = document.getLineOffset(line);
+        } catch (BadLocationException e) {
+        }
+
+        Set<ProjectCoordinate> projectCoordinates = tryResolve(pcProvider, availableDependencies);
+
+        Location[] locations = getLocation(initialOffset);
+
+        SearchContext searchContext = new SearchContext(terms, locations[0], filename, projectCoordinates);
+        SearchContext initialOffsetSearchContext = new SearchContext(terms, locations[1], filename, projectCoordinates);
+
+        LinkedList<ICompletionProposal> proposals = Lists.newLinkedList();
+
+        List<SnippetRepositoryConfiguration> sortedConfigs = Lists.newArrayList();
+        sortedConfigs.addAll(configs.getRepos());
+
+        Collections.sort(sortedConfigs, new Comparator<SnippetRepositoryConfiguration>() {
+            @Override
+            public int compare(SnippetRepositoryConfiguration o1, SnippetRepositoryConfiguration o2) {
+                return Integer.compare(o1.getPriority(), o2.getPriority());
+            }
+        });
+
         TemplateContext templateContext = getTemplateContext(document, position);
         templateContext.setVariable("selection", selectedText); //$NON-NLS-1$
 
@@ -152,6 +166,10 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
 
             if (repo.isPresent()) {
                 List<Recommendation<ISnippet>> recommendations = repo.get().search(searchContext);
+                List<Recommendation<ISnippet>> inapplicableRecommendations = repo.get()
+                        .search(initialOffsetSearchContext);
+                inapplicableRecommendations.removeAll(recommendations);
+
                 if (!recommendations.isEmpty()) {
                     proposals.add(new RepositoryProposal(sortedConfigs.get(repositoryPriority), repositoryPriority,
                             recommendations.size()));
@@ -169,6 +187,10 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
                         }
                     }
                 }
+
+                if (inapplicableRecommendations.size() > 0) {
+                    proposals.add(new InapplicableMatchesProposal(inapplicableRecommendations.size(), warningImage));
+                }
             }
         }
 
@@ -179,7 +201,7 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
         return Iterables.toArray(proposals, ICompletionProposal.class);
     }
 
-    protected abstract Location getLocation();
+    protected abstract Location[] getLocation(int initialOffset);
 
     protected abstract TemplateContext getTemplateContext(IDocument document, Position position);
 
