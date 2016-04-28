@@ -68,6 +68,7 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
     protected final IDependencyListener dependencyListener;
     private final Image contextLoadingImage;
     private final Image snippetImage;
+    private final Image warningImage;
     protected final TemplateContextType templateContextType;
 
     protected T context;
@@ -87,6 +88,7 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
         this.pcProvider = pcProvider;
         contextLoadingImage = images.getImage(SharedImages.Images.OBJ_HOURGLASS);
         snippetImage = images.getImage(SharedImages.Images.OBJ_BULLET_BLUE);
+        warningImage = images.getImage(SharedImages.Images.OBJ_WARNING);
     }
 
     public void setContext(T context) {
@@ -117,7 +119,9 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
 
         Set<ProjectCoordinate> projectCoordinates = tryResolve(pcProvider, availableDependencies);
 
-        SearchContext searchContext = new SearchContext(terms, getLocation(), filename, projectCoordinates);
+        Location location = getLocation();
+
+        SearchContext searchContext = new SearchContext(terms, location, filename, projectCoordinates);
 
         LinkedList<ICompletionProposal> proposals = Lists.newLinkedList();
 
@@ -131,12 +135,12 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
             }
         });
 
+        IDocument document = viewer.getDocument();
         Point selection = viewer.getSelectedRange();
         IRegion region = new Region(selection.x, selection.y);
         Position position = new Position(selection.x, selection.y);
-        IDocument document = viewer.getDocument();
-
         String selectedText = null;
+
         if (selection.y != 0) {
             try {
                 selectedText = document.get(selection.x, selection.y);
@@ -147,29 +151,55 @@ public abstract class AbstractContentAssistProcessor<T extends ContentAssistInvo
         TemplateContext templateContext = getTemplateContext(document, position);
         templateContext.setVariable("selection", selectedText); //$NON-NLS-1$
 
+        int totalInapplicableRecommendations = 0;
+
         for (int repositoryPriority = 0; repositoryPriority < sortedConfigs.size(); repositoryPriority++) {
             Optional<ISnippetRepository> repo = repos.getRepository(sortedConfigs.get(repositoryPriority).getId());
 
-            if (repo.isPresent()) {
-                List<Recommendation<ISnippet>> recommendations = repo.get().search(searchContext);
-                if (!recommendations.isEmpty()) {
-                    proposals.add(new RepositoryProposal(sortedConfigs.get(repositoryPriority), repositoryPriority,
-                            recommendations.size()));
-                    for (Recommendation<ISnippet> recommendation : recommendations) {
-                        ISnippet snippet = recommendation.getProposal();
+            if (!repo.isPresent()) {
+                continue;
+            }
 
-                        Template template = new Template(snippet.getName(), snippet.getDescription(),
-                                SNIPMATCH_CONTEXT_ID, snippet.getCode(), true);
+            List<Recommendation<ISnippet>> recommendations = repo.get().search(searchContext);
 
-                        try {
-                            proposals.add(SnippetProposal.newSnippetProposal(recommendation, repositoryPriority,
-                                    template, templateContext, region, snippetImage));
-                        } catch (Exception e) {
-                            log(LogMessages.ERROR_CREATING_SNIPPET_PROPOSAL_FAILED, e);
-                        }
+            if (recommendations.isEmpty()) {
+                continue;
+            }
+
+            int inapplicableRecommendations = 0;
+            int firstIndex = proposals.size();
+
+            for (Recommendation<ISnippet> recommendation : recommendations) {
+                ISnippet snippet = recommendation.getProposal();
+
+                Template template = new Template(snippet.getName(), snippet.getDescription(), SNIPMATCH_CONTEXT_ID,
+                        snippet.getCode(), true);
+
+                try {
+                    SnippetProposal snippetProposal = SnippetProposal.newSnippetProposal(recommendation,
+                            repositoryPriority, template, templateContext, region, snippetImage);
+
+                    if (offset == 0 || snippetProposal.isValidFor(document, offset)) {
+                        proposals.add(snippetProposal);
+                    } else {
+                        inapplicableRecommendations++;
                     }
+
+                } catch (Exception e) {
+                    log(LogMessages.ERROR_CREATING_SNIPPET_PROPOSAL_FAILED, e);
                 }
             }
+
+            if (recommendations.size() > inapplicableRecommendations) {
+                proposals.add(firstIndex, new RepositoryProposal(sortedConfigs.get(repositoryPriority),
+                        repositoryPriority, recommendations.size() - inapplicableRecommendations));
+            }
+
+            totalInapplicableRecommendations += inapplicableRecommendations;
+        }
+
+        if (totalInapplicableRecommendations > 0) {
+            proposals.add(new InapplicableMatchesProposal(totalInapplicableRecommendations, warningImage));
         }
 
         if (isResolvingProjectDependencies()) {

@@ -18,6 +18,9 @@ public final class Messages extends NLS {
 
     public static String COMPLETION_ENGINE_NO_SNIPPETS_FOUND;
     public static String COMPLETION_ENGINE_REPOSITORY_MATCHES;
+    public static String COMPLETION_ENGINE_INAPPLICABLE_MATCHES_PROPOSAL;
+    public static String COMPLETION_ENGINE_INAPPLICABLE_MATCHES_PROPOSAL_TOOLTIP;
+    public static String PROPOSAL_CATEGORY_SNIPMATCH;
 
     public static String CONFIRM_DIALOG_DELETE_REPOSITORY_MESSAGE;
     public static String CONFIRM_DIALOG_DELETE_REPOSITORY_TITLE;
