@@ -22,8 +22,8 @@ public class Recommendation<T> {
      * TODO: This generic return type seems to cause compile errors with javac.
      */
     public static <S, T extends S> Recommendation<S> newRecommendation(T proposal, double relevance) {
-        return new Recommendation<S>(ensureIsNotNull(proposal, "proposal cannot be null"), ensureIsInRange(relevance,
-                0, 1, "relevance '%f' must be in range [0..1]", relevance));
+        return new Recommendation<S>(ensureIsNotNull(proposal, "proposal cannot be null"),
+                ensureIsInRange(relevance, 0, 1, "relevance '%f' must be in range [0..1]", relevance));
     }
 
     private final T proposal;
