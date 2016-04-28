@@ -59,7 +59,6 @@ public class JavaContentAssistProcessor extends AbstractContentAssistProcessor<J
     protected TemplateContext getTemplateContext(IDocument document, Position position) {
         ICompilationUnit cu = context.getCompilationUnit();
         JavaContext javaTemplateContext = new JavaContext(templateContextType, document, position, cu);
-        javaTemplateContext.setForceEvaluation(true);
         return javaTemplateContext;
     }
 
@@ -73,6 +72,7 @@ public class JavaContentAssistProcessor extends AbstractContentAssistProcessor<J
             Logs.log(LogMessages.ERROR_CANNOT_COMPUTE_LOCATION, e);
             return Location.JAVA_FILE;
         }
+
     }
 
     @VisibleForTesting
