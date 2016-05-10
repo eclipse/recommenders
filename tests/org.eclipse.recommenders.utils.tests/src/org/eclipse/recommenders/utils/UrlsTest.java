@@ -13,20 +13,46 @@ import org.junit.Test;
 
 public class UrlsTest {
 
-    private static final String ESCAPED_HTTP_ABSOLUTE_URI = "http___download_eclipse_org_recommenders_models_2_0_v201210_1212_";
-    private static final String HTTP_ABSOLUTE_URI = "http://download.eclipse.org/recommenders/models/2.0/v201210_1212/";
+    private static final String ESCAPED_HTTP_ABSOLUTE_URI = "http___download_eclipse_org_123_recommenders_models_2_0_v201210_1212_data_key_value_fragid1";
+    private static final String HTTP_ABSOLUTE_URI = "http://download.eclipse.org:123/recommenders/models/2.0/v201210_1212/data?key=value#fragid1";
+    private static final String HTTP_ABSOLUTE_URI_WITH_USERNAME = "http://user@download.eclipse.org:123/recommenders/models/2.0/v201210_1212/data?key=value#fragid1";
+    private static final String HTTP_ABSOLUTE_URI_WITH_USERNAME_AND_PASSWORD = "http://user:password@download.eclipse.org:123/recommenders/models/2.0/v201210_1212/data?key=value#fragid1";
     private static final String HTTPS_ABSOLUTE_URI = "https://download.eclipse.org/recommenders/models/2.0/v201210_1212/";
     private static final String RELATIVE_URI = "download.eclipse.org/recommenders/models/2.0/v201210_1212/";
 
     @Test
-    public void testMangle() {
+    public void testMangleUrl() {
+        String out = mangle(toUrl(HTTP_ABSOLUTE_URI));
+        assertEquals(ESCAPED_HTTP_ABSOLUTE_URI, out);
+    }
+
+    @Test
+    public void testMangleUrlWithUsername() {
+        String out = mangle(toUrl(HTTP_ABSOLUTE_URI_WITH_USERNAME));
+        assertEquals(ESCAPED_HTTP_ABSOLUTE_URI, out);
+    }
+
+    @Test
+    public void testMangleUrlWithUsernameAndPassword() {
+        String out = mangle(toUrl(HTTP_ABSOLUTE_URI_WITH_USERNAME_AND_PASSWORD));
+        assertEquals(ESCAPED_HTTP_ABSOLUTE_URI, out);
+    }
+
+    @Test
+    public void testMangleUrlAsString() {
         String out = mangle(HTTP_ABSOLUTE_URI);
         assertEquals(ESCAPED_HTTP_ABSOLUTE_URI, out);
     }
 
     @Test
-    public void testMangleUrl() {
-        String out = mangle(toUrl(HTTP_ABSOLUTE_URI));
+    public void testMangleUrlWithUsernameAsString() {
+        String out = mangle(toUrl(HTTP_ABSOLUTE_URI_WITH_USERNAME));
+        assertEquals(ESCAPED_HTTP_ABSOLUTE_URI, out);
+    }
+
+    @Test
+    public void testMangleUrlWithUsernameAndPasswordAsString() {
+        String out = mangle(toUrl(HTTP_ABSOLUTE_URI_WITH_USERNAME_AND_PASSWORD));
         assertEquals(ESCAPED_HTTP_ABSOLUTE_URI, out);
     }
 

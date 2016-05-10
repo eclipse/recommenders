@@ -24,11 +24,66 @@ import com.google.common.base.Throwables;
 public final class Urls {
 
     public static String mangle(URL url) {
-        return mangle(url.toExternalForm());
+        int len = url.getProtocol().length() + 1;
+
+        String host = url.getHost();
+        int port = url.getPort();
+        String path = url.getPath();
+        String query = url.getQuery();
+        String ref = url.getRef();
+
+        if (host != null && host.length() > 0) {
+            len += 2 + host.length();
+        }
+        if (port >= 0) {
+            len += 1 + String.valueOf(port).length();
+        }
+        if (path != null) {
+            len += path.length();
+        }
+        if (query != null) {
+            len += 1 + query.length();
+        }
+        if (ref != null) {
+            len += 1 + ref.length();
+        }
+
+        StringBuffer result = new StringBuffer(len);
+        result.append(url.getProtocol());
+        result.append(":");
+        if (host != null && host.length() > 0) {
+            result.append("//");
+            result.append(host);
+        }
+        if (port >= 0) {
+            result.append(":");
+            result.append(String.valueOf(port));
+        }
+        if (path != null) {
+            result.append(path);
+        }
+        if (query != null) {
+            result.append('?');
+            result.append(query);
+        }
+        if (ref != null) {
+            result.append("#");
+            result.append(ref);
+        }
+
+        return doMangle(result.toString());
+    }
+
+    private static String doMangle(String url) {
+        return url.replaceAll("\\W", "_");
     }
 
     public static String mangle(String url) {
-        return url.replaceAll("\\W", "_");
+        try {
+            return mangle(new URL(url));
+        } catch (MalformedURLException e) {
+            throw Throwables.propagate(e);
+        }
     }
 
     public static URL toUrl(String url) {
