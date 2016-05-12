@@ -661,7 +661,8 @@ public class EclipseGitSnippetRepository implements ISnippetRepository {
         RemoteConfig config = SimpleConfigurePushDialog.getConfiguredRemote(repository);
         int timeout = Activator.getDefault().getPreferenceStore().getInt(UIPreferences.REMOTE_CONNECTION_TIMEOUT);
         final PushOperation push = new PushOperation(repository, config.getName(), false, timeout);
-        push.setCredentialsProvider(new EGitCredentialsProvider());
+        push.setCredentialsProvider(GitSnippetRepository.getCredentialsProvider(delegate.getPushUrl()));
+
         Job pushJob = new Job(Messages.JOB_NAME_PUSHING_SNIPPETS_TO_REMOTE_GIT_REPO) {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
