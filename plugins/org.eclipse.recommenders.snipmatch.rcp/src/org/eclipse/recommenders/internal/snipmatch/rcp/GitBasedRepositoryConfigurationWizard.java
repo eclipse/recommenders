@@ -31,6 +31,7 @@ import org.eclipse.recommenders.snipmatch.rcp.ISnippetRepositoryWizard;
 import org.eclipse.recommenders.snipmatch.rcp.model.EclipseGitSnippetRepositoryConfiguration;
 import org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelFactory;
 import org.eclipse.recommenders.utils.Checks;
+import org.eclipse.recommenders.utils.Urls;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -273,6 +274,8 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
             } else if (!fetchUriValidation.isOK()) {
                 setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_FETCH_URI,
                         fetchUriValidation.getMessage()));
+            } else if (isUriAlreadyAdded(txtFetchUri.getText())) {
+                setErrorMessage(Messages.WIZARD_GIT_REPOSITORY_FETCH_URI_ALREADY_ADDED);
             } else if (!pushUriValidation.isOK()) {
                 setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_PUSH_URI,
                         pushUriValidation.getMessage()));
@@ -285,6 +288,16 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
             }
 
             setPageComplete(getErrorMessage() == null);
+        }
+
+        private boolean isUriAlreadyAdded(String newText) {
+            String mangledNewText = Urls.mangle(newText);
+            for (String remoteUrl : remoteUrls) {
+                if (Urls.mangle(remoteUrl).equals(mangledNewText)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public boolean canFinish() {
