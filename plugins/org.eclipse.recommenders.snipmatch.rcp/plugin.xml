@@ -10,7 +10,8 @@
       <!-- @generated snipmatchrcp -->
       <package
             uri="org.eclipse.recommenders.snipmatch.rcp"
-            class="org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelPackage"/>
+            class="org.eclipse.recommenders.snipmatch.rcp.model.SnipmatchRcpModelPackage"
+            genModel="model/snipmatchrcp.genmodel"/>
    </extension>
 	<extension point="org.eclipse.ui.editors">
 		<editor
@@ -123,7 +124,7 @@
 	<extension point="org.eclipse.recommenders.snipmatch.rcp.configurationWizards">
 		<configurationWizard
 			name="%configurationWizards.gitBasedRepository.name"
-			wizard="org.eclipse.recommenders.internal.snipmatch.rcp.GitBasedRepositoryConfigurationWizard">
+			wizard="org.eclipse.recommenders.injection.ExtensionFactory:org.eclipse.recommenders.internal.snipmatch.rcp.GitBasedRepositoryConfigurationWizard">
 		</configurationWizard>
 	</extension>
 	<extension point="org.eclipse.recommenders.snipmatch.rcp.registeredEmfPackages">
