@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.constructors.rcp.tests;singleton:=true
+<<<<<<< HEAD   (2d78b4 [releng] Merge maintenance into master)
 Bundle-Version: 2.4.0.qualifier
+=======
+Bundle-Version: 2.3.3.qualifier
+>>>>>>> BRANCH (73d2d3 [releng] 2.3.3-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
