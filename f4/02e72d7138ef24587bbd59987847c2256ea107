@@ -1,0 +1,7 @@
+Verified+1: Hudson CI
+Code-Review+2: Johannes Dorn <johannes.dorn@codetrails.com>
+Submitted-by: Johannes Dorn <johannes.dorn@codetrails.com>
+Submitted-at: Wed, 25 May 2016 05:19:34 -0400
+Reviewed-on: https://git.eclipse.org/r/73191
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/maintenance
