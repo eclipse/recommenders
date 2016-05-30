@@ -21,6 +21,8 @@ import static org.mockito.Mockito.*;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.inject.Provider;
+
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnArgumentName;
@@ -77,8 +79,8 @@ public class ConstructorCompletionSessionProcessorTest {
     private final IProcessableProposal objectInitProcessableProposal = mock(ProcessableJavaCompletionProposal.class);
     private final IProcessableProposal stringInitProcessableProposal = mock(ProcessableJavaCompletionProposal.class);
 
-    private IProjectCoordinateProvider pcProvider;
-    private IConstructorModelProvider modelProvider;
+    private Provider<IProjectCoordinateProvider> pcProvider;
+    private Provider<IConstructorModelProvider> modelProvider;
     private IProposalNameProvider methodNameProvider;
     private IRecommendersCompletionContext context;
 
@@ -157,7 +159,7 @@ public class ConstructorCompletionSessionProcessorTest {
 
         assertThat(shouldProcess, is(equalTo(false)));
 
-        verify(modelProvider).releaseModel(model);
+        verify(modelProvider.get()).releaseModel(model);
     }
 
     @Test
@@ -175,7 +177,7 @@ public class ConstructorCompletionSessionProcessorTest {
 
         assertThat(shouldProcess, is(equalTo(false)));
 
-        verify(modelProvider).releaseModel(model);
+        verify(modelProvider.get()).releaseModel(model);
     }
 
     @Test
@@ -201,7 +203,7 @@ public class ConstructorCompletionSessionProcessorTest {
         verify(manager, times(1)).addProcessor(processorWithBoostAndLabel(200, "100%"));
         verify(manager, times(1)).addProcessor(isA(OverlayImageProposalProcessor.class));
 
-        verify(modelProvider).releaseModel(model);
+        verify(modelProvider.get()).releaseModel(model);
     }
 
     @Test
@@ -228,7 +230,7 @@ public class ConstructorCompletionSessionProcessorTest {
         verify(objectInitProcessableProposal, never()).setTag(any(ProposalTag.class), anyDouble());
         verifyZeroInteractions(manager);
 
-        verify(modelProvider).releaseModel(model);
+        verify(modelProvider.get()).releaseModel(model);
     }
 
     @Test
@@ -263,7 +265,7 @@ public class ConstructorCompletionSessionProcessorTest {
         verify(stringInitProcessableProposal, never()).setTag(any(ProposalTag.class), anyDouble());
         verifyZeroInteractions(stringInitManager);
 
-        verify(modelProvider).releaseModel(model);
+        verify(modelProvider.get()).releaseModel(model);
     }
 
     private void setUpCompletionScenario(Class<? extends ASTNode> completionType, @Nullable IType expectedType,
@@ -276,21 +278,23 @@ public class ConstructorCompletionSessionProcessorTest {
         when(context.getProposals()).thenReturn(proposals);
 
         methodNameProvider = mock(IProposalNameProvider.class);
-        when(methodNameProvider.toMethodName(objectInitCoreProposal))
-                .thenReturn(Optional.of(OBJECT_INIT));
-        when(methodNameProvider.toMethodName(stringInitCoreProposal))
-                .thenReturn(Optional.of(STRING_INIT));
+        when(methodNameProvider.toMethodName(objectInitCoreProposal)).thenReturn(Optional.of(OBJECT_INIT));
+        when(methodNameProvider.toMethodName(stringInitCoreProposal)).thenReturn(Optional.of(STRING_INIT));
     }
 
     private void setUpModelRepository(@Nullable IType type, @Nullable UniqueTypeName uniqueTypeName,
             @Nullable ConstructorModel model) {
-        pcProvider = Mockito.mock(IProjectCoordinateProvider.class);
-        when(pcProvider.tryToUniqueName(type)).thenReturn(Result.fromNullable(uniqueTypeName));
+        IProjectCoordinateProvider projectCoordinateProvider = Mockito.mock(IProjectCoordinateProvider.class);
+        when(projectCoordinateProvider.tryToUniqueName(type)).thenReturn(Result.fromNullable(uniqueTypeName));
+        pcProvider = Mockito.mock(Provider.class);
+        when(pcProvider.get()).thenReturn(projectCoordinateProvider);
 
-        modelProvider = Mockito.mock(IConstructorModelProvider.class);
+        modelProvider = Mockito.mock(Provider.class);
 
         if (uniqueTypeName != null) {
-            when(modelProvider.acquireModel(uniqueTypeName)).thenReturn(Optional.fromNullable(model));
+            IConstructorModelProvider constructorModelProvider = Mockito.mock(IConstructorModelProvider.class);
+            when(constructorModelProvider.acquireModel(uniqueTypeName)).thenReturn(Optional.fromNullable(model));
+            when(modelProvider.get()).thenReturn(constructorModelProvider);
         }
     }
 
