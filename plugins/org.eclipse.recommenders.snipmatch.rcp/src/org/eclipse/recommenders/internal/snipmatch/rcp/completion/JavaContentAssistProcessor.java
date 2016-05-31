@@ -12,6 +12,7 @@ package org.eclipse.recommenders.internal.snipmatch.rcp.completion;
 
 import static org.eclipse.jdt.ui.text.IJavaPartitions.*;
 
+import java.util.Collections;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -35,7 +36,6 @@ import org.eclipse.recommenders.internal.snipmatch.rcp.l10n.LogMessages;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.snipmatch.Location;
-import org.eclipse.recommenders.snipmatch.rcp.model.SnippetRepositoryConfigurations;
 import org.eclipse.recommenders.utils.Logs;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -51,8 +51,17 @@ public class JavaContentAssistProcessor extends AbstractContentAssistProcessor<J
 
     @Override
     protected Set<DependencyInfo> calculateAvailableDependencies(JavaContentAssistInvocationContext context) {
-        IJavaProject project = context.getProject();
-        return dependencyListener.getDependenciesForProject(DependencyInfos.createDependencyInfoForProject(project));
+        IJavaProject javaProject = context.getProject();
+        if (javaProject == null) {
+            return Collections.emptySet();
+        }
+
+        DependencyInfo dependencyInfo = DependencyInfos.createProjectDependencyInfo(javaProject).orNull();
+        if (dependencyInfo == null) {
+            return Collections.emptySet();
+        } else {
+            return dependencyListener.getDependenciesForProject(dependencyInfo);
+        }
     }
 
     @Override

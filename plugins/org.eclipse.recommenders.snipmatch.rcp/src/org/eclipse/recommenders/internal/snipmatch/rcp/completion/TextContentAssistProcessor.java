@@ -27,7 +27,6 @@ import org.eclipse.recommenders.internal.snipmatch.rcp.Repositories;
 import org.eclipse.recommenders.models.rcp.IProjectCoordinateProvider;
 import org.eclipse.recommenders.rcp.SharedImages;
 import org.eclipse.recommenders.snipmatch.Location;
-import org.eclipse.recommenders.snipmatch.rcp.model.SnippetRepositoryConfigurations;
 
 public class TextContentAssistProcessor extends AbstractContentAssistProcessor<TextContentAssistInvocationContext> {
 
@@ -42,10 +41,13 @@ public class TextContentAssistProcessor extends AbstractContentAssistProcessor<T
         IJavaProject project = context.getProject().orNull();
         if (project == null) {
             return Collections.emptySet();
+        }
+
+        DependencyInfo dependencyInfo = DependencyInfos.createProjectDependencyInfo(project).orNull();
+        if (dependencyInfo == null) {
+            return Collections.emptySet();
         } else {
-            IJavaProject javaProject = project;
-            return dependencyListener
-                    .getDependenciesForProject(DependencyInfos.createDependencyInfoForProject(javaProject));
+            return dependencyListener.getDependenciesForProject(dependencyInfo);
         }
     }
 
