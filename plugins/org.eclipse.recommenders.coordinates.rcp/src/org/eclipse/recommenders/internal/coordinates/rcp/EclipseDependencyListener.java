@@ -14,7 +14,6 @@ import static com.google.common.base.Optional.fromNullable;
 import static org.eclipse.recommenders.coordinates.rcp.DependencyInfos.*;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -36,9 +35,9 @@ import org.eclipse.recommenders.rcp.JavaModelEvents;
 import org.eclipse.recommenders.utils.Logs;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -46,10 +45,10 @@ import com.google.common.eventbus.Subscribe;
 @SuppressWarnings("restriction")
 public class EclipseDependencyListener implements IDependencyListener {
 
-    private final HashMultimap<DependencyInfo, DependencyInfo> workspaceDependenciesByProject = HashMultimap.create();
-    private final HashMultimap<DependencyInfo, IPackageFragmentRoot> jrePackageFragmentRoots = HashMultimap.create();
+    private final HashMultimap<IJavaProject, DependencyInfo> workspaceDependenciesByProject = HashMultimap.create();
+    private final HashMultimap<IJavaProject, IPackageFragmentRoot> jrePackageFragmentRoots = HashMultimap.create();
 
-    private final Map<IJavaProject, DependencyInfo> projectDependencyInfos = Maps.newHashMap();
+    private final HashBiMap<IJavaProject, DependencyInfo> projectDependencyInfos = HashBiMap.create();
 
     public EclipseDependencyListener(final EventBus bus) {
         bus.register(this);
@@ -62,6 +61,10 @@ public class EclipseDependencyListener implements IDependencyListener {
             try {
                 if (project.isOpen() && project.hasNature(JavaCore.NATURE_ID)) {
                     IJavaProject javaProject = JavaCore.create(project);
+                    if (javaProject == null) {
+                        continue;
+                    }
+
                     registerDependenciesForJavaProject(javaProject);
                 }
             } catch (CoreException e) {
@@ -72,11 +75,19 @@ public class EclipseDependencyListener implements IDependencyListener {
 
     @Subscribe
     public void onEvent(final JavaModelEvents.JavaProjectOpened e) {
+        if (e.project == null) {
+            return;
+        }
+
         registerDependenciesForJavaProject(e.project);
     }
 
     @Subscribe
     public void onEvent(final JavaModelEvents.JavaProjectClosed e) {
+        if (e.project == null) {
+            return;
+        }
+
         deregisterDependenciesForJavaProject(e.project);
     }
 
@@ -91,35 +102,43 @@ public class EclipseDependencyListener implements IDependencyListener {
     }
 
     private void registerDependenciesForJavaProject(final IJavaProject javaProject) {
-        DependencyInfo dependencyInfoForProject = getDependencyInfoForProject(javaProject);
-
-        Optional<DependencyInfo> optionalJREDependencyInfo = DependencyInfos.createDependencyInfoForJre(javaProject);
-        if (optionalJREDependencyInfo.isPresent()) {
-            workspaceDependenciesByProject.put(dependencyInfoForProject, optionalJREDependencyInfo.get());
-            jrePackageFragmentRoots.putAll(dependencyInfoForProject, detectJREPackageFragementRoots(javaProject));
+        DependencyInfo jreDependencyInfo = DependencyInfos.createJreDependencyInfo(javaProject).orNull();
+        if (jreDependencyInfo != null) {
+            workspaceDependenciesByProject.put(javaProject, jreDependencyInfo);
+            jrePackageFragmentRoots.putAll(javaProject, detectJREPackageFragementRoots(javaProject));
         }
 
-        workspaceDependenciesByProject.putAll(dependencyInfoForProject, searchForAllDependenciesOfProject(javaProject));
+        workspaceDependenciesByProject.putAll(javaProject, searchForAllDependenciesOfProject(javaProject));
+        addProjectDependencyInfoToCache(javaProject);
     }
 
     private Set<DependencyInfo> searchForAllDependenciesOfProject(final IJavaProject javaProject) {
         Set<DependencyInfo> dependencies = Sets.newHashSet();
-        Set<IPackageFragmentRoot> jreRoots = jrePackageFragmentRoots.get(getDependencyInfoForProject(javaProject));
+        Set<IPackageFragmentRoot> jreRoots = jrePackageFragmentRoots.get(javaProject);
         try {
             for (final IPackageFragmentRoot packageFragmentRoot : javaProject.getAllPackageFragmentRoots()) {
                 if (!jreRoots.contains(packageFragmentRoot) && packageFragmentRoot instanceof JarPackageFragmentRoot) {
-                    DependencyInfo dependencyInfo = createDependencyInfoForJar(packageFragmentRoot);
-                    dependencies.add(dependencyInfo);
+                    DependencyInfo dependencyInfo = createJarDependencyInfo(packageFragmentRoot).orNull();
+                    if (dependencyInfo != null) {
+                        dependencies.add(dependencyInfo);
+                    }
                 } else if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE
                         && packageFragmentRoot.getJavaProject() != null) {
-                    DependencyInfo dependencyInfo = DependencyInfos
-                            .createDependencyInfoForProject(packageFragmentRoot.getJavaProject());
-                    dependencies.add(dependencyInfo);
+                    IJavaProject project = packageFragmentRoot.getJavaProject();
+                    if (project == null) {
+                        continue;
+                    }
+
+                    DependencyInfo dependencyInfo = DependencyInfos.createProjectDependencyInfo(project).orNull();
+                    if (dependencyInfo != null) {
+                        dependencies.add(dependencyInfo);
+                    }
                 }
             }
         } catch (JavaModelException e) {
             Logs.log(LogMessages.ERROR_FAILED_TO_SEARCH_FOR_PROJECT_DEPENDENCIES, e, javaProject);
         }
+
         return dependencies;
     }
 
@@ -146,34 +165,37 @@ public class EclipseDependencyListener implements IDependencyListener {
     }
 
     private void deregisterDependenciesForJavaProject(final IJavaProject javaProject) {
-        DependencyInfo dependencyInfoForProject = getDependencyInfoForProject(javaProject);
-        workspaceDependenciesByProject.removeAll(dependencyInfoForProject);
-        jrePackageFragmentRoots.removeAll(dependencyInfoForProject);
-        synchronized (projectDependencyInfos) {
-            projectDependencyInfos.remove(javaProject);
-        }
+        workspaceDependenciesByProject.removeAll(javaProject);
+        removeProjectDependencyInfoFromCache(javaProject);
+        jrePackageFragmentRoots.removeAll(javaProject);
+
+        removeProjectDependencyInfoFromCache(javaProject);
     }
 
     private void registerDependencyForJAR(final JarPackageFragmentRoot root) {
-        Optional<IJavaProject> optionalJavaProject = getJavaProjectForPackageFragmentRoot(root);
-        if (!optionalJavaProject.isPresent()) {
+        IJavaProject javaProject = getJavaProjectForPackageFragmentRoot(root).orNull();
+        if (javaProject == null) {
             return;
         }
 
-        IJavaProject javaProject = optionalJavaProject.get();
-        DependencyInfo dependencyInfoForProject = getDependencyInfoForProject(javaProject);
-        if (!isJREOfProjectIsKnown(dependencyInfoForProject)) {
-            workspaceDependenciesByProject.removeAll(dependencyInfoForProject);
+        if (!isJREOfProjectKnown(javaProject)) {
+            workspaceDependenciesByProject.removeAll(javaProject);
+            removeProjectDependencyInfoFromCache(javaProject);
+
             registerDependenciesForJavaProject(javaProject);
         }
+
         if (!isPartOfTheJRE(root)) {
-            DependencyInfo dependencyInfo = createDependencyInfoForJar(root);
-            workspaceDependenciesByProject.put(dependencyInfoForProject, dependencyInfo);
+            DependencyInfo dependencyInfo = createJarDependencyInfo(root).orNull();
+            if (dependencyInfo != null) {
+                workspaceDependenciesByProject.put(javaProject, dependencyInfo);
+                addProjectDependencyInfoToCache(javaProject);
+            }
         }
     }
 
-    private boolean isJREOfProjectIsKnown(final DependencyInfo dependencyInfoForProject) {
-        for (DependencyInfo dependencyInfo : workspaceDependenciesByProject.get(dependencyInfoForProject)) {
+    private boolean isJREOfProjectKnown(final IJavaProject javaProject) {
+        for (DependencyInfo dependencyInfo : workspaceDependenciesByProject.get(javaProject)) {
             if (dependencyInfo.getType() == DependencyType.JRE) {
                 return true;
             }
@@ -182,39 +204,42 @@ public class EclipseDependencyListener implements IDependencyListener {
     }
 
     private boolean isPartOfTheJRE(final IPackageFragmentRoot pfr) {
-        Optional<IJavaProject> optionalJavaProject = getJavaProjectForPackageFragmentRoot(pfr);
-        if (optionalJavaProject.isPresent()) {
-            if (jrePackageFragmentRoots.containsEntry(createDependencyInfoForProject(optionalJavaProject.get()), pfr)) {
-                return true;
-            }
+        IJavaProject javaProject = getJavaProjectForPackageFragmentRoot(pfr).orNull();
+        if (javaProject == null) {
+            return false;
         }
-        return false;
+
+        if (!jrePackageFragmentRoots.containsEntry(javaProject, pfr)) {
+            return false;
+        }
+
+        return true;
     }
 
     private void deregisterDependencyForJAR(final JarPackageFragmentRoot pfr) {
-        Optional<IJavaProject> optionalJavaProject = getJavaProjectForPackageFragmentRoot(pfr);
-        if (!optionalJavaProject.isPresent()) {
+        IJavaProject javaProject = getJavaProjectForPackageFragmentRoot(pfr).orNull();
+        if (javaProject == null) {
             return;
         }
-        IJavaProject javaProject = optionalJavaProject.get();
+
         if (isPartOfTheJRE(pfr)) {
             deregisterJREDependenciesForProject(javaProject);
         } else {
-            DependencyInfo dependencyInfo = createDependencyInfoForJar(pfr);
-            DependencyInfo projectDependencyInfo = getDependencyInfoForProject(javaProject);
-            workspaceDependenciesByProject.remove(projectDependencyInfo, dependencyInfo);
-            if (!workspaceDependenciesByProject.containsKey(projectDependencyInfo)) {
-                jrePackageFragmentRoots.removeAll(projectDependencyInfo);
+            DependencyInfo jarDependencyInfo = createJarDependencyInfo(pfr).orNull();
+            if (jarDependencyInfo != null) {
+                workspaceDependenciesByProject.remove(javaProject, jarDependencyInfo);
+            }
+
+            if (!workspaceDependenciesByProject.containsKey(javaProject)) {
+                jrePackageFragmentRoots.removeAll(javaProject);
             }
         }
     }
 
     private void deregisterJREDependenciesForProject(final IJavaProject javaProject) {
-        DependencyInfo projectDependencyInfo = getDependencyInfoForProject(javaProject);
-
-        for (DependencyInfo dependencyInfo : workspaceDependenciesByProject.get(projectDependencyInfo)) {
+        for (DependencyInfo dependencyInfo : workspaceDependenciesByProject.get(javaProject)) {
             if (dependencyInfo.getType() == DependencyType.JRE) {
-                workspaceDependenciesByProject.remove(projectDependencyInfo, dependencyInfo);
+                workspaceDependenciesByProject.remove(javaProject, dependencyInfo);
                 return;
             }
         }
@@ -228,8 +253,8 @@ public class EclipseDependencyListener implements IDependencyListener {
     @Override
     public ImmutableSet<DependencyInfo> getDependencies() {
         ImmutableSet.Builder<DependencyInfo> res = ImmutableSet.builder();
-        for (DependencyInfo javaProjects : workspaceDependenciesByProject.keySet()) {
-            Set<DependencyInfo> dependenciesForProject = workspaceDependenciesByProject.get(javaProjects);
+        for (IJavaProject javaProject : workspaceDependenciesByProject.keySet()) {
+            Set<DependencyInfo> dependenciesForProject = workspaceDependenciesByProject.get(javaProject);
             res.addAll(dependenciesForProject);
         }
         return res.build();
@@ -237,24 +262,37 @@ public class EclipseDependencyListener implements IDependencyListener {
 
     @Override
     public ImmutableSet<DependencyInfo> getDependenciesForProject(final DependencyInfo project) {
-        Set<DependencyInfo> infos = workspaceDependenciesByProject.get(project);
-        return ImmutableSet.copyOf(infos);
+        synchronized (projectDependencyInfos) {
+            IJavaProject javaProject = projectDependencyInfos.inverse().get(project);
+
+            return ImmutableSet.copyOf(workspaceDependenciesByProject.get(javaProject));
+        }
     }
 
-    private DependencyInfo getDependencyInfoForProject(final IJavaProject javaProject) {
+    private void addProjectDependencyInfoToCache(final IJavaProject javaProject) {
         synchronized (projectDependencyInfos) {
             DependencyInfo dependencyInfo = projectDependencyInfos.get(javaProject);
-            if (dependencyInfo == null) {
-                dependencyInfo = createDependencyInfoForProject(javaProject);
-                projectDependencyInfos.put(javaProject, dependencyInfo);
+            if (dependencyInfo != null) {
+                return;
             }
-            return dependencyInfo;
+
+            dependencyInfo = createProjectDependencyInfo(javaProject).orNull();
+            if (dependencyInfo == null) {
+                return;
+            }
+
+            projectDependencyInfos.put(javaProject, dependencyInfo);
+        }
+    }
+
+    private void removeProjectDependencyInfoFromCache(final IJavaProject javaProject) {
+        synchronized (projectDependencyInfos) {
+            projectDependencyInfos.remove(javaProject);
         }
     }
 
     @Override
     public ImmutableSet<DependencyInfo> getProjects() {
-        Set<DependencyInfo> infos = workspaceDependenciesByProject.keySet();
-        return ImmutableSet.copyOf(infos);
+        return ImmutableSet.copyOf(projectDependencyInfos.inverse().keySet());
     }
 }
