@@ -137,18 +137,23 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
         if (root == null) {
             return absent();
         }
-        if (!root.isArchive()) {
-            return extractDependencyInfo(root.getJavaProject());
+
+        IJavaProject javaProject = root.getJavaProject();
+        if (javaProject == null) {
+            return absent();
         }
+
+        if (!root.isArchive()) {
+            return extractDependencyInfo(javaProject);
+        }
+
         File location = JdtUtils.getLocation(root).orNull();
         if (location == null) {
             return absent();
         }
 
-        IJavaProject javaProject = root.getJavaProject();
-
         if (isPartOfJRE(root, javaProject)) {
-            return DependencyInfos.createDependencyInfoForJre(javaProject);
+            return DependencyInfos.createJreDependencyInfo(javaProject);
         } else {
             DependencyInfo request = new DependencyInfo(location, JAR);
             return of(request);
