@@ -12,13 +12,13 @@ package org.eclipse.recommenders.internal.snipmatch.rcp.completion;
 
 import static org.eclipse.jdt.ui.text.IJavaPartitions.*;
 
+import java.util.Collections;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -51,8 +51,13 @@ public class JavaContentAssistProcessor extends AbstractContentAssistProcessor<J
 
     @Override
     protected Set<DependencyInfo> calculateAvailableDependencies(JavaContentAssistInvocationContext context) {
-        IJavaProject project = context.getProject();
-        return dependencyListener.getDependenciesForProject(DependencyInfos.createDependencyInfoForProject(project));
+        DependencyInfo projectDependencyInfo = DependencyInfos.createProjectDependencyInfo(context.getProject())
+                .orNull();
+        if (projectDependencyInfo == null) {
+            return Collections.emptySet();
+        }
+
+        return dependencyListener.getDependenciesForProject(projectDependencyInfo);
     }
 
     @Override
