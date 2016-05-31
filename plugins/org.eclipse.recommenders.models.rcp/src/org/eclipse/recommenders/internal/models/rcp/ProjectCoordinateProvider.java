@@ -148,7 +148,7 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
         IJavaProject javaProject = root.getJavaProject();
 
         if (isPartOfJRE(root, javaProject)) {
-            return DependencyInfos.createDependencyInfoForJre(javaProject);
+            return DependencyInfos.createJreDependencyInfo(javaProject);
         } else {
             DependencyInfo request = new DependencyInfo(location, JAR);
             return of(request);

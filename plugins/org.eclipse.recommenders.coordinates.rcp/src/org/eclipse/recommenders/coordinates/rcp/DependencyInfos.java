@@ -19,7 +19,9 @@ import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 import java.io.File;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -39,7 +41,7 @@ public final class DependencyInfos {
         // Not meant to be instantiated
     }
 
-    public static Optional<DependencyInfo> createDependencyInfoForJre(IJavaProject javaProject) {
+    public static Optional<DependencyInfo> createJreDependencyInfo(IJavaProject javaProject) {
         Optional<String> executionEnvironmentId = getExecutionEnvironmentId(javaProject);
 
         try {
@@ -71,13 +73,28 @@ public final class DependencyInfos {
         }
     }
 
-    public static DependencyInfo createDependencyInfoForJar(IPackageFragmentRoot pfr) {
+    public static DependencyInfo createJarDependencyInfo(IPackageFragmentRoot pfr) {
         File file = ensureIsNotNull(getLocation(pfr).orNull(), "Could not determine absolute location of %s.", pfr); //$NON-NLS-1$
         return new DependencyInfo(file, DependencyType.JAR);
     }
 
-    public static DependencyInfo createDependencyInfoForProject(final IJavaProject project) {
-        File file = project.getProject().getLocation().toFile();
-        return new DependencyInfo(file, DependencyType.PROJECT, ImmutableMap.of(PROJECT_NAME, project.getElementName()));
+    public static Optional<DependencyInfo> createProjectDependencyInfo(final IJavaProject javaProject) {
+        if (javaProject == null) {
+            return Optional.absent();
+        }
+
+        IProject project = javaProject.getProject();
+        if (project == null) {
+            return Optional.absent();
+        }
+
+        IPath path = project.getLocation();
+        if (path == null) {
+            return Optional.absent();
+        }
+
+        File file = path.toFile();
+        return of(new DependencyInfo(file, DependencyType.PROJECT,
+                ImmutableMap.of(PROJECT_NAME, javaProject.getElementName())));
     }
 }
