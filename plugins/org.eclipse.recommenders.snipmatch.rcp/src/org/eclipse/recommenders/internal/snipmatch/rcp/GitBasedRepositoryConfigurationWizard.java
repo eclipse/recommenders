@@ -121,6 +121,8 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
 
     class GitBasedRepositoryConfigurationWizardPage extends WizardPage {
 
+        private final String initialFetchUri;
+
         private Text txtName;
         private Text txtFetchUri;
         private Text txtPushUri;
@@ -131,6 +133,8 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
             super(pageName);
             setTitle(Messages.WIZARD_GIT_REPOSITORY_TITLE);
             setDescription(Messages.WIZARD_GIT_REPOSITORY_ADD_DESCRIPTION);
+
+            initialFetchUri = configuration != null ? configuration.getUrl() : null;
         }
 
         @Override
@@ -240,7 +244,7 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
                 public void widgetSelected(SelectionEvent e) {
                     if (cmbPushBranchRepository.getText()
                             .equals(Messages.WIZARD_GIT_REPOSITORY_OPTION_OTHER_PUSH_BRANCH_PREFIX)) {
-                        txtPushBranchPrefix.setText("");
+                        txtPushBranchPrefix.setText(""); //$NON-NLS-1$
                         txtPushBranchPrefix.setEnabled(true);
                     } else {
                         txtPushBranchPrefix
@@ -281,7 +285,7 @@ public class GitBasedRepositoryConfigurationWizard extends Wizard implements ISn
             } else if (!fetchUriValidation.isOK()) {
                 setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_FETCH_URI,
                         fetchUriValidation.getMessage()));
-            } else if (isUriAlreadyAdded(txtFetchUri.getText())) {
+            } else if (initialFetchUri.equals(txtFetchUri.getText()) && isUriAlreadyAdded(txtFetchUri.getText())) {
                 setErrorMessage(Messages.WIZARD_GIT_REPOSITORY_FETCH_URI_ALREADY_ADDED);
             } else if (!pushUriValidation.isOK()) {
                 setErrorMessage(MessageFormat.format(Messages.WIZARD_GIT_REPOSITORY_ERROR_INVALID_PUSH_URI,
