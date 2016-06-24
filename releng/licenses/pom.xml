@@ -5,7 +5,11 @@
 	<parent>
 		<groupId>org.eclipse.recommenders</groupId>
 		<artifactId>releng</artifactId>
+<<<<<<< HEAD   (790580 [releng] Merge maintenance (2.4.0) into master (2.5.0))
 		<version>2.5.0-SNAPSHOT</version>
+=======
+		<version>2.4.1-SNAPSHOT</version>
+>>>>>>> BRANCH (10a023 [releng] 2.4.1-SNAPSHOT)
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 

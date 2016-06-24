@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.snipmatch.rcp;singleton:=true
+<<<<<<< HEAD   (790580 [releng] Merge maintenance (2.4.0) into master (2.5.0))
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-Version: 2.4.1.qualifier
+>>>>>>> BRANCH (10a023 [releng] 2.4.1-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -26,6 +30,7 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.jface.databinding,
  org.eclipse.jface.text,
  org.eclipse.jgit,
+<<<<<<< HEAD   (790580 [releng] Merge maintenance (2.4.0) into master (2.5.0))
  org.eclipse.recommenders.coordinates;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.coordinates.rcp;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.injection;bundle-version="[2.5.0,2.5.1)",
@@ -35,6 +40,17 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.recommenders.snipmatch;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.utils;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.utils.rcp;bundle-version="[2.5.0,2.5.1)",
+=======
+ org.eclipse.recommenders.coordinates;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.coordinates.rcp;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.injection;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.jdt;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.models.rcp;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.rcp;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.snipmatch;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.utils;bundle-version="[2.4.1,2.4.2]",
+ org.eclipse.recommenders.utils.rcp;bundle-version="[2.4.1,2.4.2]",
+>>>>>>> BRANCH (10a023 [releng] 2.4.1-SNAPSHOT)
  org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.forms,

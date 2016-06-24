@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.news.rcp;singleton:=true
+<<<<<<< HEAD   (790580 [releng] Merge maintenance (2.4.0) into master (2.5.0))
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-Version: 2.4.1.qualifier
+>>>>>>> BRANCH (10a023 [releng] 2.4.1-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-ActivationPolicy: lazy
@@ -17,7 +21,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.eclipse.mylyn.commons.notifications.core,
  org.eclipse.mylyn.commons.notifications.ui,
+<<<<<<< HEAD   (790580 [releng] Merge maintenance (2.4.0) into master (2.5.0))
  org.eclipse.recommenders.news.api;bundle-version="[2.5.0,2.5.1)",
+=======
+ org.eclipse.recommenders.news.api;bundle-version="[2.4.1,2.4.2]",
+>>>>>>> BRANCH (10a023 [releng] 2.4.1-SNAPSHOT)
  org.eclipse.swt,
  org.eclipse.ui
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
