@@ -88,7 +88,7 @@ public class SubwordsSessionProcessor extends SessionProcessor {
     private static final int JAVADOC_TYPE_REF_HIGHLIGHT_ADJUSTMENT = "{@link ".length(); //$NON-NLS-1$
 
     // Negative value ensures subsequence matches have a lower relevance than standard JDT or template proposals
-    private static final int SUBWORDS_RANGE_START = -9000;
+    public static final int SUBWORDS_RANGE_START = -9000;
 
     private static final int[] EMPTY_SEQUENCE = new int[0];
 
@@ -464,7 +464,7 @@ public class SubwordsSessionProcessor extends SessionProcessor {
                     proposal.setTag(SUBWORDS_SCORE, null);
                     proposal.setTag(IS_EXACT_MATCH, true);
                     proposal.setTag(IS_CASE_INSENSITIVE_PREFIX_MATCH, true);
-                } else if (StringUtils.startsWithIgnoreCase(prefix, matchingArea)) {
+                } else if (StringUtils.startsWithIgnoreCase(matchingArea, prefix)) {
                     // Don't adjust score
                     proposal.setTag(SUBWORDS_SCORE, null);
                     proposal.setTag(IS_CASE_INSENSITIVE_PREFIX_MATCH, true);
