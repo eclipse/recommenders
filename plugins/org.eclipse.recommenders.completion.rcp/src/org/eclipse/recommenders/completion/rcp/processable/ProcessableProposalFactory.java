@@ -16,6 +16,7 @@ import static org.eclipse.recommenders.utils.Logs.log;
 
 import java.lang.reflect.Method;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IField;
@@ -250,6 +251,17 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
                 return res;
             }
 
+            // Some plug-ins are known to add their own proposals to JDT's Java editor.
+            // While we cannot offer recommendations or subword matching, this is likely to be fine and we should not
+            // complain about such proposals.
+            //
+            // See <https://bugs.eclipse.org/bugs/show_bug.cgi?id=497180>.
+            String uiProposalPackage = uiProposal.getClass().getPackage().getName();
+            if ("org.eclipse.objectteams".equals(uiProposalPackage)
+                    || StringUtils.startsWith(uiProposalPackage, "org.eclipse.objectteams.")) {
+                return uiProposal;
+            }
+
             // log error and return the fallback proposal
             log(ERROR_UNEXPECTED_PROPOSAL_KIND, c, uiProposal.getDisplayString());
             return uiProposal;
@@ -305,7 +317,7 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
     @Override
     public IProcessableProposal newAnonymousTypeCompletionProposal(CompletionProposal coreProposal,
             AnonymousTypeCompletionProposal uiProposal, JavaContentAssistInvocationContext context)
-                    throws JavaModelException {
+            throws JavaModelException {
         return postConstruct(new ProcessableAnonymousTypeCompletionProposal(coreProposal, uiProposal, context),
                 uiProposal);
     }
