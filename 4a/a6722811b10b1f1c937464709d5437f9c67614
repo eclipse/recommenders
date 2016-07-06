@@ -1,0 +1,8 @@
+Code-Review+1: Simon Laffoy <simon.laffoy@codetrails.com>
+Verified+1: Hudson CI
+Code-Review+2: Johannes Dorn <johannes.dorn@codetrails.com>
+Submitted-by: Andreas Sewe <andreas.sewe@codetrails.com>
+Submitted-at: Wed, 06 Jul 2016 04:51:29 -0400
+Reviewed-on: https://git.eclipse.org/r/76428
+Project: recommenders/org.eclipse.recommenders
+Branch: refs/heads/maintenance
