@@ -75,8 +75,11 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<!-- Single jacoco.exec referenced from both plugins/* and tests/*. -->
 		<sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
+<<<<<<< HEAD   (730eab [releng] Fix build failure, due to wrong version in uitests)
 		<!-- On maintenance branch this must be "maintenance-". On master branch, this must be empty -->
 		<updateSitePrefix></updateSitePrefix>
+=======
+>>>>>>> BRANCH (822ced [releng] Don't define updateSitePrefix in pom.xml)
 	</properties>
 
 	<pluginRepositories>
