@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (bf55a8 [releng] Merge maintenance (2.4.2) into master (2.5.0))
       version="2.5.0.qualifier"
+=======
+      version="2.4.3.qualifier"
+>>>>>>> BRANCH (d0af82 [releng] 2.4.3-SNAPSHOT)
       provider-name="%provider-name"
       plugin="org.eclipse.recommenders.rcp"
       license-feature="org.eclipse.license"

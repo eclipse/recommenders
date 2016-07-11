@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.constructors.tests;singleton:=true
+<<<<<<< HEAD   (bf55a8 [releng] Merge maintenance (2.4.2) into master (2.5.0))
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-Version: 2.4.3.qualifier
+>>>>>>> BRANCH (d0af82 [releng] 2.4.3-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

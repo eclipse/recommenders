@@ -1,12 +1,21 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.apidocs
+<<<<<<< HEAD   (bf55a8 [releng] Merge maintenance (2.4.2) into master (2.5.0))
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-Version: 2.4.3.qualifier
+>>>>>>> BRANCH (d0af82 [releng] 2.4.3-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+<<<<<<< HEAD   (bf55a8 [releng] Merge maintenance (2.4.2) into master (2.5.0))
 Require-Bundle: org.eclipse.recommenders.models;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.utils;bundle-version="[2.5.0,2.5.1)"
+=======
+Require-Bundle: org.eclipse.recommenders.models;bundle-version="[2.4.3,2.4.4]",
+ org.eclipse.recommenders.utils;bundle-version="[2.4.3,2.4.4]"
+>>>>>>> BRANCH (d0af82 [releng] 2.4.3-SNAPSHOT)
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  com.google.common.base;version="[15.0.0,16.0.0)",
  org.apache.commons.lang3.builder;version="[3.0.0,4.0.0)",
