@@ -232,6 +232,12 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
 
     @Test
     public void test() throws Exception {
+        @SuppressWarnings("unused")
+        List<IJavaCompletionProposal> warmupProposals = generateProposals(code, preferences);
+
+        @SuppressWarnings("unused")
+        List<IJavaCompletionProposal> warmupProposals2 = generateProposals(code, preferences);
+
         List<IJavaCompletionProposal> actualProposals = generateProposals(code, preferences);
 
         int lastRelevance = Integer.MAX_VALUE;
