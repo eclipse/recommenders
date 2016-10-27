@@ -116,7 +116,7 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
 
         scenarios.add(scenario("Constructors in initialization expression",
                 method("InputStream in = new Ziut$"),
-                COMPREHENSIVE,
+                PREFIX_LENGTH_2,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream(" /* InputStream */,
                 "ZipInputStream(" /* InputStream, Charset */));
@@ -124,21 +124,21 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
         // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=435745
         scenarios.add(scenario("Constructors in standalone expression",
                 method("new Ziut$"),
-                COMPREHENSIVE,
+                PREFIX_LENGTH_2,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream("));
 
         // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=435745
         scenarios.add(scenario("Return types of method declaration",
                 classbody("public Ziut$ method() { }"),
-                COMPREHENSIVE,
+                PREFIX_LENGTH_2,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream"));
 
         // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=435745
         scenarios.add(scenario("Parameter types of method declaration",
                 classbody("public void method(Ziut$) { }"),
-                COMPREHENSIVE,
+                PREFIX_LENGTH_2,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream"));
 
