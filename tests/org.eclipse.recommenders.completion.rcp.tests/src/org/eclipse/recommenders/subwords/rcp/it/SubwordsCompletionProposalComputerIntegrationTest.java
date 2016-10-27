@@ -267,7 +267,7 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
 
     @Before
     public void setUp() throws CoreException {
-        System.setProperty("org.eclipse.jdt.ui.codeAssistTimeout", "30000");
+        System.setProperty("org.eclipse.jdt.ui.codeAssistTimeout", "60000");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
