@@ -238,6 +238,7 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
         for (String expectedProposalPrefix : expectedProposalPrefixes) {
             boolean found = false;
             for (IJavaCompletionProposal actualProposal : actualProposals) {
+                System.err.println(actualProposal);
                 if (!actualProposal.getDisplayString().startsWith(expectedProposalPrefix)) {
                     continue;
                 }
