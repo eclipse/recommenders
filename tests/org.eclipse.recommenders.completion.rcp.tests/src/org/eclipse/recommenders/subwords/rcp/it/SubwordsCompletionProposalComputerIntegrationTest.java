@@ -68,9 +68,9 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
         }
     };
 
-    private static final SubwordsRcpPreferences PREFIX_LENGTH_2 = new SubwordsRcpPreferences() {
+    private static final SubwordsRcpPreferences PREFIX_LENGTH_3 = new SubwordsRcpPreferences() {
         {
-            minPrefixLengthForTypes = 2;
+            minPrefixLengthForTypes = 3;
         }
     };
 
@@ -115,36 +115,36 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
                 "hashCode"));
 
         scenarios.add(scenario("Constructors in initialization expression",
-                method("InputStream in = new Ziut$"),
-                COMPREHENSIVE,
+                method("InputStream in = new Ziput$"),
+                PREFIX_LENGTH_3,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream(" /* InputStream */,
                 "ZipInputStream(" /* InputStream, Charset */));
 
         // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=435745
         scenarios.add(scenario("Constructors in standalone expression",
-                method("new Ziut$"),
-                COMPREHENSIVE,
+                method("new Ziput$"),
+                PREFIX_LENGTH_3,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream("));
 
         // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=435745
         scenarios.add(scenario("Return types of method declaration",
-                classbody("public Ziut$ method() { }"),
-                COMPREHENSIVE,
+                classbody("public Ziput$ method() { }"),
+                PREFIX_LENGTH_3,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream"));
 
         // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=435745
         scenarios.add(scenario("Parameter types of method declaration",
-                classbody("public void method(Ziut$) { }"),
-                COMPREHENSIVE,
+                classbody("public void method(Ziput$) { }"),
+                PREFIX_LENGTH_3,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "ZipInputStream"));
 
         scenarios.add(scenario("Generated getters/setters",
-                classbody("ZipInputStream zipInputStream; ziut$"),
-                COMPREHENSIVE,
+                classbody("ZipInputStream zipInputStream; Ziput$"),
+                PREFIX_LENGTH_3,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_SUBWORDS_MATCH_RELEVANCE,
                 "getZipInputStream()",
                 "setZipInputStream(ZipInputStream)"));
@@ -217,7 +217,7 @@ public class SubwordsCompletionProposalComputerIntegrationTest {
 
         scenarios.add(scenario("Exact match of anonymous inner type",
                 classbody("Maps", "public void method() { new Map$ }"),
-                PREFIX_LENGTH_2,
+                PREFIX_LENGTH_3,
                 MIN_SUBWORDS_MATCH_RELEVANCE, MAX_EXACT_MATCH_RELEVANCE,
                 "Map(", "Maps("));
         // @formatter:on
