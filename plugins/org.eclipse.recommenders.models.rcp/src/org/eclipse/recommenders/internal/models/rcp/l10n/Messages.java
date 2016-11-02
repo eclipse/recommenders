@@ -16,6 +16,11 @@ public final class Messages extends NLS {
 
     private static final String BUNDLE_NAME = "org.eclipse.recommenders.internal.models.rcp.l10n.messages"; //$NON-NLS-1$
 
+    public static String PREFPAGE_BUTTON_EDIT;
+    public static String PREFPAGE_BUTTON_NEW;
+    public static String PREFPAGE_BUTTON_REMOVE;
+    public static String PREFPAGE_BUTTON_UP;
+    public static String PREFPAGE_BUTTON_DOWN;
     public static String PREFPAGE_TITLE_MODEL_REPOSITORIES;
 
     public static String PREFPAGE_DESCRIPTION_MODEL_REPOSITORIES;
@@ -75,6 +80,8 @@ public final class Messages extends NLS {
     public static String LOG_ERROR_CREATE_EXECUTABLE_EXTENSION_FAILED;
     public static String LOG_ERROR_FAILED_TO_ACCESS_MODEL_COORDINATES_CACHE;
     public static String LOG_ERROR_FAILED_TO_DELETE_MODEL_CACHE;
+    public static String LOG_ERROR_FAILED_TO_LOAD_SECURE_PREFERENCES;
+    public static String LOG_ERROR_FAILED_TO_STORE_SECURE_PREFERENCES;
     public static String LOG_ERROR_FAILED_TO_OPEN_ECLIPSE_MODEL_REPOSITORY_FOLLOWING_MODEL_DELETION;
     public static String LOG_ERROR_FAILED_TO_STORE_REMOTE_REPOSITORY_PREFERENCES;
     public static String LOG_ERROR_FAILED_TO_GET_CLASSPATH_ENTRY;
