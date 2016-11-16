@@ -2,7 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.rcp.tests
 Fragment-Host: org.eclipse.recommenders.rcp
+<<<<<<< HEAD   (489987 [releng] Merge maintenance (2.4.4) into master (2.5.0))
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-Version: 2.4.5.qualifier
+>>>>>>> BRANCH (89f2b9 [releng] 2.4.5-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-ActivationPolicy: lazy
