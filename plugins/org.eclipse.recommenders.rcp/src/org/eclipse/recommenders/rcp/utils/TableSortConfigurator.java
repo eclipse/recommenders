@@ -82,7 +82,7 @@ class TableComparator extends ViewerComparator {
     private int direction = SWT.UP;
     private TableColumn tableColumn = null;
 
-    public TableComparator(final TableViewer tableViewer, final IAction refreshUiAction,
+    TableComparator(final TableViewer tableViewer, final IAction refreshUiAction,
             final ImmutableMap<TableColumn, Comparator<Object>> comparators) {
         this.tableViewer = tableViewer;
         this.refreshUiAction = refreshUiAction;
@@ -147,7 +147,7 @@ class SelectionListener extends SelectionAdapter {
     private final TableColumn tableColumn;
     private final TableComparator comparator;
 
-    public SelectionListener(final TableColumn tableColumn, final TableComparator comparator) {
+    SelectionListener(final TableColumn tableColumn, final TableComparator comparator) {
         this.tableColumn = tableColumn;
         this.comparator = comparator;
     }

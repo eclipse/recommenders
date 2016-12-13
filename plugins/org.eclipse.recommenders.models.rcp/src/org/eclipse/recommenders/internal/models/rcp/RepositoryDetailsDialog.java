@@ -191,7 +191,7 @@ public class RepositoryDetailsDialog extends TitleAreaDialog {
         private final Text usernameField;
         private final Text passwordField;
 
-        public ServerRepositoryUrlListener(Text usernameField, Text passwordField) {
+        ServerRepositoryUrlListener(Text usernameField, Text passwordField) {
             this.usernameField = usernameField;
             this.passwordField = passwordField;
         }

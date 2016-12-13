@@ -315,7 +315,7 @@ public class ProjectCoordinatesView extends ViewPart {
         private String formerValue;
         private final ComboBoxViewerCellEditor editor;
 
-        public ProjectCoordinateEditing(TableViewer viewer) {
+        ProjectCoordinateEditing(TableViewer viewer) {
             super(viewer);
             editor = new ComboBoxViewerCellEditor(viewer.getTable());
             editor.setLabelProvider(new LabelProvider());
@@ -395,7 +395,7 @@ public class ProjectCoordinatesView extends ViewPart {
         private ListMultimap<DependencyInfo, Optional<ProjectCoordinate>> data;
         private List<IProjectCoordinateAdvisor> strategies = Lists.newArrayList();
 
-        public ContentProvider() {
+        ContentProvider() {
             Map<DependencyInfo, Collection<Optional<ProjectCoordinate>>> map = Maps.newHashMap();
             data = Multimaps.newListMultimap(map, new Supplier<List<Optional<ProjectCoordinate>>>() {
                 @Override
@@ -414,7 +414,7 @@ public class ProjectCoordinatesView extends ViewPart {
 
             private final Set<DependencyInfo> dependencyInfos;
 
-            public ResolvingDependenciesJob(String name, final Set<DependencyInfo> dependencyInfos) {
+            ResolvingDependenciesJob(String name, final Set<DependencyInfo> dependencyInfos) {
                 super(name);
                 this.dependencyInfos = dependencyInfos;
             }
@@ -472,7 +472,7 @@ public class ProjectCoordinatesView extends ViewPart {
 
         private final ViewerFilter filter;
 
-        public TableFilterAction(String text, int style, ViewerFilter filter) {
+        TableFilterAction(String text, int style, ViewerFilter filter) {
             super(text, style);
             this.filter = filter;
         }

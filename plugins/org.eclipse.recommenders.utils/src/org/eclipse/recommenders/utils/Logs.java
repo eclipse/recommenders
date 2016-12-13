@@ -229,7 +229,7 @@ public final class Logs {
 
         private String symbolicName;
 
-        public FakeBundle(String fakeBundleId) {
+        FakeBundle(String fakeBundleId) {
             this.symbolicName = fakeBundleId;
 
         }

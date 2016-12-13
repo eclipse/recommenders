@@ -60,7 +60,7 @@ public final class Versions {
 
         private final Version referencePoint;
 
-        public MajorDistance(Version referencePoint) {
+        MajorDistance(Version referencePoint) {
             this.referencePoint = referencePoint;
         }
 
@@ -78,7 +78,7 @@ public final class Versions {
 
         private final Version referencePoint;
 
-        public MinorDistance(Version referencePoint) {
+        MinorDistance(Version referencePoint) {
             this.referencePoint = referencePoint;
         }
 
@@ -96,7 +96,7 @@ public final class Versions {
 
         private final Version referencePoint;
 
-        public PatchDistance(Version referencePoint) {
+        PatchDistance(Version referencePoint) {
             this.referencePoint = referencePoint;
         }
 

@@ -407,7 +407,7 @@ public class ModelRepositoryTest {
 
         private final String contents;
 
-        public SucessfulDownload(String contents) {
+        SucessfulDownload(String contents) {
             this.contents = contents;
         }
 
@@ -429,7 +429,7 @@ public class ModelRepositoryTest {
         private CountDownLatch startDownload;
         private CountDownLatch finishDownload;
 
-        public LongRunningDownload(String contents, CountDownLatch startDownload, CountDownLatch finishDownload) {
+        LongRunningDownload(String contents, CountDownLatch startDownload, CountDownLatch finishDownload) {
             super(contents);
             this.startDownload = startDownload;
             this.finishDownload = finishDownload;

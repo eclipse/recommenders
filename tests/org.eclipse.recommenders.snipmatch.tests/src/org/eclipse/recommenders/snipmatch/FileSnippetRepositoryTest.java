@@ -664,7 +664,7 @@ public class FileSnippetRepositoryTest {
 
         private final UUID uuid;
 
-        public UuidPredicate(UUID uuid) {
+        UuidPredicate(UUID uuid) {
             this.uuid = uuid;
         }
 

@@ -131,7 +131,7 @@ public final class Proposals {
         final ImageDescriptor overlay;
         final int corner;
 
-        public CacheKey(Image image, ImageDescriptor overlay, int corner) {
+        CacheKey(Image image, ImageDescriptor overlay, int corner) {
             super();
             this.image = image;
             this.overlay = overlay;

@@ -21,7 +21,7 @@ public class JavaModelEvents {
 
         public final ICompilationUnit compilationUnit;
 
-        public CompilationUnitDeltaEvent(final ICompilationUnit cu) {
+        CompilationUnitDeltaEvent(final ICompilationUnit cu) {
             this.compilationUnit = cu;
         }
 

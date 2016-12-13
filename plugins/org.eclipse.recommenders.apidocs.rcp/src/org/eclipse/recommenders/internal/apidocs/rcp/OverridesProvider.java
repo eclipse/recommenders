@@ -78,9 +78,8 @@ public final class OverridesProvider extends ApidocProvider {
     private final OverridePatternsModelProvider pStore;
 
     @Inject
-    public OverridesProvider(IProjectCoordinateProvider pcProvider, JavaElementResolver resolver,
-            EventBus workspaceBus, IModelRepository repository, IModelIndex index,
-            Map<String, IInputStreamTransformer> transformers) {
+    public OverridesProvider(IProjectCoordinateProvider pcProvider, JavaElementResolver resolver, EventBus workspaceBus,
+            IModelRepository repository, IModelIndex index, Map<String, IInputStreamTransformer> transformers) {
         this.pcProvider = pcProvider;
         this.resolver = resolver;
         this.workspaceBus = workspaceBus;
@@ -174,7 +173,7 @@ public final class OverridesProvider extends ApidocProvider {
         private final Composite parent;
         private Composite container;
 
-        public TypeOverrideDirectivesRenderer(final IType type, final ClassOverrideDirectives directive,
+        TypeOverrideDirectivesRenderer(final IType type, final ClassOverrideDirectives directive,
                 final Composite parent) {
             this.type = type;
             this.directive = directive;
@@ -219,7 +218,7 @@ public final class OverridesProvider extends ApidocProvider {
         private double totalNumberOfExamples;
         private List<MethodPattern> patterns;
 
-        public OverridePatternsRenderer(final IType type, final ClassOverridePatterns directive, final Composite parent) {
+        OverridePatternsRenderer(final IType type, final ClassOverridePatterns directive, final Composite parent) {
             this.parent = parent;
             setPatterns(directive);
             computeTotalNumberOfExamples();

@@ -165,7 +165,7 @@ public interface ICallModel {
     /**
      * Specifies how the variable under examination was defined (field, parameter, by method return...).
      */
-    public enum DefinitionKind {
+    enum DefinitionKind {
         /**
          * indicates that the variable was defined by a method return value, e.g, int x = p.getX();
          */

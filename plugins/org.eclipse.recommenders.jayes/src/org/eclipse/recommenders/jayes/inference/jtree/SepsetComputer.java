@@ -78,7 +78,7 @@ public class SepsetComputer {
 
         private final BayesNet net;
 
-        public SepsetComparator(BayesNet net) {
+        SepsetComparator(BayesNet net) {
             this.net = net;
         }
 

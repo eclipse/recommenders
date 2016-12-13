@@ -30,7 +30,7 @@ public final class CanonicalIntArraySet extends CanonicalSet<int[]> {
 
     private static class IntArrayEntry extends Entry<int[]> {
 
-        public IntArrayEntry(int[] entry) {
+        IntArrayEntry(int[] entry) {
             super(entry);
         }
 

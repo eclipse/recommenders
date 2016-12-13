@@ -33,7 +33,7 @@ public final class Names {
         // Not meant to be instantiated
     }
 
-    public static enum PrimitiveType {
+    public enum PrimitiveType {
         BOOLEAN('Z', "boolean"),
         VOID('V', "void"),
         CHAR('C', "char"),
@@ -58,7 +58,7 @@ public final class Names {
 
         private final char vm;
 
-        private PrimitiveType(final char vm, final String src) {
+        PrimitiveType(final char vm, final String src) {
             this.vm = vm;
             this.src = src;
         }

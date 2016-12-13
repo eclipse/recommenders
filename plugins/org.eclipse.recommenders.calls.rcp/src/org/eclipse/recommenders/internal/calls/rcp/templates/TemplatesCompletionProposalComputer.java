@@ -87,7 +87,7 @@ import com.google.common.collect.Sets;
 @SuppressWarnings({ "restriction", "rawtypes", "unchecked" })
 public class TemplatesCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
-    public static enum CompletionMode {
+    public enum CompletionMode {
         TYPE_NAME,
         MEMBER_ACCESS,
         THIS

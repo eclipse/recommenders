@@ -61,9 +61,8 @@ public final class SelfCallsProvider extends ApidocProvider {
     private final MethodSelfCallsDirectivesModelProvider mStore;
 
     @Inject
-    public SelfCallsProvider(JavaElementResolver resolver, IProjectCoordinateProvider pcProvider,
-            EventBus workspaceBus, IModelRepository modelRepo, IModelIndex modelIndex,
-            Map<String, IInputStreamTransformer> transformers) {
+    public SelfCallsProvider(JavaElementResolver resolver, IProjectCoordinateProvider pcProvider, EventBus workspaceBus,
+            IModelRepository modelRepo, IModelIndex modelIndex, Map<String, IInputStreamTransformer> transformers) {
         this.resolver = resolver;
         this.pcProvider = pcProvider;
         this.workspaceBus = workspaceBus;
@@ -135,7 +134,7 @@ public final class SelfCallsProvider extends ApidocProvider {
         private final Composite parent;
         private Composite container;
 
-        public TypeSelfcallDirectivesRenderer(final IType type, final ClassSelfcallDirectives selfcalls,
+        TypeSelfcallDirectivesRenderer(final IType type, final ClassSelfcallDirectives selfcalls,
                 final Composite parent) {
             this.type = type;
             directive = selfcalls;
@@ -177,7 +176,7 @@ public final class SelfCallsProvider extends ApidocProvider {
 
         private Composite container;
 
-        public MethodSelfcallDirectivesRenderer(final IMethod method, final MethodSelfcallDirectives selfcalls,
+        MethodSelfcallDirectivesRenderer(final IMethod method, final MethodSelfcallDirectives selfcalls,
                 final Composite parent) {
             this.method = method;
             directive = selfcalls;

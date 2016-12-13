@@ -257,7 +257,7 @@ public class CompletionsPreferencePage extends FieldEditorPreferencePage impleme
 
             private final boolean enabled;
 
-            public EnabledPredicate(boolean enabled) {
+            EnabledPredicate(boolean enabled) {
                 this.enabled = enabled;
             }
 
@@ -275,7 +275,7 @@ public class CompletionsPreferencePage extends FieldEditorPreferencePage impleme
 
     private final class ContentAssistEnablementEditor extends FieldEditor {
 
-        public ContentAssistEnablementEditor(String recommendersAllCategoryId, String string,
+        ContentAssistEnablementEditor(String recommendersAllCategoryId, String string,
                 Composite fieldEditorParent) {
             super(recommendersAllCategoryId, string, fieldEditorParent);
         }

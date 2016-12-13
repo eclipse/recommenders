@@ -100,7 +100,7 @@ public class JavaElementSelectionEvent {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
-    public static enum JavaElementSelectionLocation {
+    public enum JavaElementSelectionLocation {
 
         WORKSPACE, PROJECT,
 

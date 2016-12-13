@@ -85,11 +85,10 @@ public class ProcessableProposalTagsTest {
         assertEquals("default", sut.getTag(TestTag.DEFAULT_UNSET, "default"));
     }
 
-    private static enum TestTag implements IProposalTag {
+    private enum TestTag implements IProposalTag {
         KEY,
         REMOVE,
         DEFAULT,
         DEFAULT_UNSET
     }
-
 }

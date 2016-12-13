@@ -94,7 +94,7 @@ public final class SharedImages implements IDisposable {
         return "/icons/wizban/" + image; //$NON-NLS-1$
     }
 
-    public static enum Images implements ImageResource {
+    public enum Images implements ImageResource {
         // @formatter:off
         ELCL_ADD_REPOSITORY(elcl16("add_repository.png")), //$NON-NLS-1$
         ELCL_ADD_SNIPPET(elcl16("add_snippet.png")), //$NON-NLS-1$
@@ -138,7 +138,7 @@ public final class SharedImages implements IDisposable {
 
         private final String name;
 
-        private Images(String name) {
+        Images(String name) {
             this.name = name;
         }
 

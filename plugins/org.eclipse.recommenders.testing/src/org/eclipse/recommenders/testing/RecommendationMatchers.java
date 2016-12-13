@@ -34,7 +34,7 @@ public final class RecommendationMatchers {
         private final T expectedProposal;
         private final double expectedRelevance;
 
-        public RecommendationMatcher(T expectedProposal, double expectedRelevance) {
+        RecommendationMatcher(T expectedProposal, double expectedRelevance) {
             this.expectedProposal = expectedProposal;
             this.expectedRelevance = expectedRelevance;
         }

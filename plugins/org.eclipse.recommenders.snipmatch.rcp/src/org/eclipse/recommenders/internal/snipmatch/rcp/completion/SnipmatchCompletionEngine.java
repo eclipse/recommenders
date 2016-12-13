@@ -55,7 +55,7 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("restriction")
 public class SnipmatchCompletionEngine<T extends ContentAssistInvocationContext> {
 
-    private static enum AssistantControlState {
+    private enum AssistantControlState {
         KEEP_OPEN,
         ENABLE_HIDE
     }
