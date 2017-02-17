@@ -50,7 +50,7 @@
          id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="15.0.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -79,7 +79,7 @@
          id="org.apache.commons.codec"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.6.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -128,21 +128,21 @@
          id="org.apache.httpcomponents.httpclient"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="4.3.6.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.httpcomponents.httpcore"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="4.3.3.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.lucene.core"
          download-size="0"
          install-size="0"
-         version="3.5.0.v20120725-1805"
+         version="3.5.0.qualifier"
          unpack="false"/>
 
    <plugin
