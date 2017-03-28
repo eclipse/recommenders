@@ -21,11 +21,6 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.aether.feature" version="1.0.0" match="compatible"/>
-      <import feature="org.eclipse.aether.connector.basic.feature" version="1.0.0" match="compatible"/>
-      <import feature="org.eclipse.aether.maven.feature" version="3.1.0" match="compatible"/>
-      <import feature="org.eclipse.aether.transport.file.feature" version="1.0.0" match="compatible"/>
-      <import feature="org.eclipse.aether.transport.http.feature" version="1.0.0" match="compatible"/>
       <import plugin="com.google.inject.multibindings" version="3.0.0" match="compatible"/>
    </requires>
 
