@@ -9,6 +9,7 @@
  */
 package org.eclipse.recommenders.internal.news.rcp.preferences;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -16,6 +17,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.recommenders.internal.news.rcp.Constants;
 import org.eclipse.recommenders.internal.news.rcp.l10n.Messages;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -31,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class NewsPreferencePageUITest {
@@ -55,7 +58,8 @@ public class NewsPreferencePageUITest {
             bot.button("Cancel").click(); //$NON-NLS-1$
         }
         bot.button("Restore Defaults").click(); //$NON-NLS-1$
-        bot.button("OK").click(); //$NON-NLS-1$
+        // With Oxygen, the button's label has changed.
+        firstNonNull(bot.button("OK"), bot.button("Apply and Close")).click(); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Test
