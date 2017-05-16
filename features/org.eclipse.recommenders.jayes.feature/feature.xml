@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.jayes.feature"
       label="%label"
+<<<<<<< HEAD   (0a18dc [releng] Merge maintenance (2.4.8) into master (2.5.0))
       version="2.5.0.qualifier"
+=======
+      version="2.4.9.qualifier"
+>>>>>>> BRANCH (bee9a5 [releng] 2.4.9-SNAPSHOT)
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

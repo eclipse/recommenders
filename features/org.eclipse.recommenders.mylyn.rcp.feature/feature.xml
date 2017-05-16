@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.mylyn.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (0a18dc [releng] Merge maintenance (2.4.8) into master (2.5.0))
       version="2.5.0.qualifier"
+=======
+      version="2.4.9.qualifier"
+>>>>>>> BRANCH (bee9a5 [releng] 2.4.9-SNAPSHOT)
       provider-name="%provider-name"
       plugin="org.eclipse.recommenders.mylyn.rcp"
       license-feature="org.eclipse.license"
@@ -22,7 +26,11 @@
 
    <requires>
       <import feature="org.eclipse.mylyn.java_feature" version="3.8.0"/>
+<<<<<<< HEAD   (0a18dc [releng] Merge maintenance (2.4.8) into master (2.5.0))
       <import feature="org.eclipse.recommenders.rcp.feature" version="2.5.0" match="equivalent"/>
+=======
+      <import feature="org.eclipse.recommenders.rcp.feature" version="2.4.9" match="equivalent"/>
+>>>>>>> BRANCH (bee9a5 [releng] 2.4.9-SNAPSHOT)
    </requires>
 
    <plugin
