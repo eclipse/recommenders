@@ -19,7 +19,9 @@ import static org.eclipse.recommenders.utils.Checks.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -109,7 +111,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -151,7 +152,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
 
     private volatile boolean initializeTableData = true;
 
-    private volatile List<SnippetRepositoryConfiguration> availableRepositories = Lists.newArrayList();
+    private volatile List<SnippetRepositoryConfiguration> availableRepositories = new ArrayList<>();
     private volatile ListMultimap<SnippetRepositoryConfiguration, KnownSnippet> snippetsGroupedByRepoName = LinkedListMultimap
             .create();
     private volatile ListMultimap<SnippetRepositoryConfiguration, KnownSnippet> filteredSnippetsGroupedByRepoName = LinkedListMultimap
@@ -808,7 +809,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
         if (!selectionConsistsOnlyElementsOf(KnownSnippet.class)) {
             return false;
         }
-        Set<String> configIds = Sets.newHashSet();
+        Set<String> configIds = new HashSet<>();
         for (Object element : selection) {
             KnownSnippet snippet = (KnownSnippet) element;
             String configId = snippet.config.getId();
@@ -828,7 +829,7 @@ public class SnippetsView extends ViewPart implements IRcpService {
     }
 
     private <T> List<T> castSelection() {
-        List<T> result = Lists.newArrayList();
+        List<T> result = new ArrayList<>();
         for (Object element : selection) {
             T casted = cast(element);
             result.add(casted);
