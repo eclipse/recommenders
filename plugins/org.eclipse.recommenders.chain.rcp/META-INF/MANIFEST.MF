@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.chain.rcp;singleton:=true
+<<<<<<< HEAD   (113b44 [releng] Merge maintenance (2.4.9) into master (2.5.0))
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-Version: 2.4.10.qualifier
+>>>>>>> BRANCH (938719 [releng] 2.4.10-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Activator: org.eclipse.recommenders.internal.chain.rcp.ChainRcpPlugin
@@ -12,10 +16,17 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.jdt.core;bundle-version="[3.9.0,4.0.0)",
  org.eclipse.jdt.ui;bundle-version="[3.9.0,4.0.0)",
  org.eclipse.jface.text,
+<<<<<<< HEAD   (113b44 [releng] Merge maintenance (2.4.9) into master (2.5.0))
  org.eclipse.recommenders.completion.rcp;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.injection;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.rcp;bundle-version="[2.5.0,2.5.1)",
  org.eclipse.recommenders.utils;bundle-version="[2.5.0,2.5.1)",
+=======
+ org.eclipse.recommenders.completion.rcp;bundle-version="[2.4.10,2.4.11)",
+ org.eclipse.recommenders.injection;bundle-version="[2.4.10,2.4.11)",
+ org.eclipse.recommenders.rcp;bundle-version="[2.4.10,2.4.11)",
+ org.eclipse.recommenders.utils;bundle-version="[2.4.10,2.4.11)",
+>>>>>>> BRANCH (938719 [releng] 2.4.10-SNAPSHOT)
  org.eclipse.ui,
  org.eclipse.ui.editors
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
