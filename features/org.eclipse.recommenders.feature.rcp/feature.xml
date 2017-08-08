@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (4b49dc [oomph] Fix Oomph profile (EclEmma feature ID has changed))
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.recommenders.feature.rcp"
@@ -25,3 +26,5 @@
    </requires>
 
 </feature>
+=======
+>>>>>>> BRANCH (a9eb4d [releng] Create Photon target platform)
