@@ -1,7 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+<<<<<<< HEAD   (b49e65 [releng] Merge maintenance (2.4.10) into master (2.5.0))
 Bundle-SymbolicName: org.eclipse.recommenders.news.rcp.uitests
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-SymbolicName: org.eclipse.recommenders.news.rcp.uitests;singleton:=true
+Bundle-Version: 2.4.10.qualifier
+>>>>>>> BRANCH (db7d9d [news] Limit the number of items shown)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
