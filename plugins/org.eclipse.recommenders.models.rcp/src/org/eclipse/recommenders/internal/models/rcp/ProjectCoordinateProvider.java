@@ -21,6 +21,7 @@ import static org.eclipse.recommenders.utils.Constants.REASON_NOT_IN_CACHE;
 import static org.eclipse.recommenders.utils.Result.*;
 
 import java.io.File;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.recommenders.coordinates.DependencyInfo;
 import org.eclipse.recommenders.coordinates.IProjectCoordinateAdvisorService;
 import org.eclipse.recommenders.coordinates.ProjectCoordinate;
@@ -163,9 +165,25 @@ public class ProjectCoordinateProvider implements IProjectCoordinateProvider, IR
 
     private boolean isPartOfJre(IPackageFragmentRoot root) {
         try {
-            IClasspathEntry entry = root.getRawClasspathEntry();
-            File file = root.getPath().toFile();
-            return jreContainerPath.isPrefixOf(entry.getPath()) && !"ext".equals(file.getParentFile().getName());
+            IPath path = JdtUtils.getLocationPath(root).orNull();
+            if (path == null) {
+                return false;
+            }
+            File file = JdtUtils.getLocation(root).orNull();
+            if (file == null) {
+                return false;
+            }
+            // Copied from PackageFragementRoot.getRawClasspathEntry to avoid Bug 522057
+            JavaProject project = (JavaProject) root.getJavaProject();
+            project.getResolvedClasspath(); // force the reverse rawEntry cache to be populated
+            Map rootPathToRawEntries = project.getPerProjectInfo().rootPathToRawEntries;
+            if (rootPathToRawEntries != null) {
+                IClasspathEntry entry = (IClasspathEntry) rootPathToRawEntries.get(path);
+                return jreContainerPath.isPrefixOf(entry.getPath()) && !"ext".equals(file.getParentFile().getName());
+            } else {
+                Logs.log(LogMessages.ERROR_FAILED_TO_GET_CLASSPATH_ENTRY, root);
+                return false;
+            }
         } catch (JavaModelException e) {
             Logs.log(LogMessages.ERROR_FAILED_TO_GET_CLASSPATH_ENTRY, e, root);
             return false;

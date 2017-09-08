@@ -696,27 +696,47 @@ public final class JdtUtils {
     }
 
     public static Optional<File> getLocation(@Nullable final IPackageFragmentRoot packageRoot) {
+        IPath path = getLocationPath(packageRoot).orNull();
+        if (path == null) {
+            return absent();
+        } else {
+            File file = path.toFile().getAbsoluteFile();
+            if (file.exists()) {
+                return Optional.of(file);
+            } else {
+                return absent();
+            }
+        }
+    }
+
+    public static Optional<IPath> getLocationPath(@Nullable final IPackageFragmentRoot packageRoot) {
         if (packageRoot == null) {
             return absent();
         }
-        File res = null;
         final IResource resource = packageRoot.getResource();
         if (resource != null) {
-            if (resource.getLocation() == null) {
-                res = resource.getRawLocation().toFile().getAbsoluteFile();
+            if (resource.getLocation() != null) {
+                return Optional.of(resource.getLocation());
+            } else if (resource.getRawLocation() != null) {
+                return Optional.of(resource.getRawLocation());
             } else {
-                res = resource.getLocation().toFile().getAbsoluteFile();
+                return absent();
+            }
+        } else {
+            IPath path = packageRoot.getPath();
+            String lastSegment = path.lastSegment();
+            String moduleNameSuffix = '|' + packageRoot.getElementName();
+            // Ordinary PackageFragmentRoot (JAR or directory)
+            if (lastSegment.equals(packageRoot.getElementName())) {
+                return Optional.of(path);
+            // JrtPackageFragmentRoot like "jrt-fs.jar|java.base"
+            } else if (lastSegment.endsWith(moduleNameSuffix)) {
+                return Optional
+                        .of(path.removeLastSegments(1).append(StringUtils.removeEnd(lastSegment, moduleNameSuffix)));
+            } else {
+                return absent();
             }
         }
-        if (packageRoot.isExternal()) {
-            res = packageRoot.getPath().toFile().getAbsoluteFile();
-        }
-
-        // if the file (for whatever reasons) does not exist, skip it.
-        if (res != null && !res.exists()) {
-            res = null;
-        }
-        return Optional.fromNullable(res);
     }
 
     public static boolean isInitializer(final IMethod m) {
