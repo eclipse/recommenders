@@ -44,6 +44,13 @@
 		<module>org.eclipse.recommenders.utils.rcp.tests</module>
 	</modules>
 
+	<properties>
+		<!-- Set by "mac" profile below -->
+		<surefireMac/>
+		<!-- Set by "toolchain-javase-9" profile below -->
+		<surefireToolchainJavaSE9/>
+	</properties>
+
 	<dependencies>
 		<!-- This dependency is only visible to Sonar (not Tycho) and provides annotations not part of the javax.annotation bundle from Orbit. -->
 		<!-- See <http://dev.eclipse.org/mhonarc/lists/cbi-dev/msg01424.html>. -->
@@ -70,7 +77,7 @@
 					<artifactId>tycho-surefire-plugin</artifactId>
 					<configuration>
 						<!-- Use ${tycho.testArgLine} as set by jacoco-maven-plugin. -->
-						<argLine>${tycho.testArgLine} -XX:MaxPermSize=128m</argLine>
+						<argLine>${tycho.testArgLine} -XX:MaxPermSize=128m ${surefireToolchainJavaSE9} ${surefireMac}</argLine>
 						<systemProperties>
 							<org.eclipse.swtbot.screenshots.dir>${project.build.directory}/screenshots</org.eclipse.swtbot.screenshots.dir>
 						</systemProperties>
@@ -141,19 +148,21 @@
 					<family>mac</family>
 				</os>
 			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.eclipse.tycho</groupId>
-							<artifactId>tycho-surefire-plugin</artifactId>
-							<configuration>
-								<argLine>-XstartOnFirstThread ${tycho.testArgLine}</argLine>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
+			<properties>
+				<surefireMac>-XstartOnFirstThread</surefireMac>
+			</properties>
+		</profile>
+		<profile>
+			<id>toolchain-javase-9</id>
+			<activation>
+				<property>
+					<name>toolchain</name>
+					<value>JavaSE-9</value>
+				</property>
+			</activation>
+			<properties>
+				<surefireToolchainJavaSE9>--add-modules=java.se.ee</surefireToolchainJavaSE9>
+			</properties>
 		</profile>
 	</profiles>
 </project>
