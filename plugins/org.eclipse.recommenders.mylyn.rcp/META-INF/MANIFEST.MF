@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.mylyn.rcp;singleton:=true
+<<<<<<< HEAD   (bd58e5 [releng] Merge maintenance (2.4.10) into master (2.5.0))
 Bundle-Version: 2.5.0.qualifier
+=======
+Bundle-Version: 2.4.11.qualifier
+>>>>>>> BRANCH (85fe91 [releng] 2.4.11-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -10,4 +14,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.ui;bundle-version="[3.9.0,4.0.0)",
  org.eclipse.jface.text,
  org.eclipse.mylyn.context.core,
+<<<<<<< HEAD   (bd58e5 [releng] Merge maintenance (2.4.10) into master (2.5.0))
  org.eclipse.recommenders.completion.rcp;bundle-version="[2.5.0,2.5.1)"
+=======
+ org.eclipse.recommenders.completion.rcp;bundle-version="[2.4.11,2.4.12)"
+>>>>>>> BRANCH (85fe91 [releng] 2.4.11-SNAPSHOT)
