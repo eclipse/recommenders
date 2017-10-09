@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.eclipse.recommenders.jayes.rcp.JayesEditor"
+            default="false"
+            extensions="jbif"
+            id="org.eclipse.recommenders.jayes.rcp.editor"
+            name="Jayes Viewer">
+      </editor>
+   </extension>
+
+</plugin>

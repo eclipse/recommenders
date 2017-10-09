@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: org.eclipse.recommenders.jayes.rcp;singleton:=true
+Bundle-Version: 2.5.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.recommenders.jayes,
+ org.eclipse.recommenders.jayes.io,
+ org.eclipse.ui.ide,
+ org.eclipse.core.resources
+Bundle-Vendor: %Bundle-Vendor
