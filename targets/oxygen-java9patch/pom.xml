@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (7d8a36 [jayes] Basic viewer for Jayes Networks)
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -14,3 +15,5 @@
 
 	<name>Target Definition for Eclipse Oxygen (4.7) with Java 9 Support</name>
 </project>
+=======
+>>>>>>> BRANCH (30f7a6 [releng] Switch to Oxygen.1a of Eclipse Platform)
