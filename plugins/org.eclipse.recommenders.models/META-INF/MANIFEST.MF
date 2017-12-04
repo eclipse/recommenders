@@ -1,13 +1,22 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.models
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
 Bundle-Version: 2.6.0.qualifier
+=======
+Bundle-Version: 2.5.1.qualifier
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.apache.lucene.core;bundle-version="[3.5.0,4.0.0)",
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
  org.eclipse.recommenders.coordinates;bundle-version="[2.6.0,2.6.1)",
  org.eclipse.recommenders.utils;bundle-version="[2.6.0,2.6.1)"
+=======
+ org.eclipse.recommenders.coordinates;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.utils;bundle-version="[2.5.1,2.5.2)"
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",
  com.google.common.base;version="[15.0.0,16.0.0)",
  com.google.common.cache;version="[15.0.0,16.0.0)",

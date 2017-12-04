@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.news.rcp;singleton:=true
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
 Bundle-Version: 2.6.0.qualifier
+=======
+Bundle-Version: 2.5.1.qualifier
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -16,7 +20,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.eclipse.mylyn.commons.notifications.core,
  org.eclipse.mylyn.commons.notifications.ui,
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
  org.eclipse.recommenders.news.api;bundle-version="[2.6.0,2.6.1)",
+=======
+ org.eclipse.recommenders.news.api;bundle-version="[2.5.1,2.5.2)",
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
  org.eclipse.swt,
  org.eclipse.ui
 Import-Package: com.google.common.annotations;version="[15.0.0,16.0.0)",

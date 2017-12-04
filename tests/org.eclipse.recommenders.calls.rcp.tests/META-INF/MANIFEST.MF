@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.calls.rcp.tests;singleton:=true
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
 Bundle-Version: 2.6.0.qualifier
+=======
+Bundle-Version: 2.5.1.qualifier
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
