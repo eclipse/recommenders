@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.recommenders.news.rcp.feature"
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
       version="2.6.0.qualifier"
+=======
+      version="2.5.1.qualifier"
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
       label="%label"
       provider-name="%provider-name"
       plugin="org.eclipse.recommenders.news"

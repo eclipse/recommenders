@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.jayes.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
       version="2.6.0.qualifier"
+=======
+      version="2.5.1.qualifier"
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -20,7 +24,11 @@
    </license>
 
    <requires>
+<<<<<<< HEAD   (c30560 [releng] 2.6.0-SNAPSHOT)
       <import feature="org.eclipse.recommenders.jayes.feature" version="2.6.0" match="equivalent"/>
+=======
+      <import feature="org.eclipse.recommenders.jayes.feature" version="2.5.1" match="equivalent"/>
+>>>>>>> BRANCH (ee7984 [releng] 2.5.1-SNAPSHOT)
    </requires>
 
    <plugin
