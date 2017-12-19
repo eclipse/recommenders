@@ -75,6 +75,13 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
     private static Class<JavadocLinkTypeCompletionProposal> javadocLinkTypeCompletionProposalClass;
     private static Class<JavadocInlineTagCompletionProposal> javadocInlineTagCompletionProposalClass;
 
+    // Cannot use class literals like below, as LazyModuleCompletionProposal has only been introduced with Oxygen.1.
+    @SuppressWarnings("unchecked")
+    private static Class<? extends LazyJavaCompletionProposal> lazyModuleCompletionProposals = (Class<? extends LazyJavaCompletionProposal>) Reflections
+            .loadClass(false, ProcessableProposalFactory.class.getClassLoader(),
+                    "org.eclipse.jdt.internal.ui.text.java.LazyModuleCompletionProposal")
+            .orNull();
+
     private static Method proposalInfoMethod = Reflections
             .getDeclaredMethod(true, AbstractJavaCompletionProposal.class, "getProposalInfo").orNull(); //$NON-NLS-1$
 
@@ -245,8 +252,8 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
                         (JavadocInlineTagCompletionProposal) uiProposal, context);
                 setProposalInfo(res, uiProposal);
                 return res;
-            } else if (lazyJavaCompletionProposaClass == c) {
-                IProcessableProposal res = factory.newLazyJavaCompletionProposa(coreProposal,
+            } else if (lazyJavaCompletionProposaClass == c || lazyModuleCompletionProposals == c) {
+                IProcessableProposal res = factory.newLazyJavaCompletionProposal(coreProposal,
                         (LazyJavaCompletionProposal) uiProposal, context);
                 setProposalInfo(res, uiProposal);
                 return res;
@@ -430,7 +437,7 @@ public class ProcessableProposalFactory implements IProcessableProposalFactory {
     }
 
     @Override
-    public IProcessableProposal newLazyJavaCompletionProposa(CompletionProposal coreProposal,
+    public IProcessableProposal newLazyJavaCompletionProposal(CompletionProposal coreProposal,
             LazyJavaCompletionProposal uiProposal, JavaContentAssistInvocationContext context) {
         return postConstruct(new ProcessableLazyJavaCompletionProposal(coreProposal, context), uiProposal);
     }
