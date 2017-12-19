@@ -311,7 +311,9 @@ public class SubwordsSessionProcessor extends SessionProcessor {
             }
             case CompletionProposal.JAVADOC_PARAM_REF:
             case CompletionProposal.JAVADOC_BLOCK_TAG:
-            case CompletionProposal.JAVADOC_INLINE_TAG: {
+            case CompletionProposal.JAVADOC_INLINE_TAG:
+            case CompletionProposal.MODULE_DECLARATION:
+            case CompletionProposal.MODULE_REF: {
                 completionIdentifier = javaProposal.getDisplayString();
                 break;
             }
