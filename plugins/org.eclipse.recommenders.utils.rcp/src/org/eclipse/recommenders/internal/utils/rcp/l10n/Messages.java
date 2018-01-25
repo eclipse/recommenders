@@ -31,6 +31,9 @@ public final class Messages extends NLS {
     public static String LOG_INFO_SUCESSFULLY_OPENED_EXTERNAL_BROWSER;
     public static String LOG_INFO_SUCESSFULLY_OPENED_OS_BROWSER;
 
+    public static String MESSAGE_FORMAT_PROMILLE;
+    public static String MESSAGE_FORMAT_PERCENT;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
