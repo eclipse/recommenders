@@ -62,7 +62,7 @@
 		<recommendersVersion>2.5.1-SNAPSHOT</recommendersVersion>
 		<javaVersion>1.7</javaVersion>
 		<minimumMavenVersion>3.1.1</minimumMavenVersion>
-		<tychoVersion>1.0.0</tychoVersion>
+		<tychoVersion>1.1.0</tychoVersion>
 		<!-- The default simultaneous release used to base the target platform on. (Override with -Dsimrel=...) -->
 		<simrel>oxygen</simrel>
 		<!-- Use HTTP, as it provides the most firewall-friendly access to the Git repository. -->
@@ -81,6 +81,12 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</pluginRepository>
+		<!-- TODO Temporary use of staged Tycho 1.1.0. Remove once Tycho 1.1.0 is made publically available. -->
+		<!-- See https://dev.eclipse.org/mhonarc/lists/cross-project-issues-dev/msg15235.html -->
+		<pluginRepository>
+			<id>tycho-staged</id>
+			<url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1046/</url>
 		</pluginRepository>
 	</pluginRepositories>
 
