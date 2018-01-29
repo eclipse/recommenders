@@ -13,4 +13,20 @@
 	<packaging>eclipse-target-definition</packaging>
 
 	<name>Target Definition for Eclipse Photon (4.8)</name>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>target-platform-validation-plugin</artifactId>
+					<configuration>
+						<!-- Workaround for pre-1.1.0 Tycho versions. -->
+						<!-- See https://dev.eclipse.org/mhonarc/lists/cross-project-issues-dev/msg15235.html -->
+						<executionEnvironment>JavaSE-9</executionEnvironment>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>
