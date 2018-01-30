@@ -20,6 +20,7 @@ import org.mockito.Mockito
 
 import static org.eclipse.recommenders.testing.SmokeTestScenarios.*
 import static org.junit.Assert.*
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions
 
 @SuppressWarnings("unchecked")
 class ChainCompletionScenariosTest {
@@ -29,6 +30,11 @@ class ChainCompletionScenariosTest {
     @Before
     def void before() {
         fixture.clear
+    }
+
+    // Copy of JavaCore.compareJavaVersions, as not available in JDT 3.11 (Eclipse Mars)
+    static def compareJavaVersions(String first, String second) {
+        return Long.compare(CompilerOptions.versionToJdkLevel(first), CompilerOptions.versionToJdkLevel(second));
     }
 
     @Test
@@ -64,7 +70,7 @@ class ChainCompletionScenariosTest {
                 "list subList listIterator",
                 "list subList listIterator"
             )
-        if (SystemUtils::JAVA_SPECIFICATION_VERSION.startsWith("1.8")) {
+        if (compareJavaVersions(SystemUtils::JAVA_SPECIFICATION_VERSION, "1.8") >= 0) {
             wanted.add("list parallelStream iterator")
             wanted.add("list stream iterator")
         }
@@ -455,7 +461,7 @@ class ChainCompletionScenariosTest {
                 "getList subList listIterator",
                 "getList subList listIterator"
             )
-        if (SystemUtils::JAVA_SPECIFICATION_VERSION.startsWith("1.8")) {
+        if (compareJavaVersions(SystemUtils::JAVA_SPECIFICATION_VERSION, "1.8") >= 0) {
             wanted.add("getList parallelStream iterator")
             wanted.add("getList stream iterator")
         }
@@ -633,8 +639,7 @@ class ChainCompletionScenariosTest {
                 BigInteger bigInt = null;
                 final BigInteger[] array = $
             ''')
-        var expected = w(
-            newArrayList(
+        var wanted = newArrayList(
                 "bigInt divideAndRemainder",
                 "bigInt abs divideAndRemainder",
                 "bigInt add divideAndRemainder",
@@ -661,7 +666,39 @@ class ChainCompletionScenariosTest {
                 "bigInt shiftRight divideAndRemainder",
                 "bigInt subtract divideAndRemainder",
                 "bigInt xor divideAndRemainder"
-            ))
+            )
+        if (compareJavaVersions(SystemUtils::JAVA_SPECIFICATION_VERSION, "9") >= 0) {
+            wanted.add("bigInt sqrt divideAndRemainder")
+
+            wanted.add("bigInt sqrtAndRemainder")
+            wanted.add("bigInt abs sqrtAndRemainder")
+            wanted.add("bigInt add sqrtAndRemainder")
+            wanted.add("bigInt and sqrtAndRemainder")
+            wanted.add("bigInt andNot sqrtAndRemainder")
+            wanted.add("bigInt clearBit sqrtAndRemainder")
+            wanted.add("bigInt divide sqrtAndRemainder")
+            wanted.add("bigInt flipBit sqrtAndRemainder")
+            wanted.add("bigInt gcd sqrtAndRemainder")
+            wanted.add("bigInt max sqrtAndRemainder")
+            wanted.add("bigInt min sqrtAndRemainder")
+            wanted.add("bigInt mod sqrtAndRemainder")
+            wanted.add("bigInt modInverse sqrtAndRemainder")
+            wanted.add("bigInt modPow sqrtAndRemainder")
+            wanted.add("bigInt multiply sqrtAndRemainder")
+            wanted.add("bigInt negate sqrtAndRemainder")
+            wanted.add("bigInt nextProbablePrime sqrtAndRemainder")
+            wanted.add("bigInt not sqrtAndRemainder")
+            wanted.add("bigInt or sqrtAndRemainder")
+            wanted.add("bigInt pow sqrtAndRemainder")
+            wanted.add("bigInt remainder sqrtAndRemainder")
+            wanted.add("bigInt setBit sqrtAndRemainder")
+            wanted.add("bigInt shiftLeft sqrtAndRemainder")
+            wanted.add("bigInt shiftRight sqrtAndRemainder")
+            wanted.add("bigInt sqrt sqrtAndRemainder")
+            wanted.add("bigInt subtract sqrtAndRemainder")
+            wanted.add("bigInt xor sqrtAndRemainder")
+        }
+        var expected = w(wanted)
         exercise(code, expected);
     }
 
@@ -962,7 +999,7 @@ class ChainCompletionScenariosTest {
             "unmodifiableSortedSet subSet iterator",
             "unmodifiableSortedSet tailSet iterator"
         )
-        if (SystemUtils::JAVA_SPECIFICATION_VERSION.startsWith("1.8")) {
+        if (compareJavaVersions(SystemUtils::JAVA_SPECIFICATION_VERSION, "1.8") >= 0) {
             wanted.add("EMPTY_LIST parallelStream iterator")
             wanted.add("EMPTY_LIST stream iterator")
             wanted.add("EMPTY_SET parallelStream iterator")
@@ -1108,6 +1145,10 @@ class ChainCompletionScenariosTest {
             wanted.add("unmodifiableSortedSet parallelStream iterator")
             wanted.add("unmodifiableSortedSet stream iterator")
         }
+        if (compareJavaVersions(SystemUtils::JAVA_SPECIFICATION_VERSION, "1.8") >= 0) {
+            wanted.add("emptyEnumeration asIterator")
+            wanted.add("enumeration asIterator")
+        }
 
         // need to def expectations
         var expected = w(wanted)
@@ -1136,7 +1177,7 @@ class ChainCompletionScenariosTest {
                 "l subList listIterator",
                 "l subList listIterator"
             )
-        if (SystemUtils::JAVA_SPECIFICATION_VERSION.startsWith("1.8")) {
+        if (compareJavaVersions(SystemUtils::JAVA_SPECIFICATION_VERSION, "1.8") >= 0) {
             wanted.add("l stream iterator")
             wanted.add("l parallelStream iterator")
         }
