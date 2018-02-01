@@ -12,6 +12,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.core.contexts,
  org.eclipse.e4.core.di,
  org.eclipse.e4.core.di.extensions,
+<<<<<<< HEAD   (9071df [releng] Merge maintenance (2.5.1) into master (2.6.0))
  org.eclipse.recommenders.completion.rcp;bundle-version="[2.6.0,2.6.1)",
  org.eclipse.recommenders.coordinates;bundle-version="[2.6.0,2.6.1)",
  org.eclipse.recommenders.overrides;bundle-version="[2.6.0,2.6.1)",
@@ -20,6 +21,17 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.recommenders.utils;bundle-version="[2.6.0,2.6.1)",
  org.eclipse.recommenders.models;bundle-version="[2.6.0,2.6.1)",
  org.eclipse.recommenders.injection;bundle-version="[2.6.0,2.6.1)",
+=======
+ org.eclipse.recommenders.completion.rcp;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.coordinates;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.overrides;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.models.rcp;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.rcp;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.utils;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.utils.rcp;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.models;bundle-version="[2.5.1,2.5.2)",
+ org.eclipse.recommenders.injection;bundle-version="[2.5.1,2.5.2)",
+>>>>>>> BRANCH (39a2de [tests] Make ChainCompletionScenariosTest compatible with Ja)
  org.eclipse.ui
 Import-Package: com.google.common.base;version="[15.0.0,16.0.0)",
  com.google.common.eventbus;version="[15.0.0,16.0.0)"
