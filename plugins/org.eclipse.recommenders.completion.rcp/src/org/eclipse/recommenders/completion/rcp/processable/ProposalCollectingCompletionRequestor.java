@@ -26,6 +26,12 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
@@ -69,16 +75,43 @@ public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
         ProposalCollectingCompletionRequestor.lastKnownProposalKind = lastKnownProposalKind;
     }
 
+    private static boolean isTestSource(ICompilationUnit cu) {
+        IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) cu
+                .getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+        if (packageFragmentRoot != null) {
+            try {
+                IClasspathEntry classpathEntry = packageFragmentRoot.getResolvedClasspathEntry();
+                if (classpathEntry != null) {
+                    for (IClasspathAttribute attribute : classpathEntry.getExtraAttributes()) {
+                        if ("test".equals(attribute.getName()) && "true".equals(attribute.getValue()))
+                            return true;
+                    }
+                }
+            } catch (JavaModelException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
     private final Map<IJavaCompletionProposal, CompletionProposal> proposals = new IdentityHashMap<>();
 
     private JavaContentAssistInvocationContext jdtuiContext;
     private CompletionProposalCollector collector;
     private InternalCompletionContext compilerContext;
 
-    public ProposalCollectingCompletionRequestor(final JavaContentAssistInvocationContext ctx) {
+    private boolean fIsTestCodeExcluded;
+
+    public ProposalCollectingCompletionRequestor(final JavaContentAssistInvocationContext ctx, ICompilationUnit cu) {
         super(false);
         jdtuiContext = requireNonNull(ctx);
         initalizeCollector();
+
+        fIsTestCodeExcluded = cu != null && !isTestSource(cu);
+    }
+
+    public boolean isTestCodeExcluded() {
+        return fIsTestCodeExcluded;
     }
 
     private void initalizeCollector() {
