@@ -26,6 +26,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.recommenders.internal.completion.rcp.Constants;
 import org.eclipse.recommenders.internal.completion.rcp.l10n.LogMessages;
+import org.eclipse.recommenders.rcp.utils.JdtUtils;
 import org.eclipse.recommenders.utils.Logs;
 import org.eclipse.recommenders.utils.Reflections;
 import org.eclipse.swt.graphics.Point;
@@ -75,10 +77,18 @@ public class ProposalCollectingCompletionRequestor extends CompletionRequestor {
     private CompletionProposalCollector collector;
     private InternalCompletionContext compilerContext;
 
-    public ProposalCollectingCompletionRequestor(final JavaContentAssistInvocationContext ctx) {
+    private boolean fIsTestCodeExcluded;
+
+    public ProposalCollectingCompletionRequestor(final JavaContentAssistInvocationContext ctx, ICompilationUnit cu) {
         super(false);
         jdtuiContext = requireNonNull(ctx);
         initalizeCollector();
+
+        fIsTestCodeExcluded = cu != null && !JdtUtils.isTestSource(cu);
+    }
+
+    public boolean isTestCodeExcluded() {
+        return fIsTestCodeExcluded;
     }
 
     private void initalizeCollector() {
