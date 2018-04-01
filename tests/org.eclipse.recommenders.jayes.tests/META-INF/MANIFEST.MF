@@ -2,7 +2,11 @@ Manifest-Version: 1.0
 Automatic-Module-Name: org.eclipse.recommenders.jayes.tests
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.jayes.tests
+<<<<<<< HEAD   (64cd05 [releng] Merge maintenance (2.5.2) into master (2.6.0))
 Bundle-Version: 2.6.0.qualifier
+=======
+Bundle-Version: 2.5.3.qualifier
+>>>>>>> BRANCH (b071ea [releng] 2.5.3-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Fragment-Host: org.eclipse.recommenders.jayes
