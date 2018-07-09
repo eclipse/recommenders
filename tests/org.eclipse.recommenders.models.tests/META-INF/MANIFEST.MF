@@ -2,7 +2,11 @@ Manifest-Version: 1.0
 Automatic-Module-Name: org.eclipse.recommenders.models.tests
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.models.tests;singleton:=true
+<<<<<<< HEAD   (4a0e90 [releng] Merge maintenance (2.5.3) into master (2.6.0))
 Bundle-Version: 2.6.0.qualifier
+=======
+Bundle-Version: 2.5.4.qualifier
+>>>>>>> BRANCH (af0bc9 [releng] 2.5.4-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

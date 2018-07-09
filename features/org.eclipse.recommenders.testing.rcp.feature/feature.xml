@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.testing.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (4a0e90 [releng] Merge maintenance (2.5.3) into master (2.6.0))
       version="2.6.0.qualifier"
+=======
+      version="2.5.4.qualifier"
+>>>>>>> BRANCH (af0bc9 [releng] 2.5.4-SNAPSHOT)
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -20,7 +24,11 @@
    </license>
 
    <requires>
+<<<<<<< HEAD   (4a0e90 [releng] Merge maintenance (2.5.3) into master (2.6.0))
       <import feature="org.eclipse.recommenders.rcp.feature" version="2.6.0" match="equivalent"/>
+=======
+      <import feature="org.eclipse.recommenders.rcp.feature" version="2.5.4" match="equivalent"/>
+>>>>>>> BRANCH (af0bc9 [releng] 2.5.4-SNAPSHOT)
    </requires>
 
    <plugin
