@@ -10,7 +10,7 @@
  */
 package org.eclipse.recommenders.completion.rcp.processable;
 
-import static com.google.common.base.Objects.firstNonNull;
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Optional.fromNullable;
 
 import org.eclipse.core.runtime.CoreException;
