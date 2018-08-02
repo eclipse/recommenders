@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 public final class AdvisorDescriptors {
 
@@ -53,7 +53,7 @@ public final class AdvisorDescriptors {
 
         final List<AdvisorDescriptor> descriptors = new ArrayList<>(elements.length);
         for (final IConfigurationElement element : elements) {
-            boolean enabled = Boolean.valueOf(Objects.firstNonNull(element.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE),
+            boolean enabled = Boolean.valueOf(MoreObjects.firstNonNull(element.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE),
                     TRUE.toString()));
             descriptors.add(new AdvisorDescriptor(element, enabled));
         }

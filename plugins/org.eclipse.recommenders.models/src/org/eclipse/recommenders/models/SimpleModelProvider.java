@@ -12,7 +12,7 @@ package org.eclipse.recommenders.models;
 
 import static com.google.common.base.Optional.absent;
 import static com.google.common.io.ByteStreams.toByteArray;
-import static com.google.common.io.Files.newInputStreamSupplier;
+import static com.google.common.io.Files.asByteSource;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.eclipse.recommenders.utils.Zips.closeQuietly;
 
@@ -156,7 +156,7 @@ public abstract class SimpleModelProvider<K extends IUniqueName<?>, M> implement
         public ZipFile load(ModelCoordinate key) throws Exception {
             File location = repository.getLocation(key, true).get();
             // read file in memory to speed up access
-            toByteArray(newInputStreamSupplier(location));
+            toByteArray(asByteSource(location).openStream());
             return new ZipFile(location);
         }
     }
