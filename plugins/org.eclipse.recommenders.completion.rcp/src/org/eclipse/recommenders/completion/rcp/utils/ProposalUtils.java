@@ -12,7 +12,7 @@
  */
 package org.eclipse.recommenders.completion.rcp.utils;
 
-import static com.google.common.base.Objects.firstNonNull;
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Optional.absent;
 import static org.eclipse.jdt.core.compiler.CharOperation.NO_CHAR;
 import static org.eclipse.recommenders.utils.LogMessages.LOG_WARNING_FAILED_TO_ACCESS_FIELD_REFLECTIVELY;

@@ -20,7 +20,7 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
@@ -82,6 +82,6 @@ public class DependencyInfo {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).addValue(file).addValue(type).addValue(hints).toString();
+        return MoreObjects.toStringHelper(this).addValue(file).addValue(type).addValue(hints).toString();
     }
 }

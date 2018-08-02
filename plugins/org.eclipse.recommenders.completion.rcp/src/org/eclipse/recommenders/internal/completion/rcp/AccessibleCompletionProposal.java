@@ -16,7 +16,7 @@ import java.util.Map;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionProposal;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 /**
@@ -62,7 +62,7 @@ public class AccessibleCompletionProposal extends InternalCompletionProposal {
     public <T> T getData(String key, T defaultValue) {
         @SuppressWarnings("unchecked")
         T res = (T) data.get(key);
-        return Objects.firstNonNull(res, defaultValue);
+        return MoreObjects.firstNonNull(res, defaultValue);
     }
 
     public <T> T getData(Class<?> key, T defaultValue) {
