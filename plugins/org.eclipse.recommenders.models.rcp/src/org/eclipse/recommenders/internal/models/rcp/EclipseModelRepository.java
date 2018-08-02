@@ -45,7 +45,7 @@ import org.eclipse.recommenders.utils.Pair;
 import org.eclipse.recommenders.utils.Uris;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -248,6 +248,6 @@ public class EclipseModelRepository implements IModelRepository, IRcpService {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).addValue(delegates).toString();
+        return MoreObjects.toStringHelper(this).addValue(delegates).toString();
     }
 }

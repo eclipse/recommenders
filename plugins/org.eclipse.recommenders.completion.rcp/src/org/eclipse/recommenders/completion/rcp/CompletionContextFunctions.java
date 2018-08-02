@@ -10,7 +10,7 @@
  */
 package org.eclipse.recommenders.completion.rcp;
 
-import static com.google.common.base.Objects.firstNonNull;
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.concurrent.TimeUnit.*;
 import static org.apache.commons.lang3.StringUtils.substring;
 import static org.eclipse.jdt.core.compiler.CharOperation.NO_CHAR_CHAR;
@@ -90,7 +90,6 @@ import org.eclipse.recommenders.utils.names.ITypeName;
 import org.eclipse.recommenders.utils.rcp.TimeDelimitedProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
 @SuppressWarnings({ "restriction", "rawtypes" })
@@ -231,7 +230,7 @@ public final class CompletionContextFunctions {
                 signatures = core.getExpectedTypesSignatures();
             }
             Set<ITypeName> res = new HashSet<>();
-            for (char[] signature : Objects.firstNonNull(signatures, NO_CHAR_CHAR)) {
+            for (char[] signature : firstNonNull(signatures, NO_CHAR_CHAR)) {
                 IJavaElement enclosing = context.getEnclosingElement().orNull();
                 ITypeName resolved = resolveType(signature, enclosing).orNull();
                 if (resolved != null) {

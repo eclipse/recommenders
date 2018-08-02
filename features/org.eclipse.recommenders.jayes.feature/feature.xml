@@ -20,7 +20,7 @@
    </license>
 
    <requires>
-      <import plugin="com.google.guava" version="15.0.0" match="compatible"/>
+      <import plugin="com.google.guava" version="18.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin

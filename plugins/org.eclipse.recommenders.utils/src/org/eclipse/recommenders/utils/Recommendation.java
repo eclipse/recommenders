@@ -10,7 +10,7 @@
  */
 package org.eclipse.recommenders.utils;
 
-import static com.google.common.base.Objects.toStringHelper;
+import static com.google.common.base.MoreObjects.toStringHelper;
 import static org.eclipse.recommenders.utils.Checks.*;
 
 import com.google.common.annotations.Beta;
