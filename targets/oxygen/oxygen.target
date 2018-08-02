@@ -77,10 +77,10 @@
 <!-- Recommended Orbit build for Oxygen.3a -->
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180330011457/repository/"/>
 </location>
-<!-- Needed for the code generated with Xtend 2.7.3 -->
+<!-- Needed for the code generated with Xtend 2.14.0 -->
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.xtext.xbase.lib" version="2.7.3.v201411190455"/>
-<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/maintenance/R201411190455/"/>
+<unit id="org.eclipse.xtext.xbase.lib" version="2.14.0.v20180522-1629"/>
+<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.14.0/"/>
 </location>
 <!-- Tests-only dependencies -->
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
