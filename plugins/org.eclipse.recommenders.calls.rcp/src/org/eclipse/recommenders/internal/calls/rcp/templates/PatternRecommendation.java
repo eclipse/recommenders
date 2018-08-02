@@ -70,7 +70,7 @@ public class PatternRecommendation extends Recommendation<ImmutableSet<IMethodNa
 
     @Override
     public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this).add("calls", getProposal()).add("prob", getRelevance()).add("type", type) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        return com.google.common.base.MoreObjects.toStringHelper(this).add("calls", getProposal()).add("prob", getRelevance()).add("type", type) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 .add("name", name).toString(); //$NON-NLS-1$
     }
 }

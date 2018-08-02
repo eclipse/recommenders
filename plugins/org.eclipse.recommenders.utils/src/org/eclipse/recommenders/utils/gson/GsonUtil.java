@@ -47,7 +47,6 @@ import org.eclipse.recommenders.utils.names.VmTypeName;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -183,8 +182,8 @@ public class GsonUtil {
         List<T> res = new LinkedList<>();
         ZipInputStream zis = null;
         try {
-            InputSupplier<FileInputStream> fis = Files.newInputStreamSupplier(zip);
-            zis = new ZipInputStream(fis.getInput());
+            InputStream fis = Files.asByteSource(zip).openStream();
+            zis = new ZipInputStream(fis);
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {

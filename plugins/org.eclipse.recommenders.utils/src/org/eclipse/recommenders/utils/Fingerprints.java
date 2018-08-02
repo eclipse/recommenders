@@ -10,19 +10,20 @@
  */
 package org.eclipse.recommenders.utils;
 
-import static org.eclipse.recommenders.utils.Checks.*;
+import static org.eclipse.recommenders.utils.Checks.ensureExists;
+import static org.eclipse.recommenders.utils.Checks.ensureIsFile;
+import static org.eclipse.recommenders.utils.Checks.ensureIsNotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
 
 public final class Fingerprints {
 
@@ -74,27 +75,13 @@ public final class Fingerprints {
     private static String hashStream(final InputStream stream, final HashFunction hashFunction) {
         ensureIsNotNull(stream);
         try {
-            final StreamInputSupplier supplier = new StreamInputSupplier(stream);
-            HashCode hash = ByteStreams.hash(supplier, hashFunction);
+            ByteSource bytes = ByteSource.wrap(ByteStreams.toByteArray(stream));
+            HashCode hash = bytes.hash(hashFunction);
             return hash.toString();
         } catch (final Exception e) {
             throw Throws.throwUnhandledException(e);
         } finally {
             IOUtils.closeQuietly(stream);
-        }
-    }
-
-    private static final class StreamInputSupplier implements InputSupplier<InputStream> {
-
-        private final InputStream stream;
-
-        private StreamInputSupplier(final InputStream stream) {
-            this.stream = stream;
-        }
-
-        @Override
-        public InputStream getInput() throws IOException {
-            return stream;
         }
     }
 }
