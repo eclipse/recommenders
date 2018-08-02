@@ -10,15 +10,13 @@
  */
 package org.eclipse.recommenders.utils;
 
-import static com.google.common.base.Optional.*;
-import static com.google.common.io.ByteStreams.toByteArray;
-import static com.google.common.io.Files.newInputStreamSupplier;
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
 import static org.apache.commons.io.filefilter.DirectoryFileFilter.DIRECTORY;
 import static org.apache.commons.io.filefilter.FileFileFilter.FILE;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -41,10 +39,11 @@ import org.eclipse.recommenders.utils.names.VmTypeName;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.io.ByteSink;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
+import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
-import com.google.common.io.OutputSupplier;
 
 public final class Zips {
 
@@ -88,8 +87,8 @@ public final class Zips {
     public static void unzip(File zipFile, File destFolder) throws IOException {
         ZipInputStream zis = null;
         try {
-            InputSupplier<FileInputStream> fis = Files.newInputStreamSupplier(zipFile);
-            zis = new ZipInputStream(fis.getInput());
+            ByteSource fis = Files.asByteSource(zipFile);
+            zis = new ZipInputStream(fis.openStream());
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
@@ -106,8 +105,8 @@ public final class Zips {
     public static void zip(File directory, File out) throws IOException {
         ZipOutputStream zos = null;
         try {
-            OutputSupplier<FileOutputStream> s = Files.newOutputStreamSupplier(out);
-            zos = new ZipOutputStream(s.getOutput());
+            ByteSink s = Files.asByteSink(out, FileWriteMode.APPEND);
+            zos = new ZipOutputStream(s.openStream());
             for (File f : FileUtils.listFiles(directory, FILE, DIRECTORY)) {
                 String path = removeStart(f.getPath(), directory.getAbsolutePath() + File.separator);
                 path = path.replace(File.separatorChar, '/');
@@ -215,7 +214,7 @@ public final class Zips {
      * Reads the give file into memory. This method may be used by zip based recommenders to speed up data access.
      */
     public static byte[] readFully(File file) throws IOException {
-        return toByteArray(newInputStreamSupplier(file));
+        return java.nio.file.Files.readAllBytes(file.toPath());
     }
 
     /**

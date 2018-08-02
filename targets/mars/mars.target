@@ -28,8 +28,6 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7760 -->
 <unit id="com.google.gson" version="2.2.4.v201311231704"/>
-<!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7766 -->
-<unit id="com.google.guava" version="15.0.0.v201403281430"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=5058 -->
 <unit id="com.google.inject" version="3.0.0.v201312141243"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=5060 -->
@@ -79,6 +77,8 @@
 <unit id="org.apache.maven.resolver.transport.http" version="1.0.3.v20170405-0725"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13018 -->
 <unit id="org.apache.maven.resolver.util" version="1.0.3.v20170405-0725"/>
+<!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=7766 -->
+<unit id="com.google.guava" version="21.0.0.v20170206-1425"/>
 <!-- Latest Integration Orbit build, as Maven Resolver is not part of the recommended Orbit build for Mars.2 -->
 <repository location="http://download.eclipse.org/tools/orbit/downloads/latest-I"/>
 </location>
