@@ -2,7 +2,11 @@ Manifest-Version: 1.0
 Automatic-Module-Name: org.eclipse.recommenders.overrides.tests
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.recommenders.overrides.tests;singleton:=true
+<<<<<<< HEAD   (b58b82 [releng] Merge maintenance (2.5.4) into master (2.6.0))
 Bundle-Version: 2.6.0.qualifier
+=======
+Bundle-Version: 2.5.5.qualifier
+>>>>>>> BRANCH (ba7664 [releng] 2.5.5-SNAPSHOT)
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

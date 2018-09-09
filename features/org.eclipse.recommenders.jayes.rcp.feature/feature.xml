@@ -2,7 +2,11 @@
 <feature
       id="org.eclipse.recommenders.jayes.rcp.feature"
       label="%label"
+<<<<<<< HEAD   (b58b82 [releng] Merge maintenance (2.5.4) into master (2.6.0))
       version="2.6.0.qualifier"
+=======
+      version="2.5.5.qualifier"
+>>>>>>> BRANCH (ba7664 [releng] 2.5.5-SNAPSHOT)
       provider-name="%provider-name"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -20,7 +24,11 @@
    </license>
 
    <requires>
+<<<<<<< HEAD   (b58b82 [releng] Merge maintenance (2.5.4) into master (2.6.0))
       <import feature="org.eclipse.recommenders.jayes.feature" version="2.6.0" match="equivalent"/>
+=======
+      <import feature="org.eclipse.recommenders.jayes.feature" version="2.5.5" match="equivalent"/>
+>>>>>>> BRANCH (ba7664 [releng] 2.5.5-SNAPSHOT)
    </requires>
 
    <plugin

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.recommenders.news.rcp.feature"
+<<<<<<< HEAD   (b58b82 [releng] Merge maintenance (2.5.4) into master (2.6.0))
       version="2.6.0.qualifier"
+=======
+      version="2.5.5.qualifier"
+>>>>>>> BRANCH (ba7664 [releng] 2.5.5-SNAPSHOT)
       label="%label"
       provider-name="%provider-name"
       plugin="org.eclipse.recommenders.news"
