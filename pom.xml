@@ -62,7 +62,7 @@
 		<recommendersVersion>2.5.5-SNAPSHOT</recommendersVersion>
 		<javaVersion>1.7</javaVersion>
 		<minimumMavenVersion>3.1.1</minimumMavenVersion>
-		<tychoVersion>1.2.0</tychoVersion>
+		<tychoVersion>1.3.0</tychoVersion>
 		<!-- The default simultaneous release used to base the target platform on. (Override with -Dsimrel=...) -->
 		<simrel>2018-09</simrel>
 		<!-- Use HTTP, as it provides the most firewall-friendly access to the Git repository. -->
@@ -75,6 +75,10 @@
 	</properties>
 
 	<pluginRepositories>
+		<pluginRepository>
+			<id>tycho-1.3-staged</id>
+			<url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1050/</url>
+		</pluginRepository>
 		<pluginRepository>
 			<id>eclipse-cbi-releases</id>
 			<url>https://repo.eclipse.org/content/groups/cbi/</url>
