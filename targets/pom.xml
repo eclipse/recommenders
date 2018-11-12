@@ -20,6 +20,7 @@
 		<module>oxygen</module>
 		<module>photon</module>
 		<module>2018-09</module>
+		<module>2018-12</module>
 	</modules>
 
 	<build>
