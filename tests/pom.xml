@@ -136,6 +136,22 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Workaround for <https://bugs.eclipse.org/bugs/show_bug.cgi?id=541403#c2> -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>javax.annotation</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
