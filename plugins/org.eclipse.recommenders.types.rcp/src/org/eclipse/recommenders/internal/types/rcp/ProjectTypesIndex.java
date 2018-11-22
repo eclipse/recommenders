@@ -466,9 +466,6 @@ public class ProjectTypesIndex extends AbstractIdleService implements IProjectTy
             if (input == null) {
                 return false;
             }
-            if (!input.isArchive()) {
-                return false;
-            }
             File location = JavaElementsFinder.findLocation(input).orNull();
             if (location == null) {
                 return false;
