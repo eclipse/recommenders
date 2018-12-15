@@ -90,6 +90,12 @@
 <unit id="org.apache.solr.client.solrj" version="3.5.0.v20150506-0844"/>
 <!-- https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12191 -->
 <unit id="org.slf4j.api" version="1.7.10.v20170428-1633"/>
+
+<!-- as Linux Tools did it:
+     commit: https://git.eclipse.org/c/linuxtools/org.eclipse.linuxtools.git/commit/?id=d86639ec6a88e281574a421f31aa92e7ee82aaab
+     IP:     https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17742 -->
+<unit id="javax.xml.bind" version="2.2.0.v201105210648"/>
+
 <!-- Recommended Orbit build for 2018-12 -->
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20181128170323/repository/"/>
 </location>
