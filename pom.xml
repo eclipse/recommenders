@@ -447,6 +447,13 @@
 							</goals>
 						</execution>
 					</executions>
+					<dependencies>
+						<dependency>
+						    <groupId>org.eclipse.platform</groupId>
+						    <artifactId>org.eclipse.equinox.common</artifactId>
+						    <version>3.10.0</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
