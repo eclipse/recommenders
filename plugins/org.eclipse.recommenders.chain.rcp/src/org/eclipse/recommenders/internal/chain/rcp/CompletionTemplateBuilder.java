@@ -57,8 +57,10 @@ public final class CompletionTemplateBuilder {
     private static String createChainCode(final Chain chain, final boolean createAsTitle, final int expectedDimension) {
         final HashMultiset<String> varNames = HashMultiset.create();
         final StringBuilder sb = new StringBuilder(64);
+        int count = chain.getElements().size();
         for (final ChainElement edge : chain.getElements()) {
-            switch (edge.getElementType()) {
+        	count --;
+        	switch (edge.getElementType()) {
             case FIELD:
             case LOCAL_VARIABLE:
                 appendVariableString(edge, sb);
@@ -76,7 +78,11 @@ public final class CompletionTemplateBuilder {
                 log(WARNING_CANNOT_HANDLE_ELEMENT_TYPE, edge);
             }
             final boolean appendVariables = !createAsTitle;
-            appendArrayDimensions(sb, edge.getReturnTypeDimension(), expectedDimension, appendVariables, varNames);
+            if(expectedDimension > 0 && count != 0) {
+                appendArrayDimensions(sb, edge.getReturnTypeDimension(), 0, appendVariables, varNames);
+            } else {
+                appendArrayDimensions(sb, edge.getReturnTypeDimension(), expectedDimension, appendVariables, varNames);
+            }
             sb.append("."); //$NON-NLS-1$
         }
         deleteLastChar(sb);

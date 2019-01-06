@@ -1367,6 +1367,63 @@ class ChainCompletionScenariosTest {
         exercise(code, w(newArrayList("dec", "cs")));
     }
 
+    @Test
+    def void testPrimitiveArrays1() {
+        val code = CodeBuilder::classbody(
+            '''
+            	private static class P {
+            		public int[] indexes = {10, 12};
+            	}
+            
+                public void method(P p){
+                	int[] i = $
+                }
+            ''')
+        var wanted =
+            newArrayList(
+                "p indexes"
+            )
+        exercise(code, w(wanted));
+    }
+
+    @Test
+    def void testPrimitiveArrays2() {
+        val code = CodeBuilder::classbody(
+            '''
+            	private static class P {
+            		public int[][] indexes = {{10}, {12}};
+            	}
+            
+                public void method(P p){
+                	int[] i = $
+                }
+            ''')
+        var wanted =
+            newArrayList(
+                "p indexes"
+            )
+        exercise(code, w(wanted));
+    }
+
+    @Test
+    def void testPrimitiveArrays3() {
+        val code = CodeBuilder::classbody(
+            '''
+            	private static class P {
+            		public int[][] indexes = {{10}, {12}};
+            	}
+            
+                public void method(P[] p){
+                	int[] i = $
+                }
+            ''')
+        var wanted =
+            newArrayList(
+                "p indexes"
+            )
+        exercise(code, w(wanted));
+    }
+
     def exercise(CharSequence code, List<? extends List<String>> expected) {
         val struct = fixture.createFileAndParseWithMarkers(code.toString)
         val cu = struct.first;
