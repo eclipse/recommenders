@@ -13,6 +13,7 @@ package org.eclipse.recommenders.internal.chain.rcp;
 import static org.eclipse.recommenders.internal.chain.rcp.l10n.LogMessages.WARNING_CANNOT_USE_AS_PARENT_OF_COMPLETION_LOCATION;
 import static org.eclipse.recommenders.utils.Logs.log;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -31,7 +32,6 @@ import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
-import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
@@ -167,8 +167,8 @@ public final class TypeBindingAnalyzer {
             final int expectedDimension) {
         if (expectedDimension <= edge.getReturnTypeDimension()) {
             final TypeBinding base = removeArrayWrapper(edge.getReturnType());
-            if (base instanceof BaseTypeBinding) {
-                return false;
+            if (base.isPrimitiveType()) {
+            	return Arrays.equals(base.signature(), expectedType.signature());
             }
             if (base.isCompatibleWith(expectedType)) {
                 return true;
